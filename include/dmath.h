@@ -21,6 +21,11 @@
 
 namespace dmath
 {
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Type Pre-definitions
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	struct float2;
 	struct float3;
 	struct float4;
@@ -31,6 +36,18 @@ namespace dmath
 	struct vectorf;
 	struct matrixf;
 
+	struct plane;
+	struct ray;
+
+	struct bounding_box;
+	struct bounding_sphere;
+	struct bounding_frustum;
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Vector Type definitions
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	struct float2
 	{
 	public:
@@ -127,6 +144,11 @@ namespace dmath
 		inline float& operator [] (int index) { return arr[index]; }
 	};
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Quaternion, Plane Type definitions
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	struct quaternion : public float4
 	{
 	public:
@@ -151,6 +173,38 @@ namespace dmath
 		}
 	};
 
+	struct plane
+	{
+	public:
+		float x, y, z, w;
+
+	public:
+		plane () = default;
+		inline plane (float x, float y, float z, float w)
+			: x (x), y (y), z (z), w (w)
+		{ }
+		inline plane (const float3& p1, const float3& p2, const float3& p3);
+		inline plane (const float3& p, const float3& n);
+		inline plane (const float4& v)
+			: plane (v.x, v.y, v.z, v.w)
+		{ }
+
+	public:
+		inline operator float4 () const noexcept { return float4 (x, y, z, w); }
+
+	public:
+		inline vectorf normalize ();
+
+	public:
+		inline bool intersect (const plane& p);
+		inline void intersect (const plane& p, float3* p1, float3* p2);
+	};
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Matrix Type definition
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	struct float4x4
 	{
 	public:
@@ -213,6 +267,11 @@ namespace dmath
 		static inline float4x4 billboard (const float3& pos, const float3& camPos, const float3& camUp, const float3& capForward) noexcept;
 	};
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// SIMD-operation Type definitions
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	struct vectorf
 	{
 		vectorf () = default;
@@ -220,14 +279,20 @@ namespace dmath
 		__m128 _vector;
 		inline vectorf (__m128 vector) : _vector (vector) { }
 		inline operator __m128 () const { return _vector; }
-		inline float x () const { return _mm_cvtss_f32 (_vector); }
-		inline float y () const { return _mm_cvtss_f32 (_mm_permute_ps (_vector, _MM_SHUFFLE (1, 1, 1, 1))); }
-		inline float z () const { return _mm_cvtss_f32 (_mm_permute_ps (_vector, _MM_SHUFFLE (2, 2, 2, 2))); }
-		inline float w () const { return _mm_cvtss_f32 (_mm_permute_ps (_vector, _MM_SHUFFLE (3, 3, 3, 3))); }
+		inline vectorf splat_x () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (0, 0, 0, 0)); }
+		inline vectorf splat_y () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (1, 1, 1, 1)); }
+		inline vectorf splat_z () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (2, 2, 2, 2)); }
+		inline vectorf splat_w () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (3, 3, 3, 3)); }
+		inline float x () const { return _mm_cvtss_f32 (splat_x ()); }
+		inline float y () const { return _mm_cvtss_f32 (splat_y ()); }
+		inline float z () const { return _mm_cvtss_f32 (splat_z ()); }
+		inline float w () const { return _mm_cvtss_f32 (splat_w ()); }
 #else
 		float4 _vector;
-		inline vectorf (float4 vector) : _vector (vector) { }
-		inline operator float4 () const { return _vector; }
+		inline vectorf splat_x () const { return float4 (_vector.x).operator dmath::vectorf (); }
+		inline vectorf splat_y () const { return float4 (_vector.y).operator dmath::vectorf (); }
+		inline vectorf splat_z () const { return float4 (_vector.z).operator dmath::vectorf (); }
+		inline vectorf splat_w () const { return float4 (_vector.w).operator dmath::vectorf (); }
 		inline float x () const { return _vector.x; }
 		inline float y () const { return _vector.y; }
 		inline float z () const { return _vector.z; }
@@ -243,143 +308,19 @@ namespace dmath
 		inline matrixf (const vectorf& c1, const vectorf& c2, const vectorf& c3, const vectorf& c4)
 			: column1 (c1), column2 (c2), column3 (c3), column4 (c4)
 		{ }
-
-		inline vectorf m11tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column1, column1, 0x00);
-#else
-			return vectorf (float4 (column1.x));
-#endif
-		}
-		inline vectorf m12tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column1, column1, 0x55);
-#else
-			return vectorf (float4 (column1.y));
-#endif
-		}
-		inline vectorf m13tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column1, column1, 0xaa);
-#else
-			return vectorf (float4 (column1.z));
-#endif
-		}
-		inline vectorf m14tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column1, column1, 0xff);
-#else
-			return vectorf (float4 (column1.w));
-#endif
-		}
-		inline vectorf m21tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column2, column2, 0x00);
-#else
-			return vectorf (float4 (column2.x));
-#endif
-		}
-		inline vectorf m22tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column2, column2, 0x55);
-#else
-			return vectorf (float4 (column2.y));
-#endif
-		}
-		inline vectorf m23tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column2, column2, 0xaa);
-#else
-			return vectorf (float4 (column2.z));
-#endif
-		}
-		inline vectorf m24tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column2, column2, 0x77);
-#else
-			return vectorf (float4 (column2.w));
-#endif
-		}
-		inline vectorf m31tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column3, column3, 0x00);
-#else
-			return vectorf (float4 (column3.x));
-#endif
-		}
-		inline vectorf m32tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column3, column3, 0x55);
-#else
-			return vectorf (float4 (column3.y));
-#endif
-		}
-		inline vectorf m33tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column3, column3, 0xaa);
-#else
-			return vectorf (float4 (column3.z));
-#endif
-		}
-		inline vectorf m34tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column3, column3, 0xff);
-#else
-			return vectorf (float4 (column3.w));
-#endif
-		}
-		inline vectorf m41tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column4, column4, 0x00);
-#else
-			return vectorf (float4 (column4.x));
-#endif
-		}
-		inline vectorf m42tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column4, column4, 0x55);
-#else
-			return vectorf (float4 (column4.y));
-#endif
-		}
-		inline vectorf m43tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column4, column4, 0xaa);
-#else
-			return vectorf (float4 (column4.z));
-#endif
-		}
-		inline vectorf m44tofloat4 () const noexcept
-		{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-			return _mm_shuffle_ps (column4, column4, 0xff);
-#else
-			return vectorf (float4 (column4.w));
-#endif
-		}
 	};
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Vector Type operations
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline vectorf operator+ (const vectorf& v1, const vectorf& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_add_ps (v1, v2);
 #else
-		return { v1._vector.x + v2._vector.x, v1._vector.y + v2._vector.y, v1._vector.z + v2._vector.z, v1._vector.w + v2._vector.w };
+		return float4 { v1._vector.x + v2._vector.x, v1._vector.y + v2._vector.y, v1._vector.z + v2._vector.z, v1._vector.w + v2._vector.w };
 #endif
 	}
 	inline vectorf operator- (const vectorf& v1, const vectorf& v2) noexcept
@@ -387,7 +328,7 @@ namespace dmath
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_sub_ps (v1, v2);
 #else
-		return { v1._vector.x - v2._vector.x, v1._vector.y - v2._vector.y, v1._vector.z - v2._vector.z, v1._vector.w - v2._vector.w };
+		return float4 { v1._vector.x - v2._vector.x, v1._vector.y - v2._vector.y, v1._vector.z - v2._vector.z, v1._vector.w - v2._vector.w };
 #endif
 	}
 	inline vectorf operator- (const vectorf& v) noexcept
@@ -395,7 +336,7 @@ namespace dmath
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_sub_ps (_mm_load1_ps (0), v);
 #else
-		return { -v._vector.x, -v._vector.y, -v._vector.z, -v._vector.w };
+		return float4 { -v._vector.x, -v._vector.y, -v._vector.z, -v._vector.w };
 #endif
 	}
 	inline vectorf operator* (const vectorf& v1, const vectorf& v2) noexcept
@@ -403,7 +344,7 @@ namespace dmath
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_mul_ps (v1, v2);
 #else
-		return { v1._vector.x * v2._vector.x, v1._vector.y * v2._vector.y, v1._vector.z * v2._vector.z, v1._vector.w * v2._vector.w };
+		return float4 { v1._vector.x * v2._vector.x, v1._vector.y * v2._vector.y, v1._vector.z * v2._vector.z, v1._vector.w * v2._vector.w };
 #endif
 	}
 	inline vectorf operator* (const vectorf& v, float s) noexcept
@@ -411,7 +352,7 @@ namespace dmath
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_mul_ps (v, _mm_set1_ps (s));
 #else
-		return { v._vector.x * s, v._vector.y * s, v._vector.z * s, v._vector.w * s };
+		return float4 { v._vector.x * s, v._vector.y * s, v._vector.z * s, v._vector.w * s };
 #endif
 	}
 	inline vectorf operator* (float s, const vectorf& v) noexcept
@@ -423,7 +364,7 @@ namespace dmath
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_div_ps (v1, v2);
 #else
-		return { v1._vector.x / v2._vector.x, v1._vector.y / v2._vector.y, v1._vector.z / v2._vector.z, v1._vector.w / v2._vector.w };
+		return float4 { v1._vector.x / v2._vector.x, v1._vector.y / v2._vector.y, v1._vector.z / v2._vector.z, v1._vector.w / v2._vector.w };
 #endif
 	}
 	inline vectorf operator/ (const vectorf& v, float s)
@@ -431,7 +372,25 @@ namespace dmath
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_div_ps (v, _mm_set1_ps (s));
 #else
-		return { v._vector.x / s, v._vector.y / s, v._vector.z / s, v._vector.w / s };
+		return float4{ v._vector.x / s, v._vector.y / s, v._vector.z / s, v._vector.w / s };
+#endif
+	}
+	inline bool operator== (const vectorf& v1, const vectorf& v2)
+	{
+#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
+		return _mm_movemask_ps (_mm_cmpeq_ps (v1, v2)) == 0xF;
+#else
+		return v1._vector.x == v2._vector.x && v1._vector.y == v2._vector.y
+			&& v1._vector.z == v2._vector.z && v1._vector.w == v2._vector.w;
+#endif
+	}
+	inline bool operator!= (const vectorf& v1, const vectorf& v2)
+	{
+#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
+		return _mm_movemask_ps (_mm_cmpneq_ps (v1, v2)) != 0;
+#else
+		return v1._vector.x != v2._vector.x || v1._vector.y != v2._vector.y
+			|| v1._vector.z != v2._vector.z || v1._vector.w != v2._vector.w;
 #endif
 	}
 	inline float dot2 (const vectorf& v1, const vectorf& v2) noexcept
@@ -628,7 +587,7 @@ namespace dmath
 
 	inline vectorf fma (const vectorf& mv1, const vectorf& mv2, const vectorf& av) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
+#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC ) && !defined ( NO_FMA3 )
 		return _mm_fmadd_ps (mv1, mv2, av);
 #else
 		return (mv1 * mv2) + av;
@@ -636,13 +595,36 @@ namespace dmath
 	}
 	inline vectorf fms (const vectorf& mv1, const vectorf& mv2, const vectorf& sv) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
+#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC ) && !defined ( NO_FMA3 )
 		return _mm_fmsub_ps (mv1, mv2, sv);
 #else
-		return sv - (mv1 * mv2);
+		return (mv1 * mv2) - sv;
 #endif
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Quaternion, Plane Type operations
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
+	inline float dot_plane_normal (const vectorf& p, const vectorf& n)
+	{
+		return dot3 (p, n);
+	}
+	inline float dot_plane_coord (const vectorf& p, const vectorf& v)
+	{
+		return dot_plane_normal (p, v) + p.w ();
+	}
+	inline vectorf normalize_plane (const vectorf& p)
+	{
+		return p / length3 (p);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Matrix Type operations
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline matrixf operator+ (const matrixf& m1, const matrixf& m2) noexcept
 	{
 		matrixf ret (m1.column1 + m2.column1, m1.column2 + m2.column2, m1.column3 + m2.column3, m1.column4 + m2.column4);
@@ -661,22 +643,22 @@ namespace dmath
 	inline matrixf operator* (const matrixf& m1, const matrixf& m2) noexcept
 	{
 		matrixf ret;
-		ret.column1 = fma (m1.m11tofloat4 (), m2.column1,
-			fma (m1.m12tofloat4 (), m2.column2,
-				fma (m1.m13tofloat4 (), m2.column3,
-					m1.m14tofloat4 () * m2.column4)));
-		ret.column2 = fma (m1.m21tofloat4 (), m2.column1,
-			fma (m1.m22tofloat4 (), m2.column2,
-				fma (m1.m23tofloat4 (), m2.column3,
-					m1.m24tofloat4 () * m2.column4)));
-		ret.column3 = fma (m1.m31tofloat4 (), m2.column1,
-			fma (m1.m32tofloat4 (), m2.column2,
-				fma (m1.m33tofloat4 (), m2.column3,
-					m1.m34tofloat4 () * m2.column4)));
-		ret.column4 = fma (m1.m41tofloat4 (), m2.column1,
-			fma (m1.m42tofloat4 (), m2.column2,
-				fma (m1.m43tofloat4 (), m2.column3,
-					m1.m44tofloat4 () * m2.column4)));
+		ret.column1 = fma (m1.column1.splat_x (), m2.column1,
+			fma (m1.column1.splat_y (), m2.column2,
+				fma (m1.column1.splat_z (), m2.column3,
+					m1.column1.splat_w () * m2.column4)));
+		ret.column2 = fma (m1.column2.splat_x (), m2.column1,
+			fma (m1.column2.splat_y (), m2.column2,
+				fma (m1.column2.splat_z (), m2.column3,
+					m1.column2.splat_w () * m2.column4)));
+		ret.column3 = fma (m1.column3.splat_x (), m2.column1,
+			fma (m1.column3.splat_y (), m2.column2,
+				fma (m1.column3.splat_z (), m2.column3,
+					m1.column3.splat_w () * m2.column4)));
+		ret.column4 = fma (m1.column4.splat_x (), m2.column1,
+			fma (m1.column4.splat_y (), m2.column2,
+				fma (m1.column4.splat_z (), m2.column3,
+					m1.column4.splat_w () * m2.column4)));
 		return ret;
 	}
 	inline matrixf operator* (const matrixf& m, float s) noexcept
@@ -716,28 +698,28 @@ namespace dmath
 		return ret;
 #else
 		return float4x4 (
-			m.column1.x, m.column2.x, m.column3.x, m.column4.x,
-			m.column1.y, m.column2.y, m.column3.y, m.column4.y,
-			m.column1.z, m.column2.z, m.column3.z, m.column4.z,
-			m.column1.w, m.column2.w, m.column3.w, m.column4.w
+			m.column1.x (), m.column2.x (), m.column3.x (), m.column4.x (),
+			m.column1.y (), m.column2.y (), m.column3.y (), m.column4.y (),
+			m.column1.z (), m.column2.z (), m.column3.z (), m.column4.z (),
+			m.column1.w (), m.column2.w (), m.column3.w (), m.column4.w ()
 		);
 #endif
 	}
 	inline float determinant (const matrixf& m) noexcept
 	{
-		float n22 = m.column1.x (), n21 = m.column1.y (), n20 = m.column1.z (), n19 = m.column1.w ()
-			, n12 = m.column2.x (), n11 = m.column2.y (), n10 = m.column2.z (), n9 = m.column2.w ();
-		float n8 = m.column3.x (), n7 = m.column3.y (), n6 = m.column3.z (), n5 = m.column3.w ()
-			, n4 = m.column4.x (), n3 = m.column4.y (), n2 = m.column4.z (), n1 = m.column4.w ();
+		float m11 = m.column1.x (), m12 = m.column1.y (), m13 = m.column1.z (), m14 = m.column1.w ()
+			, m21 = m.column2.x (), m22 = m.column2.y (), m23 = m.column2.z (), m24 = m.column2.w ();
+		float m31 = m.column3.x (), m32 = m.column3.y (), m33 = m.column3.z (), m34 = m.column3.w ()
+			, m41 = m.column4.x (), m42 = m.column4.y (), m43 = m.column4.z (), m44 = m.column4.w ();
 
-		float n18 = (n6 * n1) - (n5 * n2), n17 = (n7 * n1) - (n5 * n3);
-		float n16 = (n7 * n2) - (n6 * n3), n15 = (n8 * n1) - (n5 * n4);
-		float n14 = (n8 * n2) - (n6 * n4), n13 = (n8 * n3) - (n7 * n4);
+		float n18 = (m33 * m44) - (m34 * m43), n17 = (m32 * m44) - (m34 * m42);
+		float n16 = (m32 * m43) - (m33 * m42), n15 = (m31 * m44) - (m34 * m41);
+		float n14 = (m31 * m43) - (m33 * m41), n13 = (m31 * m42) - (m32 * m41);
 
-		return (((n22 * (((n11 * n18) - (n10 * n17)) + (n9 * n16))) -
-			(n21 * (((n12 * n18) - (n10 * n15)) + (n9 * n14)))) +
-			(n20 * (((n12 * n17) - (n11 * n15)) + (n9 * n13)))) -
-			(n19 * (((n12 * n16) - (n11 * n14)) + (n10 * n13)));
+		return (((m11 * (((m22 * n18) - (m23 * n17)) + (m24 * n16))) -
+				(m12 * (((m21 * n18) - (m23 * n15)) + (m24 * n14)))) +
+				(m13 * (((m21 * n17) - (m22 * n15)) + (m24 * n13)))) -
+				(m14 * (((m21 * n16) - (m22 * n14)) + (m23 * n13)));
 	}
 	inline matrixf invert (const matrixf& m) noexcept
 	{
@@ -855,10 +837,10 @@ namespace dmath
 
 		return ret;
 #else
-		float n1 = m.column1.x, n2 = m.column1.y, n3 = m.column1.z, n4 = m.column1.w
-			, n5 = m.column2.x, n6 = m.column2.y, n7 = m.column2.z, n8 = m.column2.w;
-		float n9 = m.column3.x, n10 = m.column3.y, n11 = m.column3.z, n12 = m.column3.w
-			, n13 = m.column4.x, n14 = m.column4.y, n15 = m.column4.z, n16 = m.column4.w;
+		float n1 = m.column1.x (), n2 = m.column1.y (), n3 = m.column1.z (), n4 = m.column1.w ()
+			, n5 = m.column2.x (), n6 = m.column2.y (), n7 = m.column2.z (), n8 = m.column2.w ();
+		float n9 = m.column3.x (), n10 = m.column3.y (), n11 = m.column3.z (), n12 = m.column3.w ()
+			, n13 = m.column4.x (), n14 = m.column4.y (), n15 = m.column4.z (), n16 = m.column4.w ();
 
 		float n17 = n11 * n16 - n12 * n15, n18 = n10 * n16 - n12 * n14, n19 = n10 * n15 - n11 * n14;
 		float n20 = n9 * n16 - n12 * n13, n21 = n9 * n15 - n11 * n13, n22 = n9 * n14 - n10 * n13;
@@ -879,94 +861,41 @@ namespace dmath
 #endif
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Vector * Matrix Operations
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline vectorf transform2 (const vectorf& v, const matrixf& m) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_fmadd_ps (ret, m.column2, m.column4);
-		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_fmadd_ps (temp, m.column1, ret);
-		return ret;
-#else
-		return float2 (
-			(v._vector.x * m.column1._vector.x) + (v._vector.y * m.column2._vector.x) + m.column4._vector.x,
-			(v._vector.x * m.column1._vector.y) + (v._vector.y * m.column2._vector.y) + m.column4._vector.y
-		);
-#endif
+		return fma (v.splat_x (), m.column1, fma (v.splat_y (), m.column2, m.column4));
 	}
 	inline vectorf transform_normal2 (const vectorf& v, const matrixf& m) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_mul_ps (ret, m.column2);
-		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_fmadd_ps (temp, m.column1, ret);
-		return ret;
-#else
-		return float2 (
-			(v._vector.x * m.column1._vector.x) + (v._vector.y * m.column2._vector.x),
-			(v._vector.x * m.column1._vector.y) + (v._vector.y * m.column2._vector.y)
-		);
-#endif
+		return fma (v.splat_x (), m.column1, v.splat_y () * m.column2);
 	}
 	inline vectorf transform3 (const vectorf& v, const matrixf& m) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (2, 2, 2, 2));
-		ret = _mm_fmadd_ps (ret, m.column3, m.column4);
-		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_fmadd_ps (temp, m.column2, ret);
-		temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_fmadd_ps (temp, m.column1, ret);
-		return ret;
-#else
-		return float3 (
-			(v._vector.x * m.column1._vector.x) + (v._vector.y * m.column2._vector.x) + (v._vector.z * m.column3._vector.x) + m.column4._vector.x,
-			(v._vector.x * m.column1._vector.y) + (v._vector.y * m.column2._vector.y) + (v._vector.z * m.column3._vector.y) + m.column4._vector.y,
-			(v._vector.x * m.column1._vector.z) + (v._vector.y * m.column2._vector.z) + (v._vector.z * m.column3._vector.z) + m.column4._vector.z
-		);
-#endif
+		return fma (v.splat_x (), m.column1, fma (v.splat_y (), m.column2, fma (v.splat_z (), m.column3, m.column4)));
 	}
 	inline vectorf transform_normal3 (const vectorf& v, const matrixf& m) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (2, 2, 2, 2));
-		ret = _mm_mul_ps (ret, m.column3);
-		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_fmadd_ps (temp, m.column2, ret);
-		temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_fmadd_ps (temp, m.column1, ret);
-		return ret;
-#else
-		return float3 (
-			(v._vector.x * m.column1._vector.x) + (v._vector.y * m.column2._vector.x) + (v._vector.z * m.column3._vector.x),
-			(v._vector.x * m.column1._vector.y) + (v._vector.y * m.column2._vector.y) + (v._vector.z * m.column3._vector.y),
-			(v._vector.x * m.column1._vector.z) + (v._vector.y * m.column2._vector.z) + (v._vector.z * m.column3._vector.z)
-		);
-#endif
+		return fma (v.splat_x (), m.column1, fma (v.splat_y (), m.column2, v.splat_z () * m.column3));
 	}
 	inline vectorf transform4 (const vectorf& v, const matrixf& m) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (3, 3, 3, 3));
-		ret = _mm_mul_ps (ret, m.column4);
-		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (2, 2, 2, 2));
-		ret = _mm_fmadd_ps (temp, m.column3, ret);
-		temp = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_fmadd_ps (temp, m.column2, ret);
-		temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_fmadd_ps (temp, m.column1, ret);
-		return ret;
-#else
-		return float4 (
-			(v._vector.x * m.column1._vector.x) + (v._vector.y * m.column2._vector.x) + (v._vector.z * m.column3._vector.x) + (v._vector.w * m.column4._vector.x),
-			(v._vector.x * m.column1._vector.y) + (v._vector.y * m.column2._vector.y) + (v._vector.z * m.column3._vector.y) + (v._vector.w * m.column4._vector.y),
-			(v._vector.x * m.column1._vector.z) + (v._vector.y * m.column2._vector.z) + (v._vector.z * m.column3._vector.z) + (v._vector.w * m.column4._vector.z),
-			(v._vector.x * m.column1._vector.w) + (v._vector.y * m.column2._vector.w) + (v._vector.z * m.column3._vector.w) + (v._vector.w * m.column4._vector.w)
-		);
-#endif
+		return fma (v.splat_x (), m.column1, fma (v.splat_y (), m.column2, fma (v.splat_z (), m.column3, v.splat_w () * m.column4)));
+	}
+	inline vectorf transform_plane (const vectorf& p, const matrixf& m) noexcept
+	{
+		return transform4 (p, m);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Vector Type Implements
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline dmath::float2::float2 (const vectorf& v) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -1082,6 +1011,11 @@ namespace dmath
 		return length4 (*this);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Quaternion, Plane Type Implements
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline quaternion::quaternion (float yaw, float pitch, float roll)
 	{
 		float halfRoll = roll * 0.5f, halfPitch = pitch * 0.5f, halfYaw = yaw * 0.5f;
@@ -1137,6 +1071,50 @@ namespace dmath
 		}
 	}
 
+	inline plane::plane (const float3& p1, const float3& p2, const float3& p3)
+		: plane (p1, normalize3 (cross3 ((vectorf) p2 - p1, (vectorf) p3 - p1)))
+	{ }
+	inline plane::plane (const float3 & p, const float3 & n)
+		: plane (n.x, n.y, n.z, -dot3 (p, n))
+	{ }
+	inline vectorf plane::normalize () { return normalize_plane ((float4)* this); }
+
+	inline bool plane::intersect (const plane& p)
+	{
+		float3 p1, p2;
+		intersect (p, &p1, &p2);
+		return !( p1 == p2 && p1 == float3 (dseed::single_nan));
+	}
+
+	inline void plane::intersect (const plane& p, float3* p1, float3* p2)
+	{
+		if (p1 == nullptr || p2 == nullptr) return;
+
+		vectorf v1 = cross3 ((float4)p, (float4)*this);
+		float lengthsq = length_squared3 (v1);
+
+		vectorf v2 = cross3 ((float4)p, v1);
+		vectorf point = v1 * float4 (w, w, w, w);
+
+		vectorf v3 = cross3 (v1, (float4)* this);
+		point = fma (v3, float4 (p.w, p.w, p.w, p.w), point);
+
+		if (lengthsq <= dseed::single_epsilon)
+		{
+			*p1 = point / lengthsq;
+			*p2 = *p1 + v1;
+		}
+		else
+		{
+			*p1 = *p2 = float3 (dseed::single_nan);
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Matrix Type Implement
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline float4x4::float4x4 (const matrixf& m) noexcept
 	{
 		this->operator[](0) = m.column1;
@@ -1314,6 +1292,7 @@ namespace dmath
 			pos.x, pos.y, pos.z, 1
 		);
 	}
+
 }
 
 #endif
