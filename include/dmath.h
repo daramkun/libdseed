@@ -220,10 +220,18 @@ namespace dmath
 		__m128 _vector;
 		inline vectorf (__m128 vector) : _vector (vector) { }
 		inline operator __m128 () const { return _vector; }
+		inline float x () const { return _mm_cvtss_f32 (_vector); }
+		inline float y () const { return _mm_cvtss_f32 (_mm_permute_ps (_vector, _MM_SHUFFLE (1, 1, 1, 1))); }
+		inline float z () const { return _mm_cvtss_f32 (_mm_permute_ps (_vector, _MM_SHUFFLE (2, 2, 2, 2))); }
+		inline float w () const { return _mm_cvtss_f32 (_mm_permute_ps (_vector, _MM_SHUFFLE (3, 3, 3, 3))); }
 #else
 		float4 _vector;
 		inline vectorf (float4 vector) : _vector (vector) { }
 		inline operator float4 () const { return _vector; }
+		inline float x () const { return _vector.x; }
+		inline float y () const { return _vector.y; }
+		inline float z () const { return _vector.z; }
+		inline float w () const { return _vector.w; }
 #endif
 	};
 
@@ -717,17 +725,10 @@ namespace dmath
 	}
 	inline float determinant (const matrixf& m) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		float n22 = _mm_extract_ps (m.column1._vector, 0), n21 = _mm_extract_ps (m.column1._vector, 1), n20 = _mm_extract_ps (m.column1._vector, 2), n19 = _mm_extract_ps (m.column1._vector, 3)
-			, n12 = _mm_extract_ps (m.column2._vector, 0), n11 = _mm_extract_ps (m.column2._vector, 1), n10 = _mm_extract_ps (m.column2._vector, 2), n9 = _mm_extract_ps (m.column2._vector, 3);
-		float n8 = _mm_extract_ps (m.column3._vector, 0), n7 = _mm_extract_ps (m.column3._vector, 1), n6 = _mm_extract_ps (m.column3._vector, 2), n5 = _mm_extract_ps (m.column3._vector, 3)
-			, n4 = _mm_extract_ps (m.column4._vector, 0), n3 = _mm_extract_ps (m.column4._vector, 1), n2 = _mm_extract_ps (m.column4._vector, 2), n1 = _mm_extract_ps (m.column4._vector, 3);
-#else
-		float n22 = m.column1.x, n21 = m.column1.y, n20 = m.column1.z, n19 = m.column1.w
-			, n12 = m.column2.x, n11 = m.column2.y, n10 = m.column2.z, n9 = m.column2.w;
-		float n8 = m.column3.x, n7 = m.column3.y, n6 = m.column3.z, n5 = m.column3.w
-			, n4 = m.column4.x, n3 = m.column4.y, n2 = m.column4.z, n1 = m.column4.w;
-#endif
+		float n22 = m.column1.x (), n21 = m.column1.y (), n20 = m.column1.z (), n19 = m.column1.w ()
+			, n12 = m.column2.x (), n11 = m.column2.y (), n10 = m.column2.z (), n9 = m.column2.w ();
+		float n8 = m.column3.x (), n7 = m.column3.y (), n6 = m.column3.z (), n5 = m.column3.w ()
+			, n4 = m.column4.x (), n3 = m.column4.y (), n2 = m.column4.z (), n1 = m.column4.w ();
 
 		float n18 = (n6 * n1) - (n5 * n2), n17 = (n7 * n1) - (n5 * n3);
 		float n16 = (n7 * n2) - (n6 * n3), n15 = (n8 * n1) - (n5 * n4);
