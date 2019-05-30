@@ -1,6 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <dseed.h>
 
+#include <cstring>
+
 class __memorystream : public dseed::stream
 {
 public:
@@ -176,7 +178,7 @@ private:
 	HANDLE _file;
 };
 #elif PLATFORM_UWP
-class __native_filestream_uwp : public dseed::stream
+/*class __native_filestream_uwp : public dseed::stream
 {
 public:
 	__native_filestream_uwp (Windows::Storage::Streams::IRandomAccessStream^ stream)
@@ -190,8 +192,12 @@ public:
 
 private:
 	std::atomic<int32_t> _refCount;
-};
+};*/
 #else
+#	include <sys/types.h>
+#	include <sys/stat.h>
+#	include <fcntl.h>
+#	include <unistd.h>
 class __native_filestream_posix : public dseed::stream
 {
 public:
@@ -203,7 +209,7 @@ public:
 	~__native_filestream_posix ()
 	{
 		close (_fd);
-		_fd = nullptr;
+		_fd = 0;
 	}
 
 public:
@@ -222,11 +228,11 @@ public:
 public:
 	virtual size_t read (void* buffer, size_t length) override
 	{
-		return read (_fd, buffer, length);
+		return ::read (_fd, buffer, length);
 	}
 	virtual size_t write (const void* data, size_t length) override
 	{
-		return fwrite (_fd, data, length);
+		return ::write (_fd, data, length);
 	}
 	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
 	{
@@ -234,7 +240,7 @@ public:
 	}
 	virtual void flush () override
 	{
-		flush (_fd);
+		fsync (_fd);
 	}
 	virtual dseed::error_t set_length (size_t length) override
 	{
@@ -245,15 +251,13 @@ public:
 public:
 	virtual size_t position () override
 	{
-		return tell ( _fd );
+		return lseek (_fd, 0, SEEK_CUR);
 	}
 	virtual size_t length () override
 	{
-		auto cur = tell (_fd);
-		lseek (_fd, 0, SEEK_END);
-		auto ret = tell (_fd);
-		lseek (_fd, cur, SEEK_SET);
-		return ret;
+		struct stat s;
+		fstat (_fd, &s);
+		return s.st_size;
 	}
 
 public:

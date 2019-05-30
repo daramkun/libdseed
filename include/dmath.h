@@ -157,8 +157,6 @@ namespace dmath
 		union {
 			struct { float m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44; };
 			float arr[16];
-			struct { float4 column1, column2, column3, column4; };
-			float4 arrvec[4];
 		};
 
 	public:
@@ -173,7 +171,7 @@ namespace dmath
 			, m41 (m41), m42 (m42), m43 (m43), m44 (m44)
 		{ }
 		inline float4x4 (const float4& c1, const float4& c2, const float4& c3, const float4& c4) noexcept
-			: column1 (c1), column2 (c2), column3 (c3), column4 (c4)
+			: float4x4 ( c1.x, c1.y, c1.z, c1.w, c2.x, c2.y, c2.z, c2.w, c3.x, c3.y, c3.z, c3.w, c4.x, c4.y, c4.z, c4.w )
 		{ }
 		inline float4x4 (float v) noexcept
 			: m11 (v), m12 (v), m13 (v), m14 (v)
@@ -187,7 +185,8 @@ namespace dmath
 		inline operator matrixf () const noexcept;
 
 	public:
-		inline float4& operator [] (int index) { return arrvec[index]; }
+		inline float4& operator [] (int index) { return reinterpret_cast<float4*>(arr)[index]; }
+		inline const float4& operator [] (int index) const { return reinterpret_cast<const float4*>(arr)[index]; }
 
 	public:
 		inline float determinant () const noexcept;
@@ -719,10 +718,10 @@ namespace dmath
 	inline float determinant (const matrixf& m) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		float n22 = m.column1._vector.m128_f32[0], n21 = m.column1._vector.m128_f32[1], n20 = m.column1._vector.m128_f32[2], n19 = m.column1._vector.m128_f32[3]
-			, n12 = m.column2._vector.m128_f32[0], n11 = m.column2._vector.m128_f32[1], n10 = m.column2._vector.m128_f32[2], n9 = m.column2._vector.m128_f32[3];
-		float n8 = m.column3._vector.m128_f32[0], n7 = m.column3._vector.m128_f32[1], n6 = m.column3._vector.m128_f32[2], n5 = m.column3._vector.m128_f32[3]
-			, n4 = m.column4._vector.m128_f32[0], n3 = m.column4._vector.m128_f32[1], n2 = m.column4._vector.m128_f32[2], n1 = m.column4._vector.m128_f32[3];
+		float n22 = _mm_extract_ps (m.column1._vector, 0), n21 = _mm_extract_ps (m.column1._vector, 1), n20 = _mm_extract_ps (m.column1._vector, 2), n19 = _mm_extract_ps (m.column1._vector, 3)
+			, n12 = _mm_extract_ps (m.column2._vector, 0), n11 = _mm_extract_ps (m.column2._vector, 1), n10 = _mm_extract_ps (m.column2._vector, 2), n9 = _mm_extract_ps (m.column2._vector, 3);
+		float n8 = _mm_extract_ps (m.column3._vector, 0), n7 = _mm_extract_ps (m.column3._vector, 1), n6 = _mm_extract_ps (m.column3._vector, 2), n5 = _mm_extract_ps (m.column3._vector, 3)
+			, n4 = _mm_extract_ps (m.column4._vector, 0), n3 = _mm_extract_ps (m.column4._vector, 1), n2 = _mm_extract_ps (m.column4._vector, 2), n1 = _mm_extract_ps (m.column4._vector, 3);
 #else
 		float n22 = m.column1.x, n21 = m.column1.y, n20 = m.column1.z, n19 = m.column1.w
 			, n12 = m.column2.x, n11 = m.column2.y, n10 = m.column2.z, n9 = m.column2.w;
@@ -883,9 +882,9 @@ namespace dmath
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_macc_ps (ret, m.column2, m.column4);
+		ret = _mm_fmadd_ps (ret, m.column2, m.column4);
 		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_macc_ps (temp, m.column1, ret);
+		ret = _mm_fmadd_ps (temp, m.column1, ret);
 		return ret;
 #else
 		return float2 (
@@ -900,7 +899,7 @@ namespace dmath
 		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
 		ret = _mm_mul_ps (ret, m.column2);
 		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_macc_ps (temp, m.column1, ret);
+		ret = _mm_fmadd_ps (temp, m.column1, ret);
 		return ret;
 #else
 		return float2 (
@@ -913,11 +912,11 @@ namespace dmath
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (2, 2, 2, 2));
-		ret = _mm_macc_ps (ret, m.column3, m.column4);
+		ret = _mm_fmadd_ps (ret, m.column3, m.column4);
 		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_macc_ps (temp, m.column2, ret);
+		ret = _mm_fmadd_ps (temp, m.column2, ret);
 		temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_macc_ps (temp, m.column1, ret);
+		ret = _mm_fmadd_ps (temp, m.column1, ret);
 		return ret;
 #else
 		return float3 (
@@ -933,9 +932,9 @@ namespace dmath
 		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (2, 2, 2, 2));
 		ret = _mm_mul_ps (ret, m.column3);
 		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_macc_ps (temp, m.column2, ret);
+		ret = _mm_fmadd_ps (temp, m.column2, ret);
 		temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_macc_ps (temp, m.column1, ret);
+		ret = _mm_fmadd_ps (temp, m.column1, ret);
 		return ret;
 #else
 		return float3 (
@@ -951,11 +950,11 @@ namespace dmath
 		vectorf ret = _mm_permute_ps (v, _MM_SHUFFLE (3, 3, 3, 3));
 		ret = _mm_mul_ps (ret, m.column4);
 		vectorf temp = _mm_permute_ps (v, _MM_SHUFFLE (2, 2, 2, 2));
-		ret = _mm_macc_ps (temp, m.column3, ret);
+		ret = _mm_fmadd_ps (temp, m.column3, ret);
 		temp = _mm_permute_ps (v, _MM_SHUFFLE (1, 1, 1, 1));
-		ret = _mm_macc_ps (temp, m.column2, ret);
+		ret = _mm_fmadd_ps (temp, m.column2, ret);
 		temp = _mm_permute_ps (v, _MM_SHUFFLE (0, 0, 0, 0));
-		ret = _mm_macc_ps (temp, m.column1, ret);
+		ret = _mm_fmadd_ps (temp, m.column1, ret);
 		return ret;
 #else
 		return float4 (
@@ -1139,19 +1138,19 @@ namespace dmath
 
 	inline float4x4::float4x4 (const matrixf& m) noexcept
 	{
-		column1 = m.column1;
-		column2 = m.column2;
-		column3 = m.column3;
-		column4 = m.column4;
+		this->operator[](0) = m.column1;
+		this->operator[](1) = m.column2;
+		this->operator[](2) = m.column3;
+		this->operator[](3) = m.column4;
 	}
 
 	inline float4x4::operator matrixf () const noexcept
 	{
 		matrixf ret;
-		ret.column1 = column1;
-		ret.column2 = column2;
-		ret.column3 = column3;
-		ret.column4 = column4;
+		ret.column1 = this->operator[](0);
+		ret.column2 = this->operator[](1);
+		ret.column3 = this->operator[](2);
+		ret.column4 = this->operator[](3);
 		return ret;
 	}
 

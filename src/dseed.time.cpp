@@ -1,4 +1,5 @@
 #include <dseed.h>
+#include <algorithm>
 
 constexpr int64_t TICKS_PER_MILLISEC = 10000LL;
 constexpr int64_t TICKS_PER_SECOND = (TICKS_PER_MILLISEC * 1000LL);
@@ -17,6 +18,11 @@ constexpr int64_t MILLISECS_PER_MINUTE = (MILLISECS_PER_SECOND * 60LL);
 constexpr int64_t MILLISECS_PER_HOUR = (MILLISECS_PER_MINUTE * 60LL);
 constexpr int64_t MILLISECS_PER_DAY = (MILLISECS_PER_HOUR * 24LL);
 
+#if COMPILER_MSVC
+#define min min
+#define max max
+#endif
+
 dseed::timespan_t dseed::timespan_t::current_ticks () noexcept
 {
 #if PLATFORM_MICROSOFT
@@ -26,7 +32,7 @@ dseed::timespan_t dseed::timespan_t::current_ticks () noexcept
 	return timespan_t::from_seconds (counter.QuadPart / (double)freq.QuadPart);
 #else
 	struct timespec tspec;
-	clock_gettime (CLOCK_MONOTINIC, &tspec);
+	clock_gettime (CLOCK_MONOTONIC, &tspec);
 	return timespan_t ((tspec.tv_sec * 1000000000LL) + tspec.tv_nsec);
 #endif
 }
@@ -48,9 +54,9 @@ int32_t dseed::timespan_t::days () const noexcept { return (int32_t)(_ticks / TI
 
 double dseed::timespan_t::total_milliseconds () const noexcept
 {
-	return max (
-		min (_ticks * MILLISECS_PER_TICK, INT_MAX / TICKS_PER_MILLISEC)
-		, INT_MIN / TICKS_PER_MILLISEC
+	return std::max (
+		std::min (_ticks * MILLISECS_PER_TICK, INT_MAX / ( double ) TICKS_PER_MILLISEC)
+		, INT_MIN / ( double ) TICKS_PER_MILLISEC
 	);
 }
 double dseed::timespan_t::total_seconds () const noexcept { return _ticks * SECONDS_PER_TICK; }

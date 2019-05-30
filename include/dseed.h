@@ -4,6 +4,10 @@
 #include <atomic>
 #include <string>
 #include <cstdint>
+#include <climits>
+#include <cfloat>
+#include <cmath>
+using namespace std::string_literals;
 
 #define COMPILER_MSVC										defined ( _MSC_VER )
 #define COMPILER_GCC										defined ( __GNUC__ ) && !defined ( __clang__ )
@@ -42,9 +46,9 @@
 #define PLATFORM_UNIVERSAL									( PLATFORM_UWP || PLATFORM_FUCHSIA )
 
 #if PLATFORM_MICROSOFT
-constexpr char PATH_SEPARATOR = u8'\\';
+constexpr char PATH_SEPARATOR = '\\';
 #else
-constexpr char PATH_SEPARATOR = u8'/';
+constexpr char PATH_SEPARATOR = '/';
 #endif
 
 #define ARCH_IA32											( defined ( _M_IX86 ) || defined ( __i386__ ) )
@@ -54,9 +58,9 @@ constexpr char PATH_SEPARATOR = u8'/';
 #define ARCH_ARM64											( defined ( _M_ARM64 ) || defined ( __aarch64__ ) )
 #define ARCH_ARMSET											( ARCH_ARM || ARCH_ARM64 )
 
-#if defined ( DSEED_WINDOWS_DLL_EXPORT )
+#if COMPILER_MSVC && defined ( DSEED_WINDOWS_DLL_EXPORT )
 #   define DSEEDEXP											__declspec ( dllexport )
-#elif !defined ( DSEED_WINDOWS_STATIC )
+#elif COMPILER_MSVC && !defined ( DSEED_WINDOWS_STATIC )
 #   define DSEEDEXP											__declspec ( dllimport )
 #else
 #   define DSEEDEXP
