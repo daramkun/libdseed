@@ -15,7 +15,7 @@ dseed::rectangle::rectangle (int32_t x, int32_t y, int32_t width, int32_t height
 dseed::rectangle::rectangle (const point2i& p, const size2i& s)
 	: x (p.x), y (p.y), width (s.width), height (s.height)
 { }
-bool dseed::rectangle::intersect (const rectangle& rect)
+bool dseed::rectangle::intersects (const rectangle& rect)
 {
 	return x <= rect.x + rect.width && rect.x <= x + width &&
 		y <= rect.y + rect.height && rect.y <= y + height;
@@ -27,7 +27,7 @@ dseed::rectanglef::rectanglef (float x, float y, float width, float height)
 dseed::rectanglef::rectanglef (const point2f& p, const size2f& s)
 	: x (p.x), y (p.y), width (s.width), height (s.height)
 { }
-bool dseed::rectanglef::intersect (const rectanglef& rect)
+bool dseed::rectanglef::intersects (const rectanglef& rect)
 {
 	return x <= rect.x + rect.width && rect.x <= x + width &&
 		y <= rect.y + rect.height && rect.y <= y + height;
@@ -36,7 +36,7 @@ bool dseed::rectanglef::intersect (const rectanglef& rect)
 dseed::circle::circle (int32_t x, int32_t y, int32_t radius)
 	: x (x), y (y), radius (radius)
 { }
-bool dseed::circle::intersect (const circle& circle)
+bool dseed::circle::intersects (const circle& circle)
 {
 	return sqrt (pow (x - circle.x, 2) + pow (y - circle.y, 2))
 		<= (radius + (double)circle.radius);
@@ -45,7 +45,7 @@ bool dseed::circle::intersect (const circle& circle)
 dseed::circlef::circlef (float x, float y, float radius)
 	: x (x), y (y), radius (radius)
 { }
-bool dseed::circlef::intersect (const circlef& circle)
+bool dseed::circlef::intersects (const circlef& circle)
 {
 	return sqrt (pow (x - circle.x, 2) + pow (y - circle.y, 2))
 		<= radius + circle.radius;

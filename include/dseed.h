@@ -342,7 +342,7 @@ namespace dseed
 		rectangle (const point2i& p, const size2i& s);
 
 	public:
-		bool intersect (const rectangle& rect);
+		bool intersects (const rectangle& rect);
 	};
 
 	struct DSEEDEXP rectanglef
@@ -356,7 +356,7 @@ namespace dseed
 		rectanglef (const point2f& p, const size2f& s);
 
 	public:
-		bool intersect (const rectanglef& rect);
+		bool intersects (const rectanglef& rect);
 	};
 
 	struct DSEEDEXP circle
@@ -369,7 +369,7 @@ namespace dseed
 		circle (int32_t x, int32_t y, int32_t radius);
 
 	public:
-		bool intersect (const circle& circle);
+		bool intersects (const circle& circle);
 	};
 
 	struct DSEEDEXP circlef
@@ -382,7 +382,7 @@ namespace dseed
 		circlef (float x, float y, float radius);
 
 	public:
-		bool intersect (const circlef& circle);
+		bool intersects (const circlef& circle);
 	};
 }
 

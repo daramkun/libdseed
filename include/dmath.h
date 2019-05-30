@@ -29,19 +29,22 @@ namespace dmath
 	struct float2;
 	struct float3;
 	struct float4;
+
 	struct quaternion;
+	struct plane;
+	struct ray;
 
 	struct float4x4;
 
 	struct vectorf;
 	struct matrixf;
 
-	struct plane;
-	struct ray;
-
 	struct bounding_box;
 	struct bounding_sphere;
 	struct bounding_frustum;
+
+	enum intersect_t { intersect_disjoint = 0, intersect_intersects, intersect_contains };
+	enum plane_intersect_t { plane_intersect_front, plane_intersect_end, plane_intersect_intersecting };
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -196,8 +199,23 @@ namespace dmath
 		inline vectorf normalize ();
 
 	public:
-		inline bool intersect (const plane& p);
-		inline void intersect (const plane& p, float3* p1, float3* p2);
+		inline bool intersects (const plane& p);
+		inline void intersects (const plane& p, float3* ip1, float3* ip2);
+
+		inline bool intersects (const float3& lp1, const float3& lp2);
+		inline void intersects (const float3& lp1, const float3& lp2, float3* ip);
+	};
+
+	struct ray
+	{
+	public:
+		float3 position, direction;
+
+	public:
+		ray () = default;
+		inline ray (const float3& position, const float3& direction)
+			: position (position), direction (direction)
+		{ }
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -274,11 +292,17 @@ namespace dmath
 	////////////////////////////////////////////////////////////////////////////////////////
 	struct vectorf
 	{
+	public:
 		vectorf () = default;
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
+	public:
 		__m128 _vector;
+
+	public:
 		inline vectorf (__m128 vector) : _vector (vector) { }
 		inline operator __m128 () const { return _vector; }
+
+	public:
 		inline vectorf splat_x () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (0, 0, 0, 0)); }
 		inline vectorf splat_y () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (1, 1, 1, 1)); }
 		inline vectorf splat_z () const { return _mm_permute_ps (_vector, _MM_SHUFFLE (2, 2, 2, 2)); }
@@ -288,7 +312,10 @@ namespace dmath
 		inline float z () const { return _mm_cvtss_f32 (splat_z ()); }
 		inline float w () const { return _mm_cvtss_f32 (splat_w ()); }
 #else
+	public:
 		float4 _vector;
+
+	public:
 		inline vectorf splat_x () const { return float4 (_vector.x).operator dmath::vectorf (); }
 		inline vectorf splat_y () const { return float4 (_vector.y).operator dmath::vectorf (); }
 		inline vectorf splat_z () const { return float4 (_vector.z).operator dmath::vectorf (); }
@@ -302,12 +329,73 @@ namespace dmath
 
 	struct matrixf
 	{
+	public:
 		vectorf column1, column2, column3, column4;
 
+	public:
 		matrixf () = default;
 		inline matrixf (const vectorf& c1, const vectorf& c2, const vectorf& c3, const vectorf& c4)
 			: column1 (c1), column2 (c2), column3 (c3), column4 (c4)
 		{ }
+	};
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Bounding shape Type definitions
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
+	struct bounding_box
+	{
+	public:
+		float3 center, extends;
+
+	public:
+		bounding_box () = default;
+		inline bounding_box (const float3& center, const float3& extends)
+			: center (center), extends (extends)
+		{ }
+
+	public:
+
+	};
+
+	struct bounding_sphere
+	{
+	public:
+		float3 center;
+		float radius;
+
+	public:
+		bounding_sphere () = default;
+		inline bounding_sphere (const float3& center, float radius)
+			: center (center), radius (radius)
+		{ }
+
+	public:
+
+	};
+
+	struct bounding_frustum
+	{
+	public:
+		float3 center;
+		quaternion orientation;
+
+		float right, left, top, bottom;
+		float znear, zfar;
+
+	public:
+		bounding_frustum () = default;
+		inline bounding_frustum (const float3& center, const quaternion& orientation,
+			float left, float top, float bottom, float right, float znear, float zfar)
+			: center (center), orientation (orientation)
+			, left (left), top (top), bottom (bottom), right (right)
+			, znear (znear), zfar (zfar)
+		{}
+		inline bounding_frustum (const float4x4& projection);
+
+	public:
+
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -1079,16 +1167,16 @@ namespace dmath
 	{ }
 	inline vectorf plane::normalize () { return normalize_plane ((float4)* this); }
 
-	inline bool plane::intersect (const plane& p)
+	inline bool plane::intersects (const plane& p)
 	{
-		float3 p1, p2;
-		intersect (p, &p1, &p2);
-		return !( p1 == p2 && p1 == float3 (dseed::single_nan));
+		float3 ip1, ip2;
+		intersects (p, &ip1, &ip2);
+		return !( ip1 == ip2 && ip1 == float3 (dseed::single_nan));
 	}
 
-	inline void plane::intersect (const plane& p, float3* p1, float3* p2)
+	inline void plane::intersects (const plane& p, float3* ip1, float3* ip2)
 	{
-		if (p1 == nullptr || p2 == nullptr) return;
+		if (ip1 == nullptr || ip2 == nullptr) return;
 
 		vectorf v1 = cross3 ((float4)p, (float4)*this);
 		float lengthsq = length_squared3 (v1);
@@ -1099,15 +1187,36 @@ namespace dmath
 		vectorf v3 = cross3 (v1, (float4)* this);
 		point = fma (v3, float4 (p.w, p.w, p.w, p.w), point);
 
-		if (lengthsq <= dseed::single_epsilon)
+		if (dseed::equals (lengthsq, 0))
 		{
-			*p1 = point / lengthsq;
-			*p2 = *p1 + v1;
+			*ip1 = point / lengthsq;
+			*ip2 = *ip1 + v1;
 		}
 		else
 		{
-			*p1 = *p2 = float3 (dseed::single_nan);
+			*ip1 = *ip2 = float3 (dseed::single_nan);
 		}
+	}
+
+	inline bool plane::intersects (const float3& lp1, const float3& lp2)
+	{
+		float3 ip;
+		intersects (lp1, lp2, &ip);
+		return ip != float3 (dseed::single_nan);
+	}
+	inline void plane::intersects (const float3& lp1, const float3& lp2, float3* ip)
+	{
+		float v1 = dot3 ((float4)* this, lp1);
+		float v2 = dot3 ((float4)* this, lp2);
+		float d = v1 - v2;
+
+		float vt = dot_plane_coord ((float4)* this, lp1) / d;
+
+		vectorf point = fma (lp2 - lp1, float3 (vt), lp1);
+		if (dseed::equals (d, 0))
+			*ip = point;
+		else
+			*ip = float3 (dseed::single_nan);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
