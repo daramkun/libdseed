@@ -228,6 +228,10 @@ namespace dseed
 
 	constexpr bool equals (single s1, single s2) noexcept { return (s1 - s2) < single_epsilon; }
 	constexpr bool equals (double d1, double d2) noexcept { return (d1 - d2) < double_epsilon; }
+	template<typename T>
+	inline int minimum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v1 : v2; }
+	template<typename T>
+	inline int maximum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
 
 	constexpr int gcd (int a, int b)
 	{
