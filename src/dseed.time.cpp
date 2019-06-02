@@ -19,6 +19,8 @@ constexpr int64_t MILLISECS_PER_HOUR = (MILLISECS_PER_MINUTE * 60LL);
 constexpr int64_t MILLISECS_PER_DAY = (MILLISECS_PER_HOUR * 24LL);
 
 #if COMPILER_MSVC
+#undef min
+#undef max
 #define min min
 #define max max
 #endif

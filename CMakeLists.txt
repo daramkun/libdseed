@@ -3,7 +3,7 @@ cmake_minimum_required ( VERSION 3.8 )
 SET ( VERSION 1.0.0 )
 PROJECT ( dseed
 	VERSION ${VERSION}
-	LANGUAGES CXX
+	LANGUAGES C CXX
 	DESCRIPTION "This is Core library for personal."
 )
 
