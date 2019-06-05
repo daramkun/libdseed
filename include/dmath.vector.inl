@@ -172,20 +172,20 @@ namespace dseed
 	inline dseed::float2::float2 (const vectorf& v) noexcept { float4 temp = v; x = temp.x; y = temp.y; }
 	inline float2::operator vectorf () const noexcept { return float4 (x, y, 0, 0); }
 	inline vectorf float2::normalize () const noexcept { return normalize2 (*this); }
-	inline float float2::length_squared () const noexcept { return length_squared2 (*this); }
-	inline float float2::length () const noexcept { return length2 (*this); }
+	inline float float2::length_squared () const noexcept { return length_squared2 (*this).x (); }
+	inline float float2::length () const noexcept { return length2 (*this).x (); }
 
 	inline dseed::float3::float3 (const vectorf& v) noexcept { float4 temp = v; x = temp.x; y = temp.y; z = temp.z; }
 	inline float3::operator vectorf () const noexcept { return float4 (x, y, z, 0); }
 	inline vectorf float3::normalize () const noexcept { return normalize3 (*this); }
-	inline float float3::length_squared () const noexcept { return length_squared3 (*this); }
-	inline float float3::length () const noexcept { return length3 (*this); }
+	inline float float3::length_squared () const noexcept { return length_squared3 (*this).x (); }
+	inline float float3::length () const noexcept { return length3 (*this).x (); }
 
 	inline dseed::float4::float4 (const vectorf& v) noexcept { v.store (arr); }
 	inline float4::operator vectorf () const noexcept { return vectorf (arr); }
 	inline vectorf float4::normalize () const noexcept { return normalize4 (*this); }
-	inline float float4::length_squared () const noexcept { return length_squared4 (*this); }
-	inline float float4::length () const noexcept { return length4 (*this); }
+	inline float float4::length_squared () const noexcept { return length_squared4 (*this).x (); }
+	inline float float4::length () const noexcept { return length4 (*this).x (); }
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -225,7 +225,7 @@ namespace dseed
 			xaxis.x, yaxis.x, zaxis.x, 0,
 			xaxis.y, yaxis.y, zaxis.y, 0,
 			xaxis.z, yaxis.z, zaxis.z, 0,
-			-dot3 (xaxis, pos), -dot3 (yaxis, pos), -dot3 (zaxis, pos), 1
+			-dot3 (xaxis, pos).x (), -dot3 (yaxis, pos).x (), -dot3 (zaxis, pos).x (), 1
 		);
 	}
 	inline float4x4 float4x4::orthographic (float w, float h, float zn, float zf)
@@ -263,18 +263,17 @@ namespace dseed
 	}
 	inline float4x4 float4x4::billboard (const float3& pos, const float3& camPos, const float3& camUp, const float3& camForward) noexcept
 	{
-		float3 vector, vector2, vector3;
+		vectorf vector, vector2, vector3;
 		vector = pos - camPos;
-		float num = vector.length_squared ();
+		vectorf num = length_squared3 (vector);
 		vector = (num < 0.0001f)
 			? (vector = -camForward)
-			: float3 (vector * (1.0f / sqrtf (num)));
+			: float3 (vector * rsqrtvf (num));
 
 		vector3 = normalize3 (cross3 (camUp, vector));
 		vector2 = cross3 (vector, vector3);
 		return float4x4 (float4 (vector3, 0), float4 (vector2, 0), float4 (vector, 0), float4 (pos, 1));
 	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -287,8 +286,11 @@ namespace dseed
 		quaternion () = default;
 		inline quaternion (float x, float y, float z, float w) noexcept : float4 (x, y, z, w) { }
 		inline quaternion (const float4& v) noexcept : float4 (v) { }
-		inline quaternion (float yaw, float pitch, float roll);
-		inline quaternion (const float4x4& m);
+		inline quaternion (float yaw, float pitch, float roll) : float4 (from_yaw_pitch_rollq (yaw, pitch, roll)) { }
+		inline quaternion (const float4x4& m) : float4 (from_matrixq (m)) { }
+
+	public:
+		inline operator float4x4 () const noexcept { return to_matrixq (*this); }
 
 	public:
 		inline vectorf conjugate () const noexcept { return conjugateq (*this); }
@@ -298,74 +300,6 @@ namespace dseed
 		static inline quaternion zero () noexcept { return quaternion (0, 0, 0, 0); }
 		static inline quaternion identity () noexcept { return quaternion (0, 0, 0, 1); }
 	};
-
-	////////////////////////////////////////////////////////////////////////////////////////
-	//
-	// Quaternion Type Implements
-	//
-	////////////////////////////////////////////////////////////////////////////////////////
-	inline quaternion::quaternion (float yaw, float pitch, float roll)
-	{
-		static vectorf sign = float4 (1, -1, -1, 1);
-		vectorf halfAngles = float4 (pitch, yaw, roll, 0) * (vectorf)float4 (0.5f, 0.5f, 0.5f, 0.5f);
-
-		vectorf sinAngles = sinvf (halfAngles);
-		vectorf cosAngles = cosvf (halfAngles);
-
-		vectorf P0 = sinAngles.shuffle<shuffle_ax1, shuffle_bx1, shuffle_bx2, shuffle_bx2> (cosAngles);
-		vectorf Y0 = cosAngles.shuffle<shuffle_ax1, shuffle_bx1, shuffle_ax2, shuffle_ax2> (sinAngles);
-		vectorf R0 = cosAngles.shuffle<shuffle_ax1, shuffle_ax1, shuffle_bx2, shuffle_ax2> (sinAngles);
-		vectorf P1 = cosAngles.shuffle<shuffle_ax1, shuffle_bx1, shuffle_bx2, shuffle_bx2> (sinAngles);
-		vectorf Y1 = sinAngles.shuffle<shuffle_ax1, shuffle_bx1, shuffle_ax2, shuffle_ax2> (cosAngles);
-		vectorf R1 = sinAngles.shuffle<shuffle_ax1, shuffle_ax1, shuffle_bx2, shuffle_ax2> (cosAngles);
-
-		P0 = P0 * Y0 * R0;
-		P1 = P1 * Y1 * R1;
-
-		float4 result = P0 + P1;
-		*this = result;
-	}
-
-	inline quaternion::quaternion (const float4x4& m)
-	{
-		float num8 = (m.m11 + m.m22) + m.m33;
-		if (num8 > 0.0f)
-		{
-			float num = sqrtf (num8 + 1.0f);
-			num = 0.5f / num;
-			x = (m.m23 - m.m32) * num;
-			y = (m.m31 - m.m13) * num;
-			z = (m.m12 - m.m21) * num;
-			w = num * 0.5f;
-		}
-		else if ((m.m11 >= m.m22) && (m.m11 >= m.m33))
-		{
-			float num7 = sqrtf (((1.0f + m.m11) - m.m22) - m.m33);
-			float num4 = 0.5f / num7;
-			x = 0.5f * num7;
-			y = (m.m12 + m.m21) * num4;
-			z = (m.m13 + m.m31) * num4;
-			w = (m.m23 - m.m32) * num4;
-		}
-		else if (m.m22 > m.m33)
-		{
-			float num6 = sqrtf (((1.0f + m.m22) - m.m11) - m.m33);
-			float num3 = 0.5f / num6;
-			x = (m.m21 + m.m12) * num3;
-			y = 0.5f * num6;
-			z = (m.m32 + m.m23) * num3;
-			w = (m.m31 - m.m13) * num3;
-		}
-		else
-		{
-			float num5 = sqrtf (((1.0f + m.m33) - m.m11) - m.m22);
-			float num2 = 0.5f / num5;
-			x = (m.m31 + m.m13) * num2;
-			y = (m.m32 + m.m23) * num2;
-			z = 0.5f * num5;
-			w = (m.m12 - m.m21) * num2;
-		}
-	}
 }
 
 #endif

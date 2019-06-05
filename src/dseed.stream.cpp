@@ -129,20 +129,20 @@ public:
 	virtual size_t read (void* buffer, size_t length) override
 	{
 		DWORD read;
-		if ( !ReadFile (_file, buffer, length, &read, nullptr) )
+		if (!ReadFile (_file, buffer, (DWORD)length, &read, nullptr))
 			return -1;
 		return read;
 	}
 	virtual size_t write (const void* data, size_t length) override
 	{
 		DWORD written;
-		if ( !WriteFile (_file, data, length, &written, nullptr) )
+		if (!WriteFile (_file, data, (DWORD)length, &written, nullptr))
 			return -1;
 		return written;
 	}
 	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
 	{
-		SetFilePointer (_file, offset, nullptr, origin);
+		SetFilePointer (_file, (LONG)offset, nullptr, origin);
 		if (GetLastError () > 0)
 			return false;
 		return true;
@@ -153,7 +153,7 @@ public:
 	}
 	virtual dseed::error_t set_length (size_t length) override
 	{
-		SetFilePointer (_file, length, nullptr, FILE_BEGIN);
+		SetFilePointer (_file, (LONG)length, nullptr, FILE_BEGIN);
 		SetEndOfFile (_file);
 		return dseed::error_good;
 	}
@@ -294,7 +294,7 @@ dseed::error_t dseed::create_native_filestream (const std::string& path, bool cr
 #else
 	int fd = create
 		? open (path.c_str (), O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO)
-		: open (path.c_str (), O_RDWR );
+		: open (path.c_str (), O_RDWR);
 	if (fd == -1)
 	{
 		if (errno == EACCES)

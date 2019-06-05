@@ -123,13 +123,13 @@ namespace dseed
 	// Bounding Shape Type Operators
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
-	inline float dot_plane_normal (const vectorf& p, const vectorf& n)
+	inline vectorf dot_plane_normal (const vectorf& p, const vectorf& n)
 	{
 		return dot3 (p, n);
 	}
-	inline float dot_plane_coord (const vectorf& p, const vectorf& v)
+	inline vectorf dot_plane_coord (const vectorf& p, const vectorf& v)
 	{
-		return dot_plane_normal (p, v) + p.w ();
+		return dot_plane_normal (p, v) + p.splat_w ();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ namespace dseed
 	: plane (p1, normalize3 (cross3 ((vectorf)p2 - p1, (vectorf)p3 - p1)))
 	{ }
 	inline plane::plane (const float3& p, const float3& n)
-		: plane (n.x, n.y, n.z, -dot3 (p, n))
+		: plane (n.x, n.y, n.z, -dot3 (p, n).x ())
 	{ }
 	inline vectorf plane::normalize () { return normalize_plane ((float4)* this); }
 
@@ -157,14 +157,14 @@ namespace dseed
 		if (ip1 == nullptr || ip2 == nullptr) return;
 
 		vectorf v1 = cross3 ((float4)p, (float4)* this);
-		float lengthsq = length_squared3 (v1);
+		vectorf lengthsq = length_squared3 (v1);
 
 		vectorf v2 = cross3 ((float4)p, v1);
 		vectorf point = v1 * float4 (w, w, w, w);
 
 		point = fmavf (cross3 (v1, (float4)* this), float4 (p.w, p.w, p.w, p.w), point);
 
-		if (dseed::equals (lengthsq, 0))
+		if (equalsvf (lengthsq, vectorf (0, 0, 0, 0)) == 0xF)
 			* ip2 = (*ip1 = point / lengthsq) + v1;
 		else
 			*ip1 = *ip2 = float3 (dseed::single_nan);
@@ -181,8 +181,8 @@ namespace dseed
 		if (ip == nullptr)
 			return;
 
-		float d = dot3 ((float4)* this, lp1) - dot3 ((float4)* this, lp2);
-		*ip = dseed::equals (d, 0)
+		vectorf d = dot3 ((float4)* this, lp1) - dot3 ((float4)* this, lp2);
+		*ip = (equalsvf (d, vectorf (0, 0, 0, 0)) == 0xF)
 			? float3 (fmavf (lp2 - lp1, float3 (dot_plane_coord ((float4)* this, lp1) / d), lp1))
 			: float3 (dseed::single_nan);
 	}
@@ -221,7 +221,7 @@ namespace dseed
 		vectorf center2 = bs.center;
 
 		vectorf v = center2 - center1;
-		float distance = length3 (v);
+		float distance = length3 (v).x ();
 
 		return (radius + bs.radius >= distance)
 			? (radius - bs.radius >= distance ? intersect_contains : intersect_intersects)

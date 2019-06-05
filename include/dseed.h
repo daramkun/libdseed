@@ -57,6 +57,9 @@ constexpr char PATH_SEPARATOR = '/';
 #define ARCH_ARM											( defined ( _M_ARM ) || defined ( __arm__ ) )
 #define ARCH_ARM64											( defined ( _M_ARM64 ) || defined ( __aarch64__ ) )
 #define ARCH_ARMSET											( ARCH_ARM || ARCH_ARM64 )
+#define ARCH_RISCV32										( ( defined ( __riscv ) || defined ( __riscv__ ) ) && ( __riscv_xlen == 32 ) )
+#define ARCH_RISCV64										( ( defined ( __riscv ) || defined ( __riscv__ ) ) && ( __riscv_xlen == 64 ) )
+#define ARCH_RISCVSET										( ARCH_RISCV32 || ARCH_RISCV64 )
 
 #if COMPILER_MSVC && defined ( DSEED_WINDOWS_DLL_EXPORT )
 #   define DSEEDEXP											__declspec ( dllexport )
@@ -229,15 +232,13 @@ namespace dseed
 	constexpr bool equals (single s1, single s2) noexcept { return (s1 - s2) < single_epsilon; }
 	constexpr bool equals (double d1, double d2) noexcept { return (d1 - d2) < double_epsilon; }
 	template<typename T>
-	inline int minimum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v1 : v2; }
+	inline T minimum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v1 : v2; }
 	template<typename T>
-	inline int maximum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
+	inline T maximum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
 
 	constexpr int gcd (int a, int b)
 	{
-		if (b == 0)
-			return a;
-		return gcd (b, a % b);
+		return (b == 0) ? a : gcd (b, a % b);
 	}
 
 	struct DSEEDEXP fraction
