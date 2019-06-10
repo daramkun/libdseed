@@ -142,8 +142,7 @@ public:
 	}
 	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
 	{
-		SetFilePointer (_file, (LONG)offset, nullptr, origin);
-		if (GetLastError () > 0)
+		if (SetFilePointer (_file, (LONG)offset, nullptr, origin) == INVALID_SET_FILE_POINTER)
 			return false;
 		return true;
 	}
