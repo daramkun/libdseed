@@ -278,6 +278,29 @@ namespace dseed
 			return vectori ((x >= 0 && x <= 3) ? v[x] : v2.v[4 - x], (y >= 0 && y <= 3) ? v[y] : v2.v[4 - y],
 				(z >= 0 && z <= 3) ? v2.v[z] : v[4 - z], (w >= 0 && w <= 3) ? v2.v[w] : v[4 - w]);
 		}
+		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
+		inline vectori permute () const
+		{
+			short* arr = reinterpret_cast<short*>(v);
+			vectori ret;
+			short* destarr = reinterpret_cast<short*>(ret.v);
+			destarr[0] = arr[s1]; destarr[1] = arr[s2]; destarr[2] = arr[s3]; destarr[3] = arr[s4];
+			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
+			return ret;
+		}
+		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
+			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
+		inline vectori permute () const
+		{
+			char* arr = reinterpret_cast<char*>(v);
+			vectori ret;
+			char* destarr = reinterpret_cast<char*>(ret.v);
+			destarr[0] = arr[s1]; destarr[1] = arr[s2]; destarr[2] = arr[s3]; destarr[3] = arr[s4];
+			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
+			destarr[8] = arr[s9]; destarr[9] = arr[s10]; destarr[10] = arr[s11]; destarr[11] = arr[s12];
+			destarr[12] = arr[s13]; destarr[13] = arr[s14]; destarr[14] = arr[s15]; destarr[15] = arr[s16];
+			return ret;
+		}
 		template<int x, int y, int z, int w>
 		inline vectori permute () const { return shuffle (*this, x, y, z, w); }
 		inline vectori splat_x () const { return vectori (v[0]); }
