@@ -133,9 +133,10 @@ namespace dseed
 #else
 		float v[4];
 		inline vectorf (const float* vector) { memcpy (v, vector, sizeof (float) * 4); }
-		inline vectorf (float x, float y, float z, float w) : v ({ x, y, z, w }) { }
-		inline vectorf (float s) : v ({ s, s, s, s }) { }
-		inline operator float* () const { return v; }
+		inline vectorf (float x, float y, float z, float w) { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
+		inline vectorf (float s) { v[0] = v[1] = v[2] = v[3] = s; }
+		inline operator float* () { return v; }
+		inline operator const float* () const { return v; }
 		inline void store (float* vector) const { memcpy (vector, v, sizeof (float) * 4); }
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
 		inline vectorf shuffle (const vectorf& v2) const
@@ -144,7 +145,7 @@ namespace dseed
 				(z >= 0 && z <= 3) ? v2.v[z] : v[4 - z], (w >= 0 && w <= 3) ? v2.v[w] : v[4 - w]);
 		}
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
-		inline vectorf permute () const { return shuffle (*this, x, y, z, w); }
+		inline vectorf permute () const { return shuffle<x, y, z, w> (*this); }
 		inline vectorf splat_x () const { return vectorf (v[0]); }
 		inline vectorf splat_y () const { return vectorf (v[1]); }
 		inline vectorf splat_z () const { return vectorf (v[2]); }
@@ -180,14 +181,14 @@ namespace dseed
 		inline vectori permute () const
 		{
 			__m128i shuffle = _mm_set_epi16 (s8, s7, s6, s5, s4, s3, s2, s1);
-			return _mm_shuffle_epi8 (v, mask);
+			return _mm_shuffle_epi8 (v, shuffle);
 		}
 		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
 			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
 			inline vectori permute () const
 		{
 			__m128i shuffle = _mm_set_epi8 (s16, s15, s14, s13, s12, s11, s10, s9, s8, s7, s6, s5, s4, s3, s2, s1);
-			return _mm_shuffle_epi8 (v, mask);
+			return _mm_shuffle_epi8 (v, shuffle);
 		}
 		template<int x, int y, int z, int w>
 		inline vectori permute () const { return _mm_shuffle_epi32 (v, _MM_SHUFFLE (w, z, y, x)); }
@@ -268,9 +269,10 @@ namespace dseed
 			v[2] = (int)vector[2];
 			v[3] = (int)vector[3];
 		}
-		inline vectori (int x, int y, int z, int w) : v ({ x, y, z, w }) { }
-		inline vectori (int i) : v ({ i, i, i, i }) { }
-		inline operator int* () const { return v; }
+		inline vectori (int x, int y, int z, int w) { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
+		inline vectori (int i) { v[0] = v[1] = v[2] = v[3] = i; }
+		inline operator int* () { return v; }
+		inline operator const int* () const { return v; }
 		inline void store (int* vector) { memcpy (vector, v, sizeof (int) * 4); }
 		template<int x, int y, int z, int w>
 		inline vectori shuffle (const vectori& v2) const
@@ -290,7 +292,7 @@ namespace dseed
 		}
 		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
 			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
-		inline vectori permute () const
+			inline vectori permute () const
 		{
 			char* arr = reinterpret_cast<char*>(v);
 			vectori ret;
@@ -398,7 +400,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_movemask_ps (v);
 #else
-		uint32_t& ia = *reinterpret_cast<uint32_t*> (&v);
+		auto ia = reinterpret_cast<const uint32_t*> (&v);
 		return (ia[0] >> 31) | ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8);
 #endif
 	}
@@ -431,7 +433,7 @@ namespace dseed
 
 		return ((hi[0] << 8) | (lo[0] & 0xFF));
 #else
-		uint8_t& ia = *reinterpret_cast<uint8_t*> (&v);
+		auto ia = reinterpret_cast<const uint8_t*> (&v);
 		return (ia[0] >> 31)
 			| ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8)
 			| ((ia[4] >> 27) & 16) | ((ia[5] >> 26) & 32) | ((ia[6] >> 25) & 64)
@@ -552,6 +554,7 @@ namespace dseed
 #endif
 	}
 	inline vectorf dividevf (const vectorf& v, float s) noexcept { return dividevf (v, vectorf (s)); }
+	inline vectori andvi (const vectori& v1, const vectori& v2) noexcept;
 	inline vectorf andvf (const vectorf& v1, const vectorf& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -559,9 +562,10 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vandq_s32 (v1, v2);
 #else
-		return vectori (v1.x () & v2.x (), v1.y () & v2.y (), v1.z () & v2.z (), v1.w () & v2.w ());
+		return reinterpret_vector (andvi (reinterpret_vector (v1), reinterpret_vector (v2)));
 #endif
 	}
+	inline vectori orvi (const vectori& v1, const vectori& v2) noexcept;
 	inline vectorf orvf (const vectorf& v1, const vectorf& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -569,9 +573,10 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vorrq_s32 (v1, v2);
 #else
-		return vectori (v1.x () | v2.x (), v1.y () | v2.y (), v1.z () | v2.z (), v1.w () | v2.w ());
+		return reinterpret_vector (orvi (reinterpret_vector (v1), reinterpret_vector (v2)));
 #endif
 	}
+	inline vectori xorvi (const vectori& v1, const vectori& v2) noexcept;
 	inline vectorf xorvf (const vectorf& v1, const vectorf& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -579,9 +584,10 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return veorq_s32 (v1, v2);
 #else
-		return vectori (v1.x () ^ v2.x (), v1.y () ^ v2.y (), v1.z () ^ v2.z (), v1.w () ^ v2.w ());
+		return reinterpret_vector (xorvi (reinterpret_vector (v1), reinterpret_vector (v2)));
 #endif
 	}
+	inline vectori notvi (const vectori& v) noexcept;
 	inline vectorf notvf (const vectorf& v) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -589,7 +595,7 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vmvnq_s32 (v);
 #else
-		return vectori (~v.x (), ~v.y (), ~v.z (), ~v.w ());
+		return reinterpret_vector (notvi (reinterpret_vector (v)));
 #endif
 	}
 	inline vectorf equalsvf (const vectorf& v1, const vectorf& v2) noexcept
@@ -732,7 +738,7 @@ namespace dseed
 	inline bool operator<= (const vectorf& v1, const vectorf& v2) noexcept { return movemask_vector (lesser_equalsvf (v1, v2)) == 0xF; }
 	inline bool operator> (const vectorf& v1, const vectorf& v2) noexcept { return movemask_vector (greatervf (v1, v2)) == 0xF; }
 	inline bool operator>= (const vectorf& v1, const vectorf& v2) noexcept { return movemask_vector (greater_equalsvf (v1, v2)) == 0xF; }
-	
+
 	inline vectori addvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -789,7 +795,7 @@ namespace dseed
 #endif
 	}
 	inline vectori dividevi (const vectori& v, int s) noexcept { return dividevi (v, vectori (s)); }
-	inline vectori left_shiftvi (const vectori& v1, int s)
+	inline vectori left_shiftvi (const vectori& v1, int s) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_slli_epi32 (v1, s);
@@ -799,7 +805,7 @@ namespace dseed
 		return vectori (v1.x () << s, v1.y () << s, v1.z () << s, v1.w () << s);
 #endif
 	}
-	inline vectori right_shiftvi (const vectori& v1, int s)
+	inline vectori right_shiftvi (const vectori& v1, int s) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_srai_epi32 (v1, s);
@@ -809,7 +815,7 @@ namespace dseed
 		return vectori (v1.x () >> s, v1.y () >> s, v1.z () >> s, v1.w () >> s);
 #endif
 	}
-	inline vectori andvi (const vectori& v1, const vectori& v2)
+	inline vectori andvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_and_si128 (v1, v2);
@@ -819,7 +825,7 @@ namespace dseed
 		return vectori (v1.x () & v2.x (), v1.y () & v2.y (), v1.z () & v2.z (), v1.w () & v2.w ());
 #endif
 	}
-	inline vectori orvi (const vectori& v1, const vectori& v2)
+	inline vectori orvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_or_si128 (v1, v2);
@@ -829,7 +835,7 @@ namespace dseed
 		return vectori (v1.x () | v2.x (), v1.y () | v2.y (), v1.z () | v2.z (), v1.w () | v2.w ());
 #endif
 	}
-	inline vectori xorvi (const vectori& v1, const vectori& v2)
+	inline vectori xorvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_xor_si128 (v1, v2);
@@ -849,7 +855,7 @@ namespace dseed
 		return vectori (~v.x (), ~v.y (), ~v.z (), ~v.w ());
 #endif
 	}
-	inline vectori equalsvi (const vectori& v1, const vectori& v2)
+	inline vectori equalsvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_cmpeq_epi32 (v1, v2);
@@ -860,10 +866,10 @@ namespace dseed
 			v1.x () == v2.x () ? -1 : 0,
 			v1.y () == v2.y () ? -1 : 0,
 			v1.z () == v2.z () ? -1 : 0,
-			v1.w () == v2.w () ? -1 : 0 );
+			v1.w () == v2.w () ? -1 : 0);
 #endif
 	}
-	inline vectori not_equalsvi (const vectori& v1, const vectori& v2)
+	inline vectori not_equalsvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_cmpeq_epi32 (v1, v2);
@@ -874,10 +880,10 @@ namespace dseed
 			v1.x () != v2.x () ? -1 : 0,
 			v1.y () != v2.y () ? -1 : 0,
 			v1.z () != v2.z () ? -1 : 0,
-			v1.w () != v2.w () ? -1 : 0 );
+			v1.w () != v2.w () ? -1 : 0);
 #endif
 	}
-	inline vectori lesservi (const vectori& v1, const vectori& v2)
+	inline vectori lesservi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_cmplt_epi32 (v1, v2);
@@ -888,10 +894,10 @@ namespace dseed
 			v1.x () < v2.x () ? -1 : 0,
 			v1.y () < v2.y () ? -1 : 0,
 			v1.z () < v2.z () ? -1 : 0,
-			v1.w () < v2.w () ? -1 : 0 );
+			v1.w () < v2.w () ? -1 : 0);
 #endif
 	}
-	inline vectori lesser_equalsvi (const vectori& v1, const vectori& v2)
+	inline vectori lesser_equalsvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return orvi (lesservi (v1, v2), equalsvi (v1, v2));
@@ -902,10 +908,10 @@ namespace dseed
 			v1.x () <= v2.x () ? -1 : 0,
 			v1.y () <= v2.y () ? -1 : 0,
 			v1.z () <= v2.z () ? -1 : 0,
-			v1.w () <= v2.w () ? -1 : 0 );
+			v1.w () <= v2.w () ? -1 : 0);
 #endif
 	}
-	inline vectori greatervi (const vectori& v1, const vectori& v2)
+	inline vectori greatervi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_cmpgt_epi32 (v1, v2);
@@ -916,10 +922,10 @@ namespace dseed
 			v1.x () > v2.x () ? -1 : 0,
 			v1.y () > v2.y () ? -1 : 0,
 			v1.z () > v2.z () ? -1 : 0,
-			v1.w () > v2.w () ? -1 : 0 );
+			v1.w () > v2.w () ? -1 : 0);
 #endif
 	}
-	inline vectori greater_equalsvi (const vectori& v1, const vectori& v2)
+	inline vectori greater_equalsvi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return orvi (greatervi (v1, v2), equalsvi (v1, v2));
@@ -930,7 +936,7 @@ namespace dseed
 			v1.x () >= v2.x () ? -1 : 0,
 			v1.y () >= v2.y () ? -1 : 0,
 			v1.z () >= v2.z () ? -1 : 0,
-			v1.w () >= v2.w () ? -1 : 0 );
+			v1.w () >= v2.w () ? -1 : 0);
 #endif
 	}
 
@@ -1114,6 +1120,7 @@ namespace dseed
 	{
 		return dot4 (v, v);
 	}
+	inline vectorf sqrtvf (const vectorf& v) noexcept;
 	inline vectorf length2 (const vectorf& v) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
@@ -1147,13 +1154,13 @@ namespace dseed
 	inline vectorf is_unit2 (const vectorf& v) noexcept { return equalsvf (length_squared2 (v), vectorf (1)); }
 	inline vectorf is_unit3 (const vectorf& v) noexcept { return equalsvf (length_squared3 (v), vectorf (1)); }
 	inline vectorf is_unit4 (const vectorf& v) noexcept { return equalsvf (length_squared4 (v), vectorf (1)); }
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Vector Type Utility operations
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	// Get Minimum value (max(v1, v2))
 	inline vectorf minvf (const vectorf& v1, const vectorf& v2) noexcept
 	{
@@ -1186,7 +1193,7 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vminq_f32 (v1, v2);
 #else
-		return float4 (minimum<float> (v1.x (), v2.x ()), minimum<float> (v1.y (), v2.y ()),
+		return vectori (minimum<float> (v1.x (), v2.x ()), minimum<float> (v1.y (), v2.y ()),
 			minimum<float> (v1.z (), v2.z ()), minimum<float> (v1.w (), v2.w ()));
 #endif
 	}
@@ -1198,7 +1205,7 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vmaxq_f32 (v1, v2);
 #else
-		return float4 (maximum<float> (v1.x (), v2.x ()), maximum<float> (v1.y (), v2.y ()),
+		return vectori (maximum<float> (v1.x (), v2.x ()), maximum<float> (v1.y (), v2.y ()),
 			maximum<float> (v1.z (), v2.z ()), maximum<float> (v1.w (), v2.w ()));
 #endif
 	}
@@ -1210,7 +1217,7 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vrecpeq_f32 (vrsqrteq_f32 (v));
 #else
-		return vectorf (sqrtf(v.x ()), sqrtf(v.y ()), sqrtf(v.z ()), sqrtf(v.w ()));
+		return vectorf (sqrtf (v.x ()), sqrtf (v.y ()), sqrtf (v.z ()), sqrtf (v.w ()));
 #endif
 	}
 	// Get Squared Reciprocal vector (1/sqrt(v))
@@ -1221,7 +1228,7 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		return vrsqrteq_f32 (v);
 #else
-		return dividevf (vectorf (1), sqrt (v));
+		return dividevf (vectorf (1), sqrtvf (v));
 #endif
 	}
 	// Get Power vector (v1^v2)
@@ -1249,8 +1256,8 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_round_ps (v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 #else
-		float v[4] = { roundf (v.x ()), roundf (v.y ()), roundf (v.z ()), roundf (v.w ()) };
-		return vectorf (v);
+		float va[4] = { roundf (v.x ()), roundf (v.y ()), roundf (v.z ()), roundf (v.w ()) };
+		return vectorf (va);
 #endif
 	}
 	// Get Floored vector
@@ -1259,8 +1266,8 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_floor_ps (v);
 #else
-		float v[4] = { floorf (v.x ()), floorf (v.y ()), floorf (v.z ()), floorf (v.w ()) };
-		return vectorf (v);
+		float va[4] = { floorf (v.x ()), floorf (v.y ()), floorf (v.z ()), floorf (v.w ()) };
+		return vectorf (va);
 #endif
 	}
 	// Get Ceiled vector
@@ -1269,8 +1276,8 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_ceil_ps (v);
 #else
-		float v[4] = { ceilf (v.x ()), ceilf (v.y ()), ceilf (v.z ()), ceilf (v.w ()) };
-		return vectorf (v);
+		float va[4] = { ceilf (v.x ()), ceilf (v.y ()), ceilf (v.z ()), ceilf (v.w ()) };
+		return vectorf (va);
 #endif
 	}
 	// Get Sine vector (sin(v))
@@ -1390,9 +1397,9 @@ namespace dseed
 	}
 	inline vectorf from_matrixq (const matrixf& m) noexcept
 	{
-		static const vectorf XMPMMP ( +1.0f, -1.0f, -1.0f, +1.0f );
-		static const vectorf XMMPMP ( -1.0f, +1.0f, -1.0f, +1.0f );
-		static const vectorf XMMMPP ( -1.0f, -1.0f, +1.0f, +1.0f );
+		static const vectorf XMPMMP (+1.0f, -1.0f, -1.0f, +1.0f);
+		static const vectorf XMMPMP (-1.0f, +1.0f, -1.0f, +1.0f);
+		static const vectorf XMMMPP (-1.0f, -1.0f, +1.0f, +1.0f);
 
 		vectorf r0 = m.column1;
 		vectorf r1 = m.column2;
@@ -1498,7 +1505,7 @@ namespace dseed
 		ret.column1 = r0.shuffle<0, 4, 1, 7> (v0);
 		ret.column2 = r0.shuffle<2, 1, 3, 7> (v0);
 		ret.column3 = r0.shuffle<4, 5, 6, 7> (v1);
-		ret.column4 = vectorf ( 0, 0, 0, 1 );
+		ret.column4 = vectorf (0, 0, 0, 1);
 		return ret;
 	}
 
@@ -1733,7 +1740,7 @@ namespace dseed
 		c4 = c4.permute<0, 2, 1, 3> ();
 		c6 = c6.permute<0, 2, 1, 3> ();
 
-		vectorf temp = vectorf(dot4 (c0, transposed.column1));
+		vectorf temp = vectorf (dot4 (c0, transposed.column1));
 		det = temp.x ();
 		temp = one / temp;
 
