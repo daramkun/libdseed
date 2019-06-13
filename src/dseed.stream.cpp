@@ -270,13 +270,14 @@ private:
 };
 #endif
 
-dseed::error_t dseed::create_native_filestream (const std::string& path, bool create, stream** stream)
+dseed::error_t dseed::create_native_filestream (const char* path, bool create, stream** stream)
 {
 	if (stream == nullptr)
 		return dseed::error_invalid_args;
 #if PLATFORM_WINDOWS
-	auto filename = utf8toutf16 (path);
-	HANDLE file = CreateFile2 ((LPCWSTR)filename.c_str (), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, create ? CREATE_ALWAYS : OPEN_EXISTING, nullptr);
+	char16_t filename[256];
+	utf8toutf16 (path, filename, 256);
+	HANDLE file = CreateFile2 ((LPCWSTR)filename, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, create ? CREATE_ALWAYS : OPEN_EXISTING, nullptr);
 	if (file == INVALID_HANDLE_VALUE)
 	{
 		auto error = GetLastError ();
@@ -311,16 +312,19 @@ dseed::error_t dseed::create_native_filestream (const std::string& path, bool cr
 }
 
 #include <sstream>
-std::string dseed::path_combine (const std::string& path1, const std::string& path2)
+void path_combine (const char* path1, const char* path2, char* ret, size_t retsize)
 {
 	std::stringstream ss;
 	ss << path1;
 
-	char lastword = path1.at (path1.length () - 1);
+	size_t path1len = strlen (path1);
+
+	char lastword = path1[path1len - 1];
 	if (!(lastword == '/' || lastword == '\\'))
 		ss << PATH_SEPARATOR;
 
 	ss << path2;
 
-	return ss.str ();
+	auto retstr = ss.str ();
+	memcpy (ret, retstr.c_str (), min (retsize, retstr.length () + 1) * sizeof (char));
 }

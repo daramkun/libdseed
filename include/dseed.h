@@ -475,8 +475,8 @@ namespace dseed
 
 namespace dseed
 {
-	std::u16string utf8toutf16 (const std::string& u8);
-	std::string utf16toutf8 (const std::u16string& u16);
+	void utf8toutf16 (const char* u8, char16_t* u16, size_t u16size);
+	void utf16toutf8 (const char16_t* u16, char* u8, size_t u8size);
 }
 
 namespace dseed
@@ -508,9 +508,9 @@ namespace dseed
 	};
 
 	DSEEDEXP error_t create_memorystream (void* buffer, size_t length, stream** stream);
-	DSEEDEXP error_t create_native_filestream (const std::string& path, bool create, stream** stream);
+	DSEEDEXP error_t create_native_filestream (const char* path, bool create, stream** stream);
 
-	std::string path_combine (const std::string& path1, const std::string& path2);
+	void path_combine (const char* path1, const char* path2, char* ret, size_t retsize);
 }
 
 #endif
