@@ -107,7 +107,7 @@ namespace dseed
 	public:
 		float32x4_t v;
 		inline vectorf (const float* vector) : v (vld1q_f32 (vector)) { }
-		inline vectorf (float x, float y, float z, float w) { float va [] = { x, y, z, w }; v = vld1q_f32 (va); }
+		inline vectorf (float x, float y, float z, float w) { float va[] = { x, y, z, w }; v = vld1q_f32 (va); }
 		inline vectorf (const float32x4_t& vector) : v (vector) { }
 		//inline vectorf (const int32x4_t& vector) : v (vcvtq_s32_f32 (vector)) { }
 		inline vectorf (float s) : v (vmovq_n_f32 (s)) { }
@@ -180,14 +180,14 @@ namespace dseed
 		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
 		inline vectori permute () const
 		{
-			__m128i shuffle = _mm_set_epi16 (s8, s7, s6, s5, s4, s3, s2, s1);
+			const static __m128i shuffle = _mm_set_epi16 (s8, s7, s6, s5, s4, s3, s2, s1);
 			return _mm_shuffle_epi8 (v, shuffle);
 		}
 		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
 			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
 			inline vectori permute () const
 		{
-			__m128i shuffle = _mm_set_epi8 (s16, s15, s14, s13, s12, s11, s10, s9, s8, s7, s6, s5, s4, s3, s2, s1);
+			const static __m128i shuffle = _mm_set_epi8 (s16, s15, s14, s13, s12, s11, s10, s9, s8, s7, s6, s5, s4, s3, s2, s1);
 			return _mm_shuffle_epi8 (v, shuffle);
 		}
 		template<int x, int y, int z, int w>
@@ -306,9 +306,9 @@ namespace dseed
 		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
 		inline vectori permute () const
 		{
-			short* arr = reinterpret_cast<short*>(v);
+			auto arr = reinterpret_cast<const short*>(v);
 			vectori ret;
-			short* destarr = reinterpret_cast<short*>(ret.v);
+			auto destarr = reinterpret_cast<short*>(ret.v);
 			destarr[0] = arr[s1]; destarr[1] = arr[s2]; destarr[2] = arr[s3]; destarr[3] = arr[s4];
 			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
 			return ret;
@@ -317,9 +317,9 @@ namespace dseed
 			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
 			inline vectori permute () const
 		{
-			char* arr = reinterpret_cast<char*>(v);
+			auto arr = reinterpret_cast<const char*>(v);
 			vectori ret;
-			char* destarr = reinterpret_cast<char*>(ret.v);
+			auto destarr = reinterpret_cast<char*>(ret.v);
 			destarr[0] = arr[s1]; destarr[1] = arr[s2]; destarr[2] = arr[s3]; destarr[3] = arr[s4];
 			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
 			destarr[8] = arr[s9]; destarr[9] = arr[s10]; destarr[10] = arr[s11]; destarr[11] = arr[s12];
