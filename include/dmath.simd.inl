@@ -57,11 +57,11 @@ namespace dseed
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
 		inline vectorf permute () const
 		{
-#if !defined ( NO_AVX )
+#	if !defined ( NO_AVX )
 			return _mm_permute_ps (v, _MM_SHUFFLE (w, z, y, x));
-#else
+#	else
 			return shuffle (v, x, y, z, w);
-#endif
+#	endif
 		}
 		inline vectorf splat_x () const { return permute<0, 0, 0, 0> (); }
 		inline vectorf splat_y () const { return permute<1, 1, 1, 1> (); }
@@ -107,9 +107,9 @@ namespace dseed
 	public:
 		float32x4_t v;
 		inline vectorf (const float* vector) : v (vld1q_f32 (vector)) { }
-		inline vectorf (float x, float y, float z, float w) : vectorf (float{ x, y, z, w }) { }
+		inline vectorf (float x, float y, float z, float w) { float va [] = { x, y, z, w }; v = vld1q_f32 (va); }
 		inline vectorf (const float32x4_t& vector) : v (vector) { }
-		inline vectorf (const int32x4_t& vector) : v (vcvtq_s32_f32 (vector)) { }
+		//inline vectorf (const int32x4_t& vector) : v (vcvtq_s32_f32 (vector)) { }
 		inline vectorf (float s) : v (vmovq_n_f32 (s)) { }
 		inline operator float32x4_t () const { return v; }
 		inline void store (float* vector) const { vst1q_f32 (vector, v); }
@@ -236,9 +236,9 @@ namespace dseed
 	public:
 		int32x4_t v;
 		inline vectori (const int* vector) : v (vld1q_s32 (vector)) { }
-		inline vectori (int x, int y, int z, int w) : v (vld1q_s32 (int{ x, y, z, w })) { }
+		inline vectori (int x, int y, int z, int w) { int ia[] = { x, y, z, w }; v = vld1q_s32 (ia); }
 		inline vectori (const int32x4_t& vector) : v (vector) { }
-		inline vectori (const float32x4_t& vector) : v (vcvtq_f32_s32 (vector)) { }
+		//inline vectori (const float32x4_t& vector) : v (vcvtq_f32_s32 (vector)) { }
 		inline vectori (int i) : v (vmovq_n_s32 (i)) { }
 		inline operator int32x4_t () const { return v; }
 		inline void store (int* vector) const { vst1q_s32 (vector, v); }
@@ -251,14 +251,37 @@ namespace dseed
 		}
 		template<int x, int y, int z, int w>
 		inline vectori permute () const { return shuffle<x, y, z, w> (*this); }
+		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
+		inline vectori permute () const
+		{
+			short* arr = reinterpret_cast<short*>(&v);
+			vectori ret;
+			short* destarr = reinterpret_cast<short*>(&ret.v);
+			destarr[0] = arr[s1]; destarr[1] = arr[s2]; destarr[2] = arr[s3]; destarr[3] = arr[s4];
+			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
+			return ret;
+		}
+		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
+			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
+			inline vectori permute () const
+		{
+			char* arr = reinterpret_cast<char*>(&v);
+			vectori ret;
+			char* destarr = reinterpret_cast<char*>(&ret.v);
+			destarr[0] = arr[s1]; destarr[1] = arr[s2]; destarr[2] = arr[s3]; destarr[3] = arr[s4];
+			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
+			destarr[8] = arr[s9]; destarr[9] = arr[s10]; destarr[10] = arr[s11]; destarr[11] = arr[s12];
+			destarr[12] = arr[s13]; destarr[13] = arr[s14]; destarr[14] = arr[s15]; destarr[15] = arr[s16];
+			return ret;
+		}
 		inline vectori splat_x () const { vdupq_lane_s32 (vget_low_s32 (v), 0); }
 		inline vectori splat_y () const { vdupq_lane_s32 (vget_low_s32 (v), 1); }
 		inline vectori splat_z () const { vdupq_lane_s32 (vget_high_s32 (v), 0); }
 		inline vectori splat_w () const { vdupq_lane_s32 (vget_high_s32 (v), 1); }
-		inline float x () const { return vgetq_lane_s32 (v, 0); }
-		inline float y () const { return vgetq_lane_s32 (v, 1); }
-		inline float z () const { return vgetq_lane_s32 (v, 2); }
-		inline float w () const { return vgetq_lane_s32 (v, 3); }
+		inline int x () const { return vgetq_lane_s32 (v, 0); }
+		inline int y () const { return vgetq_lane_s32 (v, 1); }
+		inline int z () const { return vgetq_lane_s32 (v, 2); }
+		inline int w () const { return vgetq_lane_s32 (v, 3); }
 #else
 		int v[4];
 		inline vectori (const int* vector) { memcpy (v, vector, sizeof (int) * 4); }
@@ -363,7 +386,7 @@ namespace dseed
 		return _mm_cvtps_epi32 (v);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 #	if ( ARCH_ARM64 )
-		return vcvtnq_f32_s32 (v);
+		return vcvtq_s32_f32 (v);
 #	elif ( ARCH_ARM )
 		float32x4_t half = vbslq_f32 (vdupq_n_u32 (0x80000000), v, vdupq_n_f32 (0.5f));
 		int32x4_t r_trunc = vcvtq_s32_f32 (v);
@@ -380,7 +403,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_castsi128_ps (v);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return vreinterpretq_f32_s32 (v);
+		return vreinterpretq_f32_s32 (v.operator float32x4_t ());
 #else
 		return *reinterpret_cast<const vectorf*>(&v);
 #endif
@@ -390,7 +413,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_castps_si128 (v);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return vreinterpretq_s32_f32 (v);
+		return vreinterpretq_s32_f32 (v.operator float32x4_t ());
 #else
 		return *reinterpret_cast<const vectori*>(&v);
 #endif
@@ -410,7 +433,7 @@ namespace dseed
 		return _mm_movemask_epi8 (v);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		uint8x16_t input = v;
-		static const int8_t __attribute__ ((aligned (16))) xr[8] = { -7, -6, -5, -4, -3, -2, -1, 0 };
+		static const int8_t xr[8] = { -7, -6, -5, -4, -3, -2, -1, 0 };
 		uint8x8_t mask_and = vdup_n_u8 (0x80);
 		int8x8_t mask_shift = vld1_s8 (xr);
 
@@ -431,7 +454,7 @@ namespace dseed
 		hi = vpadd_u8 (hi, hi);
 		hi = vpadd_u8 (hi, hi);
 
-		return ((hi[0] << 8) | (lo[0] & 0xFF));
+		return ((vget_lane_s32 (hi, 0) << 8) | (vget_lane_s32 (lo, 0) & 0xFF));
 #else
 		auto ia = reinterpret_cast<const uint8_t*> (&v);
 		return (ia[0] >> 31)
@@ -786,10 +809,13 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_div_epi32 (v1, v2);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		float32x4_t x = vrecpeq_s32 (v2);
+		vectorf fv1 = reinterpret_vector (v1);
+		vectorf fv2 = reinterpret_vector (v2);
+
+		float32x4_t x = vrecpeq_f32 (fv2);
 		for (int i = 0; i < 2; i++)
-			x = vmulq_s32 (vrecpsq_s32 (v2, x), x);
-		return vmulq_s32 (v1, x);
+			x = vmulq_f32 (vrecpsq_f32 (fv2, x), x);
+		return reinterpret_vector (vectorf (vmulq_f32 (fv1, x)));
 #else
 		return vectori (v1.x () / v2.x (), v1.y () / v2.y (), v1.z () / v2.z (), v1.w () / v2.w ());
 #endif
@@ -820,7 +846,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_and_si128 (v1, v2);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return vandq_s32 (v1, x);
+		return vandq_s32 (v1, v2);
 #else
 		return vectori (v1.x () & v2.x (), v1.y () & v2.y (), v1.z () & v2.z (), v1.w () & v2.w ());
 #endif
@@ -830,7 +856,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_or_si128 (v1, v2);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return vorrq_s32 (v1, x);
+		return vorrq_s32 (v1, v2);
 #else
 		return vectori (v1.x () | v2.x (), v1.y () | v2.y (), v1.z () | v2.z (), v1.w () | v2.w ());
 #endif
@@ -840,7 +866,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_xor_si128 (v1, v2);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return veorq_s32 (v1, x);
+		return veorq_s32 (v1, v2);
 #else
 		return vectori (v1.x () ^ v2.x (), v1.y () ^ v2.y (), v1.z () ^ v2.z (), v1.w () ^ v2.w ());
 #endif
@@ -943,7 +969,7 @@ namespace dseed
 	inline vectori fmavi (const vectori& mv1, const vectori& mv2, const vectori& av) noexcept
 	{
 #if ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return vmlal_s32 (mv1, mv2, av);
+		return vmlaq_s32 (mv1, mv2, av);
 #else
 		return addvi (multiplyvi (mv1, mv2), av);
 #endif
@@ -955,7 +981,7 @@ namespace dseed
 	inline vectori fnmsvi (const vectori& mv1, const vectori& mv2, const vectori& sv) noexcept
 	{
 #if ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return vmls_s32 (sv, mv1, mv2);
+		return vmlsq_s32 (sv, mv1, mv2);
 #else
 		return subtractvi (sv, multiplyvi (mv1, mv2));
 #endif
@@ -992,7 +1018,7 @@ namespace dseed
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		float32x2_t temp = vmul_f32 (vget_low_f32 (v1), vget_low_f32 (v2));
 		temp = vadd_f32 (temp, temp);
-		return temp;
+		return vcombine_f32 (temp, temp);
 #else
 		return vectorf ((v1.x () * v2.x ()) + (v1.y () * v2.y ()));
 #endif
@@ -1002,7 +1028,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_dp_ps (v, _mm_set1_ps (s), 0x3f);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return dot2 (v, float4 (s));
+		return dot2 (v, vectorf (s));
 #else
 		return vectorf ((v.x () * s) + (v.y () * s));
 #endif
@@ -1015,7 +1041,8 @@ namespace dseed
 		float32x4_t temp = vmulq_f32 (v1, v2);
 		float32x2_t tv1 = vpadd_f32 (vget_low_f32 (temp), vget_low_f32 (temp));
 		float32x2_t tv2 = vdup_lane_f32 (vget_high_f32 (temp), 0);
-		return tv1 = vadd_f32 (tv1, tv2);
+		tv1 = vadd_f32 (tv1, tv2);
+		return vcombine_f32 (tv1, tv1);
 #else
 		return vectorf ((v1.x () * v2.x ()) + (v1.y () * v2.y ()) + (v1.z () * v2.z ()));
 #endif
@@ -1025,7 +1052,7 @@ namespace dseed
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 		return _mm_dp_ps (v, _mm_set1_ps (s), 0x7f);
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
-		return dot3 (v, float3 (s));
+		return dot3 (v, vectorf (s, s, s, 0));
 #else
 		return vectorf ((v.x () * s) + (v.y () * s) + (v.z () * s));
 #endif
@@ -1040,7 +1067,7 @@ namespace dseed
 		float32x2_t tv2 = vget_high_f32 (temp);
 		tv1 = vadd_f32 (tv1, tv2);
 		tv1 = vpadd_f32 (tv1, tv1);
-		return tv1;
+		return vcombine_f32 (tv1, tv1);
 #else
 		return vectorf ((v1.x () * v2.x ()) + (v1.y () * v2.y ()) + (v1.z () * v2.z ()) + (v1.w () * v2.w ()));
 #endif

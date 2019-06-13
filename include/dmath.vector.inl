@@ -268,7 +268,7 @@ namespace dseed
 		vectorf num = length_squared3 (vector);
 		vector = (num < 0.0001f)
 			? (vector = -camForward)
-			: float3 (vector * rsqrtvf (num));
+			: (vector * rsqrtvf (num));
 
 		vector3 = normalize3 (cross3 (camUp, vector));
 		vector2 = cross3 (vector, vector3);
