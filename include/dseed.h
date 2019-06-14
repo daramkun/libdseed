@@ -513,4 +513,17 @@ namespace dseed
 	void path_combine (const char* path1, const char* path2, char* ret, size_t retsize);
 }
 
+namespace dseed
+{
+	class DSEEDEXP blob : public object
+	{
+	public:
+		virtual void* blob_pointer () = 0;
+		virtual size_t blob_length () = 0;
+	};
+
+	DSEEDEXP error_t create_memoryblob (size_t length, blob** blob);
+	DSEEDEXP error_t create_bufferblob (void* buffer, size_t length, bool copy, blob** blob);
+}
+
 #endif

@@ -44,6 +44,7 @@ SET ( DSEED_BUILD_FILES
 	src/dseed.string.cpp
 	src/dseed.stream.cpp
 	src/dseed.math.cpp
+	src/dseed.blob.cpp
 
 	src/dmath.cpp
 )
