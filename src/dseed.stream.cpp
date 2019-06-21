@@ -134,8 +134,8 @@ public:
 	}
 	virtual size_t write (const void* data, size_t length) override
 	{
-		if (_position + length < _buffer.size ())
-			length = _buffer.size () - _position;
+		if (_position + length > _buffer.size ())
+			_buffer.resize (_position + length);
 		if (length == 0)
 			return 0;
 
@@ -155,7 +155,7 @@ public:
 		}
 
 		if (offset < 0) offset = 0;
-		if (offset > _buffer.size ()) offset = _buffer.size ();
+		if (offset > _buffer.size ()) _buffer.resize (offset);
 
 		_position = offset;
 
