@@ -508,9 +508,36 @@ namespace dseed
 	};
 
 	DSEEDEXP error_t create_memorystream (void* buffer, size_t length, stream** stream);
+	DSEEDEXP error_t create_variable_memorystream (stream** stream);
 	DSEEDEXP error_t create_native_filestream (const char* path, bool create, stream** stream);
 
-	void path_combine (const char* path1, const char* path2, char* ret, size_t retsize);
+	DSEEDEXP void path_combine (const char* path1, const char* path2, char* ret, size_t retsize);
+	inline std::string path_combine (const std::string& path1, const std::string& path2)
+	{
+		char temp[512];
+		path_combine (path1.c_str (), path2.c_str (), temp, 512);
+		return temp;
+	}
+
+	class DSEEDEXP filesystem : public object
+	{
+	public:
+		virtual error_t create_directory (const char* path) PURE;
+		virtual error_t create_file (const char* path, bool create, stream** stream) PURE;
+		virtual error_t delete_file (const char* path) PURE;
+
+		virtual bool file_exists (const char* path) PURE;
+		virtual bool directory_exists (const char* path) PURE;
+	};
+
+	enum DSEEDEXP nativefilesystem_t : int32_t
+	{
+		nativefilesystem_documents,
+		nativefilesystem_assets,
+		nativefilesystem_temporary,
+	};
+
+	DSEEDEXP error_t create_native_filesystem (nativefilesystem_t fst, filesystem** fileSystem);
 }
 
 namespace dseed

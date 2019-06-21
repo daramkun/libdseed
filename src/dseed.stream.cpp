@@ -2,6 +2,7 @@
 #include <dseed.h>
 
 #include <cstring>
+#include <vector>
 
 class __memorystream : public dseed::stream
 {
@@ -31,7 +32,8 @@ public:
 		if (length == 0)
 			return 0;
 
-		memcpy (buffer, _buffer, length);
+		memcpy (buffer, ((const uint8_t*)_buffer) + _position, length);
+		_position += length;
 
 		return length;
 	}
@@ -42,7 +44,8 @@ public:
 		if (length == 0)
 			return 0;
 
-		memcpy (_buffer, data, length);
+		memcpy (_buffer, ((const uint8_t*)_buffer) + _position, length);
+		_position += length;
 
 		return length;
 	}
@@ -94,6 +97,97 @@ dseed::error_t dseed::create_memorystream (void* buffer, size_t length, stream**
 	if (buffer == nullptr || length <= 0 || stream == nullptr)
 		return dseed::error_invalid_args;
 	*stream = new __memorystream (buffer, length);
+	if (*stream == nullptr)
+		return dseed::error_out_of_memory;
+	return dseed::error_good;
+}
+
+class __variable_memorystream : public dseed::stream
+{
+public:
+	__variable_memorystream ()
+		: _refCount (1), _position (0)
+	{ }
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual size_t read (void* buffer, size_t length) override
+	{
+		if (_position + length < _buffer.size ())
+			length = _buffer.size () - _position;
+		if (length == 0)
+			return 0;
+
+		memcpy (buffer, _buffer.data () + _position, length);
+		_position += length;
+
+		return length;
+	}
+	virtual size_t write (const void* data, size_t length) override
+	{
+		if (_position + length < _buffer.size ())
+			length = _buffer.size () - _position;
+		if (length == 0)
+			return 0;
+
+		memcpy (_buffer.data () + _position, data, length);
+		_position += length;
+
+		return length;
+	}
+	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	{
+		switch (origin)
+		{
+		case dseed::seekorigin_begin: break;
+		case dseed::seekorigin_current: offset += _position; break;
+		case dseed::seekorigin_end: offset = _buffer.size () - offset; break;
+		default: return false;
+		}
+
+		if (offset < 0) offset = 0;
+		if (offset > _buffer.size ()) offset = _buffer.size ();
+
+		_position = offset;
+
+		return true;
+	}
+
+	virtual void flush () override { }
+	virtual dseed::error_t set_length (size_t length) override
+	{
+		seek (dseed::seekorigin_begin, length);
+		_buffer.resize (length);
+		return dseed::error_good;
+	}
+
+public:
+	virtual size_t position () override { return _position; }
+	virtual size_t length () override { return _buffer.size (); }
+
+public:
+	virtual bool readable () override { return true; }
+	virtual bool writable () override { return true; }
+	virtual bool seekable () override { return true; }
+
+private:
+	std::atomic<int32_t> _refCount;
+	std::vector<uint8_t> _buffer;
+	size_t _position;
+};
+
+dseed::error_t dseed::create_variable_memorystream (stream** stream)
+{
+	*stream = new __variable_memorystream ();
 	if (*stream == nullptr)
 		return dseed::error_out_of_memory;
 	return dseed::error_good;
@@ -312,7 +406,7 @@ dseed::error_t dseed::create_native_filestream (const char* path, bool create, s
 }
 
 #include <sstream>
-void path_combine (const char* path1, const char* path2, char* ret, size_t retsize)
+void dseed::path_combine (const char* path1, const char* path2, char* ret, size_t retsize)
 {
 	std::stringstream ss;
 	ss << path1;
@@ -327,4 +421,201 @@ void path_combine (const char* path1, const char* path2, char* ret, size_t retsi
 
 	auto retstr = ss.str ();
 	memcpy (ret, retstr.c_str (), min (retsize, retstr.length () + 1) * sizeof (char));
+}
+
+#if PLATFORM_MICROSOFT
+#	include <Shlwapi.h>
+#	include <ShlObj.h>
+#	include <atlconv.h>
+#	pragma comment ( lib, "Shlwapi.lib" )
+#endif
+#include <filesystem>
+
+std::string ____GetDocumentsDirectory ()
+{
+#if PLATFORM_WINDOWS
+	wchar_t path[MAX_PATH];
+	HRESULT result = SHGetFolderPathW (NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, path);
+
+	if (PathCombineW (path, path, L"My Games") == nullptr)
+		return nullptr;
+
+	wchar_t filename[1024];
+	wchar_t* shortname;
+	GetModuleFileNameW (GetModuleHandle (nullptr), filename, 1024);
+	shortname = PathFindFileNameW (filename);
+	if (PathCombineW (path, path, shortname) == nullptr)
+		return std::string ("");
+
+	USES_CONVERSION;
+	return std::string (W2A (path));
+#elif PLATFORM_UWP
+	wchar_t path[MAX_PATH];
+	wcscat_s (path, MAX_PATH, Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data ());
+	USES_CONVERSION;
+	return W2A (path);
+#elif PLATFORM_APPLE
+	return [[[[ NSFileManager defaultManager ]URLsForDirectory:NSDocumentDirectory inDomains : NSUserDomainMask] lastObject] .absoluteString UTF8String] ;
+#elif PLATFORM_ANDROID
+
+#elif PLATFORM_UNIX
+
+#else
+	return "";
+#endif
+}
+
+std::string ____GetAssetsDirectory ()
+{
+#if PLATFORM_WINDOWS
+	wchar_t temp[MAX_PATH];
+	GetModuleFileNameW (GetModuleHandle (nullptr), temp, MAX_PATH);
+	PathRemoveFileSpecW (temp);
+	USES_CONVERSION;
+	return std::string (W2A (temp));
+#elif PLATFORM_UWP
+	wchar_t path[MAX_PATH + 1] = { 0, };
+	wcscat_s (path, MAX_PATH, Windows::ApplicationModel::Package::Current->InstalledLocation->Path->Data ());
+	if (path[wcslen (path) - 1] != KB_PATH_SEPARATOR)
+	{
+		size_t len = wcslen (path);
+		path[len] = KB_PATH_SEPARATOR;
+		path[len + 1] = '\0';
+	}
+	//wcscat_s ( path, MAX_PATH, L"Assets\\" );
+	USES_CONVERSION;
+	return W2A (path);
+#elif PLATFORM_APPLE
+	CFBundleRef mainBundle = CFBundleGetMainBundle ();
+	CFURLRef resourceURL = CFBundleCopyResourcesDirectoryURL (mainBundle);
+	char path[4096];
+	if (!CFURLGetFileSystemRepresentation (resourceURL, true, (UInt8*)path, 4096)) {
+		CFRelease (resourceURL);
+		return nullptr;
+	}
+	CFRelease (resourceURL);
+
+	return path;
+#elif PLATFORM_ANDROID
+
+#elif PLATFORM_UNIX
+
+#else
+	return "";
+#endif
+}
+
+std::string ____GetTemporaryDirectory ()
+{
+#if PLATFORM_WINDOWS
+	wchar_t path[MAX_PATH];
+	GetTempPathW (MAX_PATH, path);
+	USES_CONVERSION;
+	return std::string (W2A (path));
+#elif PLATFORM_UWP
+	wchar_t path[MAX_PATH + 1];
+	wcscat_s (path, MAX_PATH, Windows::Storage::ApplicationData::Current->TemporaryFolder->Path->Data ());
+	USES_CONVERSION;
+	return W2A (path);
+#elif PLATFORM_MACOS
+	return getenv ("TMPDIR");
+#elif PLATFORM_IOS
+	return[NSTemporaryDirectory () UTF8String];
+#elif PLATFORM_ANDROID
+
+#elif PLATFORM_UNIX
+	return return pathCombine (getenv ("TMPDIR"), getprogname ());
+#else
+	return "";
+#endif
+}
+
+class __nativefilesystem : public dseed::filesystem
+{
+public:
+	__nativefilesystem (dseed::nativefilesystem_t fst)
+		: _refCount (1), _fst (fst)
+	{
+		switch (fst)
+		{
+		case dseed::nativefilesystem_documents:
+			_baseDir = ____GetDocumentsDirectory ();
+			break;
+		case dseed::nativefilesystem_assets:
+			_baseDir = ____GetAssetsDirectory ();
+			break;
+		case dseed::nativefilesystem_temporary:
+			_baseDir = ____GetTemporaryDirectory ();
+			break;
+		}
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t create_directory (const char* path) override
+	{
+		if (_fst == dseed::nativefilesystem_assets)
+			return dseed::error_invalid_op;
+
+		std::string fullPath = dseed::path_combine (_baseDir, path);
+		return std::filesystem::create_directory (fullPath) ? dseed::error_good : dseed::error_fail;
+	}
+	virtual dseed::error_t create_file (const char* path, bool create, dseed::stream** stream) override
+	{
+		if (_fst == dseed::nativefilesystem_assets && create)
+			return dseed::error_invalid_op;
+		if (!create && !file_exists (path))
+			return dseed::error_file_not_found;
+
+		std::string fullPath = dseed::path_combine (_baseDir, path);
+
+		dseed::create_native_filestream (fullPath.c_str (), create, stream);
+
+		if (*stream == nullptr)
+			return dseed::error_out_of_memory;
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t delete_file (const char* path) override
+	{
+		if (_fst == dseed::nativefilesystem_assets)
+			return dseed::error_invalid_op;
+
+		std::string fullPath = dseed::path_combine (_baseDir, path);
+		return std::filesystem::remove (fullPath) ? dseed::error_good : dseed::error_fail;
+	}
+
+	virtual bool file_exists (const char* path) override
+	{
+		std::string fullPath = dseed::path_combine (_baseDir, path);
+		return std::filesystem::exists (fullPath)
+			&& !std::filesystem::is_directory (fullPath);
+	}
+	virtual bool directory_exists (const char* path) override
+	{
+		std::string fullPath = dseed::path_combine (_baseDir, path);
+		return std::filesystem::is_directory (fullPath);
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	dseed::nativefilesystem_t _fst;
+	std::string _baseDir;
+};
+
+dseed::error_t dseed::create_native_filesystem (nativefilesystem_t fst, filesystem** fileSystem)
+{
+	*fileSystem = new __nativefilesystem (fst);
+	if (*fileSystem == nullptr)
+		return dseed::error_out_of_memory;
+	return dseed::error_good;
 }
