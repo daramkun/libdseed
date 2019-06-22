@@ -508,7 +508,7 @@ namespace dseed
 	};
 
 	DSEEDEXP error_t create_memorystream (void* buffer, size_t length, stream** stream);
-	DSEEDEXP error_t create_variable_memorystream (stream** stream);
+	DSEEDEXP error_t create_variable_memorystream (stream** stream, bool remove_after_read = false);
 	DSEEDEXP error_t create_native_filestream (const char* path, bool create, stream** stream);
 
 	DSEEDEXP void path_combine (const char* path1, const char* path2, char* ret, size_t retsize);

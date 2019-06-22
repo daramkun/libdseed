@@ -184,10 +184,82 @@ private:
 	std::vector<uint8_t> _buffer;
 	size_t _position;
 };
-
-dseed::error_t dseed::create_variable_memorystream (stream** stream)
+class __variable_memorystream_remove_after_read : public dseed::stream
 {
-	*stream = new __variable_memorystream ();
+public:
+	__variable_memorystream_remove_after_read ()
+		: _refCount (1), _length (0)
+	{
+		_buffer.resize (48000 * 2 * 2);
+		_tempBuffer.resize (48000 * 2 * 2);
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual size_t read (void* buffer, size_t length) override
+	{
+		if (length > _length)
+			length = _length;
+		memcpy (buffer, _buffer.data (), (size_t)length);
+		memcpy (_tempBuffer.data (), _buffer.data () + length, (size_t)_length - length);
+
+		_buffer.swap (_tempBuffer);
+
+		_length -= length;
+		return length;
+	}
+	virtual size_t write (const void* data, size_t length) override
+	{
+		int64_t tempLength = _length;
+		set_length (_length + length);
+		memcpy (_buffer.data () + tempLength, data, (size_t)length);
+		return length;
+	}
+	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	{
+		return false;
+	}
+	virtual void flush () override
+	{
+	}
+	virtual dseed::error_t set_length (size_t length) override
+	{
+		if (_buffer.size () < length)
+		{
+			int64_t tempLength = _length;
+			_buffer.resize ((length + 24) / 8 * 8);
+			_tempBuffer.resize (_buffer.size ());
+		}
+		_length = length;
+		return dseed::error_good;
+	}
+	virtual size_t position () override { return 0; }
+	virtual size_t length () override { return _length; }
+
+public:
+	virtual bool readable () override { return true; }
+	virtual bool writable () override { return true; }
+	virtual bool seekable () override { return false; }
+
+private:
+	std::atomic<int32_t> _refCount;
+	std::vector<uint8_t> _buffer, _tempBuffer;
+	size_t _length;
+};
+
+dseed::error_t dseed::create_variable_memorystream (stream** stream, bool remove_after_read)
+{
+	if (!remove_after_read) *stream = new __variable_memorystream ();
+	else *stream = new __variable_memorystream_remove_after_read ();
 	if (*stream == nullptr)
 		return dseed::error_out_of_memory;
 	return dseed::error_good;
