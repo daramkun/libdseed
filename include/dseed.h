@@ -1,4 +1,4 @@
-#ifndef __DSEED_H__
+﻿#ifndef __DSEED_H__
 #define __DSEED_H__
 
 #include <atomic>
@@ -205,21 +205,156 @@ namespace dseed
 	constexpr uint64_t uint64_max = ULLONG_MAX;
 	constexpr uint64_t uint64_min = 0;
 
+#if COMPILER_MSVC
+#	pragma pack (push, 1)
+#else
+#	pragma pack (1)
+#endif
+	struct int24_t
+	{
+		uint8_t value[3];
+
+		int24_t () = default;
+		inline int24_t (int32_t v) { memcpy (value, &v, 3); }
+		inline operator int32_t () const
+		{
+			return ((value[2] & 0x80) << 24) >> 7
+				| (value[2] << 16) | (value[1] << 8) | value[0];
+		}
+	};
+	struct uint24_t
+	{
+		uint8_t value[3];
+
+		uint24_t () = default;
+		inline uint24_t (uint32_t v) { memcpy (value, &v, 3); }
+		inline operator uint32_t () const
+		{
+			return (value[2] << 16) | (value[1] << 8) | value[0];
+		}
+	};
+#if COMPILER_MSVC
+#	pragma pack (pop)
+#else
+#	pragma pack ()
+#endif
+
+	constexpr int32_t int24_max = 8388607;
+	constexpr int32_t int24_min = -8388608;
+	constexpr uint32_t uint24_max = 16777215;
+	constexpr uint32_t uint24_min = 0;
+
 	using single = float;
 
-	constexpr single single_max = FLT_MAX;
-	constexpr single single_min = FLT_MIN;
-	constexpr single single_positive_infinite = INFINITY;
-	constexpr single single_negative_infinite = -INFINITY;
+	constexpr single single_positive_max = FLT_MAX;
+	constexpr single single_positive_min = FLT_MIN;
+	constexpr single single_negative_max = -FLT_MAX;
+	constexpr single single_negative_min = -FLT_MIN;
+	constexpr single single_positive_infinity = INFINITY;
+	constexpr single single_negative_infinity = -INFINITY;
 	constexpr single single_epsilon = FLT_EPSILON;
 	constexpr single single_nan = NAN;
 
-	constexpr double double_max = DBL_MAX;
-	constexpr double double_min = DBL_MIN;
-	constexpr double double_positive_infinite = HUGE_VAL;
-	constexpr double double_negative_infinite = -HUGE_VAL;
+	constexpr double double_positive_max = DBL_MAX;
+	constexpr double double_positive_min = DBL_MIN;
+	constexpr double double_negative_max = -DBL_MAX;
+	constexpr double double_negative_min = -DBL_MIN;
+	constexpr double double_positive_infinity = HUGE_VAL;
+	constexpr double double_negative_infinity = -HUGE_VAL;
 	constexpr double double_epsilon = DBL_EPSILON;
 	constexpr double double_nan = HUGE_VAL * 0.0;
+
+#if ARCH_ARMSET && (COMPILER_GCC || COMPILER_CLANG)
+	using half = __fp16;
+#else
+#	if COMPILER_MSVC
+#		pragma pack (push, 1)
+#	else
+#		pragma pack (1)
+#	endif
+	struct half
+	{
+		uint16_t word;
+
+		half () = default;
+		inline half (float v)
+		{
+			if (fabsf (v) <= single_epsilon)
+			{
+				word = 0;
+				return;
+			}
+
+			uint32_t& i = *((uint32_t*)& v);
+
+			int sign = (i >> 16) & 0x8000;
+			int exp = ((i >> 23) & 0xff) - (0x7f - 0x0f);
+			int frac = i & 0x007fffff;
+
+			if (exp < 31)
+			{
+				word = 0x7e00;
+				return;
+			}
+			else if (exp <= 0)
+			{
+				word = sign;
+				return;
+			}
+
+			word = sign | (exp << 10) | frac;
+		}
+		inline operator float () const
+		{
+			int sign = (word >> 15) & 0x1;
+			int exp = (word >> 10) & 0x1f;
+			int frac = word & 0x3ff;
+
+			if (exp == 0)
+			{
+				if (frac)
+				{
+					exp = 0x70;
+					frac <<= 1;
+					while ((frac & 0x0400) == 0)
+					{
+						frac <<= 1;
+						exp -= 1;
+					}
+					frac &= 0x3ff;
+					frac <<= 13;
+				}
+			}
+			else if (exp == 0x1f)
+			{
+				exp = 0xff;
+				if (frac != 0)
+					frac = (frac << 13) | 0x1fff;
+			}
+			else
+			{
+				exp += 0x70;
+				frac <<= 13;
+			}
+
+			uint32_t ret = (sign << 31) | (exp << 23) | frac;
+
+			return *((float*)& ret);
+		}
+	};
+#	if COMPILER_MSVC
+#		pragma pack (pop)
+#	else
+#		pragma pack ()
+#	endif
+
+	constexpr uint16_t half_max = 0x7bff;
+	constexpr uint16_t half_min = 0x0001;
+	constexpr uint16_t half_positive_infinity = 0x7c00;
+	constexpr uint16_t half_negative_infinity = 0xfc00;
+	constexpr uint16_t half_epsilon = 0x1400;
+	constexpr uint16_t half_nan = 0x7e00;
+#endif
 
 	constexpr single pi = 3.14159265358979323846f;
 	constexpr single pi2 = pi * 2;
