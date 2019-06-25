@@ -348,8 +348,10 @@ namespace dseed
 #		pragma pack ()
 #	endif
 
-	constexpr uint16_t half_max = 0x7bff;
-	constexpr uint16_t half_min = 0x0001;
+	constexpr uint16_t half_positive_max = 0x7bff;
+	constexpr uint16_t half_positive_min = 0x0001;
+	constexpr uint16_t half_negative_max = 0xfbff;
+	constexpr uint16_t half_negative_min = 0x8001;
 	constexpr uint16_t half_positive_infinity = 0x7c00;
 	constexpr uint16_t half_negative_infinity = 0xfc00;
 	constexpr uint16_t half_epsilon = 0x1400;
