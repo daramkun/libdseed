@@ -39,6 +39,7 @@ ENDIF ()
 
 SET ( DSEED_BUILD_FILES 
     src/dseed.cpp
+	src/dseed.lock.cpp
 	src/dseed.geometry.cpp
 	src/dseed.time.cpp
 	src/dseed.string.cpp

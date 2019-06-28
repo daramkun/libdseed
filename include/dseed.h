@@ -7,6 +7,7 @@
 #include <climits>
 #include <cfloat>
 #include <cmath>
+#include <functional>
 using namespace std::string_literals;
 
 #define COMPILER_MSVC										defined ( _MSC_VER )
@@ -185,6 +186,31 @@ namespace dseed
 
 namespace dseed
 {
+	class DSEEDEXP threadsyncer : public object
+	{
+	public:
+		virtual void lock_exclusive () = 0;
+		virtual void lock_shared () = 0;
+
+	public:
+		virtual bool try_lock_exclusive () = 0;
+		virtual bool try_lock_shared () = 0;
+
+	public:
+		virtual void unlock_exclusive () = 0;
+		virtual void unlock_shared () = 0;
+
+	public:
+		virtual void do_exclusive (std::function<void (void *)> func, void* user_data);
+		virtual void do_shared (std::function<void (void*)> func, void* user_data);
+	};
+
+	DSEEDEXP error_t create_mutex (threadsyncer** ts);
+	DSEEDEXP error_t create_spinlock (threadsyncer** ts);
+}
+
+namespace dseed
+{
 	constexpr int8_t int8_max = CHAR_MAX;
 	constexpr int8_t int8_min = CHAR_MIN;
 	constexpr uint8_t uint8_max = UCHAR_MAX;
@@ -213,25 +239,16 @@ namespace dseed
 	struct int24_t
 	{
 		uint8_t value[3];
-
 		int24_t () = default;
-		inline int24_t (int32_t v) { memcpy (value, &v, 3); }
-		inline operator int32_t () const
-		{
-			return ((value[2] & 0x80) << 24) >> 7
-				| (value[2] << 16) | (value[1] << 8) | value[0];
-		}
+		int24_t (int32_t v) noexcept;
+		operator int32_t () const noexcept;
 	};
 	struct uint24_t
 	{
 		uint8_t value[3];
-
 		uint24_t () = default;
-		inline uint24_t (uint32_t v) { memcpy (value, &v, 3); }
-		inline operator uint32_t () const
-		{
-			return (value[2] << 16) | (value[1] << 8) | value[0];
-		}
+		uint24_t (uint32_t v) noexcept;
+		operator uint32_t () const noexcept;
 	};
 #if COMPILER_MSVC
 #	pragma pack (pop)
@@ -275,72 +292,9 @@ namespace dseed
 	struct half
 	{
 		uint16_t word;
-
 		half () = default;
-		inline half (float v)
-		{
-			if (fabsf (v) <= single_epsilon)
-			{
-				word = 0;
-				return;
-			}
-
-			uint32_t& i = *((uint32_t*)& v);
-
-			int sign = (i >> 16) & 0x8000;
-			int exp = ((i >> 23) & 0xff) - (0x7f - 0x0f);
-			int frac = i & 0x007fffff;
-
-			if (exp < 31)
-			{
-				word = 0x7e00;
-				return;
-			}
-			else if (exp <= 0)
-			{
-				word = sign;
-				return;
-			}
-
-			word = sign | (exp << 10) | frac;
-		}
-		inline operator float () const
-		{
-			int sign = (word >> 15) & 0x1;
-			int exp = (word >> 10) & 0x1f;
-			int frac = word & 0x3ff;
-
-			if (exp == 0)
-			{
-				if (frac)
-				{
-					exp = 0x70;
-					frac <<= 1;
-					while ((frac & 0x0400) == 0)
-					{
-						frac <<= 1;
-						exp -= 1;
-					}
-					frac &= 0x3ff;
-					frac <<= 13;
-				}
-			}
-			else if (exp == 0x1f)
-			{
-				exp = 0xff;
-				if (frac != 0)
-					frac = (frac << 13) | 0x1fff;
-			}
-			else
-			{
-				exp += 0x70;
-				frac <<= 13;
-			}
-
-			uint32_t ret = (sign << 31) | (exp << 23) | frac;
-
-			return *((float*)& ret);
-		}
+		half (float v);
+		operator float () const;
 	};
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -373,21 +327,18 @@ namespace dseed
 	template<typename T>
 	inline T maximum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
 
-	constexpr int gcd (int a, int b)
-	{
-		return (b == 0) ? a : gcd (b, a % b);
-	}
+	constexpr int gcd (int a, int b) { return (b == 0) ? a : gcd (b, a % b); }
 
 	struct DSEEDEXP fraction
 	{
 		int32_t numerator, denominator;
 
 		fraction () = default;
-		fraction (int32_t numerator);
-		fraction (int32_t numerator, int32_t denominator);
-		fraction (double fp);
+		fraction (int32_t numerator) noexcept;
+		fraction (int32_t numerator, int32_t denominator) noexcept;
+		fraction (double fp) noexcept;
 
-		operator double () { return numerator / (double)denominator; }
+		operator double () noexcept;
 	};
 }
 
