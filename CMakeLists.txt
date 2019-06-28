@@ -48,6 +48,8 @@ SET ( DSEED_BUILD_FILES
 	src/dseed.blob.cpp
 
 	src/dmath.cpp
+
+	src/dcolor.cpp
 )
 
 IF ( NOT DSEED_STATIC_BUILD )

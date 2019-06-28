@@ -6,6 +6,5 @@
 #include <dmath.simd.inl>
 #include <dmath.vector.inl>
 #include <dmath.collision.inl>
-#include <dmath.color.inl>
 
 #endif

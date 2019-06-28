@@ -72,15 +72,15 @@ dseed::timespan_t dseed::timespan_t::from_minutes (double minutes) noexcept { re
 dseed::timespan_t dseed::timespan_t::from_hours (double hours) noexcept { return (int64_t)(hours * MILLISECS_PER_HOUR * TICKS_PER_MILLISEC); }
 dseed::timespan_t dseed::timespan_t::from_days (double days) noexcept { return (int64_t)(days * MILLISECS_PER_DAY * TICKS_PER_MILLISEC); }
 
-dseed::frame_skipper::frame_skipper (int32_t framerate)
+dseed::frameskipper::frameskipper (int32_t framerate)
 	: _recommend_framerate (framerate), _framerate_checktime (0), _framerate (0), _calculated_framerate (0)
 {
 	_last_time = _cur_time = timespan_t::current_ticks ();
 }
-bool dseed::frame_skipper::is_avaliable () noexcept { return ((_cur_time = timespan_t::current_ticks ()) - _last_time) >= (1 / _recommend_framerate); }
-void dseed::frame_skipper::reset_skipper_time () noexcept { _last_time = _cur_time; }
-dseed::timespan_t dseed::frame_skipper::delta_time () const noexcept { return _cur_time - _last_time; }
-void dseed::frame_skipper::calculate () noexcept
+bool dseed::frameskipper::is_avaliable () noexcept { return ((_cur_time = timespan_t::current_ticks ()) - _last_time) >= (1 / _recommend_framerate); }
+void dseed::frameskipper::reset_skipper_time () noexcept { _last_time = _cur_time; }
+dseed::timespan_t dseed::frameskipper::delta_time () const noexcept { return _cur_time - _last_time; }
+void dseed::frameskipper::calculate () noexcept
 {
 	++_framerate;
 	_framerate_checktime += delta_time ();
@@ -91,7 +91,7 @@ void dseed::frame_skipper::calculate () noexcept
 		_framerate = 0;
 	}
 }
-dseed::timespan_t dseed::frame_skipper::calced_framerate () const noexcept { return _calculated_framerate; }
+dseed::timespan_t dseed::frameskipper::calced_framerate () const noexcept { return _calculated_framerate; }
 
 dseed::stopwatch::stopwatch () : _startedFrom (0), _isStarted (false) { }
 void dseed::stopwatch::start () noexcept { if (_isStarted) return; _startedFrom = timespan_t::current_ticks (); _isStarted = true; }

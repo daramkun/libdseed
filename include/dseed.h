@@ -523,10 +523,10 @@ namespace dseed
 		int64_t _ticks;
 	};
 
-	struct DSEEDEXP frame_skipper
+	struct DSEEDEXP frameskipper
 	{
 	public:
-		frame_skipper (int32_t framerate = 60);
+		frameskipper (int32_t framerate = 60);
 
 	public:
 		bool is_avaliable () noexcept;
