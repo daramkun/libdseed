@@ -236,14 +236,14 @@ namespace dseed
 #else
 #	pragma pack (1)
 #endif
-	struct int24_t
+	struct DSEEDEXP int24_t
 	{
 		uint8_t value[3];
 		int24_t () = default;
 		int24_t (int32_t v) noexcept;
 		operator int32_t () const noexcept;
 	};
-	struct uint24_t
+	struct DSEEDEXP uint24_t
 	{
 		uint8_t value[3];
 		uint24_t () = default;
@@ -289,7 +289,7 @@ namespace dseed
 #	else
 #		pragma pack (1)
 #	endif
-	struct half
+	struct DSEEDEXP half
 	{
 		uint16_t word;
 		half () = default;

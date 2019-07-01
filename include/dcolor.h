@@ -5,7 +5,106 @@
 #include <dmath.h>
 
 namespace dseed
-{
+{////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Pixel Format
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
+	enum DSEEDEXP pixelformat_t : int32_t
+	{
+		// Unknown Pixel Format
+		pixelformat_unknown = 0x00000000,
+
+		// 8-bit Grayscale Pixel Format
+		pixelformat_grayscale8 = 0x00010001,
+		// 32-bit Integer RGBA Pixel Format
+		pixelformat_rgba8888 = 0x00010104,
+		// 128-bit Floating-Point RGBA Pixel Format
+		pixelformat_rgbaf = 0x00010110,
+		// 24-bit RGB Pixel Format
+		pixelformat_rgb888 = 0x00010103,
+		// 32-bit Integer BGRA Pixel Format
+		pixelformat_bgra8888 = 0x00010204,
+		// 32-bit Integer BGRA Pixel Format
+		pixelformat_bgr888 = 0x00010203,
+		// 16-bit Integer BGRA Pixel Format
+		pixelformat_bgra4444 = 0x00010202,
+
+		// 16-bit Integer BGR Pixel Format(Legacy)
+		pixelformat_bgr565 = 0x00010302,
+
+		// 8-bit Indexed BGRA Pixel Format
+		pixelformat_bgra8888_indexed8 = 0x00020104,
+		// 8-bit Indexed BGR Pixel Format
+		pixelformat_bgr888_indexed8 = 0x00020103,
+
+		// BC1 Compressed Pixel Format
+		pixelformat_bc1 = 0x00100001, pixelformat_dxt1 = pixelformat_bc1,
+		// BC2 Compressed Pixel Format
+		pixelformat_bc2 = 0x00100002, pixelformat_dxt3 = pixelformat_bc2,
+		// BC3 Compressed Pixel Format
+		pixelformat_bc3 = 0x00100003, pixelformat_dxt5 = pixelformat_bc3,
+		// BC4 Compressed Pixel Format
+		pixelformat_bc4 = 0x00100004, pixelformat_ati1 = pixelformat_bc4,
+		// BC5 Compressed Pixel Format
+		pixelformat_bc5 = 0x00100005, pixelformat_ati2 = pixelformat_bc5,
+		// BC6 Compressed Pixel Format
+		pixelformat_bc6h = 0x00100006,
+		// BC7 Compressed Pixel Format
+		pixelformat_bc7 = 0x00100007,
+
+		// ETC Compressed Pixel Format
+		pixelformat_etc1 = 0x00110001,
+		// ETC2 Compressed Pixel Format
+		pixelformat_etc2 = 0x00110002,
+		// ETC2 with Alpha Compressed Pixel Format
+		pixelformat_etc2a = 0x00110102,
+		// ETC2 with Dedicated Alpha Compressed Pixel Format
+		pixelformat_etc2a8 = 0x00110103,
+
+		// PVRTC Compressed Pixel Formats
+		pixelformat_pvrtc_2bpp = 0x00120001,
+		pixelformat_pvrtc_2abpp = 0x00120101,
+		pixelformat_pvrtc_4bpp = 0x00120002,
+		pixelformat_pvrtc_4abpp = 0x00120102,
+		// PVRTC2 Compressed Pixel Formats
+		pixelformat_pvrtc2_2bpp = 0x00120003,
+		pixelformat_pvrtc2_4bpp = 0x00120004,
+
+		// ASTC Compressed Pixel Formats
+		pixelformat_astc_4x4 = 0x00130001,
+		pixelformat_astc_5x4 = 0x00130002,
+		pixelformat_astc_5x5 = 0x00130003,
+		pixelformat_astc_6x5 = 0x00130004,
+		pixelformat_astc_6x6 = 0x00130005,
+		pixelformat_astc_8x5 = 0x00130006,
+		pixelformat_astc_8x6 = 0x00130007,
+		pixelformat_astc_8x8 = 0x00130008,
+		pixelformat_astc_10x5 = 0x00130009,
+		pixelformat_astc_10x6 = 0x0013000a,
+		pixelformat_astc_10x8 = 0x0013000b,
+		pixelformat_astc_10x10 = 0x0013000c,
+		pixelformat_astc_12x10 = 0x0013000d,
+		pixelformat_astc_12x12 = 0x0013000e,
+	};
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Utility Procedures
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	// Get Stride value
+	DSEEDEXP size_t get_stride (dseed::pixelformat_t format, int32_t width) noexcept;
+	// Get Bitmap Plane size
+	DSEEDEXP size_t get_array_size (dseed::pixelformat_t format, int32_t width, int32_t height) noexcept;
+	// Get Total Bitmap Planes Buffer size
+	DSEEDEXP size_t get_total_buffer_size (dseed::pixelformat_t format, const dseed::size3i& size) noexcept;
+	// Get Mipmap Size
+	DSEEDEXP dseed::size3i get_mipmap_size (int mipLevel, const dseed::size3i& size, bool cubemap) noexcept;
+	// Get Maximum Mip-Levels
+	DSEEDEXP size_t get_maximum_mip_levels (const dseed::size3i& size, bool cubemap) noexcept;
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Red/Green/Blue Color Types
