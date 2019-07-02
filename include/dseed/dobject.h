@@ -3,24 +3,59 @@
 
 #include <dseed/dcommon.h>
 
+#include <memory>
+
 namespace dseed
 {
+	// Singleton Template Object
+	template<typename T>
+	class DSEEDEXP singleton
+	{
+	protected:
+		singleton () { }
+		virtual ~singleton () { }
+
+	public:
+		static T* instance () noexcept
+		{
+			if (_instance == nullptr)
+				_instance = new T;
+			return _instance;
+		}
+
+	private:
+		static std::shared_ptr<T> _instance;
+	};
+	template<typename T> DSEEDEXP std::shared_ptr<T> singleton<T>::_instance = nullptr;
+
+	// Native Object Wrapped Object
+	class DSEEDEXP wrapped
+	{
+	public:
+		virtual ~wrapped ();
+
+	public:
+		virtual error_t native_object (void** nativeObject) = 0;
+	};
+
+	// DSeed Base Reference Counting Object
 	class DSEEDEXP object
 	{
+	protected:
+		object ();
+
 	public:
 		virtual ~object ();
 
 	public:
 		virtual int32_t retain () = 0;
 		virtual int32_t release () = 0;
+
+	private:
+		char _signature[8];
 	};
 
-	class DSEEDEXP wrapped_object : public object
-	{
-	public:
-		virtual error_t native_object (void** nativeObject) = 0;
-	};
-
+	// Auto Reference Counting Container Object
 	template<typename T>
 	struct auto_object
 	{
@@ -29,7 +64,7 @@ namespace dseed
 		inline auto_object (T* obj)
 			: _ptr (obj)
 		{
-			static_assert (std::is_base_of<object, T>::value, "Not supported type.");
+			static_assert (std::is_base_of<dseed::object, T>::value, "Not supported type.");
 
 			if (_ptr)
 				_ptr->retain ();
@@ -82,7 +117,7 @@ namespace dseed
 		}
 
 	private:
-		object* _ptr;
+		dseed::object* _ptr;
 	};
 }
 

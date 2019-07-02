@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-dseed::object::~object ()
-{
+dseed::wrapped::~wrapped () { }
 
-}
+dseed::object::object () { memcpy (_signature, "DSEEDOBJ", 8); }
+dseed::object::~object () { }
