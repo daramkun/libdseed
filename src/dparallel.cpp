@@ -1,19 +1,5 @@
 #include <dseed.h>
 
-void dseed::threadsyncer::do_exclusive (std::function<void (void*)> func, void* user_data)
-{
-	lock_exclusive ();
-	func (user_data);
-	unlock_exclusive ();
-}
-
-void dseed::threadsyncer::do_shared (std::function<void (void*)> func, void* user_data)
-{
-	lock_shared ();
-	func (user_data);
-	unlock_shared ();
-}
-
 #include <mutex>
 #include <shared_mutex>
 
@@ -148,4 +134,91 @@ dseed::error_t dseed::create_spinlock (threadsyncer** ts)
 	if (*ts == nullptr)
 		return error_out_of_memory;
 	return error_good;
+}
+
+class __internal_threadpool : public dseed::threadpool
+{
+public:
+	__internal_threadpool (size_t maximum_threads)
+		: _refCount (1), _stop (false)
+	{
+		_workers.reserve (maximum_threads);
+		for (size_t i = 0; i < maximum_threads; ++i)
+			_workers.emplace_back ([this] {
+			for (;;)
+			{
+				std::tuple<dseed::threadpool_body, void*> task;
+				{
+					std::unique_lock<std::mutex> lock (this->_mutex);
+
+					this->_condition.wait (lock, [this] { return this->_stop || !this->_tasks.empty (); });
+					if (this->_stop || this->_tasks.empty ())
+						break;
+
+					task = std::move (this->_tasks.front ());
+					this->_tasks.pop ();
+				}
+
+				std::get<dseed::threadpool_body> (task)(std::get<void*> (task));
+			}
+				});
+	}
+	~__internal_threadpool ()
+	{
+		{
+			std::unique_lock<std::mutex> lock (_mutex);
+			_stop = true;
+		}
+		_condition.notify_all ();
+		for (std::thread& worker : _workers)
+			worker.join ();
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+	virtual void enqueue (dseed::threadpool_body body, void* user_data) override
+	{
+		std::unique_lock<std::mutex> lock (_mutex);
+		if (_stop)
+			throw std::runtime_error ("enqueue on stopped ThreadPool");
+		_tasks.emplace (std::tuple<dseed::threadpool_body, void*> (body, user_data));
+		_condition.notify_one ();
+	}
+
+public:
+	virtual void cancel_all () override
+	{
+		std::unique_lock<std::mutex> lock (_mutex);
+		while (!_tasks.empty ())
+			_tasks.pop ();
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+
+	std::vector<std::thread> _workers;
+	std::queue<std::tuple<dseed::threadpool_body, void*>> _tasks;
+
+	std::mutex _mutex;
+	std::condition_variable _condition;
+
+	bool _stop;
+};
+
+dseed::error_t dseed::create_threadpool (threadpool** pool, size_t maximum_threads)
+{
+	if (maximum_threads == 0)
+		maximum_threads = std::thread::hardware_concurrency ();
+	*pool = new __internal_threadpool (maximum_threads);
+	if (*pool == nullptr)
+		return dseed::error_out_of_memory;
+	return dseed::error_good;
 }

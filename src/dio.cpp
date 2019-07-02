@@ -442,7 +442,7 @@ dseed::error_t dseed::create_native_filestream (const char* path, bool create, s
 		return dseed::error_invalid_args;
 #if PLATFORM_WINDOWS
 	char16_t filename[256];
-	utf8toutf16 (path, filename, 256);
+	utf8_to_utf16 (path, filename, 256);
 	HANDLE file = CreateFile2 ((LPCWSTR)filename, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, create ? CREATE_ALWAYS : OPEN_EXISTING, nullptr);
 	if (file == INVALID_HANDLE_VALUE)
 	{
@@ -475,24 +475,6 @@ dseed::error_t dseed::create_native_filestream (const char* path, bool create, s
 	if (*stream == nullptr)
 		return dseed::error_out_of_memory;
 	return dseed::error_good;
-}
-
-#include <sstream>
-void dseed::path_combine (const char* path1, const char* path2, char* ret, size_t retsize)
-{
-	std::stringstream ss;
-	ss << path1;
-
-	size_t path1len = strlen (path1);
-
-	char lastword = path1[path1len - 1];
-	if (!(lastword == '/' || lastword == '\\'))
-		ss << PATH_SEPARATOR;
-
-	ss << path2;
-
-	auto retstr = ss.str ();
-	memcpy (ret, retstr.c_str (), min (retsize, retstr.length () + 1) * sizeof (char));
 }
 
 #if PLATFORM_MICROSOFT
@@ -690,4 +672,98 @@ dseed::error_t dseed::create_native_filesystem (nativefilesystem_t fst, filesyst
 	if (*fileSystem == nullptr)
 		return dseed::error_out_of_memory;
 	return dseed::error_good;
+}
+
+class __memblob : public dseed::blob
+{
+public:
+	__memblob (size_t length)
+		: _refCount (1), _memLength (length), _mem (length)
+	{ }
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual void* blob_pointer () override { return _mem.data (); }
+	virtual size_t blob_length () override { return _memLength; }
+
+private:
+	std::atomic<int32_t> _refCount;
+	std::vector<uint8_t> _mem;
+	size_t _memLength;
+};
+
+dseed::error_t dseed::create_memoryblob (size_t length, blob** blob)
+{
+	*blob = new __memblob (length);
+	if (*blob == nullptr)
+		return error_out_of_memory;
+	return error_good;
+}
+
+class __bufferblob : public dseed::blob
+{
+public:
+	__bufferblob (void* buffer, size_t length)
+		: _refCount (1), _length (length), _buf (buffer)
+	{ }
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual void* blob_pointer () override { return _buf; }
+	virtual size_t blob_length () override { return _length; }
+
+private:
+	std::atomic<int32_t> _refCount;
+	void* _buf;
+	size_t _length;
+};
+
+dseed::error_t dseed::create_bufferblob (void* buffer, size_t length, bool copy, dseed::blob** blob)
+{
+	if (!copy)
+	{
+		*blob = new __bufferblob (buffer, length);
+		if (*blob == nullptr)
+			return error_out_of_memory;
+	}
+	else
+	{
+		*blob = new __memblob (length);
+		if (*blob == nullptr)
+			return error_out_of_memory;
+		memcpy ((*blob)->blob_pointer (), buffer, length);
+	}
+	return error_good;
+}
+
+dseed::error_t dseed::create_streamblob (stream* stream, blob** blob)
+{
+	dseed::auto_object<dseed::blob> tempBlob;
+	if (dseed::failed (dseed::create_memoryblob (stream->length (), &tempBlob)))
+		return dseed::error_fail;
+
+	if (stream->read (tempBlob->blob_pointer (), tempBlob->blob_length ()) != tempBlob->blob_length ())
+		return dseed::error_io;
+
+	*blob = tempBlob.detach ();
+
+	return error_good;
 }

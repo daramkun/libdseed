@@ -1,10 +1,5 @@
 #include <dseed.h>
 
-dseed::object::~object ()
-{
-    
-}
-
 #if PLATFORM_WINDOWS
 #include <assert.h>
 BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

@@ -39,17 +39,16 @@ ENDIF ()
 
 SET ( DSEED_BUILD_FILES 
     src/dseed.cpp
-	src/dseed.lock.cpp
-	src/dseed.geometry.cpp
-	src/dseed.time.cpp
-	src/dseed.string.cpp
-	src/dseed.stream.cpp
-	src/dseed.math.cpp
-	src/dseed.blob.cpp
-
+	src/dobject.cpp
 	src/dmath.cpp
-
+	src/dgeometry.cpp
 	src/dcolor.cpp
+	src/dtime.cpp
+	src/dio.cpp
+	src/dparallel.cpp
+	src/dstring.cpp
+	src/dhid.cpp
+	src/ddiagnostics.cpp
 )
 
 IF ( NOT DSEED_STATIC_BUILD )

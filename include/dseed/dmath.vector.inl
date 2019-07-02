@@ -1,7 +1,7 @@
-#ifndef __DMATH_VECTOR_INL__
-#define __DMATH_VECTOR_INL__
+#ifndef __DSEED_DMATH_VECTOR_INL__
+#define __DSEED_DMATH_VECTOR_INL__
 
-#include <dmath.simd.inl>
+#include <dseed/dmath.simd.inl>
 
 namespace dseed
 {

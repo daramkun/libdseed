@@ -1,5 +1,5 @@
-#ifndef __DMATH_SIMD_INL__
-#define __DMATH_SIMD_INL__
+#ifndef __DSEED_DMATH_SIMD_INL__
+#define __DSEED_DMATH_SIMD_INL__
 
 #include <dseed.h>
 

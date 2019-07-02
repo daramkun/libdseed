@@ -1,8 +1,7 @@
-#ifndef __DCOLOR_H__
-#define __DCOLOR_H__
+#ifndef __DSEED_DCOLOR_H__
+#define __DSEED_DCOLOR_H__
 
 #include <dseed.h>
-#include <dmath.h>
 
 namespace dseed
 {////////////////////////////////////////////////////////////////////////////////////////

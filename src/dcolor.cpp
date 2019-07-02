@@ -1,4 +1,4 @@
-#include <dcolor.h>
+#include <dseed.h>
 
 size_t dseed::get_stride (dseed::pixelformat_t format, int32_t width) noexcept
 {
