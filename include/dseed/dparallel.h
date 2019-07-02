@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <execution>
 
+#include <thread>
 #include <mutex>
 #include <shared_mutex>
 
@@ -81,7 +82,8 @@ namespace dseed
 	};
 
 	// Thread-Pool
-	class threadpool
+	template<class TLock = mutex>
+	struct threadpool
 	{
 	public:
 		threadpool (size_t maximum_threads = 0)
@@ -95,7 +97,7 @@ namespace dseed
 					{
 						std::function<void ()> task;
 						{
-							std::unique_lock<std::mutex> lock (this->_mutex);
+							std::unique_lock<TLock> lock (this->_mutex);
 
 							this->_condition.wait (lock, [this] { return this->_stop || !this->_tasks.empty (); });
 							if (this->_stop || this->_tasks.empty ())
@@ -112,7 +114,7 @@ namespace dseed
 		~threadpool ()
 		{
 			{
-				std::unique_lock<std::mutex> lock (_mutex);
+				std::unique_lock<TLock> lock (_mutex);
 				_stop = true;
 			}
 			_condition.notify_all ();
@@ -132,7 +134,7 @@ namespace dseed
 
 			std::future<return_type> res = task->get_future ();
 			{
-				std::unique_lock<std::mutex> lock (queue_mutex);
+				std::unique_lock<TLock> lock (queue_mutex);
 
 				if (_stop)
 					throw std::runtime_error ("enqueue on stopped Thread-Pool");
@@ -146,7 +148,7 @@ namespace dseed
 	public:
 		void cancel_all ()
 		{
-			std::unique_lock<std::mutex> lock (_mutex);
+			std::unique_lock<TLock> lock (_mutex);
 			while (!_tasks.empty ())
 				_tasks.pop ();
 		}
@@ -155,10 +157,28 @@ namespace dseed
 		std::vector<std::thread> _workers;
 		std::queue<std::function<void ()>> _tasks;
 
-		std::mutex _mutex;
+		TLock _mutex;
 		std::condition_variable _condition;
 
 		bool _stop;
+	};
+
+	template<class TLock = mutex, size_t maximum_threads = 0>
+	class parallel
+	{
+	public:
+		parallel () : _threadpool (maximum_threads) { }
+
+	public:
+		template<class T>
+		void for_each (T start, T end, const std::function<void (T)>& body) noexcept
+		{
+			for (T i = start; i != end; ++i)
+				_threadpool.enqueue (body, i);
+		}
+
+	private:
+		threadpool<TLock> _threadpool;
 	};
 }
 
