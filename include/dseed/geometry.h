@@ -1,8 +1,5 @@
-#ifndef __DSEED_DGEOMETRY_H__
-#define __DSEED_DGEOMETRY_H__
-
-#include <dseed/dcommon.h>
-#include <dseed/dmath.h>
+#ifndef __DSEED_GEOMETRY_H__
+#define __DSEED_GEOMETRY_H__
 
 namespace dseed
 {

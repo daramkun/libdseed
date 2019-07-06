@@ -1,7 +1,6 @@
-#ifndef __DSEED_DSTRING_H__
-#define __DSEED_DSTRING_H__
+#ifndef __DSEED_STRING_H__
+#define __DSEED_STRING_H__
 
-#include <dseed/dcommon.h>
 #include <string>
 #include <vector>
 

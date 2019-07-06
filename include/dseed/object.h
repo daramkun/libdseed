@@ -1,7 +1,5 @@
-#ifndef __DSEED_DOBJECT_H__
-#define __DSEED_DOBJECT_H__
-
-#include <dseed/dcommon.h>
+#ifndef __DSEED_OBJECT_H__
+#define __DSEED_OBJECT_H__
 
 #include <memory>
 
@@ -26,7 +24,7 @@ namespace dseed
 	private:
 		static std::shared_ptr<T> _instance;
 	};
-	template<typename T> DSEEDEXP std::shared_ptr<T> singleton<T>::_instance = nullptr;
+	template<typename T> std::shared_ptr<T> singleton<T>::_instance = nullptr;
 
 	// Native Object Wrapped Object
 	class DSEEDEXP wrapped

@@ -1,5 +1,5 @@
-#ifndef __DSEED_DMATH_COLLISION_INL__
-#define __DSEED_DMATH_COLLISION_INL__
+#ifndef __DSEED_MATH_COLLISION_INL__
+#define __DSEED_MATH_COLLISION_INL__
 
 namespace dseed
 {

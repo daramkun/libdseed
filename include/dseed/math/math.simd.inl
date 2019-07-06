@@ -1,7 +1,5 @@
-#ifndef __DSEED_DMATH_SIMD_INL__
-#define __DSEED_DMATH_SIMD_INL__
-
-#include <dseed.h>
+#ifndef __DSEED_MATH_SIMD_INL__
+#define __DSEED_MATH_SIMD_INL__
 
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
 #	include <xmmintrin.h>									// SSE
@@ -19,6 +17,10 @@
 #include <cmath>
 #include <cassert>
 
+#if COMPILER_MSVC
+#	pragma warning (disable : 4556)
+#endif
+
 namespace dseed
 {
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -28,14 +30,14 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	// Shuffle Index
-	enum shuffle_t : uint32_t {
+	enum shuffle_t : uint8_t {
 		shuffle_ax1 = 0, shuffle_ay1 = 1, shuffle_az1 = 2, shuffle_aw1 = 3,
 		shuffle_bx2 = 0, shuffle_by2 = 1, shuffle_bz2 = 2, shuffle_bw2 = 3,
 		shuffle_ax2 = 4, shuffle_ay2 = 5, shuffle_az2 = 6, shuffle_aw2 = 7,
 		shuffle_bx1 = 4, shuffle_by1 = 5, shuffle_bz1 = 6, shuffle_bw1 = 7,
 	};
 	// Permute Index
-	enum permute_t : uint32_t {
+	enum permute_t : uint8_t {
 		permute_x = 0, permute_y = 1, permute_z = 2, permute_w = 3,
 	};
 
@@ -52,9 +54,9 @@ namespace dseed
 		inline vectorf (float s) : v (_mm_set1_ps (s)) { }
 		inline operator __m128 () const { return v; }
 		inline void store (float* vector) const { _mm_store_ps (vector, v); }
-		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectorf shuffle (const vectorf& v2) const { return _mm_shuffle_ps (v, v2.v, _MM_SHUFFLE (w, z, y, x)); }
-		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectorf permute () const
 		{
 #	if !defined ( NO_AVX )
@@ -73,7 +75,7 @@ namespace dseed
 		inline float w () const { return _mm_cvtss_f32 (splat_w ()); }
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 	private:
-		template<uint32_t x, uint32_t y>
+		template<uint8_t x, uint8_t y>
 		inline float32x2_t __getpart (const float32x4_t& v2) const
 		{
 			float32x2_t ret;
@@ -170,39 +172,39 @@ namespace dseed
 		inline vectori (int i) : v (_mm_set1_epi32 (i)) { }
 		inline operator __m128i () const { return v; }
 		inline void store (int* vector) const { _mm_store_si128 ((__m128i*)vector, v); }
-		template<int x, int y, int z, int w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectori shuffle (const vectori& v2) const
 		{
 			return _mm_castps_si128 (_mm_shuffle_ps (
 				_mm_castsi128_ps (v), _mm_castsi128_ps (v2.v), _MM_SHUFFLE (w, z, y, x)
 			));
 		}
-		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
+		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8>
 		inline vectori permute () const
 		{
 			const static __m128i shuffle = _mm_set_epi16 (s8, s7, s6, s5, s4, s3, s2, s1);
 			return _mm_shuffle_epi8 (v, shuffle);
 		}
-		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
-			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
+		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8,
+			uint8_t s9, uint8_t s10, uint8_t s11, uint8_t s12, uint8_t s13, uint8_t s14, uint8_t s15, uint8_t s16>
 			inline vectori permute () const
 		{
 			const static __m128i shuffle = _mm_set_epi8 (s16, s15, s14, s13, s12, s11, s10, s9, s8, s7, s6, s5, s4, s3, s2, s1);
 			return _mm_shuffle_epi8 (v, shuffle);
 		}
-		template<int x, int y, int z, int w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectori permute () const { return _mm_shuffle_epi32 (v, _MM_SHUFFLE (w, z, y, x)); }
 		inline vectori splat_x () const { return permute<0, 0, 0, 0> (); }
 		inline vectori splat_y () const { return permute<1, 1, 1, 1> (); }
 		inline vectori splat_z () const { return permute<2, 2, 2, 2> (); }
 		inline vectori splat_w () const { return permute<3, 3, 3, 3> (); }
-		inline int x () const { return _mm_cvtss_i32 (_mm_castsi128_ps (splat_x ())); }
-		inline int y () const { return _mm_cvtss_i32 (_mm_castsi128_ps (splat_y ())); }
-		inline int z () const { return _mm_cvtss_i32 (_mm_castsi128_ps (splat_z ())); }
-		inline int w () const { return _mm_cvtss_i32 (_mm_castsi128_ps (splat_w ())); }
+		inline int x () const { return _mm_cvtss_si32 (_mm_castsi128_ps (splat_x ())); }
+		inline int y () const { return _mm_cvtss_si32 (_mm_castsi128_ps (splat_y ())); }
+		inline int z () const { return _mm_cvtss_si32 (_mm_castsi128_ps (splat_z ())); }
+		inline int w () const { return _mm_cvtss_si32 (_mm_castsi128_ps (splat_w ())); }
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 	private:
-		template<int x, int y>
+		template<uint8_t x, uint8_t y>
 		inline int32x2_t __getpart (const float32x4_t& v2) const
 		{
 			int32x2_t ret;
@@ -242,16 +244,16 @@ namespace dseed
 		inline vectori (int i) : v (vmovq_n_s32 (i)) { }
 		inline operator int32x4_t () const { return v; }
 		inline void store (int* vector) const { vst1q_s32 (vector, v); }
-		template<int x, int y, int z, int w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectori shuffle (const vectori& v2) const
 		{
 			int32x2_t a = this->__getpart<x, y> (v2.v);
 			int32x2_t b = v2.__getpart<z, w> (v);
 			return vcombine_s32 (a, b);
 		}
-		template<int x, int y, int z, int w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectori permute () const { return shuffle<x, y, z, w> (*this); }
-		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
+		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8>
 		inline vectori permute () const
 		{
 			short* arr = reinterpret_cast<short*>(&v);
@@ -261,8 +263,8 @@ namespace dseed
 			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
 			return ret;
 		}
-		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
-			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
+		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8,
+			uint8_t s9, uint8_t s10, uint8_t s11, uint8_t s12, uint8_t s13, uint8_t s14, uint8_t s15, uint8_t s16>
 			inline vectori permute () const
 		{
 			char* arr = reinterpret_cast<char*>(&v);
@@ -297,13 +299,13 @@ namespace dseed
 		inline operator int* () { return v; }
 		inline operator const int* () const { return v; }
 		inline void store (int* vector) { memcpy (vector, v, sizeof (int) * 4); }
-		template<int x, int y, int z, int w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectori shuffle (const vectori& v2) const
 		{
 			return vectori ((x >= 0 && x <= 3) ? v[x] : v2.v[4 - x], (y >= 0 && y <= 3) ? v[y] : v2.v[4 - y],
 				(z >= 0 && z <= 3) ? v2.v[z] : v[4 - z], (w >= 0 && w <= 3) ? v2.v[w] : v[4 - w]);
 		}
-		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8>
+		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8>
 		inline vectori permute () const
 		{
 			auto arr = reinterpret_cast<const short*>(v);
@@ -313,8 +315,8 @@ namespace dseed
 			destarr[4] = arr[s5]; destarr[5] = arr[s6]; destarr[6] = arr[s7]; destarr[7] = arr[s8];
 			return ret;
 		}
-		template<int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8,
-			int s9, int s10, int s11, int s12, int s13, int s14, int s15, int s16>
+		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8,
+			uint8_t s9, uint8_t s10, uint8_t s11, uint8_t s12, uint8_t s13, uint8_t s14, uint8_t s15, uint8_t s16>
 			inline vectori permute () const
 		{
 			auto arr = reinterpret_cast<const char*>(v);
@@ -326,7 +328,7 @@ namespace dseed
 			destarr[12] = arr[s13]; destarr[13] = arr[s14]; destarr[14] = arr[s15]; destarr[15] = arr[s16];
 			return ret;
 		}
-		template<int x, int y, int z, int w>
+		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		inline vectori permute () const { return shuffle (*this, x, y, z, w); }
 		inline vectori splat_x () const { return vectori (v[0]); }
 		inline vectori splat_y () const { return vectori (v[1]); }
@@ -807,7 +809,8 @@ namespace dseed
 	inline vectori dividevi (const vectori& v1, const vectori& v2) noexcept
 	{
 #if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		return _mm_div_epi32 (v1, v2);
+		//return _mm_div_epi32 (v1, v2);
+		return vectori (v1.x () / v2.x (), v1.y () / v2.y (), v1.z () / v2.z (), v1.w () / v2.w ());
 #elif ( ARCH_ARMSET ) && !defined ( NO_INTRINSIC )
 		vectorf fv1 = reinterpret_vector (v1);
 		vectorf fv2 = reinterpret_vector (v2);
@@ -1261,12 +1264,12 @@ namespace dseed
 	// Get Power vector (v1^v2)
 	inline vectorf powvf (const vectorf& v1, const vectorf& v2) noexcept
 	{
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-		return _mm_pow_ps (v1, v2);
-#else
+//#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
+//		return _mm_pow_ps (v1, v2);
+//#else
 		float v[4] = { powf (v1.x (), v2.x ()), powf (v1.y (), v2.y ()), powf (v1.z (), v2.z ()), powf (v1.w (), v2.w ()) };
 		return vectorf (v);
-#endif
+//#endif
 	}
 	// Get Reciprocal vector (1/v)
 	inline vectorf rcpvf (const vectorf& v) noexcept
@@ -1823,5 +1826,9 @@ namespace dseed
 		return transform4 (p, m);
 	}
 }
+
+#if COMPILER_MSVC
+#	pragma warning (default : 4556)
+#endif
 
 #endif

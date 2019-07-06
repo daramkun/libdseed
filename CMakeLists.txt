@@ -1,4 +1,4 @@
-cmake_minimum_required ( VERSION 3.8 )
+cmake_minimum_required ( VERSION 3.10 )
 
 INCLUDE ( GenerateExportHeader )
 INCLUDE ( CMakePackageConfigHelpers )
@@ -7,6 +7,7 @@ SET ( DSEED_VERSION_MAJOR 1 )
 SET ( DSEED_VERSION_MINOR 0 )
 SET ( DSEED_VERSION_REVISION 0 )
 SET ( DSEED_VERSION ${DSEED_VERSION_MAJOR}.${DSEED_VERSION_MINOR}.${DSEED_VERSION_REVISION} )
+
 PROJECT ( dseed
 	VERSION ${DSEED_VERSION}
 	LANGUAGES C CXX
@@ -18,57 +19,53 @@ SET ( INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation dir
 SET ( INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers." )
 SET ( INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files" )
 
-OPTION ( DSEED_STATIC_BUILD "libdseed build to static library." OFF )
-OPTION ( DSEED_CRT_LINK_STATIC "libdseed built with static CRT library." OFF )
 OPTION ( DSEED_SKIP_INSTALL "libdseed do not install." OFF )
-
-IF ( DSEED_CRT_LINK_STATIC AND MSVC )
-	SET ( CompilerFlags
-		  CMAKE_CXX_FLAGS
-		  CMAKE_CXX_FLAGS_DEBUG
-		  CMAKE_CXX_FLAGS_RELEASE
-		  CMAKE_C_FLAGS
-		  CMAKE_C_FLAGS_DEBUG
-		  CMAKE_C_FLAGS_RELEASE
-    )
-	FOREACH ( CompilerFlag ${CompilerFlags} )
-		STRING ( REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}" )
-		STRING ( REPLACE "/MDd" "/MTd" ${CompilerFlag} "${${CompilerFlag}}" )
-	ENDFOREACH()
-ENDIF ()
 
 SET ( DSEED_BUILD_FILES 
     src/dseed.cpp
-	src/dobject.cpp
-	src/dmath.cpp
-	src/dgeometry.cpp
-	src/dcolor.cpp
-	src/dtime.cpp
-	src/dio.cpp
-	src/dparallel.cpp
-	src/dstring.cpp
-	src/dhid.cpp
-	src/ddiagnostics.cpp
+
+	src/object.cpp
+
+	src/math/math.cpp
+	src/geometry.cpp
+	src/color.cpp
+	src/time.cpp
+	src/string.cpp
+
+	src/io.cpp
+	src/hid.cpp
+
+	src/diagnostics.cpp
+	
+	src/parallel.cpp
+
+	src/bitmap/bitmap.cpp
+	src/bitmap/bitmap.decoder.wic.cpp
+	src/bitmap/bitmap.decoder.dib.cpp
+	src/bitmap/bitmap.decoder.tga.cpp
+	src/bitmap/bitmap.decoder.dds.cpp
+	src/bitmap/bitmap.decoder.pkm.cpp
+	src/bitmap/bitmap.decoder.ktx.cpp
+
+	src/media/media.cpp
+	src/media/audio.cpp
+	src/media/media.decoder.mf.cpp
 )
 
-IF ( NOT DSEED_STATIC_BUILD )
-	SET ( DSEED_BUILD_TYPE SHARED )
-	IF ( MSVC )
-		SET ( DSEED_DEFINITIONS -DDSEED_WINDOWS_DLL_EXPORT )
-	ENDIF ()
-ELSE ()
-	SET ( DSEED_BUILD_TYPE STATIC )
-	IF ( MSVC )
-		SET ( DSEED_DEFINITIONS -DDSEED_WINDOWS_STATIC )
-	ENDIF ()
+link_directories ( ${INSTALL_LIB_DIR} )
+SET ( DSEED_LINK_LIBS  )
+
+IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "MSYS" )
+	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib )
+ENDIF ()
+
+SET ( DSEED_BUILD_TYPE SHARED )
+IF ( MSVC )
+	SET ( DSEED_DEFINITIONS -DDSEED_WINDOWS_DLL_EXPORT )
 ENDIF ()
 
 ADD_LIBRARY ( dseed ${DSEED_BUILD_TYPE} ${DSEED_BUILD_FILES} )
-target_compile_definitions ( dseed PRIVATE ${DSEED_DEFINITIONS} )
-
-SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
-SET_TARGET_PROPERTIES ( dseed PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON )
-
+TARGET_COMPILE_DEFINITIONS ( dseed PRIVATE ${DSEED_DEFINITIONS} )
 TARGET_INCLUDE_DIRECTORIES (
     dseed
     PUBLIC
@@ -76,6 +73,10 @@ TARGET_INCLUDE_DIRECTORIES (
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
 	$<INSTALL_INTERFACE:${INSTALL_INC_DIR}>
 )
+TARGET_LINK_LIBRARIES ( dseed ${DSEED_LINK_LIBS} )
+
+SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
+SET_TARGET_PROPERTIES ( dseed PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON )
 
 IF ( NOT ${DSEED_SKIP_INSTALL} )
 	generate_export_header ( dseed )

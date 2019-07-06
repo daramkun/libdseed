@@ -1,7 +1,5 @@
-#ifndef __DSEED_DMATH_H__
-#define __DSEED_DMATH_H__
-
-#include <dseed/dcommon.h>
+#ifndef __DSEED_MATH_H__
+#define __DSEED_MATH_H__
 
 namespace dseed
 {
@@ -136,8 +134,8 @@ namespace dseed
 	};
 }
 
-#include <dseed/dmath.simd.inl>
-#include <dseed/dmath.vector.inl>
-#include <dseed/dmath.collision.inl>
+#include <dseed/math/math.simd.inl>
+#include <dseed/math/math.vector.inl>
+#include <dseed/math/math.collision.inl>
 
 #endif

@@ -1,14 +1,13 @@
-#ifndef __DSEED_DPARALLEL_H__
-#define __DSEED_DPARALLEL_H__
-
-#include <dseed/dcommon.h>
+#ifndef __DSEED_PARALLEL_H__
+#define __DSEED_PARALLEL_H__
 
 #include <algorithm>
-#include <execution>
 
 #include <thread>
 #include <mutex>
 #include <shared_mutex>
+#include <future>
+#include <queue>
 
 namespace dseed
 {
@@ -21,10 +20,10 @@ namespace dseed
 	struct spinlock
 	{
 	public:
-		spinlock () : _sharedCount (0), _exclusiveFlag (false) { }
+		inline spinlock () noexcept : _sharedCount (0), _exclusiveFlag (false) { }
 
 	public:
-		void lock ()
+		inline void lock () noexcept
 		{
 			bool expected = false;
 			while (!_exclusiveFlag.compare_exchange_weak (expected, true, std::memory_order_acquire))
@@ -33,7 +32,7 @@ namespace dseed
 			while (_sharedCount.load (std::memory_order_seq_cst) != 0)
 				std::this_thread::yield ();
 		}
-		void lock_shared ()
+		inline void lock_shared () noexcept
 		{
 			while (true) {
 				while (_exclusiveFlag.load (std::memory_order_seq_cst))
@@ -49,7 +48,7 @@ namespace dseed
 		}
 
 	public:
-		bool try_lock ()
+		inline bool try_lock () noexcept
 		{
 			bool expected = false;
 			if (!_exclusiveFlag.load (std::memory_order_seq_cst) && _sharedCount.load (std::memory_order_seq_cst) == 0)
@@ -57,7 +56,7 @@ namespace dseed
 			return false;
 		}
 
-		bool try_lock_shared ()
+		inline bool try_lock_shared () noexcept
 		{
 			if (!_exclusiveFlag.load (std::memory_order_seq_cst))
 			{
@@ -73,8 +72,8 @@ namespace dseed
 		}
 
 	public:
-		void unlock () { _exclusiveFlag.store (false, std::memory_order_release); }
-		void unlock_shared () { _sharedCount.fetch_sub (1, std::memory_order_release); }
+		inline void unlock () noexcept { _exclusiveFlag.store (false, std::memory_order_release); }
+		inline void unlock_shared () noexcept { _sharedCount.fetch_sub (1, std::memory_order_release); }
 
 	private:
 		std::atomic<uint64_t> _sharedCount;
@@ -86,8 +85,8 @@ namespace dseed
 	struct threadpool
 	{
 	public:
-		threadpool (size_t maximum_threads = 0)
-			: _stop (false)
+		inline threadpool (size_t maximum_threads = 0)
+			: _stop (false), _running (0)
 		{
 			_workers.reserve (maximum_threads);
 			for (size_t i = 0; i < maximum_threads; ++i)
@@ -103,15 +102,19 @@ namespace dseed
 							if (this->_stop || this->_tasks.empty ())
 								break;
 
+							++_running;
 							task = std::move (this->_tasks.front ());
 							this->_tasks.pop ();
 						}
 						task ();
+
+						--_running;
+						_waitCondition.notify_all ();
 					}
 					});
 			}
 		}
-		~threadpool ()
+		inline ~threadpool ()
 		{
 			{
 				std::unique_lock<TLock> lock (_mutex);
@@ -124,7 +127,7 @@ namespace dseed
 
 	public:
 		template<class F, class... Args>
-		auto enqueue (F&& f, Args&& ... args)
+		inline auto enqueue (F&& f, Args&& ... args)
 		{
 			using return_type = typename std::result_of<F (Args...)>::type;
 
@@ -134,7 +137,7 @@ namespace dseed
 
 			std::future<return_type> res = task->get_future ();
 			{
-				std::unique_lock<TLock> lock (queue_mutex);
+				std::unique_lock<TLock> lock (_mutex);
 
 				if (_stop)
 					throw std::runtime_error ("enqueue on stopped Thread-Pool");
@@ -146,11 +149,15 @@ namespace dseed
 		}
 
 	public:
-		void cancel_all ()
+		inline void cancel_all ()
 		{
 			std::unique_lock<TLock> lock (_mutex);
 			while (!_tasks.empty ())
 				_tasks.pop ();
+		}
+		inline void wait ()
+		{
+			_waitCondition.wait (_mutex, [this]() -> bool { return _running == 0 && _tasks.empty (); });
 		}
 
 	private:
@@ -158,7 +165,8 @@ namespace dseed
 		std::queue<std::function<void ()>> _tasks;
 
 		TLock _mutex;
-		std::condition_variable _condition;
+		std::condition_variable _condition, _waitCondition;
+		std::atomic<uint32_t> _running;
 
 		bool _stop;
 	};
@@ -167,14 +175,23 @@ namespace dseed
 	class parallel
 	{
 	public:
-		parallel () : _threadpool (maximum_threads) { }
+		inline parallel () : _threadpool (maximum_threads) { }
 
 	public:
 		template<class T>
-		void for_each (T start, T end, const std::function<void (T)>& body) noexcept
+		inline void for_each (T start, T end, const std::function<void (T)>& body) noexcept
+		{
+			threadpool<TLock> threadpool;
+			for (T i = start; i != end; ++i)
+				threadpool.enqueue (body, i);
+			threadpool.wait ();
+		}
+		template<class T>
+		inline void for_each_shared (T start, T end, const std::function<void (T)>& body) noexcept
 		{
 			for (T i = start; i != end; ++i)
 				_threadpool.enqueue (body, i);
+			_threadpool.wait ();
 		}
 
 	private:

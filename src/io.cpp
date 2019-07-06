@@ -92,7 +92,7 @@ private:
 	size_t _position;
 };
 
-dseed::error_t dseed::create_memorystream (void* buffer, size_t length, stream** stream)
+dseed::error_t dseed::create_memorystream (void* buffer, size_t length, dseed::stream** stream)
 {
 	if (buffer == nullptr || length <= 0 || stream == nullptr)
 		return dseed::error_invalid_args;
@@ -256,7 +256,7 @@ private:
 	size_t _length;
 };
 
-dseed::error_t dseed::create_variable_memorystream (stream** stream, bool remove_after_read)
+dseed::error_t dseed::create_variable_memorystream (dseed::stream** stream, bool remove_after_read)
 {
 	if (!remove_after_read) *stream = new __variable_memorystream ();
 	else *stream = new __variable_memorystream_remove_after_read ();
@@ -436,7 +436,7 @@ private:
 };
 #endif
 
-dseed::error_t dseed::create_native_filestream (const char* path, bool create, stream** stream)
+dseed::error_t dseed::create_native_filestream (const char* path, bool create, dseed::stream** stream)
 {
 	if (stream == nullptr)
 		return dseed::error_invalid_args;
@@ -459,8 +459,8 @@ dseed::error_t dseed::create_native_filestream (const char* path, bool create, s
 	return dseed::error_not_support;
 #else
 	int fd = create
-		? open (path.c_str (), O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO)
-		: open (path.c_str (), O_RDWR);
+		? open (path, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO)
+		: open (path, O_RDWR);
 	if (fd == -1)
 	{
 		if (errno == EACCES)
@@ -574,11 +574,13 @@ std::string ____GetTemporaryDirectory ()
 #elif PLATFORM_MACOS
 	return getenv ("TMPDIR");
 #elif PLATFORM_IOS
-	return[NSTemporaryDirectory () UTF8String];
+	return [NSTemporaryDirectory () UTF8String];
 #elif PLATFORM_ANDROID
 
 #elif PLATFORM_UNIX
-	return return pathCombine (getenv ("TMPDIR"), getprogname ());
+	char temp[512];
+	dseed::path_combine (getenv ("TMPDIR"), getenv ("_"), temp, 512);
+	return temp;
 #else
 	return "";
 #endif
@@ -666,7 +668,7 @@ private:
 	std::string _baseDir;
 };
 
-dseed::error_t dseed::create_native_filesystem (nativefilesystem_t fst, filesystem** fileSystem)
+dseed::error_t dseed::create_native_filesystem (dseed::nativefilesystem_t fst, dseed::filesystem** fileSystem)
 {
 	*fileSystem = new __nativefilesystem (fst);
 	if (*fileSystem == nullptr)
@@ -701,7 +703,7 @@ private:
 	size_t _memLength;
 };
 
-dseed::error_t dseed::create_memoryblob (size_t length, blob** blob)
+dseed::error_t dseed::create_memoryblob (size_t length, dseed::blob** blob)
 {
 	*blob = new __memblob (length);
 	if (*blob == nullptr)
@@ -754,7 +756,7 @@ dseed::error_t dseed::create_bufferblob (void* buffer, size_t length, bool copy,
 	return error_good;
 }
 
-dseed::error_t dseed::create_streamblob (stream* stream, blob** blob)
+dseed::error_t dseed::create_streamblob (dseed::stream* stream, dseed::blob** blob)
 {
 	dseed::auto_object<dseed::blob> tempBlob;
 	if (dseed::failed (dseed::create_memoryblob (stream->length (), &tempBlob)))

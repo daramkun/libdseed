@@ -1,12 +1,10 @@
-#ifndef __DSEED_DIO_H__
-#define __DSEED_DIO_H__
-
-#include <dseed/dcommon.h>
+#ifndef __DSEED_IO_H__
+#define __DSEED_IO_H__
 
 namespace dseed
 {
 	// Stream Seeking Origin
-	enum DSEEDEXP seekorigin_t : int32_t
+	enum seekorigin_t : int32_t
 	{
 		// Seek from Begin of Stream
 		seekorigin_begin,
@@ -47,31 +45,31 @@ namespace dseed
 	};
 
 	// Create Memory Stream from Exists Buffer
-	DSEEDEXP error_t create_memorystream (void* buffer, size_t length, stream** stream);
+	DSEEDEXP error_t create_memorystream (void* buffer, size_t length, dseed::stream** stream);
 	// Create Variable Empty Memory Stream
-	DSEEDEXP error_t create_variable_memorystream (stream** stream, bool remove_after_read = false);
+	DSEEDEXP error_t create_variable_memorystream (dseed::stream** stream, bool remove_after_read = false);
 	// Create File Stream (Maybe some platform not support)
-	DSEEDEXP error_t create_native_filestream (const char* path, bool create, stream** stream);
+	DSEEDEXP error_t create_native_filestream (const char* path, bool create, dseed::stream** stream);
 
 	// File System
 	class DSEEDEXP filesystem : public object
 	{
 	public:
 		// Create New Directory
-		virtual error_t create_directory (const char* path) PURE;
+		virtual error_t create_directory (const char* path) = 0;
 		// Create File Stream
-		virtual error_t create_file (const char* path, bool create, stream** stream) PURE;
+		virtual error_t create_file (const char* path, bool create, dseed::stream** stream) = 0;
 		// Delete File
-		virtual error_t delete_file (const char* path) PURE;
+		virtual error_t delete_file (const char* path) = 0;
 
 		// Is File Exists?
-		virtual bool file_exists (const char* path) PURE;
+		virtual bool file_exists (const char* path) = 0;
 		// Is Directory Exists?
-		virtual bool directory_exists (const char* path) PURE;
+		virtual bool directory_exists (const char* path) = 0;
 	};
 
 	// Native File System Directories
-	enum DSEEDEXP nativefilesystem_t : int32_t
+	enum nativefilesystem_t : int32_t
 	{
 		// Document Directory
 		nativefilesystem_documents,
@@ -82,7 +80,7 @@ namespace dseed
 	};
 
 	// Create Native File System
-	DSEEDEXP error_t create_native_filesystem (nativefilesystem_t fst, filesystem** fileSystem);
+	DSEEDEXP error_t create_native_filesystem (dseed::nativefilesystem_t fst, dseed::filesystem** fileSystem);
 
 	// Memory Blob
 	class DSEEDEXP blob : public object
@@ -93,11 +91,11 @@ namespace dseed
 	};
 
 	// Create Empty Blob
-	DSEEDEXP error_t create_memoryblob (size_t length, blob** blob);
+	DSEEDEXP error_t create_memoryblob (size_t length, dseed::blob** blob);
 	// Create Blob from Exists Buffer
-	DSEEDEXP error_t create_bufferblob (void* buffer, size_t length, bool copy, blob** blob);
+	DSEEDEXP error_t create_bufferblob (void* buffer, size_t length, bool copy, dseed::blob** blob);
 	// Create Blob from Stream
-	DSEEDEXP error_t create_streamblob (stream* stream, blob** blob);
+	DSEEDEXP error_t create_streamblob (dseed::stream* stream, dseed::blob** blob);
 }
 
 #endif

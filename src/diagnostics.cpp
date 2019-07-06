@@ -1,7 +1,9 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <dseed.h>
 
 #include <thread>
 #include <iomanip>
+#include <string.h>
 
 #if PLATFORM_MICROSOFT
 #	include <atlconv.h>
@@ -79,7 +81,7 @@ private:
 	dseed::auto_object<dseed::stream> _stream;
 };
 
-dseed::error_t create_stream_logwriter (dseed::stream* stream, dseed::logwriter** writer)
+dseed::error_t dseed::create_stream_logwriter (dseed::stream* stream, dseed::logwriter** writer)
 {
 	if (stream == nullptr || writer == nullptr)
 		return dseed::error_invalid_args;

@@ -1,9 +1,9 @@
-#ifndef __DSEED_DDIAGNOSTICS_H__
-#define __DSEED_DDIAGNOSTICS_H__
+#ifndef __DSEED_DIAGNOSTICS_H__
+#define __DSEED_DIAGNOSTICS_H__
 
 namespace dseed
 {
-	enum DSEEDEXP loglevel_t
+	enum loglevel_t
 	{
 		loglevel_debug_only,
 		loglevel_information,
@@ -18,7 +18,7 @@ namespace dseed
 		virtual void write (loglevel_t level, const char* tag, const char* message) = 0;
 	};
 
-	DSEEDEXP error_t create_stream_logwriter (stream* stream, logwriter** writer);
+	DSEEDEXP error_t create_stream_logwriter (dseed::stream* stream, dseed::logwriter** writer);
 
 	class DSEEDEXP logger
 	{

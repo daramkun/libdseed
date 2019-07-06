@@ -1,5 +1,7 @@
 #include <dseed.h>
 
+#include <string.h>
+
 inline dseed::int24_t::int24_t (int32_t v) noexcept { memcpy (value, &v, 3); }
 inline dseed::int24_t::operator int32_t() const noexcept
 {

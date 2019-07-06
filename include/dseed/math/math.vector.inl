@@ -1,7 +1,5 @@
-#ifndef __DSEED_DMATH_VECTOR_INL__
-#define __DSEED_DMATH_VECTOR_INL__
-
-#include <dseed/dmath.simd.inl>
+#ifndef __DSEED_MATH_VECTOR_INL__
+#define __DSEED_MATH_VECTOR_INL__
 
 namespace dseed
 {
@@ -104,7 +102,7 @@ namespace dseed
 	public:
 		union {
 			struct { float m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44; };
-			struct { float4 c1, c2, c3, c4; };
+			//struct { float4 c1, c2, c3, c4; }; //< GCC Error: member ¡®dseed::float4 dseed::float4x4::<unnamed union>::<unnamed struct>::c4¡¯ with constructor not allowed in anonymous aggregate
 			float arr16[16];
 			float4 arr4[4];
 		};
@@ -121,7 +119,11 @@ namespace dseed
 			, m41 (m41), m42 (m42), m43 (m43), m44 (m44)
 		{ }
 		inline float4x4 (const float4& c1, const float4& c2, const float4& c3, const float4& c4) noexcept
-			: c1 (c1), c2 (c2), c3 (c3), c4 (c4)
+			//: c1 (c1), c2 (c2), c3 (c3), c4 (c4)
+			: m11 (c1.x), m12 (c1.y), m13 (c1.z), m14 (c1.w)
+			, m21 (c2.x), m22 (c2.y), m23 (c2.z), m24 (c2.w)
+			, m31 (c3.x), m32 (c3.y), m33 (c3.z), m34 (c3.w)
+			, m41 (c4.x), m42 (c4.y), m43 (c4.z), m44 (c4.w)
 		{ }
 		inline float4x4 (float v) noexcept
 			: m11 (v), m12 (v), m13 (v), m14 (v)

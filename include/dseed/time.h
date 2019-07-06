@@ -1,7 +1,5 @@
-#ifndef __DSEED_DTIME_H__
-#define __DSEED_DTIME_H__
-
-#include <dseed/dcommon.h>
+#ifndef __DSEED_TIME_H__
+#define __DSEED_TIME_H__
 
 namespace dseed
 {

@@ -1,13 +1,9 @@
-#ifndef __DSEED_DHID_H__
-#define __DSEED_DHID_H__
-
-#include <dseed/dcommon.h>
-#include <dseed/dmath.h>
-#include <dseed/dgeometry.h>
+#ifndef __DSEED_HID_H__
+#define __DSEED_HID_H__
 
 namespace dseed
 {
-	enum DSEEDEXP keys_t : uint8_t
+	enum keys_t : uint8_t
 	{
 		keys_back = 0x08, keysab = 0x09,
 		keys_clear = 0x0C, keys_return = 0x0D, keys_enter = keys_return,
@@ -34,7 +30,7 @@ namespace dseed
 		keys_left_bracket = 0xDB, keys_backslash = 0xDC, keys_right_bracket = 0xDD, keys_quote = 0xDE,
 	};
 
-	enum DSEEDEXP mousebuttons_t : int8_t
+	enum mousebuttons_t : int8_t
 	{
 		mousebuttons_no_button = 0,
 		mousebuttons_left = 1,
@@ -44,7 +40,7 @@ namespace dseed
 		mousebuttons_x_button2 = 16,
 	};
 
-	enum DSEEDEXP gamepadbuttons_t : int32_t
+	enum gamepadbuttons_t : int32_t
 	{
 		gamepadbuttons_no_button = 0,
 
@@ -68,14 +64,14 @@ namespace dseed
 		gamepadbuttons_right_thumbstick = 8192,
 	};
 
-	enum DSEEDEXP touchstate_t : int8_t
+	enum touchstate_t : int8_t
 	{
 		touchstate_released,
 		touchstate_pressed,
 		touchstate_moved,
 	};
 
-	struct DSEEDEXP keyboard_state
+	struct keyboard_state
 	{
 	public:
 		bool key_states[256];
@@ -85,7 +81,7 @@ namespace dseed
 		inline bool key_up (keys_t key) noexcept { return !key_states[(int)key]; }
 	};
 
-	struct DSEEDEXP mouse_state
+	struct mouse_state
 	{
 	public:
 		point2i position;
@@ -94,10 +90,14 @@ namespace dseed
 		bool is_relative;
 
 	public:
-		mouse_state ();
+		inline mouse_state ()
+			: position (int32_min, int32_min), wheel (0, 0)
+			, buttons (mousebuttons_no_button)
+			, is_relative (false)
+		{ }
 	};
 
-	struct DSEEDEXP mouse_feedback
+	struct mouse_feedback
 	{
 	public:
 		bool lock_in_window;
@@ -106,7 +106,7 @@ namespace dseed
 		bool hide_cursor;
 	};
 
-	struct DSEEDEXP gamepad_state
+	struct gamepad_state
 	{
 	public:
 		float2 left_thumbstick, right_thumbstick;
@@ -114,38 +114,38 @@ namespace dseed
 		gamepadbuttons_t buttons;
 	};
 
-	struct DSEEDEXP gamepad_feedback
+	struct gamepad_feedback
 	{
 	public:
 		float left_motor_speed, right_motor_speed;
 	};
 
-	struct DSEEDEXP touchpointer
+	struct touchpointer
 	{
 		int32_t pointerId;
 		point2i position;
 		touchstate_t state;
 	};
 
-	struct DSEEDEXP touchpanel_state
+	struct touchpanel_state
 	{
 	public:
 		touchpointer pointers[256];
 		size_t pointerCount;
 	};
 
-	struct DSEEDEXP accelerometer_state
+	struct accelerometer_state
 	{
 	public:
 		float3 accelerometer;
 	};
 
-	struct DSEEDEXP gyroscope_state
+	struct gyroscope_state
 	{
 		float3 gyroscope;
 	};
 
-	struct DSEEDEXP gps_state
+	struct gps_state
 	{
 		double longitude, latitude;
 	};

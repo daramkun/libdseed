@@ -1,7 +1,5 @@
-#ifndef __DSEED_DCOLOR_H__
-#define __DSEED_DCOLOR_H__
-
-#include <dseed.h>
+#ifndef __DSEED_COLOR_H__
+#define __DSEED_COLOR_H__
 
 namespace dseed
 {////////////////////////////////////////////////////////////////////////////////////////
@@ -9,13 +7,15 @@ namespace dseed
 	// Pixel Format
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
-	enum DSEEDEXP pixelformat_t : int32_t
+	enum pixelformat_t : int32_t
 	{
 		// Unknown Pixel Format
 		pixelformat_unknown = 0x00000000,
 
 		// 8-bit Grayscale Pixel Format
 		pixelformat_grayscale8 = 0x00010001,
+		// 32-bit Floating-Point Grayscale Pixel Format
+		pixelformat_grayscalef = 0x00010004,
 		// 32-bit Integer RGBA Pixel Format
 		pixelformat_rgba8888 = 0x00010104,
 		// 128-bit Floating-Point RGBA Pixel Format
@@ -37,15 +37,26 @@ namespace dseed
 		// 8-bit Indexed BGR Pixel Format
 		pixelformat_bgr888_indexed8 = 0x00020103,
 
-		// BC1 Compressed Pixel Format
+		// 24-bit YCbCr:4:4:4 Pixel Format
+		pixelformat_yuv888 = 0x00030003,
+		// 32-bit YCbCr:4:4:4 and Alpha Pixel Format
+		pixelformat_yuva8888 = 0x00030004,
+
+		// 32-bit YCbCr:4:2:2(YUYV or YUY2) Packed Pixel Format
+		pixelformat_yuyv8888 = 0x00040204,
+		// YCbCr:4:2:0(NV12) Packed Pixel Format
+		pixelformat_yyyyuv888888 = 0x00040406,
+		pixelformat_nv12 = pixelformat_yyyyuv888888,
+
+		// BC1(DXT1) Compressed Pixel Format
 		pixelformat_bc1 = 0x00100001, pixelformat_dxt1 = pixelformat_bc1,
-		// BC2 Compressed Pixel Format
+		// BC2(DXT3) Compressed Pixel Format
 		pixelformat_bc2 = 0x00100002, pixelformat_dxt3 = pixelformat_bc2,
-		// BC3 Compressed Pixel Format
+		// BC3(DXT5) Compressed Pixel Format
 		pixelformat_bc3 = 0x00100003, pixelformat_dxt5 = pixelformat_bc3,
-		// BC4 Compressed Pixel Format
+		// BC4(ATI1) Compressed Pixel Format
 		pixelformat_bc4 = 0x00100004, pixelformat_ati1 = pixelformat_bc4,
-		// BC5 Compressed Pixel Format
+		// BC5(ATI2) Compressed Pixel Format
 		pixelformat_bc5 = 0x00100005, pixelformat_ati2 = pixelformat_bc5,
 		// BC6 Compressed Pixel Format
 		pixelformat_bc6h = 0x00100006,
@@ -85,6 +96,11 @@ namespace dseed
 		pixelformat_astc_10x10 = 0x0013000c,
 		pixelformat_astc_12x10 = 0x0013000d,
 		pixelformat_astc_12x12 = 0x0013000e,
+
+		// Depth-Stencil Pixel Formats (Not support in dseed Bitmap object, Only for Texture objects)
+		pixelformat_depth16 = 0x01000002,
+		pixelformat_depth24stencil8 = 0x01000104,
+		pixelformat_depth32 = 0x01000004,
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -94,11 +110,11 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get Stride value
-	DSEEDEXP size_t get_stride (dseed::pixelformat_t format, int32_t width) noexcept;
+	DSEEDEXP size_t get_bitmap_stride (dseed::pixelformat_t format, int32_t width) noexcept;
 	// Get Bitmap Plane size
-	DSEEDEXP size_t get_array_size (dseed::pixelformat_t format, int32_t width, int32_t height) noexcept;
+	DSEEDEXP size_t get_bitmap_plane_size (dseed::pixelformat_t format, int32_t width, int32_t height) noexcept;
 	// Get Total Bitmap Planes Buffer size
-	DSEEDEXP size_t get_total_buffer_size (dseed::pixelformat_t format, const dseed::size3i& size) noexcept;
+	DSEEDEXP size_t get_bitmap_total_size (dseed::pixelformat_t format, const dseed::size3i& size) noexcept;
 	// Get Mipmap Size
 	DSEEDEXP dseed::size3i get_mipmap_size (int mipLevel, const dseed::size3i& size, bool cubemap) noexcept;
 	// Get Maximum Mip-Levels
@@ -423,7 +439,7 @@ namespace dseed
 	{
 		union
 		{
-			struct { uint8_t y, u, v, a; };
+			struct { uint8_t v, u, y, a; };
 			uint32_t color;
 		};
 		yuva () = default;
@@ -431,7 +447,7 @@ namespace dseed
 			: y (y), u (v), v (v), a (a)
 		{ }
 		inline yuva (uint32_t yuva)
-			: color (color)
+			: color (yuva)
 		{ }
 		inline yuva (const rgba& rgba)
 		{
@@ -456,15 +472,15 @@ namespace dseed
 	{
 		union
 		{
-			struct { uint8_t y, u, v; };
+			struct { uint8_t v, u, y; };
 			uint24_t color;
 		};
 		yuv () = default;
 		inline yuv (uint8_t y, uint8_t u, uint8_t v)
 			: y (y), u (v), v (v)
 		{ }
-		inline yuv (uint24_t yuva)
-			: color (color)
+		inline yuv (uint24_t yuv)
+			: color (yuv)
 		{ }
 		inline yuv (const rgb& rgb)
 		{
@@ -480,6 +496,50 @@ namespace dseed
 				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
 				(uint8_t)(y + +1.8814 * u)
 			);
+		}
+	};
+
+	struct yuyv
+	{
+		union
+		{
+			struct { uint8_t y1, u, y2, v; };
+			uint32_t color;
+		};
+		yuyv () = default;
+		inline yuyv (uint8_t y1, uint8_t u, uint8_t y2, uint8_t v)
+			: y1 (y1), u (u), y2 (y2), v (v)
+		{ }
+		inline yuyv (uint32_t yuyv)
+			: color (color)
+		{ }
+		inline yuyv (const rgb& rgb1, const rgb& rgb2)
+			: yuyv ((yuv)rgb1, (yuv)rgb2)
+		{ }
+		inline yuyv (const yuv& yuv1, const yuv& yuv2)
+		{
+			y1 = yuv1.y;
+			y2 = yuv2.y;
+			u = (uint8_t)((yuv1.u + yuv2.u) / 2);
+			v = (uint8_t)((yuv1.v + yuv2.v) / 2);
+		}
+
+		inline error_t to_rgb (rgb* rgb1, rgb* rgb2)
+		{
+			if (rgb1 == nullptr || rgb2 == nullptr)
+				return dseed::error_invalid_args;
+			yuv yuv1 (y1, u, v), yuv2 (y2, u, v);
+			*rgb1 = (rgb)yuv1;
+			*rgb2 = (rgb)yuv2;
+			return dseed::error_good;
+		}
+		inline error_t to_yuv444 (yuv* yuv1, yuv* yuv2)
+		{
+			if (yuv1 == nullptr || yuv2 == nullptr)
+				return dseed::error_invalid_args;
+			*yuv1 = yuv (y1, u, v);
+			*yuv2 = yuv (y2, u, v);
+			return dseed::error_good;
 		}
 	};
 
@@ -522,7 +582,7 @@ namespace dseed
 		grayscalef () = default;
 		inline grayscalef (float grayscale) : color (grayscale) { }
 		inline grayscalef (const rgbaf& rgbaf)
-			: color (+0.2627 * rgbaf.r + +0.678 * rgbaf.g + +0.0593 * rgbaf.b)
+			: color ((float)(+0.2627 * rgbaf.r + +0.678 * rgbaf.g + +0.0593 * rgbaf.b))
 		{ }
 
 		inline operator rgbaf () const noexcept { return rgbaf (color, color, color, 1); }

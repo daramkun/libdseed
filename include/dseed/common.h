@@ -1,5 +1,5 @@
-#ifndef __DSEED_DCOMMON_H__
-#define __DSEED_DCOMMON_H__
+#ifndef __DSEED_COMMON_H__
+#define __DSEED_COMMON_H__
 
 #include <atomic>
 #include <string>
@@ -64,7 +64,7 @@ constexpr char PATH_SEPARATOR = '/';
 
 #if COMPILER_MSVC && defined ( DSEED_WINDOWS_DLL_EXPORT )
 #   define DSEEDEXP											__declspec ( dllexport )
-#elif COMPILER_MSVC && !defined ( DSEED_WINDOWS_STATIC )
+#elif COMPILER_MSVC && !defined ( DSEED_WINDOWS_DLL_EXPORT )
 #   define DSEEDEXP											__declspec ( dllimport )
 #else
 #   define DSEEDEXP
@@ -91,9 +91,12 @@ namespace dseed
 	constexpr error_t error_end_of_file = 0x80020003;
 	constexpr error_t error_hash_not_correct = 0x80020004;
 	constexpr error_t error_access_denied = 0x80020005;
+	constexpr error_t error_not_support_file_format = 0x80020006;
 
 	constexpr error_t error_not_impl = 0x80030001;
 	constexpr error_t error_not_support = 0x80030002;
+	constexpr error_t error_platform_not_support = 0x80030003;
+	constexpr error_t error_feature_not_support = 0x80030004;
 
 	constexpr error_t error_device_not_conn = 0x80040001;
 	constexpr error_t error_device_disconn = 0x80040002;

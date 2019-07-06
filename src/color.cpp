@@ -1,20 +1,28 @@
 #include <dseed.h>
 
-size_t dseed::get_stride (dseed::pixelformat_t format, int32_t width) noexcept
+size_t dseed::get_bitmap_stride (dseed::pixelformat_t format, int32_t width) noexcept
 {
 	using namespace dseed;
 	switch (format)
 	{
-	case pixelformat_rgbaf: return width * 16;
+	case pixelformat_rgbaf:
+		return width * 16;
+
 	case pixelformat_rgba8888:
 	case pixelformat_bgra8888:
+	case pixelformat_yuva8888:
+	case pixelformat_grayscalef:
 		return width * 4;
+
 	case pixelformat_rgb888:
 	case pixelformat_bgr888:
+	case pixelformat_yuv888:
 		return 4 * ((width * ((24 + 7) / 8) + 3) / 4);
+
 	case pixelformat_bgra4444:
 	case pixelformat_bgr565:
 		return width * 2;
+
 	case pixelformat_bgr888_indexed8:
 	case pixelformat_bgra8888_indexed8:
 	case pixelformat_grayscale8:
@@ -23,7 +31,7 @@ size_t dseed::get_stride (dseed::pixelformat_t format, int32_t width) noexcept
 	default: return 0;
 	}
 }
-size_t dseed::get_array_size (dseed::pixelformat_t format, int32_t width, int32_t height) noexcept
+size_t dseed::get_bitmap_plane_size (dseed::pixelformat_t format, int32_t width, int32_t height) noexcept
 {
 	using namespace dseed;
 	switch (format)
@@ -38,7 +46,15 @@ size_t dseed::get_array_size (dseed::pixelformat_t format, int32_t width, int32_
 	case pixelformat_bgr888_indexed8:
 	case pixelformat_bgra8888_indexed8:
 	case pixelformat_grayscale8:
-		return get_stride (format, width) * height;
+	case pixelformat_grayscalef:
+	case pixelformat_yuv888:
+	case pixelformat_yuva8888:
+		return get_bitmap_stride (format, width) * height;
+
+	case pixelformat_yuyv8888:
+		return (size_t)(ceil (width / 2.0) * height) * 4;
+	case pixelformat_yyyyuv888888:
+		return (size_t)(width * height + (ceil (width / 2.0) * ceil (height / 2.0)) * 2);
 
 	case pixelformat_bc1:
 	case pixelformat_etc1:
@@ -74,13 +90,13 @@ size_t dseed::get_array_size (dseed::pixelformat_t format, int32_t width, int32_
 	default: return 0;
 	}
 }
-size_t dseed::get_total_buffer_size (dseed::pixelformat_t format, const dseed::size3i& size) noexcept
+size_t dseed::get_bitmap_total_size (dseed::pixelformat_t format, const dseed::size3i& size) noexcept
 {
-	return get_array_size (format, size.width, size.height) * size.depth;
+	return get_bitmap_plane_size (format, size.width, size.height) * size.depth;
 }
 dseed::size3i dseed::get_mipmap_size (int mipLevel, const dseed::size3i& size, bool cubemap) noexcept
 {
-	int halfmaker = pow (2, mipLevel);
+	int halfmaker = (int)pow (2, mipLevel);
 	dseed::size3i mipSize (
 		(int32_t)ceil (size.width / halfmaker),
 		(int32_t)ceil (size.height / halfmaker),
@@ -93,5 +109,5 @@ dseed::size3i dseed::get_mipmap_size (int mipLevel, const dseed::size3i& size, b
 }
 size_t dseed::get_maximum_mip_levels (const dseed::size3i& size, bool cubemap) noexcept
 {
-	return (size_t)(1 + floor (log2 (max (size.width, max (size.height, cubemap ? size.height : size.depth)))));
+	return (size_t)(1 + floor (log2 (dseed::maximum (size.width, dseed::maximum (size.height, cubemap ? size.height : size.depth)))));
 }
