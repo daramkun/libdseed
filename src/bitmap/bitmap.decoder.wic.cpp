@@ -15,7 +15,7 @@ using IWICImagingFactoryP = IWICImagingFactory2;
 #define CLSID_WICImagingFactoryP CLSID_WICImagingFactory2
 #endif
 
-/*class __windowsimagingcodec_palette : public dseed::palette
+class __windowsimagingcodec_palette : public dseed::palette
 {
 public:
 	__windowsimagingcodec_palette (IWICPalette* palette)
@@ -262,7 +262,7 @@ private:
 	std::atomic<int32_t> _refCount;
 	CComPtr<IWICImagingFactoryP> _factory;
 	CComPtr<IWICBitmapDecoder> _decoder;
-};*/
+};
 #endif
 
 dseed::error_t dseed::create_windows_imaging_codec_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder)
@@ -271,7 +271,7 @@ dseed::error_t dseed::create_windows_imaging_codec_bitmap_decoder (dseed::stream
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 
-	IWICImagingFactoryP* factory;
+	CComPtr<IWICImagingFactoryP> factory;
 	bool coinit = false;
 	do
 	{
@@ -291,29 +291,17 @@ dseed::error_t dseed::create_windows_imaging_codec_bitmap_decoder (dseed::stream
 		break;
 	} while (true);
 
-	IStream* istream;
+	CComPtr<IStream> istream;
 	if (FAILED (ImpledIStream::Create (stream, &istream)))
-	{
-		factory->Release ();
 		return dseed::error_fail;
-	}
 
 	IWICBitmapDecoder* wicDecoder;
 	if (FAILED (factory->CreateDecoderFromStream (istream, nullptr, WICDecodeMetadataCacheOnDemand, &wicDecoder)))
-	{
-		istream->Release ();
-		factory->Release ();
 		return dseed::error_not_support;
-	}
 
-	istream->Release ();
-
-	//*decoder = new __windowsimagingcodec_decoder (factory, wicDecoder);
+	*decoder = new __windowsimagingcodec_decoder (factory, wicDecoder);
 	if (*decoder == nullptr)
 		return dseed::error_out_of_memory;
-
-	wicDecoder->Release ();
-	factory->Release ();
 
 	return dseed::error_good;
 #else

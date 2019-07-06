@@ -10,7 +10,7 @@
 #	include "../Microsoft/WaveFormatHelper.hxx"
 #	include "../Microsoft/IStreamHelper.hxx"
 
-/*class MFSupportChecker
+class MFSupportChecker
 {
 public:
 	HRESULT hr;
@@ -258,18 +258,18 @@ private:
 	dseed::timespan_t _currentTime;
 
 	std::vector<dseed::sampletype_t> _sampleTypes;
-};*/
+};
 #endif
 
 dseed::error_t dseed::create_media_foundation_media_decoder (dseed::stream* stream, dseed::media_decoder** decoder)
 {
 #if PLATFORM_WINDOWS
-	/*if (FAILED (!g_mfsupportchecker.IsSupport ()))
+	if (!g_mfsupportchecker.IsSupport ())
 		return dseed::error_not_support;
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 
-	CComPtr<ImpledIStream> istream;
+	CComPtr<IStream> istream;
 	ImpledIStream::Create (stream, &istream);
 	CComPtr<IMFByteStream> mfStream;
 	if (FAILED (MFCreateMFByteStreamOnStreamEx (istream, &mfStream)))
@@ -348,7 +348,7 @@ dseed::error_t dseed::create_media_foundation_media_decoder (dseed::stream* stre
 
 	*decoder = new __mf_decoder (sourceReader, sampleTypes);
 	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;*/
+		return dseed::error_out_of_memory;
 
 	return dseed::error_good;
 #else
