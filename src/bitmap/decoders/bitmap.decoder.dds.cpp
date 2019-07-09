@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "../Microsoft/DDSCommon.hxx"
+#include "../../Microsoft/DDSCommon.hxx"
 #include "bitmap.decoder.hxx"
 
 dseed::error_t dseed::create_dds_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder)

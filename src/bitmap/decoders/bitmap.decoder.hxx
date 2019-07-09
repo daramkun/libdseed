@@ -5,7 +5,7 @@ class __common_bitmap_decoder : public dseed::bitmap_decoder
 {
 public:
 	__common_bitmap_decoder (const std::vector<std::tuple<dseed::bitmap*, dseed::timespan_t>>& bitmaps)
-		: _refCount (0)
+		: _refCount (1)
 	{
 		for (auto i : bitmaps)
 			_bitmaps.push_back (std::tuple<dseed::auto_object<dseed::bitmap>, dseed::timespan_t> (
@@ -14,13 +14,19 @@ public:
 				));
 	}
 	__common_bitmap_decoder (const std::vector<dseed::bitmap*>& bitmaps)
-		: _refCount (0)
+		: _refCount (1)
 	{
 		for (auto i : bitmaps)
 			_bitmaps.push_back (std::tuple<dseed::auto_object<dseed::bitmap>, dseed::timespan_t> (i, 0));
 	}
+	__common_bitmap_decoder (const std::vector<dseed::bitmap*>& bitmaps, const std::vector<dseed::timespan_t>& timespans)
+		: _refCount (1)
+	{
+		for (int i = 0; i < bitmaps.size (); ++i)
+			_bitmaps.push_back (std::tuple<dseed::auto_object<dseed::bitmap>, dseed::timespan_t> (bitmaps[i], timespans[i]));
+	}
 	__common_bitmap_decoder (dseed::bitmap* bitmap)
-		: _refCount (0)
+		: _refCount (1)
 	{
 		_bitmaps.push_back (std::tuple<dseed::auto_object<dseed::bitmap>, dseed::timespan_t> (bitmap, 0));
 	}

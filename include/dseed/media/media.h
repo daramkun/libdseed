@@ -68,6 +68,7 @@ namespace dseed
 
 	DSEEDEXP timespan_t get_audio_duration (const audioformat& wf, size_t bytes);
 	DSEEDEXP size_t get_audio_bytes_count (const audioformat& wf, dseed::timespan_t duration);
+	DSEEDEXP size_t get_audio_bytes_count (uint32_t bytes_per_sec, dseed::timespan_t duration);
 
 	class DSEEDEXP media_sample : public dseed::object
 	{
@@ -120,9 +121,88 @@ namespace dseed
 
 	public:
 		virtual dseed::error_t encode (size_t streamIndex, media_sample* sample) = 0;
+
+	public:
+		virtual dseed::error_t commit () = 0;
 	};
+
+	struct DSEEDEXP media_encoder_options
+	{
+		size_t options_size;
+	protected:
+		media_encoder_options (size_t options_size) : options_size (options_size) { }
+	};
+
+	using createmediaencoder_fn = error_t (*) (dseed::stream*, const media_encoder_options*, media_encoder**);
+
+	class DSEEDEXP audio_stream : public dseed::stream
+	{
+	public:
+		virtual dseed::error_t audioformat (audioformat* wf) = 0;
+	};
+
+	DSEEDEXP dseed::error_t create_audio_buffered_stream (media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
+	DSEEDEXP dseed::error_t create_audio_wholestored_stream (media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
+
+	struct DSEEDEXP quadfilter
+	{
+		double a0, a1, a2, a3, a4;
+		double x1[12], x2[12], y1[12], y2[12];
+
+		float process (float input, int ch);
+
+		static quadfilter high_pass_filter (int samplerate, double freq, double q);
+		static quadfilter high_shelf_filter (int samplerate, double freq, float shelfSlope, double gaindb);
+		static quadfilter low_pass_filter (int samplerate, double freq, double q);
+		static quadfilter low_shelf_filter (int samplerate, double freq, float shelfSlope, double gaindb);
+		static quadfilter all_pass_filter (int samplerate, double freq, double q);
+		static quadfilter notch_filter (int samplerate, double freq, double q);
+		static quadfilter peak_eq_filter (int samplerate, double freq, double bandwidth, double peakGainDB);
+		static quadfilter band_pass_filter_csg (int samplerate, double freq, double q);
+		static quadfilter band_pass_filter_cpg (int samplerate, double freq, double q);
+	};
+
+	enum DSEEDEXP eqpreset_t
+	{
+		eqpreset_none,
+		eqpreset_acoustic,
+		eqpreset_dance,
+		eqpreset_jazz,
+		eqpreset_electronic,
+		eqpreset_pop,
+		eqpreset_rock,
+		eqpreset_hiphop,
+		eqpreset_classical,
+		eqpreset_piano,
+	};
+
+	DSEEDEXP dseed::error_t initialize_equalizer_filter (uint32_t samplerate, double bandwidth, eqpreset_t preset, quadfilter* filters, size_t filtersCount);
+	DSEEDEXP dseed::error_t initialize_equalizer_filter_with_gaindbs (uint32_t samplerate, double bandwidth,
+		quadfilter* filters, double* gainDbs, size_t filtersAndGainDbsCount);
+
+	DSEEDEXP dseed::error_t create_audio_filter_stream (audio_stream* original, quadfilter* filters, size_t filtersCount, audio_stream** stream);
+
+	enum DSEEDEXP spectrumchannels_t : uint32_t
+	{
+		spectrumchannels_none = 0,
+		spectrumchannels_ch1 = 1 << 0,
+		spectrumchannels_ch2 = 1 << 1,
+		spectrumchannels_ch3 = 1 << 2,
+		spectrumchannels_ch4 = 1 << 3,
+		spectrumchannels_ch5 = 1 << 4,
+		spectrumchannels_ch6 = 1 << 5,
+		spectrumchannels_ch7 = 1 << 6,
+		spectrumchannels_ch8 = 1 << 7,
+		spectrumchannels_ch9 = 1 << 8,
+		spectrumchannels_ch10 = 1 << 9,
+		spectrumchannels_average_all = 0xffffffff,
+	};
+
+	DSEEDEXP dseed::error_t convert_pcm_to_frequency (const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels_t ch, float* out);
+	DSEEDEXP dseed::error_t convert_pcm_to_decibel (const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels_t ch, float* out);
 }
 
-#include "media.decoders.h"
+#include <dseed/media/media.decoders.h>
+#include <dseed/media/media.encoders.h>
 
 #endif

@@ -100,9 +100,10 @@ namespace dseed
 	};
 
 	// Encoder Creation Function Prototype
-	using createencoder_fn = error_t (*) (dseed::stream*, const bitmap_encoder_options*, bitmap_encoder**);
+	using createbitmapencoder_fn = error_t (*) (dseed::stream*, const bitmap_encoder_options*, bitmap_encoder**);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>
+#include <dseed/bitmap/bitmap.encoders.h>
 
 #endif
