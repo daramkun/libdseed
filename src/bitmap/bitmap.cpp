@@ -8,7 +8,7 @@ public:
 	__palette (const void* pixels, size_t size, int bpp)
 		: _refCount (1), _bpp (bpp)
 	{
-		_palette.resize (size);
+		_palette.resize (size * (bpp / 8));
 		memcpy (_palette.data (), pixels, (bpp / 8) * _palette.size ());
 	}
 
@@ -23,7 +23,7 @@ public:
 	}
 
 public:
-	virtual size_t size () override { return _palette.size (); }
+	virtual size_t size () override { return _palette.size () / (_bpp / 8); }
 	virtual int bits_per_pixel () override { return _bpp; }
 
 public:
@@ -31,6 +31,18 @@ public:
 	{
 		if (dest == nullptr) return dseed::error_invalid_args;
 		memcpy (dest, _palette.data (), (_bpp / 8) * _palette.size ());
+		return dseed::error_good;
+	}
+
+public:
+	virtual void resize (size_t size) override
+	{
+		_palette.resize (size * (_bpp / 8));
+	}
+	virtual dseed::error_t pixels_pointer (void** ptr) override
+	{
+		if (ptr == nullptr) return dseed::error_invalid_args;
+		*ptr = _palette.data ();
 		return dseed::error_good;
 	}
 

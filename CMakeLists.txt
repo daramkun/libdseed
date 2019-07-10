@@ -197,6 +197,7 @@ SET ( DSEED_BUILD_FILES
 
 	# Bitmap
 	src/bitmap/bitmap.cpp
+	src/bitmap/bitmap.reformat.cpp
 
 	# Bitmap Decoders with Non-external Library
 	src/bitmap/decoders/bitmap.decoder.wic.cpp
@@ -228,6 +229,7 @@ SET ( DSEED_BUILD_FILES
 	src/media/audio.cpp
 	src/media/audio.filter.cpp
 	src/media/audio.spectrum.cpp
+	src/media/audio.reformat.cpp
 
 	# Media Decoders with Non-external Library
 	src/media/decoders/media.decoder.mf.cpp
@@ -359,11 +361,8 @@ TARGET_INCLUDE_DIRECTORIES (
 
 	${DSEED_PRIVATE_INCS}
 )
-MESSAGE ( "dseed Build Libs Headers: ${DSEED_PRIVATE_INCS}" )
 TARGET_COMPILE_DEFINITIONS ( dseed PRIVATE ${DSEED_DEFINITIONS} )
-MESSAGE ( "dseed Build Definitions: ${DSEED_DEFINITIONS}" )
 TARGET_LINK_LIBRARIES ( dseed ${DSEED_LINK_LIBS} )
-MESSAGE ( "dseed Build Linkage Libs: ${DSEED_LINK_LIBS}" )
 
 SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
 

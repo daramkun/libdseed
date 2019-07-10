@@ -51,6 +51,10 @@ public:
 		return dseed::error_good;
 	}
 
+public:
+	virtual void resize (size_t size) override { }
+	virtual dseed::error_t pixels_pointer (void** ptr) override { return dseed::error_not_impl; }
+
 private:
 	std::atomic<int32_t> _refCount;
 	CComPtr<IWICPalette> _palette;
