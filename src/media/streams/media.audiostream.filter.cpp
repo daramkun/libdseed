@@ -8,7 +8,7 @@ public:
 	__filter_stream (dseed::audio_stream* base, dseed::quadfilter* filters, size_t filtersCount)
 		: _refCount (1), _base (base), _filters (filters, filters + filtersCount)
 	{
-		base->waveformat (&_wf);
+		base->audioformat (&_wf);
 	}
 
 public:

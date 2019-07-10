@@ -3,6 +3,7 @@
 
 namespace dseed
 {
+	// Media Sample Types
 	using sampletype_t = uint32_t;
 	enum
 	{
@@ -66,10 +67,14 @@ namespace dseed
 		{ }
 	};
 
+	// Get Audio Duration from Bytes
 	DSEEDEXP timespan_t get_audio_duration (const audioformat& wf, size_t bytes);
+	// Get Bytes Count from Duration
 	DSEEDEXP size_t get_audio_bytes_count (const audioformat& wf, dseed::timespan_t duration);
+	// Get Bytes Count from Duration
 	DSEEDEXP size_t get_audio_bytes_count (uint32_t bytes_per_sec, dseed::timespan_t duration);
 
+	// Media Sample
 	class DSEEDEXP media_sample : public dseed::object
 	{
 	public:
@@ -88,6 +93,7 @@ namespace dseed
 		virtual size_t sample_size () = 0;
 	};
 
+	// Media Decoder
 	class DSEEDEXP media_decoder : public dseed::object
 	{
 	public:
@@ -114,6 +120,7 @@ namespace dseed
 	DSEEDEXP error_t add_media_decoder (createmediadecoder_fn fn);
 	DSEEDEXP error_t detect_media_decoder (dseed::stream* stream, dseed::media_decoder** decoder);
 
+	// Media Encoder
 	class DSEEDEXP media_encoder : public dseed::object
 	{
 	public:
@@ -126,6 +133,7 @@ namespace dseed
 		virtual dseed::error_t commit () = 0;
 	};
 
+	// Media Encoder Options
 	struct DSEEDEXP media_encoder_options
 	{
 		size_t options_size;
@@ -135,15 +143,19 @@ namespace dseed
 
 	using createmediaencoder_fn = error_t (*) (dseed::stream*, const media_encoder_options*, media_encoder**);
 
+	// Audio Stream
 	class DSEEDEXP audio_stream : public dseed::stream
 	{
 	public:
 		virtual dseed::error_t audioformat (audioformat* wf) = 0;
 	};
 
+	// Create Buffered Audio Stream
 	DSEEDEXP dseed::error_t create_audio_buffered_stream (media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
+	// Create Whole-Stored Audio Stream
 	DSEEDEXP dseed::error_t create_audio_wholestored_stream (media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
 
+	// Quad-Filter
 	struct DSEEDEXP quadfilter
 	{
 		double a0, a1, a2, a3, a4;
@@ -162,6 +174,7 @@ namespace dseed
 		static quadfilter band_pass_filter_cpg (int samplerate, double freq, double q);
 	};
 
+	// Equalizer Presets
 	enum DSEEDEXP eqpreset_t
 	{
 		eqpreset_none,
@@ -182,6 +195,7 @@ namespace dseed
 
 	DSEEDEXP dseed::error_t create_audio_filter_stream (audio_stream* original, quadfilter* filters, size_t filtersCount, audio_stream** stream);
 
+	// Spectrum Processing Channels
 	enum DSEEDEXP spectrumchannels_t : uint32_t
 	{
 		spectrumchannels_none = 0,

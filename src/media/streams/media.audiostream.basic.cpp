@@ -80,7 +80,7 @@ public:
 	virtual bool seekable () override { return true; }
 
 public:
-	virtual dseed::error_t waveformat (jaurim::waveformat* wf) override { *wf = _wf; return dseed::error_good; }
+	virtual dseed::error_t audioformat (dseed::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
 
 private:
 	dseed::error_t buffering () noexcept
@@ -111,7 +111,7 @@ private:
 private:
 	std::atomic<int32_t> _refCount;
 
-	dseed::auto_object<jaurim::audio_decoder> _decoder;
+	dseed::auto_object<dseed::media_decoder> _decoder;
 	dseed::auto_object<dseed::stream> _memstream;
 	size_t _position;
 	dseed::audioformat _wf;
