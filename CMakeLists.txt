@@ -195,6 +195,9 @@ SET ( DSEED_BUILD_FILES
 	# Concurrency
 	src/parallel.cpp
 
+	# Extra
+	src/extra.cpp
+
 	# Bitmap
 	src/bitmap/bitmap.cpp
 	src/bitmap/bitmap.reformat.cpp

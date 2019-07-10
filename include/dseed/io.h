@@ -81,21 +81,6 @@ namespace dseed
 
 	// Create Native File System
 	DSEEDEXP error_t create_native_filesystem (dseed::nativefilesystem_t fst, dseed::filesystem** fileSystem);
-
-	// Memory Blob
-	class DSEEDEXP blob : public object
-	{
-	public:
-		virtual void* blob_pointer () = 0;
-		virtual size_t blob_length () = 0;
-	};
-
-	// Create Empty Blob
-	DSEEDEXP error_t create_memoryblob (size_t length, dseed::blob** blob);
-	// Create Blob from Exists Buffer
-	DSEEDEXP error_t create_bufferblob (void* buffer, size_t length, bool copy, dseed::blob** blob);
-	// Create Blob from Stream
-	DSEEDEXP error_t create_streamblob (dseed::stream* stream, dseed::blob** blob);
 }
 
 #endif

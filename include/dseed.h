@@ -45,6 +45,7 @@
 #include <dseed/diagnostics.h>
 
 #include <dseed/parallel.h>
+#include <dseed/extra.h>
 
 #include <dseed/bitmap/bitmap.h>
 #include <dseed/media/media.h>

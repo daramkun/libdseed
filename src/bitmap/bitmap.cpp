@@ -9,7 +9,8 @@ public:
 		: _refCount (1), _bpp (bpp)
 	{
 		_palette.resize (size * (bpp / 8));
-		memcpy (_palette.data (), pixels, (bpp / 8) * _palette.size ());
+		if (pixels != nullptr)
+			memcpy (_palette.data (), pixels, (bpp / 8) * _palette.size ());
 	}
 
 public:
@@ -76,6 +77,8 @@ public:
 		
 		size_t bufferSize = dseed::get_bitmap_total_size (format, size);
 		_pixels.resize (bufferSize);
+
+		dseed::create_attributes (&_extraInfo);
 	}
 
 public:
@@ -193,6 +196,15 @@ public:
 		return dseed::error_good;
 	}
 
+public:
+	virtual dseed::error_t extra_info (dseed::attributes** attr) override
+	{
+		if (attr == nullptr) return dseed::error_invalid_args;
+		*attr = _extraInfo;
+		(*attr)->retain ();
+		return dseed::error_good;
+	}
+
 private:
 	std::atomic<int32_t> _refCount;
 
@@ -204,6 +216,8 @@ private:
 
 	std::vector<uint8_t> _pixels;
 	size_t _stride, _planeSize;
+
+	dseed::auto_object<dseed::attributes> _extraInfo;
 };
 
 dseed::error_t dseed::create_bitmap (bitmaptype_t type, const size3i& size, pixelformat_t format, palette* palette, bitmap** bitmap)

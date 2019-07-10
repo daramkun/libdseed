@@ -85,6 +85,8 @@ namespace dseed
 	constexpr error_t error_invalid_op = 0x80010002;
 	constexpr error_t error_out_of_range = 0x80010003;
 	constexpr error_t error_out_of_memory = 0x80010004;
+	constexpr error_t error_not_contained = 0x80010005;
+	constexpr error_t error_type_incorrect = 0x80010006;
 
 	constexpr error_t error_io = 0x80020001;
 	constexpr error_t error_file_not_found = 0x80020002;

@@ -67,6 +67,9 @@ namespace dseed
 	public:
 		virtual error_t read_pixels (void* buffer, const point2i& pos, const size2i& size, size_t depth = 0) = 0;
 		virtual error_t write_pixels (const void* data, const point2i& pos, const size2i& size, size_t depth = 0) = 0;
+
+	public:
+		virtual error_t extra_info (attributes** attr) = 0;
 	};
 
 	DSEEDEXP error_t create_bitmap (bitmaptype_t type, const size3i& size, pixelformat_t format, palette* palette, bitmap** bitmap);

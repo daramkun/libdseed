@@ -67,6 +67,8 @@ public:
 		:_refCount (1), _bitmap (bitmap)
 	{
 		_palette = new __windowsimagingcodec_palette (palette);
+
+		dseed::create_attributes (&_extraInfo);
 	}
 
 public:
@@ -174,10 +176,20 @@ public:
 		return dseed::error_not_impl;
 	}
 
+public:
+	virtual dseed::error_t extra_info (dseed::attributes** attr) override
+	{
+		if (attr == nullptr) return dseed::error_invalid_args;
+		*attr = _extraInfo;
+		(*attr)->retain ();
+		return dseed::error_good;
+	}
+
 private:
 	std::atomic<int32_t> _refCount;
 	CComPtr<IWICBitmapSource> _bitmap;
 	dseed::auto_object<__windowsimagingcodec_palette> _palette;
+	dseed::auto_object<dseed::attributes> _extraInfo;
 };
 
 class __windowsimagingcodec_decoder : public dseed::bitmap_decoder
