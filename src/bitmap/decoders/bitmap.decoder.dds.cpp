@@ -132,7 +132,7 @@ dseed::error_t dseed::create_dds_bitmap_decoder (dseed::stream* stream, dseed::b
 		memcpy (ptr, buf.data (), buf.size ());
 	}
 
-	*decoder = new __common_bitmap_decoder (bitmaps);
+	*decoder = new __common_bitmap_decoder (bitmaps, dseed::frametype_mipmap);
 	if (decoder == nullptr)
 		return dseed::error_out_of_memory;
 

@@ -204,7 +204,7 @@ dseed::error_t dseed::create_ktx_bitmap_decoder (dseed::stream* stream, dseed::b
 		memcpy (ptr, pixels.data (), pixels.size ());
 	}
 
-	*decoder = new __common_bitmap_decoder (bitmaps);
+	*decoder = new __common_bitmap_decoder (bitmaps, dseed::frametype_mipmap);
 	if (decoder == nullptr)
 		return dseed::error_out_of_memory;
 

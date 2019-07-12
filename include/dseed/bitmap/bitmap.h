@@ -74,11 +74,18 @@ namespace dseed
 
 	DSEEDEXP error_t create_bitmap (bitmaptype_t type, const size3i& size, pixelformat_t format, palette* palette, bitmap** bitmap);
 
+	enum frametype_t
+	{
+		frametype_plain,
+		frametype_mipmap,
+	};
+
 	class DSEEDEXP bitmap_decoder : public object
 	{
 	public:
 		virtual error_t decode_frame (size_t i, bitmap** bitmap, timespan_t* duration) = 0;
 		virtual size_t frame_count () = 0;
+		virtual frametype_t frame_type () = 0;
 	};
 
 	// Decoder Creation Function Prototype

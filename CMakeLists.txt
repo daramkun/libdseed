@@ -374,9 +374,9 @@ TARGET_LINK_LIBRARIES ( dseed ${DSEED_LINK_LIBS} )
 SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
 
 IF ( NOT ${DSEED_SKIP_BUILD_APP} )
-	ADD_EXECUTABLE ( dseed_test app/test/test.cpp )
-	TARGET_INCLUDE_DIRECTORIES ( dseed_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-	TARGET_LINK_LIBRARIES ( dseed_test dseed )
+	ADD_EXECUTABLE ( dseed_test_bitmap app/test_bitmap/test.cpp )
+	TARGET_INCLUDE_DIRECTORIES ( dseed_test_bitmap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
+	TARGET_LINK_LIBRARIES ( dseed_test_bitmap dseed )
 ENDIF ()
 
 IF ( NOT ${DSEED_SKIP_INSTALL} )
@@ -400,7 +400,7 @@ IF ( NOT ${DSEED_SKIP_INSTALL} )
 	)
 	IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 		INSTALL (
-			TARGETS dseed_test
+			TARGETS dseed_test_bitmap
 			RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 		)
 	ENDIF ()

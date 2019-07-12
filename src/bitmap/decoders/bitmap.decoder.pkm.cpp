@@ -45,7 +45,7 @@ dseed::error_t dseed::create_pkm_bitmap_decoder (dseed::stream* stream, dseed::b
 
 	memcpy (ptr, pixels.data (), pixels.size ());
 
-	*decoder = new __common_bitmap_decoder (bitmap);
+	*decoder = new __common_bitmap_decoder (bitmap, dseed::frametype_mipmap);
 	if (*decoder == nullptr)
 		return dseed::error_out_of_memory;
 
