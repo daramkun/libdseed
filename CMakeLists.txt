@@ -377,6 +377,10 @@ IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 	ADD_EXECUTABLE ( dseed_test_bitmap app/test_bitmap/test.cpp )
 	TARGET_INCLUDE_DIRECTORIES ( dseed_test_bitmap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
 	TARGET_LINK_LIBRARIES ( dseed_test_bitmap dseed )
+	
+	ADD_EXECUTABLE ( dseed_test_audio app/test_audio/test.cpp )
+	TARGET_INCLUDE_DIRECTORIES ( dseed_test_audio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
+	TARGET_LINK_LIBRARIES ( dseed_test_audio dseed )
 ENDIF ()
 
 IF ( NOT ${DSEED_SKIP_INSTALL} )
@@ -400,7 +404,7 @@ IF ( NOT ${DSEED_SKIP_INSTALL} )
 	)
 	IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 		INSTALL (
-			TARGETS dseed_test_bitmap
+			TARGETS dseed_test_bitmap dseed_test_audio
 			RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 		)
 	ENDIF ()

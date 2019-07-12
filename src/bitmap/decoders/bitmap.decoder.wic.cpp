@@ -273,6 +273,7 @@ public:
 		_decoder->GetFrameCount (&c);
 		return c;
 	}
+	virtual dseed::frametype_t frame_type () override { return dseed::frametype_plain; }
 
 private:
 	std::atomic<int32_t> _refCount;
