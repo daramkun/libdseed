@@ -41,7 +41,11 @@ namespace dseed
 #	pragma pack ()
 #endif
 
+	DSEEDEXP dseed::error_t create_dib_bitmap_encoder (dseed::stream* stream, const dseed::bitmap_encoder_options* options, dseed::bitmap_encoder** encoder);
 	DSEEDEXP dseed::error_t create_dds_bitmap_encoder (dseed::stream* stream, const dseed::bitmap_encoder_options* options, dseed::bitmap_encoder** encoder);
+
+	DSEEDEXP dseed::error_t create_ico_bitmap_encoder (dseed::stream* stream, const dseed::bitmap_encoder_options* options, dseed::bitmap_encoder** encoder);
+	DSEEDEXP dseed::error_t create_cur_bitmap_encoder (dseed::stream* stream, const dseed::bitmap_encoder_options* options, dseed::bitmap_encoder** encoder);
 
 	DSEEDEXP dseed::error_t create_png_bitmap_encoder (dseed::stream* stream, const dseed::bitmap_encoder_options* options, dseed::bitmap_encoder** encoder);
 	DSEEDEXP dseed::error_t create_jpeg_bitmap_encoder (dseed::stream* stream, const dseed::bitmap_encoder_options* options, dseed::bitmap_encoder** encoder);

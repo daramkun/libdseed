@@ -39,8 +39,11 @@ public:
 	virtual dseed::error_t encode_frame (dseed::bitmap* bitmap, dseed::timespan_t duration) override
 	{
 		if (_pgif == nullptr) return dseed::error_fail;
-		if (bitmap == nullptr || !(bitmap->format () == dseed::pixelformat_bgr888_indexed8 || bitmap->format () == dseed::pixelformat_bgra8888_indexed8))
+		if (bitmap == nullptr)
 			return dseed::error_invalid_args;
+		if ((!(bitmap->format () == dseed::pixelformat_bgr888_indexed8 || bitmap->format () == dseed::pixelformat_bgra8888_indexed8))
+			|| (bitmap->size ().depth > 1))
+			return dseed::error_not_support;
 
 		auto size = bitmap->size ();
 		ColorMapObject* cmo = nullptr;

@@ -86,12 +86,16 @@ public:
 		if (_already_encoded)
 			return dseed::error_invalid_op;
 
+		dseed::size3i size = bitmap->size ();
+		if (size.depth > 1)
+			return dseed::error_not_support;
+
 		dseed::pixelformat_t format = bitmap->format ();
 		if (format != dseed::pixelformat_rgb888 &&
 			format != dseed::pixelformat_rgba8888 &&
 			format != dseed::pixelformat_bgr888 &&
 			format != dseed::pixelformat_bgra8888)
-			return dseed::error_invalid_args;
+			return dseed::error_not_support;
 
 		size_t streamOriginPos = _stream->position ();
 
@@ -99,7 +103,6 @@ public:
 		jpeg_create_compress (&_cinfo);
 		jpeg_stream_dest (&_cinfo, _stream);
 
-		dseed::size3i size = bitmap->size ();
 		_cinfo.image_width = size.width;
 		_cinfo.image_height = size.height;
 		_cinfo.input_components = (format == dseed::pixelformat_rgb888 || format == dseed::pixelformat_bgr888) ? 3 : 4;

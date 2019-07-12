@@ -139,7 +139,7 @@ public:
 	}
 
 public:
-	virtual dseed::error_t get_int32 (uint64_t key, int32_t* value) override
+	virtual dseed::error_t get_int32 (dseed::attrkey_t key, int32_t* value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -152,7 +152,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t get_uint32 (uint64_t key, uint32_t* value) override
+	virtual dseed::error_t get_uint32 (dseed::attrkey_t key, uint32_t* value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -165,7 +165,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t get_int64 (uint64_t key, int64_t* value) override
+	virtual dseed::error_t get_int64 (dseed::attrkey_t key, int64_t* value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -178,7 +178,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t get_uint64 (uint64_t key, uint64_t* value) override
+	virtual dseed::error_t get_uint64 (dseed::attrkey_t key, uint64_t* value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -191,7 +191,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t get_single (uint64_t key, float* value) override
+	virtual dseed::error_t get_single (dseed::attrkey_t key, float* value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -204,7 +204,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t get_double (uint64_t key, double* value) override
+	virtual dseed::error_t get_double (dseed::attrkey_t key, double* value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -217,7 +217,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t get_object (uint64_t key, dseed::object** value) override
+	virtual dseed::error_t get_object (dseed::attrkey_t key, dseed::object** value) override
 	{
 		auto found = _items.find (key);
 		if (found == _items.end ())
@@ -233,7 +233,7 @@ public:
 	}
 
 public:
-	virtual dseed::error_t set_int32 (uint64_t key, int32_t value) override
+	virtual dseed::error_t set_int32 (dseed::attrkey_t key, int32_t value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -251,7 +251,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_uint32 (uint64_t key, uint32_t value) override
+	virtual dseed::error_t set_uint32 (dseed::attrkey_t key, uint32_t value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -269,7 +269,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_int64 (uint64_t key, int64_t value) override
+	virtual dseed::error_t set_int64 (dseed::attrkey_t key, int64_t value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -287,7 +287,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_uint64 (uint64_t key, uint64_t value) override
+	virtual dseed::error_t set_uint64 (dseed::attrkey_t key, uint64_t value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -305,7 +305,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_single (uint64_t key, float value) override
+	virtual dseed::error_t set_single (dseed::attrkey_t key, float value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -323,7 +323,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_double (uint64_t key, double value) override
+	virtual dseed::error_t set_double (dseed::attrkey_t key, double value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -341,7 +341,7 @@ public:
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_object (uint64_t key, dseed::object* value) override
+	virtual dseed::error_t set_object (dseed::attrkey_t key, dseed::object* value) override
 	{
 		auto found = _items.find (key);
 		if (found != _items.end ())
@@ -377,7 +377,7 @@ dseed::error_t dseed::create_attributes (attributes** attr)
 	return dseed::error_good;
 }
 
-dseed::error_t dseed::attributes::get_size (uint64_t key, uint32_t* width, uint32_t* height)
+dseed::error_t dseed::attributes::get_size (dseed::attrkey_t key, uint32_t* width, uint32_t* height)
 {
 	uint64_t temp;
 	error_t err;
@@ -391,12 +391,12 @@ dseed::error_t dseed::attributes::get_size (uint64_t key, uint32_t* width, uint3
 	return error_good;
 }
 
-dseed::error_t dseed::attributes::set_size (uint64_t key, uint32_t width, uint32_t height)
+dseed::error_t dseed::attributes::set_size (dseed::attrkey_t key, uint32_t width, uint32_t height)
 {
 	return set_uint64 (key, ((width << 32) & 0xffffffff00000000) | height);
 }
 
-dseed::error_t dseed::attributes::get_fraction (uint64_t key, int32_t* numerator, int32_t* denominator)
+dseed::error_t dseed::attributes::get_fraction (dseed::attrkey_t key, int32_t* numerator, int32_t* denominator)
 {
 	int64_t temp;
 	error_t err;
@@ -410,7 +410,113 @@ dseed::error_t dseed::attributes::get_fraction (uint64_t key, int32_t* numerator
 	return error_good;
 }
 
-dseed::error_t dseed::attributes::set_fraction (uint64_t key, int32_t numerator, int32_t denominator)
+dseed::error_t dseed::attributes::set_fraction (dseed::attrkey_t key, int32_t numerator, int32_t denominator)
 {
 	return set_int64 (key, ((numerator << 32) & 0xffffffff00000000) | denominator);
+}
+
+class __ptr_obj : public dseed::object
+{
+public:
+	__ptr_obj (const void* ptr, size_t ptrSize)
+		: _refCount (1)
+	{
+		_ptr.resize (ptrSize);
+		memcpy (_ptr.data (), ptr, ptrSize);
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	void* get_ptr () { return _ptr.data (); }
+	size_t get_ptr_size () { return _ptr.size (); }
+
+private:
+	std::atomic<int32_t> _refCount;
+	std::vector<uint8_t> _ptr;
+};
+
+dseed::error_t dseed::attributes::get_string (dseed::attrkey_t key, char* strBuffer, size_t strBufferMaxSize)
+{
+	dseed::error_t err;
+
+	dseed::auto_object<dseed::object> value;
+	if (dseed::failed (err = get_object (key, &value)))
+		return err;
+
+	__ptr_obj* ptrobj = dynamic_cast<__ptr_obj*>(value.get ());
+	if (ptrobj == nullptr)
+		return dseed::error_type_incorrect;
+
+	memcpy (strBuffer, ptrobj->get_ptr (), dseed::minimum (ptrobj->get_ptr_size (), strBufferMaxSize));
+
+	return dseed::error_good;
+}
+
+dseed::error_t dseed::attributes::set_string (dseed::attrkey_t key, const char* str)
+{
+	dseed::auto_object<__ptr_obj> value;
+	*&value = new __ptr_obj (str, std::char_traits<char>::length (str));
+
+	return set_object (key, value);
+}
+
+dseed::error_t dseed::attributes::get_u16string (dseed::attrkey_t key, char16_t* strBuffer, size_t strBufferMaxSize)
+{
+	dseed::error_t err;
+
+	dseed::auto_object<dseed::object> value;
+	if (dseed::failed (err = get_object (key, &value)))
+		return err;
+
+	__ptr_obj* ptrobj = dynamic_cast<__ptr_obj*>(value.get ());
+	if (ptrobj == nullptr)
+		return dseed::error_type_incorrect;
+
+	memcpy (strBuffer, ptrobj->get_ptr (), dseed::minimum (ptrobj->get_ptr_size (), strBufferMaxSize * sizeof (char16_t)));
+
+	return dseed::error_good;
+}
+
+dseed::error_t dseed::attributes::set_u16string (dseed::attrkey_t key, const char16_t* str)
+{
+	dseed::auto_object<__ptr_obj> value;
+	*&value = new __ptr_obj (str, std::char_traits<char16_t>::length (str));
+
+	return set_object (key, value);
+}
+
+dseed::error_t dseed::attributes::get_struct (attrkey_t key, void* buffer, size_t bufferSize)
+{
+	dseed::error_t err;
+
+	dseed::auto_object<dseed::object> value;
+	if (dseed::failed (err = get_object (key, &value)))
+		return err;
+
+	__ptr_obj* ptrobj = dynamic_cast<__ptr_obj*>(value.get ());
+	if (ptrobj == nullptr)
+		return dseed::error_type_incorrect;
+	if (ptrobj->get_ptr_size () != bufferSize)
+		return dseed::error_type_incorrect;
+
+	memcpy (buffer, ptrobj->get_ptr (), bufferSize);
+
+	return dseed::error_good;
+}
+
+dseed::error_t dseed::attributes::set_struct (attrkey_t key, const void* data, size_t dataSize)
+{
+	dseed::auto_object<__ptr_obj> value;
+	*&value = new __ptr_obj (data, dataSize);
+
+	return set_object (key, value);
 }

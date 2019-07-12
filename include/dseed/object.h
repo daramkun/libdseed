@@ -107,7 +107,7 @@ namespace dseed
 		inline T** operator & () { return reinterpret_cast<T * *> (&_ptr); }
 		inline T* operator -> () const { return dynamic_cast<T*> (_ptr); }
 		inline operator T* () const { return dynamic_cast<T*> (_ptr); }
-		inline explicit operator object* () const { return _ptr; }
+		//inline explicit operator object* () const { return _ptr; }
 		inline auto_object<T>& operator = (T* obj)
 		{
 			store (obj);

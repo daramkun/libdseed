@@ -20,6 +20,7 @@ SET ( INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation
 SET ( INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files" )
 
 OPTION ( DSEED_SKIP_INSTALL        "libdseed do not install."              OFF )
+OPTION ( DSEED_SKIP_BUILD_APP      "libdseed do not build app."            OFF )
 
 OPTION ( DSEED_USE_PNG             "libdseed use PNG Decode/Encode."       ON  )
 OPTION ( DSEED_USE_JPEG            "libdseed use JPEG Decode/Encode."      ON  )
@@ -209,6 +210,7 @@ SET ( DSEED_BUILD_FILES
 	src/bitmap/decoders/bitmap.decoder.dds.cpp
 	src/bitmap/decoders/bitmap.decoder.pkm.cpp
 	src/bitmap/decoders/bitmap.decoder.ktx.cpp
+	src/bitmap/decoders/bitmap.decoder.ico.cur.cpp
 
 	# Bitmap Decoders with External Libraries
 	src/bitmap/decoders/bitmap.decoder.png.cpp
@@ -219,7 +221,9 @@ SET ( DSEED_BUILD_FILES
 	src/bitmap/decoders/bitmap.decoder.gif.cpp
 
 	# Bitmap Encoders with Non-external Library
+	src/bitmap/encoders/bitmap.encoder.dib.cpp
 	src/bitmap/encoders/bitmap.encoder.dds.cpp
+	src/bitmap/encoders/bitmap.encoder.ico.cur.cpp
 
 	# Bitmap Encoders with External Libraries
 	src/bitmap/encoders/bitmap.encoder.png.cpp
@@ -369,6 +373,12 @@ TARGET_LINK_LIBRARIES ( dseed ${DSEED_LINK_LIBS} )
 
 SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
 
+IF ( NOT ${DSEED_SKIP_BUILD_APP} )
+	ADD_EXECUTABLE ( dseed_test app/test/test.cpp )
+	TARGET_INCLUDE_DIRECTORIES ( dseed_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
+	TARGET_LINK_LIBRARIES ( dseed_test dseed )
+ENDIF ()
+
 IF ( NOT ${DSEED_SKIP_INSTALL} )
 	generate_export_header ( dseed )
 	SET_PROPERTY ( TARGET dseed PROPERTY VERSION ${DSEED_VERSION} )
@@ -388,6 +398,12 @@ IF ( NOT ${DSEED_SKIP_INSTALL} )
 		PUBLIC_HEADER DESTINATION ${INSTALL_INC_DIR}
 		INCLUDES DESTINATION ${INSTALL_INC_DIR}
 	)
+	IF ( NOT ${DSEED_SKIP_BUILD_APP} )
+		INSTALL (
+			TARGETS dseed_test
+			RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+		)
+	ENDIF ()
 	INSTALL (
 		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 		DESTINATION ${INSTALL_INC_DIR}

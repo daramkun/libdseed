@@ -51,6 +51,8 @@ public:
 		dseed::pixelformat_t format = bitmap->format ();
 		size_t stride = dseed::get_bitmap_stride (format, size.width);
 
+		if (size.depth > 1)
+			return dseed::error_not_support;
 		if (!(format == dseed::pixelformat_rgba8888 || format == dseed::pixelformat_rgb888
 			|| format == dseed::pixelformat_bgra8888 || format == dseed::pixelformat_bgr888
 			|| format == dseed::pixelformat_bgr888_indexed8 || format == dseed::pixelformat_bgra8888_indexed8

@@ -46,6 +46,8 @@ public:
 			return dseed::error_not_support;
 
 		dseed::size3i size = bitmap->size ();
+		if (size.depth > 1)
+			return dseed::error_not_support;
 
 		if (_anim == nullptr)
 		{

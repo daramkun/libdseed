@@ -12,6 +12,9 @@ namespace dseed
 	DSEEDEXP error_t create_ktx_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_pkm_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 
+	DSEEDEXP error_t create_ico_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
+	DSEEDEXP error_t create_cur_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
+
 	DSEEDEXP error_t create_png_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_jpeg_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_jpeg2000_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
