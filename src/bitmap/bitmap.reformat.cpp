@@ -1306,7 +1306,7 @@ template<> inline int pixelconv<pixelformat_grayscale8, pixelformat_grayscalef> 
 			{
 				uint8_t* destPtrX = destPtr + x;
 				const float* srcPtrX = srcPtr + x;
-				*destPtrX = (uint8_t)(srcPtrX * 255.0f);
+				*destPtrX = (uint8_t)(*srcPtrX * 255.0f);
 			}
 		}
 	}
@@ -1475,7 +1475,7 @@ template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_grayscalef> 
 			{
 				float* destPtrX = destPtr + x;
 				const uint8_t* srcPtrX = srcPtr + x;
-				*destPtrX = (float)(srcPtrX / 255.0f);
+				*destPtrX = (float)(*srcPtrX / 255.0f);
 			}
 		}
 	}
