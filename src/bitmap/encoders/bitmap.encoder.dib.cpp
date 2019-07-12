@@ -96,6 +96,7 @@ public:
 
 		return dseed::error_good;
 	}
+	virtual dseed::frametype_t frame_type () override { return dseed::frametype_plain; }
 
 public:
 	virtual dseed::error_t commit () override

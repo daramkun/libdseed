@@ -213,6 +213,7 @@ private:
 			break;
 		}
 	}
+	virtual dseed::frametype_t frame_type () override { return dseed::frametype_mipmap; }
 
 private:
 	std::atomic<int32_t> _refCount;

@@ -100,6 +100,7 @@ namespace dseed
 	{
 	public:
 		virtual error_t encode_frame (bitmap* bitmap, timespan_t duration) = 0;
+		virtual frametype_t frame_type () = 0;
 
 	public:
 		virtual error_t commit () = 0;
