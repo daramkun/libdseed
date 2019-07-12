@@ -16,14 +16,20 @@
 using namespace dseed;
 
 #define PIXELCONV_ARGS										uint8_t* dest, const uint8_t* src, const dseed::size3i& size, uint8_t* destPalette, uint8_t* srcPalette
-using pixelconvfn = std::function<int (PIXELCONV_ARGS)>;
-using pixelconvtp = std::tuple<pixelformat_t, pixelformat_t>;
+using pcfn = std::function<int (PIXELCONV_ARGS)>;
+using pctp = std::tuple<pixelformat_t, pixelformat_t>;
 template<pixelformat_t destformat, pixelformat_t srcformat>
 inline int pixelconv (PIXELCONV_ARGS) noexcept
 {
 	static_assert (true, "Not support those formats currently.");
-	return 0;
+	return -1;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// RGB series Conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bgra8888> (PIXELCONV_ARGS)
 {
@@ -218,6 +224,31 @@ template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_grayscale8> (P
 	}
 	return 0;
 }
+template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_rgba8888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_grayscalef, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			rgba* destPtr = (rgba*)(dest + destDepthZ + destStrideY);
+			const float* srcPtr = (const float*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				rgba* destPtrX = destPtr + x;
+				const float* srcPtrX = srcPtr + x;
+				destPtrX->r = destPtrX->g = destPtrX->b = (uint8_t)((*srcPtrX) * 255);
+				destPtrX->a = 255;
+			}
+		}
+	}
+	return 0;
+}
 
 template<> inline int pixelconv<pixelformat_rgb888, pixelformat_rgba8888> (PIXELCONV_ARGS) noexcept
 {
@@ -374,6 +405,30 @@ template<> inline int pixelconv<pixelformat_rgb888, pixelformat_grayscale8> (PIX
 	}
 	return 0;
 }
+template<> inline int pixelconv<pixelformat_rgb888, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_rgb888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_grayscalef, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			rgb* destPtr = (rgb*)(dest + destDepthZ + destStrideY);
+			const float* srcPtr = (const float*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				rgb* destPtrX = destPtr + x;
+				const float* srcPtrX = srcPtr + x;
+				destPtrX->r = destPtrX->g = destPtrX->b = (uint8_t)((*srcPtrX) * 255);
+			}
+		}
+	}
+	return 0;
+}
 template<> inline int pixelconv<pixelformat_rgb888, pixelformat_bgra4444> (PIXELCONV_ARGS)
 {
 	size_t destStride = get_bitmap_stride (pixelformat_rgb888, size.width)
@@ -471,6 +526,10 @@ template<> inline int pixelconv<pixelformat_bgra8888, pixelformat_grayscale8> (P
 {
 	return pixelconv<pixelformat_rgba8888, pixelformat_grayscale8> (dest, src, size, destPalette, srcPalette);
 }
+template<> inline int pixelconv<pixelformat_bgra8888, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	return pixelconv<pixelformat_rgba8888, pixelformat_grayscalef> (dest, src, size, destPalette, srcPalette);
+}
 
 template<> inline int pixelconv<pixelformat_bgr888, pixelformat_rgbaf> (PIXELCONV_ARGS)
 {
@@ -539,6 +598,10 @@ template<> inline int pixelconv<pixelformat_bgr888, pixelformat_bgr888> (PIXELCO
 template<> inline int pixelconv<pixelformat_bgr888, pixelformat_grayscale8> (PIXELCONV_ARGS)
 {
 	return pixelconv<pixelformat_rgb888, pixelformat_grayscale8> (dest, src, size, destPalette, srcPalette);
+}
+template<> inline int pixelconv<pixelformat_bgr888, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	return pixelconv<pixelformat_rgb888, pixelformat_grayscalef> (dest, src, size, destPalette, srcPalette);
 }
 
 template<> inline int pixelconv<pixelformat_bgra4444, pixelformat_rgba8888> (PIXELCONV_ARGS)
@@ -845,18 +908,17 @@ template<> inline int pixelconv<pixelformat_bgra4444, pixelformat_grayscale8> (P
 			{
 				bgra4* destPtrX = destPtr + x;
 				const uint8_t* srcPtrX = srcPtr + x;
-				destPtrX->r = destPtrX->g = destPtrX->b = *srcPtrX;
+				destPtrX->r = destPtrX->g = destPtrX->b = (*srcPtrX) / 17;
 				destPtrX->a = 15;
 			}
 		}
 	}
 	return 0;
 }
-
-template<> inline int pixelconv<pixelformat_bgr565, pixelformat_bgr888> (PIXELCONV_ARGS)
+template<> inline int pixelconv<pixelformat_bgra4444, pixelformat_grayscalef> (PIXELCONV_ARGS)
 {
-	size_t destStride = get_bitmap_stride (pixelformat_bgr565, size.width)
-		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destStride = get_bitmap_stride (pixelformat_bgra4444, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_grayscalef, size.width);
 	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
 
 	for (auto z = 0; z < size.depth; ++z)
@@ -865,41 +927,14 @@ template<> inline int pixelconv<pixelformat_bgr565, pixelformat_bgr888> (PIXELCO
 		for (auto y = 0; y < size.height; ++y)
 		{
 			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
-			bgr565* destPtr = (bgr565*)(dest + destDepthZ + destStrideY);
-			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			bgra4* destPtr = (bgra4*)(dest + destDepthZ + destStrideY);
+			const float* srcPtr = (const float*)(src + srcDepthZ + srcStrideY);
 			for (auto x = 0; x < size.width; ++x)
 			{
-				bgr565* destPtrX = destPtr + x;
-				const bgr* srcPtrX = srcPtr + x;
-				destPtrX->r = ceil (srcPtrX->r / 8);
-				destPtrX->g = ceil (srcPtrX->g / 4);
-				destPtrX->b = ceil (srcPtrX->b / 8);
-			}
-		}
-	}
-	return 0;
-}
-template<> inline int pixelconv<pixelformat_bgr888, pixelformat_bgr565> (PIXELCONV_ARGS)
-{
-	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width)
-		, srcStride = get_bitmap_stride (pixelformat_bgr565, size.width);
-	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
-
-	for (auto z = 0; z < size.depth; ++z)
-	{
-		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
-		for (auto y = 0; y < size.height; ++y)
-		{
-			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
-			bgr* destPtr = (bgr*)(dest + destDepthZ + destStrideY);
-			const bgr565* srcPtr = (const bgr565*)(src + srcDepthZ + srcStrideY);
-			for (auto x = 0; x < size.width; ++x)
-			{
-				bgr* destPtrX = destPtr + x;
-				const bgr565* srcPtrX = srcPtr + x;
-				destPtrX->r = srcPtrX->r * 8;
-				destPtrX->g = srcPtrX->g * 4;
-				destPtrX->b = srcPtrX->b * 8;
+				bgra4* destPtrX = destPtr + x;
+				const float* srcPtrX = srcPtr + x;
+				destPtrX->r = destPtrX->g = destPtrX->b = (uint8_t)((*srcPtrX) * 15);
+				destPtrX->a = 15;
 			}
 		}
 	}
@@ -1036,7 +1071,7 @@ template<> inline int pixelconv<pixelformat_rgbaf, pixelformat_bgr888> (PIXELCON
 template<> inline int pixelconv<pixelformat_rgbaf, pixelformat_grayscale8> (PIXELCONV_ARGS)
 {
 	size_t destStride = get_bitmap_stride (pixelformat_rgbaf, size.width)
-		, srcStride = get_bitmap_stride (pixelformat_rgba8888, size.width);
+		, srcStride = get_bitmap_stride (pixelformat_grayscale8, size.width);
 	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
 
 	for (auto z = 0; z < size.depth; ++z)
@@ -1051,6 +1086,30 @@ template<> inline int pixelconv<pixelformat_rgbaf, pixelformat_grayscale8> (PIXE
 			{
 				rgbaf* destPtrX = destPtr + x;
 				destPtrX->r = destPtrX->g = destPtrX->b = *(srcPtr + x) / 255.0f;
+				(destPtr + x)->a = 1;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_rgbaf, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_rgbaf, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_grayscalef, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			rgbaf* destPtr = (rgbaf*)(dest + destDepthZ + destStrideY);
+			const float* srcPtr = (const float*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				rgbaf* destPtrX = destPtr + x;
+				destPtrX->r = destPtrX->g = destPtrX->b = *(srcPtr + x);
 				(destPtr + x)->a = 1;
 			}
 		}
@@ -1229,6 +1288,264 @@ template<> inline int pixelconv<pixelformat_grayscale8, pixelformat_rgbaf> (PIXE
 	}
 	return 0;
 }
+template<> inline int pixelconv<pixelformat_grayscale8, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscale8, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_grayscalef, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			uint8_t* destPtr = (uint8_t*)(dest + destDepthZ + destStrideY);
+			const float* srcPtr = (const float*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				uint8_t* destPtrX = destPtr + x;
+				const float* srcPtrX = srcPtr + x;
+				*destPtrX = (uint8_t)(srcPtrX * 255.0f);
+			}
+		}
+	}
+	return 0;
+}
+
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_rgba8888> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_rgba8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const rgba* srcPtr = (const rgba*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const rgba* srcPtrX = srcPtr + x;
+				*destPtrX = (float)(srcPtrX->r * 0.2126f + srcPtrX->g * 0.7152 + srcPtrX->b * 0.0722) / 255.0f;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_rgb888> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_rgb888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const rgb* srcPtr = (const rgb*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const rgb* srcPtrX = srcPtr + x;
+				*destPtrX = (float)(srcPtrX->r * 0.2126f + srcPtrX->g * 0.7152 + srcPtrX->b * 0.0722) / 255.0f;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_bgra8888> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_rgba8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const bgra* srcPtr = (const bgra*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const bgra* srcPtrX = srcPtr + x;
+				*destPtrX = (float)(srcPtrX->r * 0.2126f + srcPtrX->g * 0.7152 + srcPtrX->b * 0.0722) / 255.0f;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_bgra4444> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgra4444, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const bgra4* srcPtr = (const bgra4*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const bgra4* srcPtrX = srcPtr + x;
+				*destPtrX = (float)(srcPtrX->r * 0.2126f + srcPtrX->g * 0.7152 + srcPtrX->b * 0.0722) / 15.0f;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_bgr888> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const bgr* srcPtrX = srcPtr + x;
+				*destPtrX = (float)(srcPtrX->r * 0.2126f + srcPtrX->g * 0.7152 + srcPtrX->b * 0.0722) / 255.0f;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_rgbaf> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_rgbaf, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const rgbaf* srcPtr = (const rgbaf*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const rgbaf* srcPtrX = srcPtr + x;
+				*destPtrX = (srcPtrX->r * 0.2126f + srcPtrX->g * 0.7152 + srcPtrX->b * 0.0722);
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_grayscalef, pixelformat_grayscalef> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_grayscalef, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_grayscale8, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			float* destPtr = (float*)(dest + destDepthZ + destStrideY);
+			const uint8_t* srcPtr = (const uint8_t*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				float* destPtrX = destPtr + x;
+				const uint8_t* srcPtrX = srcPtr + x;
+				*destPtrX = (float)(srcPtrX / 255.0f);
+			}
+		}
+	}
+	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// BGR565 <-> BGR888 Conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+template<> inline int pixelconv<pixelformat_bgr565, pixelformat_bgr888> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgr565, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			bgr565* destPtr = (bgr565*)(dest + destDepthZ + destStrideY);
+			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				bgr565* destPtrX = destPtr + x;
+				const bgr* srcPtrX = srcPtr + x;
+				destPtrX->r = ceil (srcPtrX->r / 8);
+				destPtrX->g = ceil (srcPtrX->g / 4);
+				destPtrX->b = ceil (srcPtrX->b / 8);
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_bgr888, pixelformat_bgr565> (PIXELCONV_ARGS)
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgr565, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			bgr* destPtr = (bgr*)(dest + destDepthZ + destStrideY);
+			const bgr565* srcPtr = (const bgr565*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				bgr* destPtrX = destPtr + x;
+				const bgr565* srcPtrX = srcPtr + x;
+				destPtrX->r = srcPtrX->r * 8;
+				destPtrX->g = srcPtrX->g * 4;
+				destPtrX->b = srcPtrX->b * 8;
+			}
+		}
+	}
+	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Indexed BGR series conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> inline int pixelconv<pixelformat_bgra8888, pixelformat_bgra8888_indexed8> (PIXELCONV_ARGS)
 {
@@ -1423,6 +1740,12 @@ template<> inline int pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgr888>
 	return 256;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// DXT series <-> RGBA Conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
 template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bc1> (PIXELCONV_ARGS) noexcept
 {
 #if defined ( USE_SQUISH )
@@ -1549,6 +1872,12 @@ template<> inline int pixelconv<pixelformat_bc5, pixelformat_rgba8888> (PIXELCON
 #endif
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// ETC1 <-> RGB/RGBA series Conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
 template<> inline int pixelconv<pixelformat_rgb888, pixelformat_etc1> (PIXELCONV_ARGS)
 {
 	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_rgb888, size.width, size.height),
@@ -1619,86 +1948,107 @@ template<> inline int pixelconv<pixelformat_etc1, pixelformat_rgba8888> (PIXELCO
 	return 0;
 }
 
-std::map<pixelconvtp, pixelconvfn> g_pixelconvs = {
-	{ pixelconvtp (pixelformat_rgbaf, pixelformat_rgba8888), pixelconv<pixelformat_rgbaf, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_rgbaf, pixelformat_bgra8888), pixelconv<pixelformat_rgbaf, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_rgbaf, pixelformat_rgb888), pixelconv<pixelformat_rgbaf, pixelformat_rgb888> },
-	{ pixelconvtp (pixelformat_rgbaf, pixelformat_bgr888), pixelconv<pixelformat_rgbaf, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_rgbaf, pixelformat_bgra4444), pixelconv<pixelformat_rgbaf, pixelformat_bgra4444> },
-	{ pixelconvtp (pixelformat_rgbaf, pixelformat_grayscale8), pixelconv<pixelformat_rgbaf, pixelformat_grayscale8> },
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Conversions Dictionary
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_rgbaf), pixelconv<pixelformat_rgba8888, pixelformat_rgbaf> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bgra8888), pixelconv<pixelformat_rgba8888, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bgra4444), pixelconv<pixelformat_rgba8888, pixelformat_bgra4444> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_rgb888), pixelconv<pixelformat_rgba8888, pixelformat_rgb888> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bgr888), pixelconv<pixelformat_rgba8888, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_grayscale8), pixelconv<pixelformat_rgba8888, pixelformat_grayscale8> },
+std::map<pctp, pcfn> g_pixelconvs = {
+	{ pctp (pixelformat_rgbaf, pixelformat_rgba8888), pixelconv<pixelformat_rgbaf, pixelformat_rgba8888> },
+	{ pctp (pixelformat_rgbaf, pixelformat_bgra8888), pixelconv<pixelformat_rgbaf, pixelformat_bgra8888> },
+	{ pctp (pixelformat_rgbaf, pixelformat_rgb888), pixelconv<pixelformat_rgbaf, pixelformat_rgb888> },
+	{ pctp (pixelformat_rgbaf, pixelformat_bgr888), pixelconv<pixelformat_rgbaf, pixelformat_bgr888> },
+	{ pctp (pixelformat_rgbaf, pixelformat_bgra4444), pixelconv<pixelformat_rgbaf, pixelformat_bgra4444> },
+	{ pctp (pixelformat_rgbaf, pixelformat_grayscale8), pixelconv<pixelformat_rgbaf, pixelformat_grayscale8> },
+	{ pctp (pixelformat_rgbaf, pixelformat_grayscalef), pixelconv<pixelformat_rgbaf, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_rgbaf), pixelconv<pixelformat_bgra8888, pixelformat_rgbaf> },
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_rgba8888), pixelconv<pixelformat_bgra8888, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_bgra4444), pixelconv<pixelformat_bgra8888, pixelformat_bgra4444> },
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_rgb888), pixelconv<pixelformat_bgra8888, pixelformat_rgb888> },
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_bgr888), pixelconv<pixelformat_bgra8888, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_grayscale8), pixelconv<pixelformat_bgra8888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_rgba8888, pixelformat_rgbaf), pixelconv<pixelformat_rgba8888, pixelformat_rgbaf> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bgra8888), pixelconv<pixelformat_rgba8888, pixelformat_bgra8888> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bgra4444), pixelconv<pixelformat_rgba8888, pixelformat_bgra4444> },
+	{ pctp (pixelformat_rgba8888, pixelformat_rgb888), pixelconv<pixelformat_rgba8888, pixelformat_rgb888> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bgr888), pixelconv<pixelformat_rgba8888, pixelformat_bgr888> },
+	{ pctp (pixelformat_rgba8888, pixelformat_grayscale8), pixelconv<pixelformat_rgba8888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_rgba8888, pixelformat_grayscalef), pixelconv<pixelformat_rgba8888, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_bgra4444, pixelformat_rgbaf), pixelconv<pixelformat_bgra4444, pixelformat_rgbaf> },
-	{ pixelconvtp (pixelformat_bgra4444, pixelformat_rgba8888), pixelconv<pixelformat_bgra4444, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bgra4444, pixelformat_bgra8888), pixelconv<pixelformat_bgra4444, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_bgra4444, pixelformat_rgb888), pixelconv<pixelformat_bgra4444, pixelformat_rgb888> },
-	{ pixelconvtp (pixelformat_bgra4444, pixelformat_bgr888), pixelconv<pixelformat_bgra4444, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_bgra4444, pixelformat_grayscale8), pixelconv<pixelformat_bgra4444, pixelformat_grayscale8> },
+	{ pctp (pixelformat_bgra8888, pixelformat_rgbaf), pixelconv<pixelformat_bgra8888, pixelformat_rgbaf> },
+	{ pctp (pixelformat_bgra8888, pixelformat_rgba8888), pixelconv<pixelformat_bgra8888, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bgra8888, pixelformat_bgra4444), pixelconv<pixelformat_bgra8888, pixelformat_bgra4444> },
+	{ pctp (pixelformat_bgra8888, pixelformat_rgb888), pixelconv<pixelformat_bgra8888, pixelformat_rgb888> },
+	{ pctp (pixelformat_bgra8888, pixelformat_bgr888), pixelconv<pixelformat_bgra8888, pixelformat_bgr888> },
+	{ pctp (pixelformat_bgra8888, pixelformat_grayscale8), pixelconv<pixelformat_bgra8888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_bgra8888, pixelformat_grayscalef), pixelconv<pixelformat_bgra8888, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_rgbaf), pixelconv<pixelformat_rgb888, pixelformat_rgbaf> },
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_rgba8888), pixelconv<pixelformat_rgb888, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_bgra8888), pixelconv<pixelformat_rgb888, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_bgra4444), pixelconv<pixelformat_rgb888, pixelformat_bgra4444> },
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_bgr888), pixelconv<pixelformat_rgb888, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_grayscale8), pixelconv<pixelformat_rgb888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_bgra4444, pixelformat_rgbaf), pixelconv<pixelformat_bgra4444, pixelformat_rgbaf> },
+	{ pctp (pixelformat_bgra4444, pixelformat_rgba8888), pixelconv<pixelformat_bgra4444, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bgra4444, pixelformat_bgra8888), pixelconv<pixelformat_bgra4444, pixelformat_bgra8888> },
+	{ pctp (pixelformat_bgra4444, pixelformat_rgb888), pixelconv<pixelformat_bgra4444, pixelformat_rgb888> },
+	{ pctp (pixelformat_bgra4444, pixelformat_bgr888), pixelconv<pixelformat_bgra4444, pixelformat_bgr888> },
+	{ pctp (pixelformat_bgra4444, pixelformat_grayscale8), pixelconv<pixelformat_bgra4444, pixelformat_grayscale8> },
+	{ pctp (pixelformat_bgra4444, pixelformat_grayscalef), pixelconv<pixelformat_bgra4444, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_rgbaf), pixelconv<pixelformat_bgr888, pixelformat_rgbaf> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_rgba8888), pixelconv<pixelformat_bgr888, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_bgra8888), pixelconv<pixelformat_bgr888, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_bgra4444), pixelconv<pixelformat_bgr888, pixelformat_bgra4444> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_rgb888), pixelconv<pixelformat_bgr888, pixelformat_rgb888> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_grayscale8), pixelconv<pixelformat_bgr888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_rgb888, pixelformat_rgbaf), pixelconv<pixelformat_rgb888, pixelformat_rgbaf> },
+	{ pctp (pixelformat_rgb888, pixelformat_rgba8888), pixelconv<pixelformat_rgb888, pixelformat_rgba8888> },
+	{ pctp (pixelformat_rgb888, pixelformat_bgra8888), pixelconv<pixelformat_rgb888, pixelformat_bgra8888> },
+	{ pctp (pixelformat_rgb888, pixelformat_bgra4444), pixelconv<pixelformat_rgb888, pixelformat_bgra4444> },
+	{ pctp (pixelformat_rgb888, pixelformat_bgr888), pixelconv<pixelformat_rgb888, pixelformat_bgr888> },
+	{ pctp (pixelformat_rgb888, pixelformat_grayscale8), pixelconv<pixelformat_rgb888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_rgb888, pixelformat_grayscalef), pixelconv<pixelformat_rgb888, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_grayscale8, pixelformat_rgbaf), pixelconv<pixelformat_grayscale8, pixelformat_rgbaf> },
-	{ pixelconvtp (pixelformat_grayscale8, pixelformat_rgba8888), pixelconv<pixelformat_grayscale8, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_grayscale8, pixelformat_bgra8888), pixelconv<pixelformat_grayscale8, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_grayscale8, pixelformat_bgra4444), pixelconv<pixelformat_grayscale8, pixelformat_bgra4444> },
-	{ pixelconvtp (pixelformat_grayscale8, pixelformat_rgb888), pixelconv<pixelformat_grayscale8, pixelformat_rgb888> },
-	{ pixelconvtp (pixelformat_grayscale8, pixelformat_bgr888), pixelconv<pixelformat_grayscale8, pixelformat_bgr888> },
+	{ pctp (pixelformat_bgr888, pixelformat_rgbaf), pixelconv<pixelformat_bgr888, pixelformat_rgbaf> },
+	{ pctp (pixelformat_bgr888, pixelformat_rgba8888), pixelconv<pixelformat_bgr888, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bgr888, pixelformat_bgra8888), pixelconv<pixelformat_bgr888, pixelformat_bgra8888> },
+	{ pctp (pixelformat_bgr888, pixelformat_bgra4444), pixelconv<pixelformat_bgr888, pixelformat_bgra4444> },
+	{ pctp (pixelformat_bgr888, pixelformat_rgb888), pixelconv<pixelformat_bgr888, pixelformat_rgb888> },
+	{ pctp (pixelformat_bgr888, pixelformat_grayscale8), pixelconv<pixelformat_bgr888, pixelformat_grayscale8> },
+	{ pctp (pixelformat_bgr888, pixelformat_grayscalef), pixelconv<pixelformat_bgr888, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_bgr565, pixelformat_bgr888), pixelconv<pixelformat_bgr565, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_bgr565), pixelconv<pixelformat_bgr888, pixelformat_bgr565> },
+	{ pctp (pixelformat_grayscale8, pixelformat_rgbaf), pixelconv<pixelformat_grayscale8, pixelformat_rgbaf> },
+	{ pctp (pixelformat_grayscale8, pixelformat_rgba8888), pixelconv<pixelformat_grayscale8, pixelformat_rgba8888> },
+	{ pctp (pixelformat_grayscale8, pixelformat_bgra8888), pixelconv<pixelformat_grayscale8, pixelformat_bgra8888> },
+	{ pctp (pixelformat_grayscale8, pixelformat_bgra4444), pixelconv<pixelformat_grayscale8, pixelformat_bgra4444> },
+	{ pctp (pixelformat_grayscale8, pixelformat_rgb888), pixelconv<pixelformat_grayscale8, pixelformat_rgb888> },
+	{ pctp (pixelformat_grayscale8, pixelformat_bgr888), pixelconv<pixelformat_grayscale8, pixelformat_bgr888> },
+	{ pctp (pixelformat_grayscale8, pixelformat_grayscalef), pixelconv<pixelformat_grayscale8, pixelformat_grayscalef> },
 
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_bgra8888_indexed8), pixelconv<pixelformat_bgra8888, pixelformat_bgra8888_indexed8> },
-	{ pixelconvtp (pixelformat_bgra8888, pixelformat_bgr888_indexed8), pixelconv<pixelformat_bgra8888, pixelformat_bgr888_indexed8> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_bgra8888_indexed8), pixelconv<pixelformat_bgr888, pixelformat_bgra8888_indexed8> },
-	{ pixelconvtp (pixelformat_bgr888, pixelformat_bgr888_indexed8), pixelconv<pixelformat_bgr888, pixelformat_bgr888_indexed8> },
+	{ pctp (pixelformat_grayscalef, pixelformat_rgbaf), pixelconv<pixelformat_grayscalef, pixelformat_rgbaf> },
+	{ pctp (pixelformat_grayscalef, pixelformat_rgba8888), pixelconv<pixelformat_grayscalef, pixelformat_rgba8888> },
+	{ pctp (pixelformat_grayscalef, pixelformat_bgra8888), pixelconv<pixelformat_grayscalef, pixelformat_bgra8888> },
+	{ pctp (pixelformat_grayscalef, pixelformat_bgra4444), pixelconv<pixelformat_grayscalef, pixelformat_bgra4444> },
+	{ pctp (pixelformat_grayscalef, pixelformat_rgb888), pixelconv<pixelformat_grayscalef, pixelformat_rgb888> },
+	{ pctp (pixelformat_grayscalef, pixelformat_bgr888), pixelconv<pixelformat_grayscalef, pixelformat_bgr888> },
+	{ pctp (pixelformat_grayscalef, pixelformat_grayscale8), pixelconv<pixelformat_grayscalef, pixelformat_grayscale8> },
 
-	{ pixelconvtp (pixelformat_bgra8888_indexed8, pixelformat_bgra8888), pixelconv<pixelformat_bgra8888_indexed8, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_bgra8888_indexed8, pixelformat_bgr888), pixelconv<pixelformat_bgra8888_indexed8, pixelformat_bgr888> },
-	{ pixelconvtp (pixelformat_bgr888_indexed8, pixelformat_bgra8888), pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgra8888> },
-	{ pixelconvtp (pixelformat_bgr888_indexed8, pixelformat_bgr888), pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgr888> },
+	{ pctp (pixelformat_bgr565, pixelformat_bgr888), pixelconv<pixelformat_bgr565, pixelformat_bgr888> },
+	{ pctp (pixelformat_bgr888, pixelformat_bgr565), pixelconv<pixelformat_bgr888, pixelformat_bgr565> },
 
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bc1), pixelconv<pixelformat_rgba8888, pixelformat_bc1> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bc2), pixelconv<pixelformat_rgba8888, pixelformat_bc2> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bc3), pixelconv<pixelformat_rgba8888, pixelformat_bc3> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bc4), pixelconv<pixelformat_rgba8888, pixelformat_bc4> },
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_bc5), pixelconv<pixelformat_rgba8888, pixelformat_bc5> },
+	{ pctp (pixelformat_bgra8888, pixelformat_bgra8888_indexed8), pixelconv<pixelformat_bgra8888, pixelformat_bgra8888_indexed8> },
+	{ pctp (pixelformat_bgra8888, pixelformat_bgr888_indexed8), pixelconv<pixelformat_bgra8888, pixelformat_bgr888_indexed8> },
+	{ pctp (pixelformat_bgr888, pixelformat_bgra8888_indexed8), pixelconv<pixelformat_bgr888, pixelformat_bgra8888_indexed8> },
+	{ pctp (pixelformat_bgr888, pixelformat_bgr888_indexed8), pixelconv<pixelformat_bgr888, pixelformat_bgr888_indexed8> },
 
-	{ pixelconvtp (pixelformat_bc1, pixelformat_rgba8888), pixelconv<pixelformat_bc1, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bc2, pixelformat_rgba8888), pixelconv<pixelformat_bc2, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bc3, pixelformat_rgba8888), pixelconv<pixelformat_bc3, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bc4, pixelformat_rgba8888), pixelconv<pixelformat_bc4, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_bc5, pixelformat_rgba8888), pixelconv<pixelformat_bc5, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_bgra8888), pixelconv<pixelformat_bgra8888_indexed8, pixelformat_bgra8888> },
+	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_bgr888), pixelconv<pixelformat_bgra8888_indexed8, pixelformat_bgr888> },
+	{ pctp (pixelformat_bgr888_indexed8, pixelformat_bgra8888), pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgra8888> },
+	{ pctp (pixelformat_bgr888_indexed8, pixelformat_bgr888), pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgr888> },
 
-	{ pixelconvtp (pixelformat_rgba8888, pixelformat_etc1), pixelconv<pixelformat_rgba8888, pixelformat_etc1> },
-	{ pixelconvtp (pixelformat_rgb888, pixelformat_etc1), pixelconv<pixelformat_rgb888, pixelformat_etc1> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc1), pixelconv<pixelformat_rgba8888, pixelformat_bc1> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc2), pixelconv<pixelformat_rgba8888, pixelformat_bc2> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc3), pixelconv<pixelformat_rgba8888, pixelformat_bc3> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc4), pixelconv<pixelformat_rgba8888, pixelformat_bc4> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc5), pixelconv<pixelformat_rgba8888, pixelformat_bc5> },
 
-	{ pixelconvtp (pixelformat_etc1, pixelformat_rgba8888), pixelconv<pixelformat_etc1, pixelformat_rgba8888> },
-	{ pixelconvtp (pixelformat_etc1, pixelformat_rgb888), pixelconv<pixelformat_etc1, pixelformat_rgb888> },
+	{ pctp (pixelformat_bc1, pixelformat_rgba8888), pixelconv<pixelformat_bc1, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bc2, pixelformat_rgba8888), pixelconv<pixelformat_bc2, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bc3, pixelformat_rgba8888), pixelconv<pixelformat_bc3, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bc4, pixelformat_rgba8888), pixelconv<pixelformat_bc4, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bc5, pixelformat_rgba8888), pixelconv<pixelformat_bc5, pixelformat_rgba8888> },
+
+	{ pctp (pixelformat_rgba8888, pixelformat_etc1), pixelconv<pixelformat_rgba8888, pixelformat_etc1> },
+	{ pctp (pixelformat_rgb888, pixelformat_etc1), pixelconv<pixelformat_rgb888, pixelformat_etc1> },
+
+	{ pctp (pixelformat_etc1, pixelformat_rgba8888), pixelconv<pixelformat_etc1, pixelformat_rgba8888> },
+	{ pctp (pixelformat_etc1, pixelformat_rgb888), pixelconv<pixelformat_etc1, pixelformat_rgb888> },
 
 };
 
@@ -1744,7 +2094,7 @@ dseed::error_t dseed::reformat_bitmap (dseed::bitmap* original, dseed::pixelform
 	if (dseed::succeeded (temp->palette (&destPalette)))
 		destPalette->pixels_pointer ((void**)& destPalettePtr);
 
-	pixelconvtp tp (reformat, originalFormat);
+	pctp tp (reformat, originalFormat);
 	auto found = g_pixelconvs.find (tp);
 	if (found == g_pixelconvs.end ())
 		return dseed::error_not_support;
