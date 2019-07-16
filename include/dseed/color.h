@@ -456,10 +456,26 @@ namespace dseed
 			v = (uint8_t)(+0.5 * rgba.r + -0.45979 * rgba.g + -0.04021 * rgba.b);
 			a = rgba.a;
 		}
+		inline yuva (const bgra& bgra)
+		{
+			y = (uint8_t)(+0.2627 * bgra.r + +0.678 * bgra.g + +0.0593 * bgra.b);
+			u = (uint8_t)(-0.13963 * bgra.r + -0.36037 * bgra.g + +0.5 * bgra.b);
+			v = (uint8_t)(+0.5 * bgra.r + -0.45979 * bgra.g + -0.04021 * bgra.b);
+			a = bgra.a;
+		}
 
 		inline operator rgba () const noexcept
 		{
 			return rgba (
+				(uint8_t)(y + +1.4746 * v),
+				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
+				(uint8_t)(y + +1.8814 * u),
+				a
+			);
+		}
+		inline operator bgra () const noexcept
+		{
+			return bgra (
 				(uint8_t)(y + +1.4746 * v),
 				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
 				(uint8_t)(y + +1.8814 * u),
@@ -488,10 +504,24 @@ namespace dseed
 			u = (uint8_t)(-0.13963 * rgb.r + -0.36037 * rgb.g + +0.5 * rgb.b);
 			v = (uint8_t)(+0.5 * rgb.r + -0.45979 * rgb.g + -0.04021 * rgb.b);
 		}
+		inline yuv (const bgr& bgr)
+		{
+			y = (uint8_t)(+0.2627 * bgr.r + +0.678 * bgr.g + +0.0593 * bgr.b);
+			u = (uint8_t)(-0.13963 * bgr.r + -0.36037 * bgr.g + +0.5 * bgr.b);
+			v = (uint8_t)(+0.5 * bgr.r + -0.45979 * bgr.g + -0.04021 * bgr.b);
+		}
 
 		inline operator rgb () const noexcept
 		{
 			return rgb (
+				(uint8_t)(y + +1.4746 * v),
+				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
+				(uint8_t)(y + +1.8814 * u)
+			);
+		}
+		inline operator bgr () const noexcept
+		{
+			return bgr (
 				(uint8_t)(y + +1.4746 * v),
 				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
 				(uint8_t)(y + +1.8814 * u)
@@ -516,6 +546,9 @@ namespace dseed
 		inline yuyv (const rgb& rgb1, const rgb& rgb2)
 			: yuyv ((yuv)rgb1, (yuv)rgb2)
 		{ }
+		inline yuyv (const bgr & bgr1, const bgr & bgr2)
+			: yuyv ((yuv)bgr1, (yuv)bgr2)
+		{ }
 		inline yuyv (const yuv& yuv1, const yuv& yuv2)
 		{
 			y1 = yuv1.y;
@@ -524,7 +557,7 @@ namespace dseed
 			v = (uint8_t)((yuv1.v + yuv2.v) / 2);
 		}
 
-		inline error_t to_rgb (rgb* rgb1, rgb* rgb2)
+		inline error_t to_rgb (rgb* rgb1, rgb* rgb2) const
 		{
 			if (rgb1 == nullptr || rgb2 == nullptr)
 				return dseed::error_invalid_args;
@@ -533,7 +566,16 @@ namespace dseed
 			*rgb2 = (rgb)yuv2;
 			return dseed::error_good;
 		}
-		inline error_t to_yuv444 (yuv* yuv1, yuv* yuv2)
+		inline error_t to_bgr (bgr* bgr1, bgr* bgr2) const
+		{
+			if (bgr1 == nullptr || bgr2 == nullptr)
+				return dseed::error_invalid_args;
+			yuv yuv1 (y1, u, v), yuv2 (y2, u, v);
+			*bgr1 = (bgr)yuv1;
+			*bgr2 = (bgr)yuv2;
+			return dseed::error_good;
+		}
+		inline error_t to_yuv444 (yuv* yuv1, yuv* yuv2) const
 		{
 			if (yuv1 == nullptr || yuv2 == nullptr)
 				return dseed::error_invalid_args;

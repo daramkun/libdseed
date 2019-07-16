@@ -1742,6 +1742,344 @@ template<> inline int pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgr888>
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+// YCbCr/YCbCrA <-> BGR/BGRA series Conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+template<> inline int pixelconv<pixelformat_yuv888, pixelformat_bgr888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_yuv888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuv* destPtr = (yuv*)(dest + destDepthZ + destStrideY);
+			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuv* destPtrX = destPtr + x;
+				const bgr* srcPtrX = srcPtr + x;
+				*destPtrX = yuv (*srcPtrX);
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_yuv888, pixelformat_bgra8888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_yuv888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgra8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuv* destPtr = (yuv*)(dest + destDepthZ + destStrideY);
+			const bgra* srcPtr = (const bgra*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuv* destPtrX = destPtr + x;
+				const bgra* srcPtrX = srcPtr + x;
+				*destPtrX = yuv (*((const bgr*)srcPtrX));
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_yuva8888, pixelformat_bgr888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_yuva8888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuva* destPtr = (yuva*)(dest + destDepthZ + destStrideY);
+			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuva* destPtrX = destPtr + x;
+				const bgr* srcPtrX = srcPtr + x;
+				*((yuv*)destPtrX) = yuv (*srcPtrX);
+				destPtrX->a = 255;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_yuva8888, pixelformat_bgra8888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_yuva8888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgra8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuva* destPtr = (yuva*)(dest + destDepthZ + destStrideY);
+			const bgra* srcPtr = (const bgra*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuva* destPtrX = destPtr + x;
+				const bgra* srcPtrX = srcPtr + x;
+				*destPtrX = yuva (*srcPtrX);
+			}
+		}
+	}
+	return 0;
+}
+
+template<> inline int pixelconv<pixelformat_bgr888, pixelformat_yuv888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_yuv888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			bgr* destPtr = (bgr*)(dest + destDepthZ + destStrideY);
+			const yuv* srcPtr = (const yuv*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				bgr* destPtrX = destPtr + x;
+				const yuv* srcPtrX = srcPtr + x;
+				*destPtrX = (bgr)(*srcPtrX);
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_bgr888, pixelformat_yuva8888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_yuva8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuva* destPtr = (yuva*)(dest + destDepthZ + destStrideY);
+			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuva* destPtrX = destPtr + x;
+				const bgr* srcPtrX = srcPtr + x;
+				*((yuv*)destPtrX) = yuv (*srcPtrX);
+				destPtrX->a = 255;
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_bgra8888, pixelformat_yuv888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgra8888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_yuv888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuv* destPtr = (yuv*)(dest + destDepthZ + destStrideY);
+			const bgra* srcPtr = (const bgra*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuv* destPtrX = destPtr + x;
+				const bgra* srcPtrX = srcPtr + x;
+				*destPtrX = yuv (*((const bgr*)srcPtrX));
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_bgra8888, pixelformat_yuva8888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgra8888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_yuva8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuva* destPtr = (yuva*)(dest + destDepthZ + destStrideY);
+			const bgra* srcPtr = (const bgra*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; ++x)
+			{
+				yuva* destPtrX = destPtr + x;
+				const bgra* srcPtrX = srcPtr + x;
+				*destPtrX = yuva (*srcPtrX);
+			}
+		}
+	}
+	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Packed YCbCr series <-> BGR Conversions
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+template<> inline int pixelconv<pixelformat_yuyv8888, pixelformat_bgr888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_yuyv8888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			yuyv* destPtr = (yuyv*)(dest + destDepthZ + destStrideY);
+			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; x += 2)
+			{
+				yuyv* destPtrX = destPtr + (x / 2);
+				const bgr* srcPtrX = srcPtr + x;
+				*destPtrX = yuyv (*srcPtrX, *(srcPtrX + 1));
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_yyyyuv888888, pixelformat_bgr888> (PIXELCONV_ARGS) noexcept
+{
+	size_t srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = size.width * size.height + (size.width / 2 * size.height / 2), srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; y += 2)
+		{
+			uint8_t* destY1Ptr = (uint8_t*)(dest + destDepthZ + (size.width * y));
+			uint8_t* destY2Ptr = (uint8_t*)(dest + destDepthZ + (size.width * (y + 1)));
+			uint8_t* destUVPtr = (uint8_t*)(dest + destDepthZ + (size.width * size.height) + (size.width * (y / 2)));
+			const bgr* srcPtr1 = (const bgr*)(src + srcDepthZ + (y * srcStride));
+			const bgr* srcPtr2 = (const bgr*)(src + srcDepthZ + ((y + 1) * srcStride));
+			for (auto x = 0; x < size.width; x += 2)
+			{
+				const bgr* srcPtr1X = srcPtr1 + x;
+				const bgr* srcPtr2X = srcPtr2 + x;
+
+				uint8_t* destUVPtrX = destUVPtr + x;
+
+				uint8_t* destY1PtrX = destY1Ptr + (x / 2);
+				yuv yuv1 = *srcPtr1X, yuv2 = *(srcPtr1X + 1);
+
+				destY1PtrX[0] = yuv1.y;
+				destY1PtrX[1] = yuv2.y;
+
+				uint32_t cu, cv;
+				cu = yuv1.u + yuv2.u;
+				cv = yuv1.v + yuv2.v;
+
+				if (y < size.height)
+				{
+					uint8_t* destY2PtrX = destY2Ptr + (x / 2);
+					yuv yuv3 = *srcPtr2X, yuv4 = *(srcPtr2X + 1);
+
+					if (y < size.height)
+					{
+						destY2PtrX[0] = yuv3.y;
+						destY2PtrX[1] = yuv4.y;
+					}
+
+					cu += yuv3.u + yuv4.u;
+					cv += yuv3.v + yuv4.v;
+				}
+				destUVPtrX[0] = cu;
+				destUVPtrX[1] = cv;
+
+			}
+		}
+	}
+	return 0;
+}
+
+template<> inline int pixelconv<pixelformat_bgr888, pixelformat_yuyv8888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width)
+		, srcStride = get_bitmap_stride (pixelformat_yuyv8888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			bgr* destPtr = (bgr*)(dest + destDepthZ + destStrideY);
+			const yuyv* srcPtr = (const yuyv*)(src + srcDepthZ + srcStrideY);
+			for (auto x = 0; x < size.width; x += 2)
+			{
+				bgr* destPtrX = destPtr + (x / 2);
+				const yuyv* srcPtrX = srcPtr + x;
+				srcPtrX->to_bgr (destPtrX, destPtrX + 1);
+			}
+		}
+	}
+	return 0;
+}
+template<> inline int pixelconv<pixelformat_bgr888, pixelformat_yyyyuv888888> (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width);
+	size_t destDepth = destStride * size.height, srcDepth = (size.width * size.height) + (size.width / 2 * size.height / 2);
+
+	for (auto z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
+		for (auto y = 0; y < size.height; y += 2)
+		{
+			bgr* destPtr1 = (bgr*)(dest + destDepthZ + (y * destStride));
+			bgr* destPtr2 = (bgr*)(dest + destDepthZ + ((y + 1) * destStride));
+			const uint8_t* srcY1Ptr = (const uint8_t*)(src + srcDepthZ + (size.width * y));
+			const uint8_t* srcY2Ptr = (const uint8_t*)(src + srcDepthZ + (size.width * (y + 1)));
+			const uint8_t* srcUVPtr = (const uint8_t*)(src + srcDepthZ + (size.width * size.height) + (size.width * (y / 2)));
+			for (auto x = 0; x < size.width; x += 2)
+			{
+				bgr* destPtr1X = destPtr1 + x;
+				bgr* destPtr2X = destPtr2 + x;
+
+				const uint8_t* srcUVPtrX = srcUVPtr + x;
+
+				// TODO
+			}
+		}
+	}
+	return -1;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 // DXT series <-> RGBA Conversions
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2031,6 +2369,22 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_bgr888), pixelconv<pixelformat_bgra8888_indexed8, pixelformat_bgr888> },
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_bgra8888), pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgra8888> },
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_bgr888), pixelconv<pixelformat_bgr888_indexed8, pixelformat_bgr888> },
+
+	{ pctp (pixelformat_yuv888, pixelformat_bgr888), pixelconv<pixelformat_yuv888, pixelformat_bgr888> },
+	{ pctp (pixelformat_yuv888, pixelformat_bgra8888), pixelconv<pixelformat_yuv888, pixelformat_bgra8888> },
+	{ pctp (pixelformat_yuva8888, pixelformat_bgr888), pixelconv<pixelformat_yuva8888, pixelformat_bgr888> },
+	{ pctp (pixelformat_yuva8888, pixelformat_bgra8888), pixelconv<pixelformat_yuva8888, pixelformat_bgra8888> },
+
+	{ pctp (pixelformat_bgr888, pixelformat_yuv888), pixelconv<pixelformat_bgr888, pixelformat_yuv888> },
+	{ pctp (pixelformat_bgr888, pixelformat_yuva8888), pixelconv<pixelformat_bgr888, pixelformat_yuva8888> },
+	{ pctp (pixelformat_bgra8888, pixelformat_yuv888), pixelconv<pixelformat_bgra8888, pixelformat_yuv888> },
+	{ pctp (pixelformat_bgra8888, pixelformat_yuva8888), pixelconv<pixelformat_bgra8888, pixelformat_yuva8888> },
+
+	{ pctp (pixelformat_yuyv8888, pixelformat_bgr888), pixelconv<pixelformat_yuyv8888, pixelformat_bgr888> },
+	{ pctp (pixelformat_yyyyuv888888, pixelformat_bgr888), pixelconv<pixelformat_yyyyuv888888, pixelformat_bgr888> },
+
+	{ pctp (pixelformat_bgr888, pixelformat_yuyv8888), pixelconv<pixelformat_bgr888, pixelformat_yuyv8888> },
+	{ pctp (pixelformat_bgr888, pixelformat_yyyyuv888888), pixelconv<pixelformat_bgr888, pixelformat_yyyyuv888888> },
 
 	{ pctp (pixelformat_rgba8888, pixelformat_bc1), pixelconv<pixelformat_rgba8888, pixelformat_bc1> },
 	{ pctp (pixelformat_rgba8888, pixelformat_bc2), pixelconv<pixelformat_rgba8888, pixelformat_bc2> },

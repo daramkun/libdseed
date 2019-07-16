@@ -28,6 +28,9 @@ size_t dseed::get_bitmap_stride (dseed::pixelformat_t format, int32_t width) noe
 	case pixelformat_grayscale8:
 		return width;
 
+	case pixelformat_yuyv8888:
+		return width / 2;
+
 	default: return 0;
 	}
 }
