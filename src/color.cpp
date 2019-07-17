@@ -29,7 +29,7 @@ size_t dseed::get_bitmap_stride (dseed::pixelformat_t format, int32_t width) noe
 		return width;
 
 	case pixelformat_yuyv8888:
-		return width / 2;
+		return ceil (width / 2.0) * 4;
 
 	default: return 0;
 	}
@@ -57,7 +57,7 @@ size_t dseed::get_bitmap_plane_size (dseed::pixelformat_t format, int32_t width,
 	case pixelformat_yuyv8888:
 		return (size_t)(ceil (width / 2.0) * height) * 4;
 	case pixelformat_yyyyuv888888:
-		return (size_t)(width * height + (ceil (width / 2.0) * ceil (height / 2.0)) * 2);
+		return (size_t)(width * height + ((ceil (width / 2.0) * 2) * ceil (height / 2.0)));
 
 	case pixelformat_bc1:
 	case pixelformat_etc1:

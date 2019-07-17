@@ -2,7 +2,8 @@
 #define __DSEED_COLOR_H__
 
 namespace dseed
-{////////////////////////////////////////////////////////////////////////////////////////
+{
+	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Pixel Format
 	//
@@ -119,6 +120,10 @@ namespace dseed
 	DSEEDEXP dseed::size3i get_mipmap_size (int mipLevel, const dseed::size3i& size, bool cubemap) noexcept;
 	// Get Maximum Mip-Levels
 	DSEEDEXP size_t get_maximum_mip_levels (const dseed::size3i& size, bool cubemap) noexcept;
+	// Saturate Integer color value
+	constexpr uint8_t saturate (int32_t v) { return (uint8_t)maximum (0, minimum (255, v)); }
+	// Saturate Floating point color value
+	constexpr float saturate (float v) { return maximum (0.000f, minimum (1.000f, v)); }
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -426,6 +431,19 @@ namespace dseed
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
 	
+	// https://stackoverflow.com/questions/1737726/how-to-perform-rgb-yuv-conversion-in-c-c , Modified
+// RGB -> YUV
+#define RGB2Y(R, G, B) dseed::saturate(( (  66 * (R) + 129 * (G) +  25 * (B) + 128) >> 8) +  16)
+#define RGB2U(R, G, B) dseed::saturate(( ( -38 * (R) -  74 * (G) + 112 * (B) + 128) >> 8) + 128)
+#define RGB2V(R, G, B) dseed::saturate(( ( 112 * (R) -  94 * (G) -  18 * (B) + 128) >> 8) + 128)
+// YUV -> RGB
+#define C(Y) ( (Y) - 16  )
+#define D(U) ( (U) - 128 )
+#define E(V) ( (V) - 128 )
+#define YUV2R(Y, U, V) dseed::saturate(( 298 * C(Y)              + 409 * E(V) + 128) >> 8)
+#define YUV2G(Y, U, V) dseed::saturate(( 298 * C(Y) - 100 * D(U) - 208 * E(V) + 128) >> 8)
+#define YUV2B(Y, U, V) dseed::saturate(( 298 * C(Y) + 516 * D(U)              + 128) >> 8)
+
 	struct yuva;
 	struct yuv;
 
@@ -449,36 +467,20 @@ namespace dseed
 		inline yuva (uint32_t yuva)
 			: color (yuva)
 		{ }
-		inline yuva (const rgba& rgba)
-		{
-			y = (uint8_t)(+0.2627 * rgba.r + +0.678 * rgba.g + +0.0593 * rgba.b);
-			u = (uint8_t)(-0.13963 * rgba.r + -0.36037 * rgba.g + +0.5 * rgba.b);
-			v = (uint8_t)(+0.5 * rgba.r + -0.45979 * rgba.g + -0.04021 * rgba.b);
-			a = rgba.a;
-		}
 		inline yuva (const bgra& bgra)
 		{
-			y = (uint8_t)(+0.2627 * bgra.r + +0.678 * bgra.g + +0.0593 * bgra.b);
-			u = (uint8_t)(-0.13963 * bgra.r + -0.36037 * bgra.g + +0.5 * bgra.b);
-			v = (uint8_t)(+0.5 * bgra.r + -0.45979 * bgra.g + -0.04021 * bgra.b);
+			y = RGB2Y (bgra.r, bgra.g, bgra.b);
+			u = RGB2U (bgra.r, bgra.g, bgra.b);
+			v = RGB2V (bgra.r, bgra.g, bgra.b);
 			a = bgra.a;
 		}
 
-		inline operator rgba () const noexcept
-		{
-			return rgba (
-				(uint8_t)(y + +1.4746 * v),
-				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
-				(uint8_t)(y + +1.8814 * u),
-				a
-			);
-		}
 		inline operator bgra () const noexcept
 		{
 			return bgra (
-				(uint8_t)(y + +1.4746 * v),
-				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
-				(uint8_t)(y + +1.8814 * u),
+				YUV2R (y, u, v),
+				YUV2G (y, u, v),
+				YUV2B (y, u, v),
 				a
 			);
 		}
@@ -498,33 +500,19 @@ namespace dseed
 		inline yuv (uint24_t yuv)
 			: color (yuv)
 		{ }
-		inline yuv (const rgb& rgb)
-		{
-			y = (uint8_t)(+0.2627 * rgb.r + +0.678 * rgb.g + +0.0593 * rgb.b);
-			u = (uint8_t)(-0.13963 * rgb.r + -0.36037 * rgb.g + +0.5 * rgb.b);
-			v = (uint8_t)(+0.5 * rgb.r + -0.45979 * rgb.g + -0.04021 * rgb.b);
-		}
 		inline yuv (const bgr& bgr)
 		{
-			y = (uint8_t)(+0.2627 * bgr.r + +0.678 * bgr.g + +0.0593 * bgr.b);
-			u = (uint8_t)(-0.13963 * bgr.r + -0.36037 * bgr.g + +0.5 * bgr.b);
-			v = (uint8_t)(+0.5 * bgr.r + -0.45979 * bgr.g + -0.04021 * bgr.b);
+			y = RGB2Y (bgr.r, bgr.g, bgr.b);
+			u = RGB2U (bgr.r, bgr.g, bgr.b);
+			v = RGB2V (bgr.r, bgr.g, bgr.b);
 		}
 
-		inline operator rgb () const noexcept
-		{
-			return rgb (
-				(uint8_t)(y + +1.4746 * v),
-				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
-				(uint8_t)(y + +1.8814 * u)
-			);
-		}
 		inline operator bgr () const noexcept
 		{
 			return bgr (
-				(uint8_t)(y + +1.4746 * v),
-				(uint8_t)(y + -0.16455 * u + -0.57135 * v),
-				(uint8_t)(y + +1.8814 * u)
+				YUV2R (y, u, v),
+				YUV2G (y, u, v),
+				YUV2B (y, u, v)
 			);
 		}
 	};
@@ -543,9 +531,6 @@ namespace dseed
 		inline yuyv (uint32_t yuyv)
 			: color (color)
 		{ }
-		inline yuyv (const rgb& rgb1, const rgb& rgb2)
-			: yuyv ((yuv)rgb1, (yuv)rgb2)
-		{ }
 		inline yuyv (const bgr & bgr1, const bgr & bgr2)
 			: yuyv ((yuv)bgr1, (yuv)bgr2)
 		{ }
@@ -553,19 +538,10 @@ namespace dseed
 		{
 			y1 = yuv1.y;
 			y2 = yuv2.y;
-			u = (uint8_t)((yuv1.u + yuv2.u) / 2);
-			v = (uint8_t)((yuv1.v + yuv2.v) / 2);
+			u = yuv1.u;//(uint8_t)((yuv1.u + yuv2.u) / 2);
+			v = yuv1.v;//(uint8_t)((yuv1.v + yuv2.v) / 2);
 		}
 
-		inline error_t to_rgb (rgb* rgb1, rgb* rgb2) const
-		{
-			if (rgb1 == nullptr || rgb2 == nullptr)
-				return dseed::error_invalid_args;
-			yuv yuv1 (y1, u, v), yuv2 (y2, u, v);
-			*rgb1 = (rgb)yuv1;
-			*rgb2 = (rgb)yuv2;
-			return dseed::error_good;
-		}
 		inline error_t to_bgr (bgr* bgr1, bgr* bgr2) const
 		{
 			if (bgr1 == nullptr || bgr2 == nullptr)
@@ -612,7 +588,7 @@ namespace dseed
 		grayscale () = default;
 		inline grayscale (uint8_t grayscale) : color (grayscale) { }
 		inline grayscale (const rgb& rgb)
-			: color ((uint8_t)(+0.2627 * rgb.r + +0.678 * rgb.g + +0.0593 * rgb.b))
+			: color ((uint8_t)maximum (0.0, minimum (255.0, +0.2627 * rgb.r + +0.678 * rgb.g + +0.0593 * rgb.b)))
 		{ }
 
 		inline operator rgb () const noexcept { return rgb (color, color, color); }
@@ -624,7 +600,7 @@ namespace dseed
 		grayscalef () = default;
 		inline grayscalef (float grayscale) : color (grayscale) { }
 		inline grayscalef (const rgbaf& rgbaf)
-			: color ((float)(+0.2627 * rgbaf.r + +0.678 * rgbaf.g + +0.0593 * rgbaf.b))
+			: color ((float)maximum (0.0, minimum (1.0, (+0.2627 * rgbaf.r + +0.678 * rgbaf.g + +0.0593 * rgbaf.b))))
 		{ }
 
 		inline operator rgbaf () const noexcept { return rgbaf (color, color, color, 1); }
