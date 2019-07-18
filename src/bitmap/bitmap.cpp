@@ -55,7 +55,7 @@ private:
 
 dseed::error_t dseed::create_palette (const void* pixels, int bpp, size_t pixelsCount, palette** palette)
 {
-	if (pixels == nullptr || !(pixelsCount > 0 && pixelsCount <= 256) || palette == nullptr)
+	if (!(pixelsCount > 0 && pixelsCount <= 256) || palette == nullptr)
 		return dseed::error_invalid_args;
 
 	*palette = new __palette (pixels, pixelsCount, bpp);

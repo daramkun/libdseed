@@ -174,6 +174,10 @@ namespace dseed
 	template<> constexpr pixelformat_t type2format<yuva> () { return pixelformat_yuva8888; }
 	template<> constexpr pixelformat_t type2format<yuv> () { return pixelformat_yuv888; }
 
+	template<class color_t> constexpr pixelformat_t type2indexedformat () { static_assert (true, "Not support type."); return pixelformat_unknown; }
+	template<> constexpr pixelformat_t type2indexedformat<bgra> () { return pixelformat_bgra8888_indexed8; }
+	template<> constexpr pixelformat_t type2indexedformat<bgr> () { return pixelformat_bgr888_indexed8; }
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Red/Green/Blue Color Types
