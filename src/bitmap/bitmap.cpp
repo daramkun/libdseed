@@ -10,7 +10,7 @@ public:
 	{
 		_palette.resize (size * (bpp / 8));
 		if (pixels != nullptr)
-			memcpy (_palette.data (), pixels, (bpp / 8) * _palette.size ());
+			memcpy (_palette.data (), pixels, _palette.size ());
 	}
 
 public:
@@ -31,7 +31,7 @@ public:
 	virtual dseed::error_t copy_palette (void* dest) override
 	{
 		if (dest == nullptr) return dseed::error_invalid_args;
-		memcpy (dest, _palette.data (), (_bpp / 8) * _palette.size ());
+		memcpy (dest, _palette.data (), _palette.size ());
 		return dseed::error_good;
 	}
 
@@ -55,7 +55,7 @@ private:
 
 dseed::error_t dseed::create_palette (const void* pixels, int bpp, size_t pixelsCount, palette** palette)
 {
-	if (pixels == nullptr || !(pixelsCount > 0 && pixelsCount < 256) || palette == nullptr)
+	if (pixels == nullptr || !(pixelsCount > 0 && pixelsCount <= 256) || palette == nullptr)
 		return dseed::error_invalid_args;
 
 	*palette = new __palette (pixels, pixelsCount, bpp);

@@ -118,11 +118,9 @@ namespace dseed
 	using createbitmapencoder_fn = error_t (*) (dseed::stream*, const bitmap_encoder_options*, bitmap_encoder**);
 
 	// Bitmap Pixel Reformatting
-	//  : RGBA, RGB, BGRA, BGR, Grayscale color formats can be converted to each other(without Legacy RGB/BGR formats).
-	//  : BGR565 can be converted from/to BGR only.
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV) color formats can be converted to each other.
 	//  : Palette formats can be converted from/to BGRA, BGR only.
-	//  : YCbCr series formats can be converted from/to BGRA, BGR only.
-	//  : Packed YCbCr series formats can be converted from/to BGR only.
+	//  : Subsampled YCbCr series formats can be converted from/to BGR only(Reimplementing...).
 	//  : Compressed color formats can be converted from/to RGBA only. (BC6H, BC7, ETC2, PVRTC, ASTC not implemented now)
 	DSEEDEXP error_t reformat_bitmap (dseed::bitmap* original, dseed::pixelformat_t reformat, dseed::bitmap** bitmap);
 }
