@@ -111,6 +111,7 @@ inline int pixelconv_to_indexedcolor (PIXELCONV_ARGS) noexcept
 		return pixelconv_to_indexedcolor<bgra, bgra> (dest, conved.data (), size, destPalette, nullptr);
 	else if (typeid(TDest) == typeid(bgr))
 		return pixelconv_to_indexedcolor<bgr, bgra> (dest, conved.data (), size, destPalette, nullptr);
+	return 0;
 }
 
 template<> 

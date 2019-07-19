@@ -11,7 +11,7 @@ dseed::error_t dseed::create_gif_bitmap_decoder (dseed::stream* stream, dseed::b
 	int err;
 	auto pgif = DGifOpen (stream, [](GifFileType* file, GifByteType* buf, int len) -> int
 		{
-			return reinterpret_cast<dseed::stream*>(file->UserData)->read (buf, len);
+			return (int) reinterpret_cast<dseed::stream*>(file->UserData)->read (buf, len);
 		}, &err
 	);
 	if (pgif == nullptr)
@@ -27,7 +27,7 @@ dseed::error_t dseed::create_gif_bitmap_decoder (dseed::stream* stream, dseed::b
 	if (pgif->SColorMap)
 	{
 		palette.resize (pgif->SColorMap->ColorCount);
-		memcpy (palette.data (), pgif->SColorMap->Colors, palette.size ());
+		//memcpy (palette.data (), pgif->SColorMap->Colors, palette.size () * sizeof (dseed::bgra));
 		for (int i = 0; i < palette.size (); ++i)
 		{
 			palette[i].b = pgif->SColorMap->Colors[i].Blue;
@@ -48,7 +48,8 @@ dseed::error_t dseed::create_gif_bitmap_decoder (dseed::stream* stream, dseed::b
 	}
 
 	dseed::auto_object<dseed::palette> globalPaletteObj;
-	dseed::create_palette (palette.data (), 32, palette.size(), &globalPaletteObj);
+	if (dseed::failed (dseed::create_palette (palette.data (), 32, palette.size (), &globalPaletteObj)))
+		return dseed::error_fail;
 
 	std::vector<dseed::bitmap*> _bitmaps (imageCount);
 	std::vector<dseed::timespan_t> _timespans (imageCount);
@@ -66,7 +67,7 @@ dseed::error_t dseed::create_gif_bitmap_decoder (dseed::stream* stream, dseed::b
 		if (pgif->SavedImages[z].ImageDesc.ColorMap)
 		{
 			innerPalette.resize (savedImage.ImageDesc.ColorMap->ColorCount);
-			memcpy (innerPalette.data (), savedImage.ImageDesc.ColorMap->Colors, innerPalette.size ());
+			//memcpy (innerPalette.data (), savedImage.ImageDesc.ColorMap->Colors, innerPalette.size ());
 			for (int i = 0; i < palette.size (); ++i)
 			{
 				innerPalette[i].b = savedImage.ImageDesc.ColorMap->Colors[i].Blue;
@@ -119,7 +120,8 @@ dseed::error_t dseed::create_gif_bitmap_decoder (dseed::stream* stream, dseed::b
 		if (paletteChanged)
 		{
 			localPaletteObj.release ();
-			dseed::create_palette (innerPalette.data (), 32, innerPalette.size (), &localPaletteObj);
+			if (dseed::failed (dseed::create_palette (usingPalette, 32, usingPaletteSize, &localPaletteObj)))
+				return dseed::error_fail;
 		}
 
 		if (dseed::failed (dseed::create_bitmap (dseed::bitmaptype_2d, size, dseed::pixelformat_bgra8888_indexed8,

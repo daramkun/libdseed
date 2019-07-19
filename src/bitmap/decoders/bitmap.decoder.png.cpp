@@ -160,7 +160,7 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 	rows.resize (size.height);
 	for (size_t i = 0; i < size.height; ++i)
 	{
-		png_uint_32 q = i * stride;
+		png_uint_32 q = (uint32_t)(i * stride);
 		bitmap->pixels_pointer_per_line ((void**)&((png_bytep)rows[i]), i);
 	}
 	png_read_image (png, rows.data ());

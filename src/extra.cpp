@@ -393,7 +393,7 @@ dseed::error_t dseed::attributes::get_size (dseed::attrkey_t key, uint32_t* widt
 
 dseed::error_t dseed::attributes::set_size (dseed::attrkey_t key, uint32_t width, uint32_t height)
 {
-	return set_uint64 (key, ((width << 32) & 0xffffffff00000000) | height);
+	return set_uint64 (key, ((((uint64_t)width) << 32) & 0xffffffff00000000) | height);
 }
 
 dseed::error_t dseed::attributes::get_fraction (dseed::attrkey_t key, int32_t* numerator, int32_t* denominator)
@@ -412,7 +412,7 @@ dseed::error_t dseed::attributes::get_fraction (dseed::attrkey_t key, int32_t* n
 
 dseed::error_t dseed::attributes::set_fraction (dseed::attrkey_t key, int32_t numerator, int32_t denominator)
 {
-	return set_int64 (key, ((numerator << 32) & 0xffffffff00000000) | denominator);
+	return set_int64 (key, ((((int64_t)(numerator)) << 32) & 0xffffffff00000000) | denominator);
 }
 
 class __ptr_obj : public dseed::object

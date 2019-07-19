@@ -129,7 +129,7 @@ dseed::error_t dseed::create_jpeg2000_bitmap_decoder (dseed::stream* stream, dse
 		for (auto x = 0; x < size.width; ++x)
 		{
 			auto offset = x * image->numcomps;
-			for (auto z = 0; z < image->numcomps; ++z)
+			for (uint32_t z = 0; z < image->numcomps; ++z)
 				linePtr[offset + z] = image->comps[z].data[y * size.width + x];
 		}
 	}

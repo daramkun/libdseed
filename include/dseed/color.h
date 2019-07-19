@@ -59,7 +59,7 @@ namespace dseed
 		pixelformat_bc4 = 0x00100004, pixelformat_ati1 = pixelformat_bc4,
 		// BC5(ATI2) Compressed Pixel Format
 		pixelformat_bc5 = 0x00100005, pixelformat_ati2 = pixelformat_bc5,
-		// BC6 Compressed Pixel Format
+		// BC6 Compressed Pixel Format(Only support Signed-bit Format now)
 		pixelformat_bc6h = 0x00100006,
 		// BC7 Compressed Pixel Format
 		pixelformat_bc7 = 0x00100007,
@@ -150,16 +150,16 @@ namespace dseed
 
 	// https://stackoverflow.com/questions/1737726/how-to-perform-rgb-yuv-conversion-in-c-c , Modified
 	// RGB -> YUV
-	constexpr uint8_t rgb2y (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (((66 * r + 129 * g + 25 * b + 128) >> 8) + 16); }
-	constexpr uint8_t rgb2u (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128); }
-	constexpr uint8_t rgb2v (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (((112 * r - 94 * g - 18 * b + 128) >> 8) + 128); }
+	constexpr uint8_t rgb2y (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (((( 66 * r) + (129 * g) + (25  * b) + 128) >> 8) + 16); }
+	constexpr uint8_t rgb2u (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate ((((-38 * r) - (74  * g) + (112 * b) + 128) >> 8) + 128); }
+	constexpr uint8_t rgb2v (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate ((((112 * r) - (94  * g) - (18  * b) + 128) >> 8) + 128); }
 	// YUV -> RGB
 	constexpr int32_t __c (int32_t y) noexcept { return y - 16; }
 	constexpr int32_t __d (int32_t u) noexcept { return u - 128; }
 	constexpr int32_t __e (int32_t v) noexcept { return v - 128; }
-	constexpr uint8_t yuv2r (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate ((298 * __c (y) + 409 * __e (v) + 128) >> 8); }
-	constexpr uint8_t yuv2g (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate ((298 * __c (y) - 100 * __d (u) - 208 * __e (v) + 128) >> 8); }
-	constexpr uint8_t yuv2b (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate ((298 * __c (y) + 516 * __d (u) + 128) >> 8); }
+	constexpr uint8_t yuv2r (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (((298 * __c (y))                   + (409 * __e (v)) + 128) >> 8); }
+	constexpr uint8_t yuv2g (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (((298 * __c (y)) - (100 * __d (u)) - (208 * __e (v)) + 128) >> 8); }
+	constexpr uint8_t yuv2b (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (((298 * __c (y)) + (516 * __d (u))                   + 128) >> 8); }
 
 	template<class color_t> constexpr pixelformat_t type2format () { static_assert (true, "Not support type."); return pixelformat_unknown; }
 	template<> constexpr pixelformat_t type2format<rgba> () { return pixelformat_rgba8888; }
@@ -599,7 +599,7 @@ namespace dseed
 	{
 		union
 		{
-			struct { uint8_t v, u, y; };
+			struct { uint8_t y, u, v; };
 			uint24_t color;
 		};
 		yuv () = default;
@@ -744,10 +744,10 @@ namespace dseed
 	inline grayscalef::operator yuv () const noexcept { return yuv ((uint8_t)(color * 255), 0, 0); }
 	inline grayscalef::operator yuva () const noexcept { return yuva ((uint8_t)(color * 255), 0, 0, 255); }
 
-	inline yuva::operator rgba () const noexcept { return rgba (yuv2r (y, u, v), yuv2g (y, u, v), yuv2b (y, u, v), 255); }
+	inline yuva::operator rgba () const noexcept { return rgba (yuv2r (y, u, v), yuv2g (y, u, v), yuv2b (y, u, v), a); }
 	inline yuva::operator rgb () const noexcept { return rgb (yuv2r (y, u, v), yuv2g (y, u, v), yuv2b (y, u, v)); }
 	inline yuva::operator rgbaf () const noexcept { return (rgbaf)(bgra)* this; }
-	inline yuva::operator bgra () const noexcept { return bgra (yuv2r (y, u, v), yuv2g (y, u, v), yuv2b (y, u, v), 255); }
+	inline yuva::operator bgra () const noexcept { return bgra (yuv2r (y, u, v), yuv2g (y, u, v), yuv2b (y, u, v), a); }
 	inline yuva::operator bgr () const noexcept { return bgr (yuv2r (y, u, v), yuv2g (y, u, v), yuv2b (y, u, v)); }
 	inline yuva::operator bgra4 () const noexcept { return bgra4 (yuv2r (y, u, v) / 17, yuv2g (y, u, v) / 17, yuv2b (y, u, v) / 17, a / 17); }
 	inline yuva::operator bgr565 () const noexcept { return bgr565 (yuv2r (y, u, v) / 8, yuv2g (y, u, v) / 4, yuv2b (y, u, v) / 8); }

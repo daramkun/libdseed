@@ -211,6 +211,7 @@ SET ( DSEED_BUILD_FILES
 	src/bitmap/decoders/bitmap.decoder.pkm.cpp
 	src/bitmap/decoders/bitmap.decoder.ktx.cpp
 	src/bitmap/decoders/bitmap.decoder.ico.cur.cpp
+	src/bitmap/decoders/bitmap.decoder.astc.cpp
 
 	# Bitmap Decoders with External Libraries
 	src/bitmap/decoders/bitmap.decoder.png.cpp
