@@ -150,16 +150,17 @@ namespace dseed
 
 	// https://stackoverflow.com/questions/1737726/how-to-perform-rgb-yuv-conversion-in-c-c , Modified
 	// RGB -> YUV
-	constexpr uint8_t rgb2y (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (((( 66 * r) + (129 * g) + (25  * b) + 128) >> 8) + 16); }
-	constexpr uint8_t rgb2u (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate ((((-38 * r) - (74  * g) + (112 * b) + 128) >> 8) + 128); }
-	constexpr uint8_t rgb2v (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate ((((112 * r) - (94  * g) - (18  * b) + 128) >> 8) + 128); }
+	constexpr int32_t add128shift8 (int32_t v) noexcept { return (v + 128) >> 8; }
+	constexpr uint8_t rgb2y (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (add128shift8 (( 66 * r) + (129 * g) + ( 25 * b)) + 16); }
+	constexpr uint8_t rgb2u (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (add128shift8 ((-38 * r) - ( 74 * g) + (112 * b)) + 128); }
+	constexpr uint8_t rgb2v (int32_t r, int32_t g, int32_t b) noexcept { return dseed::saturate (add128shift8 ((112 * r) - ( 94 * g) - ( 18 * b)) + 128); }
 	// YUV -> RGB
 	constexpr int32_t __c (int32_t y) noexcept { return y - 16; }
 	constexpr int32_t __d (int32_t u) noexcept { return u - 128; }
 	constexpr int32_t __e (int32_t v) noexcept { return v - 128; }
-	constexpr uint8_t yuv2r (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (((298 * __c (y))                   + (409 * __e (v)) + 128) >> 8); }
-	constexpr uint8_t yuv2g (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (((298 * __c (y)) - (100 * __d (u)) - (208 * __e (v)) + 128) >> 8); }
-	constexpr uint8_t yuv2b (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (((298 * __c (y)) + (516 * __d (u))                   + 128) >> 8); }
+	constexpr uint8_t yuv2r (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (add128shift8 ((298 * __c (y))                   + (409 * __e (v)))); }
+	constexpr uint8_t yuv2g (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (add128shift8 ((298 * __c (y)) - (100 * __d (u)) - (208 * __e (v)))); }
+	constexpr uint8_t yuv2b (int32_t y, int32_t u, int32_t v) noexcept { return dseed::saturate (add128shift8 ((298 * __c (y)) + (516 * __d (u))                  )); }
 
 	template<class color_t> constexpr pixelformat_t type2format () { static_assert (true, "Not support type."); return pixelformat_unknown; }
 	template<> constexpr pixelformat_t type2format<rgba> () { return pixelformat_rgba8888; }
@@ -566,7 +567,7 @@ namespace dseed
 		};
 		yuva () = default;
 		inline yuva (uint8_t y, uint8_t u, uint8_t v, uint8_t a = 255)
-			: y (y), u (v), v (v), a (a)
+			: y (y), u (u), v (v), a (a)
 		{ }
 		inline yuva (uint32_t yuva)
 			: color (yuva)
@@ -604,7 +605,7 @@ namespace dseed
 		};
 		yuv () = default;
 		inline yuv (uint8_t y, uint8_t u, uint8_t v)
-			: y (y), u (v), v (v)
+			: y (y), u (u), v (v)
 		{ }
 		inline yuv (uint24_t yuv)
 			: color (yuv)

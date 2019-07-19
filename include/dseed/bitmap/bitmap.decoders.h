@@ -18,6 +18,7 @@ namespace dseed
 
 	DSEEDEXP error_t create_png_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_jpeg_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
+	DSEEDEXP error_t create_jpeg_bitmap_decoder_yuv (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_jpeg2000_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_webp_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);
 	DSEEDEXP error_t create_tiff_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder);

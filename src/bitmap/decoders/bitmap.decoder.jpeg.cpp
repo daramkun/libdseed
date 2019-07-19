@@ -68,7 +68,7 @@ void jpeg_stream_src (j_decompress_ptr cinfo, dseed::stream* stream)
 
 #include "bitmap.decoder.hxx"
 
-dseed::error_t dseed::create_jpeg_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder)
+dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, bool yuv, dseed::bitmap_decoder** decoder)
 {
 #if defined ( USE_JPEG )
 	if (stream == nullptr || decoder == nullptr)
@@ -86,14 +86,17 @@ dseed::error_t dseed::create_jpeg_bitmap_decoder (dseed::stream* stream, dseed::
 	if (r != JPEG_HEADER_OK)
 		return dseed::error_fail;
 
+	if (yuv && cinfo.jpeg_color_space == JCS_YCbCr)
+		cinfo.out_color_space = JCS_YCbCr;
+
 	jpeg_start_decompress (&cinfo);
 
 	dseed::size3i size (cinfo.output_width, cinfo.output_height, 1);
 	dseed::pixelformat_t pixelFormat;
 	switch (cinfo.output_components)
 	{
-	case 3: pixelFormat = dseed::pixelformat_rgb888; break;
-	case 4: pixelFormat = dseed::pixelformat_rgba8888; break;
+	case 3: pixelFormat = (!yuv) ? dseed::pixelformat_rgb888 : dseed::pixelformat_yuv888; break;
+	case 4: pixelFormat = (!yuv) ? dseed::pixelformat_rgba8888 : dseed::pixelformat_yuva8888; break;
 	case 1: pixelFormat = dseed::pixelformat_grayscale8; break;
 	default: return dseed::error_not_support;
 	}
@@ -118,8 +121,18 @@ dseed::error_t dseed::create_jpeg_bitmap_decoder (dseed::stream* stream, dseed::
 	if (*decoder == nullptr)
 		return dseed::error_out_of_memory;
 
-	return error_good;
+	return dseed::error_good;
 #else
 	return dseed::error_feature_not_support;
 #endif
+}
+
+dseed::error_t dseed::create_jpeg_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder)
+{
+	return __create_jpeg_bitmap_decoder_internal (stream, false, decoder);
+}
+
+dseed::error_t dseed::create_jpeg_bitmap_decoder_yuv (dseed::stream* stream, dseed::bitmap_decoder** decoder)
+{
+	return __create_jpeg_bitmap_decoder_internal (stream, true, decoder);
 }
