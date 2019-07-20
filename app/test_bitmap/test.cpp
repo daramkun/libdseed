@@ -28,7 +28,7 @@ int main (int argc, char* argv[])
 
 			dseed::timespan_t start = dseed::timespan_t::current_ticks ();
 			dseed::auto_object<dseed::bitmap> reformated;
-			if (dseed::failed (dseed::reformat_bitmap (bitmap, dseed::pixelformat_bgr888, &reformated)))
+			if (dseed::failed (dseed::reformat_bitmap (bitmap, dseed::pixelformat_nv12, &reformated)))
 				return -6;
 			dseed::auto_object<dseed::bitmap> reformated2;
 			if (dseed::failed (dseed::reformat_bitmap (reformated, dseed::pixelformat_yuv888, &reformated2)))

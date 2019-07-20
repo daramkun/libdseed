@@ -151,150 +151,163 @@ inline int pixelconv_to_indexedcolor<bgr, bgra> (PIXELCONV_ARGS) noexcept
 // Packed YCbCr series <-> BGR Conversions
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-/*template<> inline int pixelconv<pixelformat_yuyv8888, pixelformat_bgr888> (PIXELCONV_ARGS) noexcept
-{
-	size_t destStride = get_bitmap_stride (pixelformat_yuyv8888, size.width)
-		, srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
-	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
 
-	for (auto z = 0; z < size.depth; ++z)
+#if COMPILER_MSVC
+#	pragma pack (push, 1)
+#else
+#	pragma pack (1)
+#endif
+struct yuyv { uint8_t y1, u, y2, v; yuyv (uint8_t y1, uint8_t y2, uint8_t u, uint8_t v) : y1 (y1), y2 (y2), u (u), v (v) { } };
+struct uv { uint8_t u, v; uv (uint8_t u, uint8_t v) : u (u), v (v) { } };
+#if COMPILER_MSVC
+#	pragma pack (pop)
+#else
+#	pragma pack ()
+#endif
+
+template<class TSrc>
+inline int pixelconv_to_chromasubsample_yuv422 (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (dseed::pixelformat_yuyv8888, size.width)
+		, srcStride = get_bitmap_stride (type2format<TSrc> (), size.width);
+	size_t destDepth = get_bitmap_plane_size (dseed::pixelformat_yuyv8888, size.width, size.height)
+		, srcDepth = get_bitmap_plane_size (type2format<TSrc> (), size.width, size.height);
+
+	for (size_t z = 0; z < size.depth; ++z)
 	{
-		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
-		for (auto y = 0; y < size.height; ++y)
+		size_t destDepthZ = z * destDepth
+			, srcDepthZ = z * srcDepth;
+		for (size_t y = 0; y < size.height; ++y)
 		{
-			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
+			size_t destStrideY = y * destStride
+				, srcStrideY = y * srcStride;
 			yuyv* destPtr = (yuyv*)(dest + destDepthZ + destStrideY);
-			const bgr* srcPtr = (const bgr*)(src + srcDepthZ + srcStrideY);
-			for (auto x = 0; x < size.width; x += 2)
+			const TSrc* srcPtr = (TSrc*)(src + srcDepthZ + srcStrideY);
+
+			for (size_t x = 0; x < size.width; x += 2)
 			{
 				yuyv* destPtrX = destPtr + (x / 2);
-				const bgr* srcPtrX = srcPtr + x;
-				*destPtrX = yuyv (*srcPtrX, *(srcPtrX + 1));
+				const TSrc* srcPtrX = srcPtr + x;
+				yuv srcColor1 = *srcPtrX;
+				grayscale srcColor2 = {0};
+				if (x + 1 < size.width)
+					srcColor2 = *(srcPtrX + 1);
+				*destPtrX = yuyv (srcColor1.y, srcColor2.color, srcColor1.u, srcColor1.v);
 			}
 		}
 	}
+
 	return 0;
 }
-template<> inline int pixelconv<pixelformat_yyyyuv888888, pixelformat_bgr888> (PIXELCONV_ARGS) noexcept
+template<class TDest>
+inline int pixelconv_from_chromasubsample_yuv422 (PIXELCONV_ARGS) noexcept
 {
-	size_t srcStride = get_bitmap_stride (pixelformat_bgr888, size.width);
-	size_t destDepth = get_bitmap_plane_size (pixelformat_yyyyuv888888, size.width, size.height)
-		, srcDepth = srcStride * size.height;
-	size_t destYSize = size.width * size.height;
+	size_t destStride = get_bitmap_stride (type2format<TDest> (), size.width)
+		, srcStride = get_bitmap_stride (dseed::pixelformat_yuyv8888, size.width);
+	size_t destDepth = get_bitmap_plane_size (type2format<TDest> (), size.width, size.height)
+		, srcDepth = get_bitmap_plane_size (dseed::pixelformat_yuyv8888, size.width, size.height);
 
-	for (auto z = 0; z < size.depth; ++z)
+	for (size_t z = 0; z < size.depth; ++z)
 	{
-		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
-		for (auto y = 0; y < size.height; y += 2)
+		size_t destDepthZ = z * destDepth
+			, srcDepthZ = z * srcDepth;
+		for (size_t y = 0; y < size.height; ++y)
 		{
-			uint8_t* destY1Ptr = (uint8_t*)(dest + destDepthZ + (size.width * y));
-			uint8_t* destY2Ptr = (uint8_t*)(dest + destDepthZ + (size.width * (y + 1)));
-			uint8_t* destUVPtr = (uint8_t*)(dest + destDepthZ + destYSize + (size.width * (y / 2)));
-			const bgr* srcPtr1 = (const bgr*)(src + srcDepthZ + (y * srcStride));
-			const bgr* srcPtr2 = (const bgr*)(src + srcDepthZ + ((y + 1) * srcStride));
-			for (auto x = 0; x < size.width; x += 2)
+			size_t destStrideY = y * destStride
+				, srcStrideY = y * srcStride;
+			TDest* destPtr = (TDest*)(dest + destDepthZ + destStrideY);
+			const yuyv* srcPtr = (yuyv*)(src + srcDepthZ + srcStrideY);
+
+			for (size_t x = 0; x < size.width; x += 2)
 			{
-				const bgr* srcPtr1X = srcPtr1 + x;
-				const bgr* srcPtr2X = srcPtr2 + x;
-
-				uint8_t* destUVPtrX = destUVPtr + x;
-
-				uint8_t* destY1PtrX = destY1Ptr + (x / 2);
-				yuv yuv1 = yuv(*srcPtr1X), yuv2 = yuv(*(srcPtr1X + 1));
-
-				destY1PtrX[0] = yuv1.y;
-				destY1PtrX[1] = yuv2.y;
-
-				uint32_t cu, cv, divider = 2;
-				if (y < size.height)
-					divider = 4;
-
-				cu = yuv1.u;// + yuv2.u;
-				cv = yuv1.v;// + yuv2.v;
-
-				if (y < size.height)
-				{
-					uint8_t* destY2PtrX = destY2Ptr + (x / 2);
-					yuv yuv3 = *srcPtr2X, yuv4 = *(srcPtr2X + 1);
-
-					destY2PtrX[0] = yuv3.y;
-					destY2PtrX[1] = yuv4.y;
-
-					//cu += yuv3.u + yuv4.u;
-					//cv += yuv3.v + yuv4.v;
-				}
-				destUVPtrX[0] = cu;// / divider;
-				destUVPtrX[1] = cv;// / divider;
-
-			}
-		}
-	}
-	return 0;
-}
-
-template<> inline int pixelconv<pixelformat_bgr888, pixelformat_yuyv8888> (PIXELCONV_ARGS) noexcept
-{
-	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width)
-		, srcStride = get_bitmap_stride (pixelformat_yuyv8888, size.width);
-	size_t destDepth = destStride * size.height, srcDepth = srcStride * size.height;
-
-	for (auto z = 0; z < size.depth; ++z)
-	{
-		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
-		for (auto y = 0; y < size.height; ++y)
-		{
-			size_t destStrideY = y * destStride, srcStrideY = y * srcStride;
-			bgr* destPtr = (bgr*)(dest + destDepthZ + destStrideY);
-			const yuyv* srcPtr = (const yuyv*)(src + srcDepthZ + srcStrideY);
-			for (auto x = 0; x < size.width; x += 2)
-			{
-				bgr* destPtrX = destPtr + x;
+				TDest* destPtrX = destPtr + x;
 				const yuyv* srcPtrX = srcPtr + (x / 2);
-				srcPtrX->to_bgr (destPtrX, destPtrX + 1);
+				*destPtrX = yuv (srcPtrX->y1, srcPtrX->u, srcPtrX->v);
+				if (x + 1 < size.width)
+					* (destPtrX + 1) = yuv (srcPtrX->y2, srcPtrX->u, srcPtrX->v);
 			}
 		}
 	}
+
 	return 0;
 }
-template<> inline int pixelconv<pixelformat_bgr888, pixelformat_yyyyuv888888> (PIXELCONV_ARGS) noexcept
+
+template<class TSrc>
+inline int pixelconv_to_chromasubsample_nv12 (PIXELCONV_ARGS) noexcept
 {
-	size_t destStride = get_bitmap_stride (pixelformat_bgr888, size.width);
-	size_t destDepth = destStride * size.height, srcDepth = (size.width * size.height) + (size.width / 2 * size.height / 2);
-	size_t srcYSize = size.width * size.height;
+	size_t destYStride = size.width
+		, destUVStride = (size_t)ceil(size.width / 2.0) * 2
+		, srcStride = get_bitmap_stride (type2format<TSrc> (), size.width);
+	size_t destDepth = get_bitmap_plane_size (dseed::pixelformat_nv12, size.width, size.height)
+		, srcDepth = get_bitmap_plane_size (type2format<TSrc> (), size.width, size.height);
+	size_t ySize = size.width * size.height;
 
-	for (auto z = 0; z < size.depth; ++z)
+	for (size_t z = 0; z < size.depth; ++z)
 	{
-		size_t destDepthZ = z * destDepth, srcDepthZ = z * srcDepth;
-		for (auto y = 0; y < size.height; y += 2)
+		size_t destDepthZ = z * destDepth
+			, srcDepthZ = z * srcDepth;
+		for (size_t y = 0; y < size.height; ++y)
 		{
-			bgr* destPtr1 = (bgr*)(dest + destDepthZ + (y * destStride));
-			bgr* destPtr2 = (bgr*)(dest + destDepthZ + ((y + 1) * destStride));
-			const uint8_t* srcY1Ptr = (const uint8_t*)(src + srcDepthZ + (size.width * y));
-			const uint8_t* srcY2Ptr = (const uint8_t*)(src + srcDepthZ + (size.width * (y + 1)));
-			const uint8_t* srcUVPtr = (const uint8_t*)(src + srcDepthZ + srcYSize + (size.width * (y / 2)));
-			for (auto x = 0; x < size.width; x += 2)
+			size_t destYStrideY = y * destYStride
+				, destUVStrideY = (y / 2) * destUVStride
+				, srcStrideY = y * srcStride;
+			grayscale* destYPtr = (grayscale*)(dest + destDepthZ + destYStrideY);
+			uv* destUVPtr = (uv*)(dest + destDepthZ + ySize + destUVStrideY);
+			const TSrc* srcPtr = (TSrc*)(src + srcDepthZ + srcStrideY);
+
+			for (size_t x = 0; x < size.width; ++x)
 			{
-				bgr* destPtr1X = destPtr1 + x;
-				bgr* destPtr2X = destPtr2 + x;
+				grayscale* destYPtrX = destYPtr + x;
+				const TSrc* srcPtrX = srcPtr + x;
+				*destYPtrX = *srcPtrX;
 
-				const uint8_t* srcUVPtrX = srcUVPtr + x;
-				uint8_t u = *srcUVPtrX, v = *(srcUVPtrX + 1);
-
-				const uint8_t* srcY1PtrX = srcY1Ptr + (x / 2);
-				destPtr1X[0] = (bgr)yuv (*srcY1PtrX, u, v);
-				destPtr1X[1] = (bgr)yuv (*(srcY1PtrX + 1), u, v);
-
-				if (y < size.height)
+				if ((x + 1) % 2 == 1 && (y + 1) % 2 == 1)
 				{
-					const uint8_t* srcY2PtrX = srcY2Ptr + (x / 2);
-					destPtr2X[0] = (bgr)yuv (*srcY2PtrX, u, v);
-					destPtr2X[1] = (bgr)yuv (*(srcY2PtrX + 1), u, v);
+					uv* destUVPtrX = destUVPtr + (x / 2);
+					yuv yuv = *srcPtrX;
+					*destUVPtrX = uv (yuv.u, yuv.v);
 				}
 			}
 		}
 	}
+
 	return 0;
-}*/
+}
+template<class TDest>
+inline int pixelconv_from_chromasubsample_nv12 (PIXELCONV_ARGS) noexcept
+{
+	size_t destStride = get_bitmap_stride (type2format<TDest> (), size.width)
+		, srcYStride = size.width
+		, srcUVStride = (size_t)ceil (size.width / 2.0) * 2;
+	size_t destDepth = get_bitmap_plane_size (type2format<TDest> (), size.width, size.height)
+		, srcDepth = get_bitmap_plane_size (dseed::pixelformat_nv12, size.width, size.height);
+	size_t ySize = size.width * size.height;
+
+	for (size_t z = 0; z < size.depth; ++z)
+	{
+		size_t destDepthZ = z * destDepth
+			, srcDepthZ = z * srcDepth;
+		for (size_t y = 0; y < size.height; ++y)
+		{
+			size_t destStrideY = y * destStride
+				, srcYStrideY = y * srcYStride
+				, srcUVStrideY = (y / 2) * srcUVStride;
+			TDest* destPtr = (TDest*)(dest + destDepthZ + destStrideY);
+			const grayscale* srcYPtr = (grayscale*)(src + srcDepthZ + srcYStrideY);
+			const uv* srcUVPtr = (uv*)(src + srcDepthZ + ySize + srcUVStrideY);
+
+			for (size_t x = 0; x < size.width; ++x)
+			{
+				TDest* destPtrX = destPtr + x;
+				const grayscale* srcYPtrX = srcYPtr + x;
+				const uv* srcUVPtrX = srcUVPtr + (x / 2);
+				*destPtrX = yuv (srcYPtrX->color, srcUVPtrX->u, srcUVPtrX->v);
+			}
+		}
+	}
+
+	return 0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -689,11 +702,53 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Subsampled YUV Color Conversions
 	////////////////////////////////////////////////////////////////////////////////////////
-	//{ pctp (pixelformat_yuyv8888, pixelformat_bgr888), pixelconv<pixelformat_yuyv8888, pixelformat_bgr888> },
-	//{ pctp (pixelformat_yyyyuv888888, pixelformat_bgr888), pixelconv<pixelformat_yyyyuv888888, pixelformat_bgr888> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_rgba8888), pixelconv_to_chromasubsample_yuv422<rgba> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_rgb888), pixelconv_to_chromasubsample_yuv422<rgb> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_rgbaf), pixelconv_to_chromasubsample_yuv422<rgbaf> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_bgra8888), pixelconv_to_chromasubsample_yuv422<bgra> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_bgr888), pixelconv_to_chromasubsample_yuv422<bgr> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_bgra4444), pixelconv_to_chromasubsample_yuv422<bgra4> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_bgr565), pixelconv_to_chromasubsample_yuv422<bgr565> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_grayscale8), pixelconv_to_chromasubsample_yuv422<grayscale> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_grayscalef), pixelconv_to_chromasubsample_yuv422<grayscalef> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_yuva8888), pixelconv_to_chromasubsample_yuv422<yuva> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_yuv888), pixelconv_to_chromasubsample_yuv422<yuv> },
 
-	//{ pctp (pixelformat_bgr888, pixelformat_yuyv8888), pixelconv<pixelformat_bgr888, pixelformat_yuyv8888> },
-	//{ pctp (pixelformat_bgr888, pixelformat_yyyyuv888888), pixelconv<pixelformat_bgr888, pixelformat_yyyyuv888888> },
+	{ pctp (pixelformat_nv12, pixelformat_rgba8888), pixelconv_to_chromasubsample_nv12<rgba> },
+	{ pctp (pixelformat_nv12, pixelformat_rgb888), pixelconv_to_chromasubsample_nv12<rgb> },
+	{ pctp (pixelformat_nv12, pixelformat_rgbaf), pixelconv_to_chromasubsample_nv12<rgbaf> },
+	{ pctp (pixelformat_nv12, pixelformat_bgra8888), pixelconv_to_chromasubsample_nv12<bgra> },
+	{ pctp (pixelformat_nv12, pixelformat_bgr888), pixelconv_to_chromasubsample_nv12<bgr> },
+	{ pctp (pixelformat_nv12, pixelformat_bgra4444), pixelconv_to_chromasubsample_nv12<bgra4> },
+	{ pctp (pixelformat_nv12, pixelformat_bgr565), pixelconv_to_chromasubsample_nv12<bgr565> },
+	{ pctp (pixelformat_nv12, pixelformat_grayscale8), pixelconv_to_chromasubsample_nv12<grayscale> },
+	{ pctp (pixelformat_nv12, pixelformat_grayscalef), pixelconv_to_chromasubsample_nv12<grayscalef> },
+	{ pctp (pixelformat_nv12, pixelformat_yuva8888), pixelconv_to_chromasubsample_nv12<yuva> },
+	{ pctp (pixelformat_nv12, pixelformat_yuv888), pixelconv_to_chromasubsample_nv12<yuv> },
+
+	{ pctp (pixelformat_rgba8888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<rgba> },
+	{ pctp (pixelformat_rgb888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<rgb> },
+	{ pctp (pixelformat_rgbaf, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<rgbaf> },
+	{ pctp (pixelformat_bgra8888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<bgra> },
+	{ pctp (pixelformat_bgr888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<bgr> },
+	{ pctp (pixelformat_bgra4444, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<bgra4> },
+	{ pctp (pixelformat_bgr565, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<bgr565> },
+	{ pctp (pixelformat_grayscale8, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<grayscale> },
+	{ pctp (pixelformat_grayscalef, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<grayscalef> },
+	{ pctp (pixelformat_yuva8888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<yuva> },
+	{ pctp (pixelformat_yuv888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<yuv> },
+
+	{ pctp (pixelformat_rgba8888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<rgba> },
+	{ pctp (pixelformat_rgb888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<rgb> },
+	{ pctp (pixelformat_rgbaf, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<rgbaf> },
+	{ pctp (pixelformat_bgra8888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<bgra> },
+	{ pctp (pixelformat_bgr888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<bgr> },
+	{ pctp (pixelformat_bgra4444, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<bgra4> },
+	{ pctp (pixelformat_bgr565, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<bgr565> },
+	{ pctp (pixelformat_grayscale8, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<grayscale> },
+	{ pctp (pixelformat_grayscalef, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<grayscalef> },
+	{ pctp (pixelformat_yuva8888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<yuva> },
+	{ pctp (pixelformat_yuv888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<yuv> },
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// DXT Color Conversions

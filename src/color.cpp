@@ -29,7 +29,7 @@ size_t dseed::get_bitmap_stride (dseed::pixelformat_t format, int32_t width) noe
 		return width;
 
 	case pixelformat_yuyv8888:
-		return ceil (width / 2.0) * 4;
+		return (((width + 2) / 4) * 4) * 2;
 
 	default: return 0;
 	}
