@@ -122,6 +122,23 @@ namespace dseed
 	//    can be converted to each other.
 	//  : Compressed color formats can be converted from/to RGBA only. (BC6H, BC7, ETC2, PVRTC, ASTC not implemented now)
 	DSEEDEXP error_t reformat_bitmap (dseed::bitmap* original, dseed::pixelformat_t reformat, dseed::bitmap** bitmap);
+
+	// Resize methods
+	enum resize_t
+	{
+		// Nearest-Neighborhood
+		resize_nearest,
+		// Bilinear
+		resize_bilinear,
+		// Bicubic,
+		resize_bicubic,
+		// Lanczos
+		resize_lanczos,
+	};
+
+	// Bitmap Rezie
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV) only support.
+	DSEEDEXP error_t resize_bitmap (dseed::bitmap* original, resize_t resize_method, const size3i& size, dseed::bitmap** bitmap);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>

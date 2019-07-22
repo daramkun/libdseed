@@ -315,126 +315,32 @@ inline int pixelconv_from_chromasubsample_nv12 (PIXELCONV_ARGS) noexcept
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bc1> (PIXELCONV_ARGS) noexcept
+enum BCENUM { BC1 = (1 << 0), BC2 = (1 << 1), BC3 = (1 << 2), BC4 = (1 << 3), BC5 = (1 << 4) };
+constexpr pixelformat_t BC_TO_PF (BCENUM compression) noexcept { switch (compression) { case BC1: return pixelformat_bc1; case BC2: return pixelformat_bc2;
+case BC3: return pixelformat_bc3; case BC4: return pixelformat_bc4; case BC5: return pixelformat_bc5; } }
+
+template<BCENUM compression>
+inline int pixelconv_to_dxt (PIXELCONV_ARGS) noexcept
 {
 #if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_bc1, size.width, size.height);
+	size_t destDepth = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height),
+		srcDepth = dseed::get_bitmap_plane_size (BC_TO_PF(compression), size.width, size.height);
 	for (int z = 0; z < size.depth; ++z)
-		squish::DecompressImage (dest + (destArr * z), size.width, size.height, src + (srcArr * z), squish::kDxt1);
+		squish::DecompressImage (dest + (destDepth * z), size.width, size.height, src + (srcDepth * z), compression);
 	return 0;
 #else
 	return -1;
 #endif
 }
-template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bc2> (PIXELCONV_ARGS) noexcept
+template<BCENUM compression>
+inline int pixelconv_from_dxt (PIXELCONV_ARGS) noexcept
 {
 #if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_bc2, size.width, size.height);
+	size_t destDepth = dseed::get_bitmap_plane_size (BC_TO_PF (compression), size.width, size.height),
+		srcDepth = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height);
 	for (int z = 0; z < size.depth; ++z)
-		squish::DecompressImage (dest + (destArr * z), size.width, size.height, src + (srcArr * z), squish::kDxt3);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bc3> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_bc3, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::DecompressImage (dest + (destArr * z), size.width, size.height, src + (srcArr * z), squish::kDxt5);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bc4> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_bc4, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::DecompressImage (dest + (destArr * z), size.width, size.height, src + (srcArr * z), squish::kBc4);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_rgba8888, pixelformat_bc5> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_bc5, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::DecompressImage (dest + (destArr * z), size.width, size.height, src + (srcArr * z), squish::kBc5);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_bc1, pixelformat_rgba8888> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_bc1, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::CompressImage (src + (srcArr * z), size.width, size.height, dest + (destArr * z)
-			, squish::kDxt1 | squish::kColourIterativeClusterFit);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_bc2, pixelformat_rgba8888> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_bc2, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::CompressImage (src + (srcArr * z), size.width, size.height, dest + (destArr * z)
-			, squish::kDxt3 | squish::kColourIterativeClusterFit);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_bc3, pixelformat_rgba8888> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_bc3, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::CompressImage (src + (srcArr * z), size.width, size.height, dest + (destArr * z)
-			, squish::kDxt5 | squish::kColourIterativeClusterFit);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_bc4, pixelformat_rgba8888> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_bc4, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::CompressImage (src + (srcArr * z), size.width, size.height, dest + (destArr * z)
-			, squish::kBc4 | squish::kColourIterativeClusterFit);
-	return 0;
-#else
-	return -1;
-#endif
-}
-template<> inline int pixelconv<pixelformat_bc5, pixelformat_rgba8888> (PIXELCONV_ARGS) noexcept
-{
-#if defined ( USE_SQUISH )
-	size_t destArr = dseed::get_bitmap_plane_size (pixelformat_bc5, size.width, size.height),
-		srcArr = dseed::get_bitmap_plane_size (pixelformat_rgba8888, size.width, size.height);
-	for (int z = 0; z < size.depth; ++z)
-		squish::CompressImage (src + (srcArr * z), size.width, size.height, dest + (destArr * z)
-			, squish::kBc5 | squish::kColourIterativeClusterFit);
+		squish::CompressImage (src + (srcDepth * z), size.width, size.height, dest + (destDepth * z)
+			, compression | squish::kColourIterativeClusterFit);
 	return 0;
 #else
 	return -1;
@@ -753,17 +659,17 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	////////////////////////////////////////////////////////////////////////////////////////
 	// DXT Color Conversions
 	////////////////////////////////////////////////////////////////////////////////////////
-	{ pctp (pixelformat_rgba8888, pixelformat_bc1), pixelconv<pixelformat_rgba8888, pixelformat_bc1> },
-	{ pctp (pixelformat_rgba8888, pixelformat_bc2), pixelconv<pixelformat_rgba8888, pixelformat_bc2> },
-	{ pctp (pixelformat_rgba8888, pixelformat_bc3), pixelconv<pixelformat_rgba8888, pixelformat_bc3> },
-	{ pctp (pixelformat_rgba8888, pixelformat_bc4), pixelconv<pixelformat_rgba8888, pixelformat_bc4> },
-	{ pctp (pixelformat_rgba8888, pixelformat_bc5), pixelconv<pixelformat_rgba8888, pixelformat_bc5> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc1), pixelconv_to_dxt<BC1> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc2), pixelconv_to_dxt<BC2> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc3), pixelconv_to_dxt<BC3> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc4), pixelconv_to_dxt<BC4> },
+	{ pctp (pixelformat_rgba8888, pixelformat_bc5), pixelconv_to_dxt<BC5> },
 
-	{ pctp (pixelformat_bc1, pixelformat_rgba8888), pixelconv<pixelformat_bc1, pixelformat_rgba8888> },
-	{ pctp (pixelformat_bc2, pixelformat_rgba8888), pixelconv<pixelformat_bc2, pixelformat_rgba8888> },
-	{ pctp (pixelformat_bc3, pixelformat_rgba8888), pixelconv<pixelformat_bc3, pixelformat_rgba8888> },
-	{ pctp (pixelformat_bc4, pixelformat_rgba8888), pixelconv<pixelformat_bc4, pixelformat_rgba8888> },
-	{ pctp (pixelformat_bc5, pixelformat_rgba8888), pixelconv<pixelformat_bc5, pixelformat_rgba8888> },
+	{ pctp (pixelformat_bc1, pixelformat_rgba8888), pixelconv_from_dxt<BC1> },
+	{ pctp (pixelformat_bc2, pixelformat_rgba8888), pixelconv_from_dxt<BC2> },
+	{ pctp (pixelformat_bc3, pixelformat_rgba8888), pixelconv_from_dxt<BC3> },
+	{ pctp (pixelformat_bc4, pixelformat_rgba8888), pixelconv_from_dxt<BC4> },
+	{ pctp (pixelformat_bc5, pixelformat_rgba8888), pixelconv_from_dxt<BC5> },
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// ETC1 Color Conversions
@@ -778,6 +684,9 @@ std::map<pctp, pcfn> g_pixelconvs = {
 
 dseed::error_t dseed::reformat_bitmap (dseed::bitmap* original, dseed::pixelformat_t reformat, dseed::bitmap** bitmap)
 {
+	if (original == nullptr || bitmap == nullptr)
+		return dseed::error_invalid_args;
+
 	pixelformat_t originalFormat = original->format ();
 	if (originalFormat == reformat)
 	{
@@ -788,20 +697,17 @@ dseed::error_t dseed::reformat_bitmap (dseed::bitmap* original, dseed::pixelform
 
 	bool isIndexedTarget = false;
 	int bpp = 0;
+	dseed::auto_object<dseed::palette> tempPalette;
 	if (reformat == pixelformat_bgra8888_indexed8 || reformat == pixelformat_bgr888_indexed8)
 	{
 		isIndexedTarget = true;
 		bpp = (reformat & 0xff) * 8;
-	}
 
-	dseed::size3i size = original->size ();
-
-	dseed::auto_object<dseed::palette> tempPalette;
-	if (isIndexedTarget)
-	{
 		if (dseed::failed (dseed::create_palette (nullptr, bpp, 256, &tempPalette)))
 			return dseed::error_fail;
 	}
+
+	dseed::size3i size = original->size ();
 
 	dseed::auto_object<dseed::bitmap> temp;
 	if (dseed::failed (dseed::create_bitmap (dseed::bitmaptype_2d, size, reformat
@@ -818,16 +724,13 @@ dseed::error_t dseed::reformat_bitmap (dseed::bitmap* original, dseed::pixelform
 	if (dseed::succeeded (temp->palette (&destPalette)))
 		destPalette->pixels_pointer ((void**)& destPalettePtr);
 
-	pctp tp (reformat, originalFormat);
-	auto found = g_pixelconvs.find (tp);
+	auto found = g_pixelconvs.find (pctp (reformat, originalFormat));
 	if (found == g_pixelconvs.end ())
 		return dseed::error_not_support;
 
 	int paletteCount = found->second (destPtr, srcPtr, size, destPalettePtr, srcPalettePtr);
-	if (paletteCount == -1)
-		return dseed::error_not_support;
-	if (isIndexedTarget)
-		tempPalette->resize (paletteCount);
+	if (paletteCount == -1) return dseed::error_not_support;
+	if (isIndexedTarget) tempPalette->resize (paletteCount);
 
 	*bitmap = temp.detach ();
 

@@ -202,6 +202,7 @@ SET ( DSEED_BUILD_FILES
 	# Bitmap
 	src/bitmap/bitmap.cpp
 	src/bitmap/bitmap.reformat.cpp
+	src/bitmap/bitmap.resize.cpp
 
 	# Bitmap Decoders with Non-external Library
 	src/bitmap/decoders/bitmap.decoder.wic.cpp

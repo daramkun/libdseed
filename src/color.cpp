@@ -60,6 +60,7 @@ size_t dseed::get_bitmap_plane_size (dseed::pixelformat_t format, int32_t width,
 		return (size_t)(width * height + ((ceil (width / 2.0) * 2) * ceil (height / 2.0)));
 
 	case pixelformat_bc1:
+	case pixelformat_bc4:
 	case pixelformat_etc1:
 	case pixelformat_etc2:
 	case pixelformat_pvrtc_2bpp:
@@ -70,6 +71,7 @@ size_t dseed::get_bitmap_plane_size (dseed::pixelformat_t format, int32_t width,
 
 	case pixelformat_bc2:
 	case pixelformat_bc3:
+	case pixelformat_bc5:
 	case pixelformat_bc6h:
 	case pixelformat_bc7:
 	case pixelformat_etc2a:

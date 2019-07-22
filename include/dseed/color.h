@@ -228,6 +228,8 @@ namespace dseed
 	inline rgba operator- (const rgba& c1, const rgba& c2) { return rgba (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b, c1.a - c2.a); }
 	inline rgba operator* (const rgba& c1, const rgba& c2) { return rgba (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b, c1.a * c2.a); }
 	inline rgba operator/ (const rgba& c1, const rgba& c2) { return rgba (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b, c1.a / c2.a); }
+	inline rgba operator* (const rgba& c1, double factor) { return rgba ((uint8_t)(c1.r * factor), (uint8_t)(c1.g * factor), (uint8_t)(c1.b * factor), (uint8_t)(c1.a * factor)); }
+	inline rgba operator/ (const rgba& c1, double factor) { return rgba ((uint8_t)(c1.r / factor), (uint8_t)(c1.g / factor), (uint8_t)(c1.b / factor), (uint8_t)(c1.a / factor)); }
 
 	struct rgb
 	{
@@ -266,6 +268,8 @@ namespace dseed
 	inline rgb operator- (const rgb& c1, const rgb& c2) { return rgb (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b); }
 	inline rgb operator* (const rgb& c1, const rgb& c2) { return rgb (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b); }
 	inline rgb operator/ (const rgb& c1, const rgb& c2) { return rgb (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b); }
+	inline rgb operator* (const rgb& c1, double factor) { return rgb ((uint8_t)(c1.r * factor), (uint8_t)(c1.g * factor), (uint8_t)(c1.b * factor)); }
+	inline rgb operator/ (const rgb& c1, double factor) { return rgb ((uint8_t)(c1.r / factor), (uint8_t)(c1.g / factor), (uint8_t)(c1.b / factor)); }
 
 	struct rgbaf
 	{
@@ -305,6 +309,8 @@ namespace dseed
 	inline rgbaf operator- (const rgbaf& c1, const rgbaf& c2) { return rgbaf (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b, c1.a - c2.a); }
 	inline rgbaf operator* (const rgbaf& c1, const rgbaf& c2) { return rgbaf (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b, c1.a * c2.a); }
 	inline rgbaf operator/ (const rgbaf& c1, const rgbaf& c2) { return rgbaf (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b, c1.a / c2.a); }
+	inline rgbaf operator* (const rgbaf& c1, double factor) { return rgbaf ((float)(c1.r * factor), (float)(c1.g * factor), (float)(c1.b * factor), (float)(c1.a * factor)); }
+	inline rgbaf operator/ (const rgbaf& c1, double factor) { return rgbaf ((float)(c1.r / factor), (float)(c1.g / factor), (float)(c1.b / factor), (float)(c1.a / factor)); }
 
 	struct bgra
 	{
@@ -343,6 +349,8 @@ namespace dseed
 	inline bgra operator- (const bgra& c1, const bgra& c2) { return bgra (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b, c1.a - c2.a); }
 	inline bgra operator* (const bgra& c1, const bgra& c2) { return bgra (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b, c1.a * c2.a); }
 	inline bgra operator/ (const bgra& c1, const bgra& c2) { return bgra (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b, c1.a / c2.a); }
+	inline bgra operator* (const bgra& c1, double factor) { return bgra ((uint8_t)(c1.r * factor), (uint8_t)(c1.g * factor), (uint8_t)(c1.b * factor), (uint8_t)(c1.a * factor)); }
+	inline bgra operator/ (const bgra& c1, double factor) { return bgra ((uint8_t)(c1.r / factor), (uint8_t)(c1.g / factor), (uint8_t)(c1.b / factor), (uint8_t)(c1.a / factor)); }
 
 	struct bgr
 	{
@@ -381,6 +389,8 @@ namespace dseed
 	inline bgr operator- (const bgr& c1, const bgr& c2) { return bgr (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b); }
 	inline bgr operator* (const bgr& c1, const bgr& c2) { return bgr (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b); }
 	inline bgr operator/ (const bgr& c1, const bgr& c2) { return bgr (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b); }
+	inline bgr operator* (const bgr& c1, double factor) { return bgr ((uint8_t)(c1.r * factor), (uint8_t)(c1.g * factor), (uint8_t)(c1.b * factor)); }
+	inline bgr operator/ (const bgr& c1, double factor) { return bgr ((uint8_t)(c1.r / factor), (uint8_t)(c1.g / factor), (uint8_t)(c1.b / factor)); }
 
 	struct bgra4
 	{
@@ -419,6 +429,8 @@ namespace dseed
 	inline bgra4 operator- (const bgra4& c1, const bgra4& c2) { return bgra4 (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b, c1.a - c2.a); }
 	inline bgra4 operator* (const bgra4& c1, const bgra4& c2) { return bgra4 (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b, c1.a * c2.a); }
 	inline bgra4 operator/ (const bgra4& c1, const bgra4& c2) { return bgra4 (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b, c1.a / c2.a); }
+	inline bgra4 operator* (const bgra4& c1, double factor) { return bgra4 ((uint8_t)(c1.r * factor), (uint8_t)(c1.g * factor), (uint8_t)(c1.b * factor), (uint8_t)(c1.a * factor)); }
+	inline bgra4 operator/ (const bgra4& c1, double factor) { return bgra4 ((uint8_t)(c1.r / factor), (uint8_t)(c1.g / factor), (uint8_t)(c1.b / factor), (uint8_t)(c1.a / factor)); }
 
 	struct bgr565
 	{
@@ -457,6 +469,8 @@ namespace dseed
 	inline bgr565 operator- (const bgr565& c1, const bgr565& c2) { return bgr565 (c1.r - c2.r, c1.g - c2.g, c1.b - c2.b); }
 	inline bgr565 operator* (const bgr565& c1, const bgr565& c2) { return bgr565 (c1.r * c2.r, c1.g * c2.g, c1.b * c2.b); }
 	inline bgr565 operator/ (const bgr565& c1, const bgr565& c2) { return bgr565 (c1.r / c2.r, c1.g / c2.g, c1.b / c2.b); }
+	inline bgr565 operator* (const bgr565& c1, double factor) { return bgr565 ((uint8_t)(c1.r * factor), (uint8_t)(c1.g * factor), (uint8_t)(c1.b * factor)); }
+	inline bgr565 operator/ (const bgr565& c1, double factor) { return bgr565 ((uint8_t)(c1.r / factor), (uint8_t)(c1.g / factor), (uint8_t)(c1.b / factor)); }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -507,6 +521,8 @@ namespace dseed
 	inline grayscale operator- (const grayscale& c1, const grayscale& c2) { return grayscale (c1.color - c2.color); }
 	inline grayscale operator* (const grayscale& c1, const grayscale& c2) { return grayscale (c1.color * c2.color); }
 	inline grayscale operator/ (const grayscale& c1, const grayscale& c2) { return grayscale (c1.color / c2.color); }
+	inline grayscale operator* (const grayscale& c1, double factor) { return grayscale ((uint8_t)(c1.color * factor)); }
+	inline grayscale operator/ (const grayscale& c1, double factor) { return grayscale ((uint8_t)(c1.color / factor)); }
 
 	struct grayscalef
 	{
@@ -539,6 +555,8 @@ namespace dseed
 	inline grayscalef operator- (const grayscalef& c1, const grayscalef& c2) { return grayscalef (c1.color - c2.color); }
 	inline grayscalef operator* (const grayscalef& c1, const grayscalef& c2) { return grayscalef (c1.color * c2.color); }
 	inline grayscalef operator/ (const grayscalef& c1, const grayscalef& c2) { return grayscalef (c1.color / c2.color); }
+	inline grayscalef operator* (const grayscalef& c1, double factor) { return grayscalef ((float)(c1.color * factor)); }
+	inline grayscalef operator/ (const grayscalef& c1, double factor) { return grayscalef ((float)(c1.color / factor)); }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -595,6 +613,8 @@ namespace dseed
 	inline yuva operator- (const yuva& c1, const yuva& c2) { return yuva (c1.y - c2.y, c1.u - c2.u, c1.v - c2.v, c1.a - c2.a); }
 	inline yuva operator* (const yuva& c1, const yuva& c2) { return yuva (c1.y * c2.y, c1.u * c2.u, c1.v * c2.v, c1.a * c2.a); }
 	inline yuva operator/ (const yuva& c1, const yuva& c2) { return yuva (c1.y / c2.y, c1.u / c2.u, c1.v / c2.v, c1.a / c2.a); }
+	inline yuva operator* (const yuva& c1, double factor) { return yuva ((uint8_t)(c1.y * factor), (uint8_t)(c1.u * factor), (uint8_t)(c1.v * factor), (uint8_t)(c1.a * factor)); }
+	inline yuva operator/ (const yuva& c1, double factor) { return yuva ((uint8_t)(c1.y / factor), (uint8_t)(c1.u / factor), (uint8_t)(c1.v / factor), (uint8_t)(c1.a / factor)); }
 
 	struct yuv
 	{
@@ -633,6 +653,8 @@ namespace dseed
 	inline yuv operator- (const yuv& c1, const yuv& c2) { return yuv (c1.y - c2.y, c1.u - c2.u, c1.v - c2.v); }
 	inline yuv operator* (const yuv& c1, const yuv& c2) { return yuv (c1.y * c2.y, c1.u * c2.u, c1.v * c2.v); }
 	inline yuv operator/ (const yuv& c1, const yuv& c2) { return yuv (c1.y / c2.y, c1.u / c2.u, c1.v / c2.v); }
+	inline yuv operator* (const yuv& c1, double factor) { return yuv ((uint8_t)(c1.y * factor), (uint8_t)(c1.u * factor), (uint8_t)(c1.v * factor)); }
+	inline yuv operator/ (const yuv& c1, double factor) { return yuv ((uint8_t)(c1.y / factor), (uint8_t)(c1.u / factor), (uint8_t)(c1.v / factor)); }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)

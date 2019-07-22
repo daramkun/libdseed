@@ -245,8 +245,25 @@ dseed::error_t dseed::create_bitmap (bitmaptype_t type, const size3i& size, pixe
 }
 
 constexpr int32_t MAXIMUM_BITMAP_DECODER_COUNT = 512;
-std::function<dseed::error_t (dseed::stream*, dseed::bitmap_decoder**)> g_bitmap_decoder_creator[MAXIMUM_BITMAP_DECODER_COUNT];
-std::atomic<int32_t> g_bitmap_decoder_creator_count;
+std::function<dseed::error_t (dseed::stream*, dseed::bitmap_decoder**)> g_bitmap_decoder_creator[MAXIMUM_BITMAP_DECODER_COUNT] =
+{
+	dseed::create_dib_bitmap_decoder,
+	dseed::create_tga_bitmap_decoder,
+	dseed::create_dds_bitmap_decoder,
+	dseed::create_ktx_bitmap_decoder,
+	dseed::create_pkm_bitmap_decoder,
+	dseed::create_astc_bitmap_decoder,
+	dseed::create_ico_bitmap_decoder,
+	dseed::create_cur_bitmap_decoder,
+	dseed::create_png_bitmap_decoder,
+	dseed::create_jpeg_bitmap_decoder,
+	dseed::create_jpeg2000_bitmap_decoder,
+	dseed::create_webp_bitmap_decoder,
+	dseed::create_tiff_bitmap_decoder,
+	dseed::create_gif_bitmap_decoder,
+	dseed::create_windows_imaging_codec_bitmap_decoder,
+};
+std::atomic<int32_t> g_bitmap_decoder_creator_count = 15;
 
 dseed::error_t dseed::add_bitmap_decoder (createbitmapdecoder_fn fn)
 {
