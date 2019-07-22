@@ -72,35 +72,96 @@ inline bool bmprsz_bilinear (uint8_t* dest, const uint8_t* src, const dseed::siz
 			const TPixel* srcPtr1 = (TPixel*)(src + srcDepthZ + srcStrideY1);
 			const TPixel* srcPtr2 = (TPixel*)(src + srcDepthZ + srcStrideY2);
 
-			double yWeight1 = (srcY2 == 0) ? 0.5 : (srcY1 / srcY2);
-			double yWeight2 = 1 - yWeight1;
-
 			for (size_t x = 0; x < destSize.width; ++x)
 			{
 				size_t srcX1 = x * xRatio;
 				size_t srcX2 = (x + 1) * xRatio;
 				double xDiff1 = (xRatio * x) - srcX1, xDiff2 = 1 - xDiff1;
-				
+
+				TPixel srcY1XColorSum = ((*(srcPtr1 + srcX1) * xDiff2) + (*(srcPtr1 + srcX2) * xDiff1)) * yDiff2;
+				TPixel srcY2XColorSum = ((*(srcPtr2 + srcX1) * xDiff2) + (*(srcPtr2 + srcX2) * xDiff1)) * yDiff1;
+
 				TPixel* destPtrX = destPtr + x;
-				const TPixel* srcPtrX1 = srcPtr1 + srcX1;
-				const TPixel* srcPtrX2 = srcPtr1 + srcX2;
+				*destPtrX = srcY1XColorSum + srcY2XColorSum;
+			}
+		}
+	}
 
-				TPixel srcY1XColor1 = (*srcPtrX1) * xDiff2;
-				TPixel srcY1XColor2 = (*srcPtrX2) * xDiff1;
-				TPixel srcY1XColorSum = srcY1XColor1 + srcY1XColor2;
+	return true;
+}
 
-				srcPtrX1 = srcPtr2 + srcX1;
-				srcPtrX2 = srcPtr2 + srcX2;
+rgbaf cubic_hermite (const rgbaf& a, const rgbaf& b, const rgbaf& c, const rgbaf& d, float factor) noexcept
+{
+	rgbaf _a = (-a / 2.0f) + ((b * 3.0f) / 2.0f) - (c * 3.0f) / 2.0f + (d / 2.0f);
+	rgbaf _b = a - ((b * 5.0f) / 2.0f) + (c * 2.0f) - (d / 2.0f);
+	rgbaf _c = (-a / 2.0f) + (c / 2.0f);
+	rgbaf _d = b;
 
-				TPixel srcY2XColor1 = (*srcPtrX1) * xDiff2;
-				TPixel srcY2XColor2 = (*srcPtrX2) * xDiff1;
-				TPixel srcY2XColorSum = srcY2XColor1 + srcY2XColor2;
+	return (_a * factor * factor * factor) + (_b * factor * factor) + (_c * factor) + d;
+}
+template<class TPixel>
+inline bool bmprsz_bicubic (uint8_t* dest, const uint8_t* src, const dseed::size3i& destSize, const dseed::size3i& srcSize) noexcept
+{
+	size_t destStride = dseed::get_bitmap_stride (dseed::type2format<TPixel> (), destSize.width)
+		, srcStride = dseed::get_bitmap_stride (dseed::type2format<TPixel> (), srcSize.width);
+	size_t destDepth = dseed::get_bitmap_plane_size (dseed::type2format<TPixel> (), destSize.width, destSize.height)
+		, srcDepth = dseed::get_bitmap_plane_size (dseed::type2format<TPixel> (), srcSize.width, srcSize.height);
 
-				TPixel srcColor1 = srcY1XColorSum * yDiff2;
-				TPixel srcColor2 = srcY2XColorSum * yDiff1;
-				TPixel srcColorSum = srcColor1 + srcColor2;
+	double zRatio = srcSize.depth / (double)destSize.depth
+		, yRatio = (srcSize.height - 1) / (double)destSize.height
+		, xRatio = (srcSize.width - 1) / (double)destSize.width;
 
-				*destPtrX = srcColorSum;
+	for (size_t z = 0; z < destSize.depth; ++z)
+	{
+		size_t srcZ = (size_t)(z * zRatio);
+		size_t destDepthZ = z * destDepth
+			, srcDepthZ = srcZ * srcDepth;
+		
+		const uint8_t* srcPtr = (uint8_t*)(src + srcDepthZ);
+
+		for (size_t y = 0; y < destSize.height; ++y)
+		{
+			size_t srcY1 = clamp<size_t> ((y - 1) * yRatio, srcSize.height);
+			size_t srcY2 = clamp<size_t> ((y + 0) * yRatio, srcSize.height);
+			size_t srcY3 = clamp<size_t> ((y + 1) * yRatio, srcSize.height);
+			size_t srcY4 = clamp<size_t> ((y + 2) * yRatio, srcSize.height);
+			double yDiff1 = (yRatio * y) - srcY2, yDiff2 = 1 - yDiff1;
+
+			size_t destStrideY = y * destStride;
+			TPixel* destPtr = (TPixel*)(dest + destDepthZ + destStrideY);
+
+			for (size_t x = 0; x < destSize.width; ++x)
+			{
+				size_t srcX1 = clamp<size_t> ((x - 1) * xRatio, srcSize.width);
+				size_t srcX2 = clamp<size_t> ((x + 0) * xRatio, srcSize.width);
+				size_t srcX3 = clamp<size_t> ((x + 1) * xRatio, srcSize.width);
+				size_t srcX4 = clamp<size_t> ((x + 2) * xRatio, srcSize.width);
+				double xDiff1 = (xRatio * x) - srcX2, xDiff2 = 1 - xDiff1;
+
+				const TPixel* srcPtrY1 = (const TPixel*)(srcPtr + (srcY1 * srcStride))
+					, * srcPtrY2 = (const TPixel*)(srcPtr + (srcY2 * srcStride))
+					, * srcPtrY3 = (const TPixel*)(srcPtr + (srcY3 * srcStride))
+					, * srcPtrY4 = (const TPixel*)(srcPtr + (srcY4 * srcStride));
+
+				rgbaf
+					p11 = *(srcPtrY1 + srcX1), p12 = *(srcPtrY1 + srcX2), p13 = *(srcPtrY1 + srcX3), p14 = *(srcPtrY1 + srcX4),
+					p21 = *(srcPtrY2 + srcX1), p22 = *(srcPtrY2 + srcX2), p23 = *(srcPtrY2 + srcX3), p24 = *(srcPtrY2 + srcX4),
+					p31 = *(srcPtrY3 + srcX1), p32 = *(srcPtrY3 + srcX2), p33 = *(srcPtrY3 + srcX3), p34 = *(srcPtrY3 + srcX4),
+					p41 = *(srcPtrY4 + srcX1), p42 = *(srcPtrY4 + srcX2), p43 = *(srcPtrY4 + srcX3), p44 = *(srcPtrY4 + srcX4);
+
+				rgbaf p1, p2, p3, p4;
+				p1 = cubic_hermite (p11, p12, p13, p14, xDiff1);
+				p2 = cubic_hermite (p21, p22, p23, p24, xDiff1);
+				p3 = cubic_hermite (p31, p32, p33, p34, xDiff1);
+				p4 = cubic_hermite (p41, p42, p43, p44, xDiff1);
+				rgbaf calced = cubic_hermite (p1, p2, p3, p4, yDiff1);
+				calced.r = saturate (calced.r);
+				calced.g = saturate (calced.g);
+				calced.b = saturate (calced.b);
+				calced.a = saturate (calced.a);
+
+				TPixel* destPtrX = destPtr + x;
+				*destPtrX = calced;
 			}
 		}
 	}
@@ -132,6 +193,18 @@ std::map<rztp, rzfn> g_resizes = {
 	{ rztp (resize_bilinear, pixelformat_grayscalef), bmprsz_bilinear<grayscalef> },
 	{ rztp (resize_bilinear, pixelformat_yuva8888), bmprsz_bilinear<yuva> },
 	{ rztp (resize_bilinear, pixelformat_yuv888), bmprsz_bilinear<yuv> },
+
+	{ rztp (resize_bicubic, pixelformat_rgba8888), bmprsz_bicubic<rgba> },
+	{ rztp (resize_bicubic, pixelformat_rgb888), bmprsz_bicubic<rgb> },
+	{ rztp (resize_bicubic, pixelformat_rgbaf), bmprsz_bicubic<rgbaf> },
+	{ rztp (resize_bicubic, pixelformat_bgra8888), bmprsz_bicubic<bgra> },
+	{ rztp (resize_bicubic, pixelformat_bgr888), bmprsz_bicubic<bgr> },
+	{ rztp (resize_bicubic, pixelformat_bgra4444), bmprsz_bicubic<bgra4> },
+	{ rztp (resize_bicubic, pixelformat_bgr565), bmprsz_bicubic<bgr565> },
+	{ rztp (resize_bicubic, pixelformat_grayscale8), bmprsz_bicubic<grayscale> },
+	{ rztp (resize_bicubic, pixelformat_grayscalef), bmprsz_bicubic<grayscalef> },
+	{ rztp (resize_bicubic, pixelformat_yuva8888), bmprsz_bicubic<yuva> },
+	{ rztp (resize_bicubic, pixelformat_yuv888), bmprsz_bicubic<yuv> },
 };
 
 dseed::error_t dseed::resize_bitmap (dseed::bitmap* original, resize_t resize_method, const size3i& size, dseed::bitmap** bitmap)

@@ -34,7 +34,7 @@ int main (int argc, char* argv[])
 				return -6;
 			dseed::auto_object<dseed::bitmap> reformated2;
 			//if (dseed::failed (dseed::reformat_bitmap (reformated, dseed::pixelformat_bc4, &reformated2)))
-			if (dseed::failed (dseed::resize_bitmap (reformated, dseed::resize_bilinear, dseed::size3i (600, 600, 1), &reformated2)))
+			if (dseed::failed (dseed::resize_bitmap (reformated, dseed::resize_bicubic, dseed::size3i (600, 600, 1), &reformated2)))
 				return -7;
 			dseed::auto_object<dseed::bitmap> reformated3;
 			if (dseed::failed (dseed::reformat_bitmap (reformated2, dseed::pixelformat_rgba8888, &reformated3)))

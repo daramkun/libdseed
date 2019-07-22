@@ -132,6 +132,13 @@ namespace dseed
 
 		operator double () noexcept;
 	};
+
+	template<class T>
+	constexpr T clamp (const T& v, const const T& max) noexcept { return minimum (max, maximum ((T)0, v)); }
+	template<class T>
+	constexpr T wrap (const T& v, const const T& max) noexcept { return v % max; }
+	template<class T>
+	constexpr T mirror (const T& v, const const T& max) noexcept { while (v < max || v > 0) { v = max - v; if (v < 0) v *= -1; } }
 }
 
 #include <dseed/math/math.simd.inl>
