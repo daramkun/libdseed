@@ -4,7 +4,7 @@ int main (int argc, char* argv[])
 {
 	dseed::auto_object<dseed::stream> inputStream;
 	if (dseed::failed (dseed::create_native_filestream (
-		u8"..\\..\\..\\sample\\bitmaps\\sample8.png", false, &inputStream)))
+		u8"..\\..\\..\\sample\\bitmaps\\sample1.png24.png", false, &inputStream)))
 		return -1;
 
 	dseed::auto_object<dseed::bitmap_decoder> decoder;
@@ -28,6 +28,15 @@ int main (int argc, char* argv[])
 			if (dseed::failed (decoder->decode_frame (i, &bitmap, &duration)))
 				return -5;
 
+			float mask_factor = 1 / 9.0f;
+			float maskArr[] = {
+				0.0, -1.0, 0.0,
+				-1.0, 5.0, -1.0,
+				0.0, -1.0, 0.0
+			};
+			dseed::bitmap_filter_mask mask (maskArr, 3, 3);
+			mask *= mask_factor;
+
 			dseed::timespan_t start = dseed::timespan_t::current_ticks ();
 			dseed::auto_object<dseed::bitmap> reformated;
 			if (dseed::failed (dseed::reformat_bitmap (bitmap, dseed::pixelformat_rgba8888, &reformated)))
@@ -37,7 +46,8 @@ int main (int argc, char* argv[])
 			if (dseed::failed (dseed::resize_bitmap (reformated, dseed::resize_bicubic, dseed::size3i (600, 600, 1), &reformated2)))
 				return -7;
 			dseed::auto_object<dseed::bitmap> reformated3;
-			if (dseed::failed (dseed::reformat_bitmap (reformated2, dseed::pixelformat_rgba8888, &reformated3)))
+			//if (dseed::failed (dseed::reformat_bitmap (reformated2, dseed::pixelformat_rgba8888, &reformated3)))
+			if (dseed::failed (dseed::filter_bitmap (reformated2, mask, &reformated3)))
 				return -8;
 			dseed::timespan_t end = dseed::timespan_t::current_ticks ();
 			printf ("Reformat time: %lf\n", (end - start).total_seconds ());

@@ -139,6 +139,40 @@ namespace dseed
 	// Bitmap Rezie
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV) only support.
 	DSEEDEXP error_t resize_bitmap (dseed::bitmap* original, resize_t resize_method, const size3i& size, dseed::bitmap** bitmap);
+
+	struct DSEEDEXP bitmap_filter_mask
+	{
+		float mask[128];
+		size_t width, height;
+		bitmap_filter_mask (float* mask, size_t width, size_t height);
+		bitmap_filter_mask (float mask, size_t width, size_t height);
+
+		inline float get_mask (size_t x, size_t y) const noexcept { return mask[y * width + x]; }
+
+		inline bitmap_filter_mask& operator*= (float factor) noexcept
+		{
+			for (size_t y = 0; y < height; ++y)
+				for (size_t x = 0; x < width; ++x)
+					mask[y * width + x] *= factor;
+			return *this;
+		}
+		inline bitmap_filter_mask& operator/= (float factor) noexcept
+		{
+			for (size_t y = 0; y < height; ++y)
+				for (size_t x = 0; x < width; ++x)
+					mask[y * width + x] /= factor;
+			return *this;
+		}
+
+		static void identity_3 (bitmap_filter_mask* mask);
+		static void edge_detection_3 (bitmap_filter_mask* mask);
+		static void sharpen_3 (bitmap_filter_mask* mask);
+		static void gaussian_blur_3 (bitmap_filter_mask* mask);
+		static void gaussian_blur_5 (bitmap_filter_mask* mask);
+		static void unsharpmask_5 (bitmap_filter_mask* mask);
+	};
+
+	DSEEDEXP error_t filter_bitmap (dseed::bitmap* original, const bitmap_filter_mask& mask, dseed::bitmap** bitmap);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>

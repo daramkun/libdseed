@@ -134,11 +134,11 @@ namespace dseed
 	};
 
 	template<class T>
-	constexpr T clamp (const T& v, const const T& max) noexcept { return minimum (max, maximum ((T)0, v)); }
+	constexpr T clamp (T v, T max) noexcept { return minimum (max, maximum ((T)0, v)); }
 	template<class T>
-	constexpr T wrap (const T& v, const const T& max) noexcept { return v % max; }
+	constexpr T wrap (T v, T max) noexcept { return v % max; }
 	template<class T>
-	constexpr T mirror (const T& v, const const T& max) noexcept { while (v < max || v > 0) { v = max - v; if (v < 0) v *= -1; } }
+	constexpr T mirror (T v, T max) noexcept { while (v < max || v > 0) { v = max - v; if (v < 0) v *= -1; } return v; }
 }
 
 #include <dseed/math/math.simd.inl>

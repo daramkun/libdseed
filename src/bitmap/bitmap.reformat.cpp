@@ -317,7 +317,7 @@ inline int pixelconv_from_chromasubsample_nv12 (PIXELCONV_ARGS) noexcept
 
 enum BCENUM { BC1 = (1 << 0), BC2 = (1 << 1), BC3 = (1 << 2), BC4 = (1 << 3), BC5 = (1 << 4) };
 constexpr pixelformat_t BC_TO_PF (BCENUM compression) noexcept { switch (compression) { case BC1: return pixelformat_bc1; case BC2: return pixelformat_bc2;
-case BC3: return pixelformat_bc3; case BC4: return pixelformat_bc4; case BC5: return pixelformat_bc5; } }
+case BC3: return pixelformat_bc3; case BC4: return pixelformat_bc4; case BC5: return pixelformat_bc5; default: pixelformat_unknown; } }
 
 template<BCENUM compression>
 inline int pixelconv_to_dxt (PIXELCONV_ARGS) noexcept

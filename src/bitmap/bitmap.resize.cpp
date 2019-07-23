@@ -121,10 +121,10 @@ inline bool bmprsz_bicubic (uint8_t* dest, const uint8_t* src, const dseed::size
 
 		for (size_t y = 0; y < destSize.height; ++y)
 		{
-			size_t srcY1 = clamp<size_t> ((y - 1) * yRatio, srcSize.height);
-			size_t srcY2 = clamp<size_t> ((y + 0) * yRatio, srcSize.height);
-			size_t srcY3 = clamp<size_t> ((y + 1) * yRatio, srcSize.height);
-			size_t srcY4 = clamp<size_t> ((y + 2) * yRatio, srcSize.height);
+			size_t srcY1 = clamp<size_t> ((y - 1) * yRatio, srcSize.height - 1);
+			size_t srcY2 = clamp<size_t> ((y + 0) * yRatio, srcSize.height - 1);
+			size_t srcY3 = clamp<size_t> ((y + 1) * yRatio, srcSize.height - 1);
+			size_t srcY4 = clamp<size_t> ((y + 2) * yRatio, srcSize.height - 1);
 			double yDiff1 = (yRatio * y) - srcY2, yDiff2 = 1 - yDiff1;
 
 			size_t destStrideY = y * destStride;
@@ -132,10 +132,10 @@ inline bool bmprsz_bicubic (uint8_t* dest, const uint8_t* src, const dseed::size
 
 			for (size_t x = 0; x < destSize.width; ++x)
 			{
-				size_t srcX1 = clamp<size_t> ((x - 1) * xRatio, srcSize.width);
-				size_t srcX2 = clamp<size_t> ((x + 0) * xRatio, srcSize.width);
-				size_t srcX3 = clamp<size_t> ((x + 1) * xRatio, srcSize.width);
-				size_t srcX4 = clamp<size_t> ((x + 2) * xRatio, srcSize.width);
+				size_t srcX1 = clamp<size_t> ((x - 1) * xRatio, srcSize.width - 1);
+				size_t srcX2 = clamp<size_t> ((x + 0) * xRatio, srcSize.width - 1);
+				size_t srcX3 = clamp<size_t> ((x + 1) * xRatio, srcSize.width - 1);
+				size_t srcX4 = clamp<size_t> ((x + 2) * xRatio, srcSize.width - 1);
 				double xDiff1 = (xRatio * x) - srcX2, xDiff2 = 1 - xDiff1;
 
 				const TPixel* srcPtrY1 = (const TPixel*)(srcPtr + (srcY1 * srcStride))
