@@ -77,7 +77,7 @@ dseed::error_t dseed::create_webp_bitmap_decoder (dseed::stream* stream, dseed::
 			}
 			else
 			{
-				for (auto y = 0; y < height; ++y)
+				for (size_t y = 0; y < height; ++y)
 				{
 					memcpy (ptr + (y * stride),
 						config.output.u.RGBA.rgba + (y * config.output.u.RGBA.stride),

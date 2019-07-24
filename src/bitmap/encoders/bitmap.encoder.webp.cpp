@@ -88,7 +88,7 @@ public:
 		void* ptr;
 		bitmap->pixels_pointer (&ptr);
 
-		importPixels (&picture, (uint8_t*)ptr, stride);
+		importPixels (&picture, (uint8_t*)ptr, (int)stride);
 
 		int ms = (int)duration.total_milliseconds ();
 		if (!WebPAnimEncoderAdd (_anim, &picture, ms, &_config))

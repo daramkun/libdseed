@@ -146,7 +146,7 @@ public:
 
 		jpeg_start_compress (&_cinfo, true);
 
-		int row_stride = dseed::get_bitmap_stride (bitmap->format (), size.width);
+		//int row_stride = dseed::get_bitmap_stride (bitmap->format (), size.width);
 		while (_cinfo.next_scanline < _cinfo.image_height)
 		{
 			void* ptr;

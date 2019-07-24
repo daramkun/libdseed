@@ -137,13 +137,17 @@ namespace dseed
 	};
 
 	// Bitmap Rezie
-	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV) only support.
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
 	DSEEDEXP error_t resize_bitmap (dseed::bitmap* original, resize_t resize_method, const size3i& size, dseed::bitmap** bitmap);
+	// Bitmap Crop
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
+	DSEEDEXP error_t crop_bitmap (dseed::bitmap* original, const rectangle& area, dseed::bitmap** bitmap);
 
 	struct DSEEDEXP bitmap_filter_mask
 	{
-		float mask[128];
+		float mask[192];
 		size_t width, height;
+		bitmap_filter_mask () = default;
 		bitmap_filter_mask (float* mask, size_t width, size_t height);
 		bitmap_filter_mask (float mask, size_t width, size_t height);
 
@@ -172,6 +176,8 @@ namespace dseed
 		static void unsharpmask_5 (bitmap_filter_mask* mask);
 	};
 
+	// Bitmap Filtering
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
 	DSEEDEXP error_t filter_bitmap (dseed::bitmap* original, const bitmap_filter_mask& mask, dseed::bitmap** bitmap);
 }
 

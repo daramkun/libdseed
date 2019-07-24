@@ -143,7 +143,7 @@ inline int pixelconv_to_indexedcolor<bgr, bgra> (PIXELCONV_ARGS) noexcept
 	for (int i = 0; i < count; ++i)
 		destPaletteBGR[i] = palette[i];
 
-	return count;
+	return (int)count;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +317,7 @@ inline int pixelconv_from_chromasubsample_nv12 (PIXELCONV_ARGS) noexcept
 
 enum BCENUM { BC1 = (1 << 0), BC2 = (1 << 1), BC3 = (1 << 2), BC4 = (1 << 3), BC5 = (1 << 4) };
 constexpr pixelformat_t BC_TO_PF (BCENUM compression) noexcept { switch (compression) { case BC1: return pixelformat_bc1; case BC2: return pixelformat_bc2;
-case BC3: return pixelformat_bc3; case BC4: return pixelformat_bc4; case BC5: return pixelformat_bc5; default: pixelformat_unknown; } }
+case BC3: return pixelformat_bc3; case BC4: return pixelformat_bc4; case BC5: return pixelformat_bc5; default: return pixelformat_unknown; } }
 
 template<BCENUM compression>
 inline int pixelconv_to_dxt (PIXELCONV_ARGS) noexcept
@@ -394,7 +394,7 @@ template<> inline int pixelconv<pixelformat_etc1, pixelformat_rgb888> (PIXELCONV
 		srcArr = dseed::get_bitmap_plane_size (pixelformat_rgb888, size.width, size.height);
 	size_t srcStride = dseed::get_bitmap_stride (dseed::pixelformat_rgb888, size.width);
 	for (int z = 0; z < size.depth; ++z)
-		etc1_encode_image (src + (z * srcArr), size.width, size.height, 3, srcStride, dest + (z * destArr));
+		etc1_encode_image (src + (z * srcArr), size.width, size.height, 3, (etc1_uint32)srcStride, dest + (z * destArr));
 	return 0;
 }
 template<> inline int pixelconv<pixelformat_etc1, pixelformat_rgba8888> (PIXELCONV_ARGS)
@@ -418,7 +418,7 @@ template<> inline int pixelconv<pixelformat_etc1, pixelformat_rgba8888> (PIXELCO
 				tempPixel.b = srcPixel.b;
 			}
 		}
-		etc1_encode_image (temp.data () + (z * tempArr), size.width, size.height, 3, tempStride, dest + (z * destArr));
+		etc1_encode_image (temp.data () + (z * tempArr), size.width, size.height, 3, (etc1_uint32)tempStride, dest + (z * destArr));
 	}
 	return 0;
 }

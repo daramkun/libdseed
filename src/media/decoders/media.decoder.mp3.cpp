@@ -67,7 +67,6 @@ public:
 
 		int length = _file.sampleRate;
 		std::vector<uint8_t> buffer (length * _file.channels * 2);
-		int bitstream;
 		dseed::timespan_t current = reading_position ();
 
 		drmp3_uint64 result = drmp3_read_pcm_frames_s16 (&_file, length, (drmp3_int16*)buffer.data ());
@@ -75,7 +74,7 @@ public:
 		if (result == 0)
 			return dseed::error_end_of_file;
 
-		length = result;
+		length = (int)result;
 		dseed::timespan_t duration = dseed::timespan_t::from_seconds (length * _file.channels * 2 / (double)_byterate);
 
 		*sample = new __common_media_sample (dseed::sampletype_audio, buffer.data (), buffer.size (), current, duration);

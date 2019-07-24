@@ -32,11 +32,11 @@ public:
 			|| format == dseed::pixelformat_bgra8888_indexed8))
 			return dseed::error_not_support;
 
-		bitmap_file_header fileHeader;
+		bitmap_file_header fileHeader = {};
 		memcpy (&fileHeader.bfType, "BM", 2);
 		fileHeader.bfReserved1 = fileHeader.bfReserved2 = 0;
 		
-		bitmap_info_header infoHeader;
+		bitmap_info_header infoHeader = {};
 		infoHeader.biSize = sizeof (bitmap_info_header);
 		infoHeader.biWidth = size.width;
 		infoHeader.biHeight = size.height;
@@ -66,7 +66,7 @@ public:
 		if (format == dseed::pixelformat_bgra8888_indexed8)
 		{
 			bitmap->palette (&palette);
-			infoHeader.biClrUsed = palette->size ();
+			infoHeader.biClrUsed = (uint32_t)palette->size ();
 		}
 
 		fileHeader.bfSize = sizeof (bitmap_file_header) + sizeof (bitmap_info_header)
@@ -74,7 +74,7 @@ public:
 			+ infoHeader.biSizeImage;
 		fileHeader.bfOffBits = sizeof (bitmap_file_header) + sizeof (bitmap_info_header)
 			+ sizeof (dseed::bgra) * infoHeader.biClrUsed;
-		infoHeader.biSizeImage = dseed::get_bitmap_plane_size (format, size.width, size.height);
+		infoHeader.biSizeImage = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 
 		_stream->write (&fileHeader, sizeof (fileHeader));
 		_stream->write (&infoHeader, sizeof (infoHeader));

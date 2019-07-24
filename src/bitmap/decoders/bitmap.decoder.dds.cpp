@@ -207,7 +207,7 @@ dseed::error_t dseed::create_dds_bitmap_decoder (dseed::stream* stream, dseed::b
 
 	for (uint32_t mip = 0; mip <= header.mipMapCount; ++mip)
 	{
-		int halfmaker = pow (2, mip);
+		int halfmaker = (int)pow (2, mip);
 		dseed::size3i currentSize (header.width / halfmaker, header.height / halfmaker, header.depth / halfmaker);
 		if (currentSize.width <= 0) currentSize.width = 1;
 		if (currentSize.height <= 0) currentSize.height = 1;

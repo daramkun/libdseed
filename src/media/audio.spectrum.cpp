@@ -12,7 +12,7 @@ void __swap (std::complex<double>& a, std::complex<double>& b)
 }
 void __fft (std::complex<double>* complexes, size_t count, bool isInv)
 {
-	int n = count;
+	int n = (int)count;
 	for (int i = 1, j = 0; i < n; ++i)
 	{
 		int bit = n >> 1;

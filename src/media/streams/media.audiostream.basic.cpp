@@ -52,7 +52,7 @@ public:
 		default: return false;
 		}
 
-		if (unit > length ())
+		if (unit > (int64_t)length ())
 			unit = length ();
 		if (unit < 0)
 			unit = 0;

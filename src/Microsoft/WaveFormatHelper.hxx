@@ -3,8 +3,8 @@
 static dseed::audioformat waveFormatFromWaveFormatEX (const WAVEFORMATEX* pwfx)
 {
 	dseed::audioformat wf = {};
-	wf.channels = pwfx->nChannels;
-	wf.bits_per_sample = pwfx->wBitsPerSample;
+	wf.channels = (uint8_t)pwfx->nChannels;
+	wf.bits_per_sample = (uint8_t)pwfx->wBitsPerSample;
 	wf.samples_per_sec = pwfx->nSamplesPerSec;
 	wf.block_align = pwfx->nBlockAlign;
 	wf.bytes_per_sec = pwfx->nAvgBytesPerSec;

@@ -57,7 +57,7 @@ public:
 public:
 	virtual dseed::error_t commit () override
 	{
-		IcoCurHeader header = { 0, _ico ? ICO_CUR_IMAGE_TYPE_ICON : ICO_CUR_IMAGE_TYPE_CURSOR, _bitmaps.size () };
+		IcoCurHeader header = { 0, (uint16_t)(_ico ? ICO_CUR_IMAGE_TYPE_ICON : ICO_CUR_IMAGE_TYPE_CURSOR), (uint16_t)_bitmaps.size () };
 		_stream->write (&header, sizeof (IcoCurHeader));
 
 		for (auto& bitmap : _bitmaps)
@@ -72,7 +72,7 @@ public:
 			{
 				dseed::auto_object<dseed::palette> palette;
 				bitmap->palette (&palette);
-				entry.palettes = palette->size ();
+				entry.palettes = (uint8_t)palette->size ();
 			}
 			else entry.palettes = 0;
 			entry.reserved = 0;
@@ -97,7 +97,7 @@ public:
 					entry.cur_hotspot_x = entry.cur_hotspot_y = 0;
 				}
 			}
-			entry.offset = _stream->position () + sizeof (IcoCurEntry);
+			entry.offset = (uint32_t)(_stream->position () + sizeof (IcoCurEntry));
 
 			dseed::auto_object<dseed::stream> encodeStream;
 			dseed::create_variable_memorystream (&encodeStream);
@@ -116,7 +116,7 @@ public:
 			std::vector<uint8_t> bytes (encodeStream->length ());
 			encodeStream->read (bytes.data (), bytes.size ());
 
-			entry.bytes = bytes.size ();
+			entry.bytes = (uint32_t)bytes.size ();
 
 			_stream->write (&entry, sizeof (IcoCurEntry));
 			_stream->write (bytes.data (), bytes.size ());

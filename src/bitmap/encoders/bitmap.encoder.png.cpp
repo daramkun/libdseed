@@ -61,7 +61,6 @@ public:
 
 		std::vector<uint8_t> pixels;
 		pixels.resize (stride * size.height);
-		size_t pixelsLength;
 		bitmap->copy_pixels (pixels.data ());
 
 		std::vector<png_bytep> pixelsRows;
@@ -91,7 +90,7 @@ public:
 
 			png_set_IHDR (_png, _info, size.width, size.height, 8, PNG_COLOR_TYPE_PALETTE,
 				PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-			png_set_PLTE (_png, _info, (png_const_colorp)palette.data (), paletteSize / 3);
+			png_set_PLTE (_png, _info, (png_const_colorp)palette.data (), (int)paletteSize / 3);
 			png_set_rows (_png, _info, pixelsRows.data ());
 
 			png_write_png (_png, _info, PNG_TRANSFORM_IDENTITY, nullptr);
@@ -129,8 +128,8 @@ public:
 
 			png_set_IHDR (_png, _info, size.width, size.height, 8, PNG_COLOR_TYPE_PALETTE,
 				PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-			png_set_tRNS (_png, _info, alpha.data (), alpha.size (), nullptr);
-			png_set_PLTE (_png, _info, (png_const_colorp)newPalette.data (), newPalette.size () / 3);
+			png_set_tRNS (_png, _info, alpha.data (), (int)alpha.size (), nullptr);
+			png_set_PLTE (_png, _info, (png_const_colorp)newPalette.data (), (int)newPalette.size () / 3);
 			png_set_rows (_png, _info, pixelsRows.data ());
 
 			png_write_png (_png, _info, PNG_TRANSFORM_IDENTITY, nullptr);

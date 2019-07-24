@@ -115,7 +115,7 @@ public:
 	}
 	virtual dseed::error_t set_reading_position (dseed::timespan_t pos) override
 	{
-		op_pcm_seek (_file, pos.total_seconds () * _samplerate);
+		op_pcm_seek (_file, (int64_t)(pos.total_seconds () * _samplerate));
 		return dseed::error_good;
 	}
 

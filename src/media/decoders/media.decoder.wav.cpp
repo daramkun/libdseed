@@ -38,7 +38,7 @@ public:
 			[](void* pUserData, int offset, drwav_seek_origin origin) -> drwav_bool32
 			{
 				dseed::stream* stream = (dseed::stream*)pUserData;
-				return stream->seek ((dseed::seekorigin_t)origin, offset) >= 0;
+				return stream->seek ((dseed::seekorigin_t)origin, offset);
 			}, stream);
 
 		if (_file == nullptr)
@@ -101,7 +101,6 @@ public:
 
 		int length = _byterate / 100;
 		std::vector<uint8_t> buffer (length);
-		int bitstream;
 		dseed::timespan_t current = reading_position ();
 
 		drwav_uint64 result = 0;

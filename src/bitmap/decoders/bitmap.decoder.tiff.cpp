@@ -65,8 +65,8 @@ dseed::error_t dseed::create_tiff_bitmap_decoder (dseed::stream* stream, dseed::
 		nullptr, &bitmap)))
 		return dseed::error_fail;
 
-	for (auto y = 0; y < height; ++y)
-		bitmap->write_pixels (raster + ((height - y - 1) * width), dseed::point2i (0, y), dseed::size2i (width, 1));
+	for (size_t y = 0; y < height; ++y)
+		bitmap->write_pixels (raster + ((height - y - 1) * width), dseed::point2i (0, (int32_t)y), dseed::size2i (width, 1));
 
 	_TIFFfree (raster);
 

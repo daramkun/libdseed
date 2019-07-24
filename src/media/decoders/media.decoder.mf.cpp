@@ -128,7 +128,7 @@ public:
 			else
 			{
 				CComPtr<IMFMediaType> type;
-				if (FAILED (_reader->GetCurrentMediaType (streamIndex, &type)))
+				if (FAILED (_reader->GetCurrentMediaType ((DWORD)streamIndex, &type)))
 					return dseed::error_fail;
 
 				GUID audioType;
@@ -155,7 +155,7 @@ public:
 			else
 			{
 				CComPtr<IMFMediaType> type;
-				if (FAILED (_reader->GetCurrentMediaType (streamIndex, &type)))
+				if (FAILED (_reader->GetCurrentMediaType ((DWORD)streamIndex, &type)))
 					return dseed::error_fail;
 
 				dseed::imageformat* af = (dseed::imageformat*)buffer;
@@ -234,7 +234,7 @@ public:
 		CComPtr<IMFSample> mfSample;
 		DWORD flags;
 		DWORD actualStream;
-		if (FAILED (_reader->ReadSample (streamIndex, 0, &actualStream, &flags, nullptr, &mfSample)))
+		if (FAILED (_reader->ReadSample ((DWORD)streamIndex, 0, &actualStream, &flags, nullptr, &mfSample)))
 			return dseed::error_fail;
 
 		if (flags & MF_SOURCE_READERF_ENDOFSTREAM)

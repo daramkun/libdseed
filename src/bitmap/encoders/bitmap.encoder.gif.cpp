@@ -13,7 +13,7 @@ public:
 		int err;
 		_pgif = EGifOpen (stream, [](GifFileType* file, const GifByteType* buf, int len) -> int
 			{
-				return reinterpret_cast<dseed::stream*>(file->UserData)->write (buf, len);
+				return (int) reinterpret_cast<dseed::stream*>(file->UserData)->write (buf, len);
 			}, &err
 		);
 		if (_pgif == nullptr)
@@ -84,8 +84,8 @@ public:
 						_transparent = i;
 				}
 			}
-			cmo = GifMakeMapObject (_palette.size (), (const GifColorType*)_palette.data ());
-			EGifPutScreenDesc (_pgif, size.width, size.height, _palette.size (), _transparent, cmo);
+			cmo = GifMakeMapObject ((int)_palette.size (), (const GifColorType*)_palette.data ());
+			EGifPutScreenDesc (_pgif, size.width, size.height, (int)_palette.size (), _transparent, cmo);
 
 			char netscape_extension[] = "NETSCAPE2.0";
 			EGifPutExtension (_pgif, APPLICATION_EXT_FUNC_CODE, 11, netscape_extension);
@@ -132,7 +132,7 @@ public:
 			{
 				if (_palette[i].r != tempPalette[i].r || _palette[i].g != tempPalette[i].g || _palette[i].b != tempPalette[i].b)
 				{
-					cmo = GifMakeMapObject (tempPalette.size (), (const GifColorType*)tempPalette.data ());
+					cmo = GifMakeMapObject ((int)tempPalette.size (), (const GifColorType*)tempPalette.data ());
 					_transparent = transparent;
 					break;
 				}
@@ -141,7 +141,7 @@ public:
 
 		int delay = (int)(duration.total_milliseconds () / 10);
 		char extension[] = { (3 << 2) | (_transparent != -1 ? 1 : 0),
-			delay % 256, delay / 256, _transparent };
+			(char)(delay % 256), (char)(delay / 256), (char)_transparent };
 		EGifPutExtension (_pgif, GRAPHICS_EXT_FUNC_CODE, 4, extension);
 
 		EGifPutImageDesc (_pgif, 0, 0, size.width, size.height, false, cmo);
