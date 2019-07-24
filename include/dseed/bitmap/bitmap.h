@@ -134,6 +134,14 @@ namespace dseed
 		resize_bicubic,
 		// Lanczos
 		resize_lanczos,
+		// Lanczos x2
+		resize_lanczos2,
+		// Lanczos x3
+		resize_lanczos3,
+		// Lanczos x4
+		resize_lanczos4,
+		// Lanczos x5
+		resize_lanczos5,
 	};
 
 	// Bitmap Rezie

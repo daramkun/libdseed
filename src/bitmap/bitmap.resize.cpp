@@ -177,8 +177,12 @@ inline float lanczos_weight (float x, float dist) noexcept
 		return sinc (dist) * sinc (dist / x);
 	return 0;
 }
-constexpr int LANCZOS_WINDOW = 1;
-template<class TPixel>
+constexpr int LANCZOS_WINDOW1 = 1;
+constexpr int LANCZOS_WINDOW2 = 2;
+constexpr int LANCZOS_WINDOW3 = 3;
+constexpr int LANCZOS_WINDOW4 = 4;
+constexpr int LANCZOS_WINDOW5 = 5;
+template<class TPixel, int window>
 inline bool bmprsz_lanczos (uint8_t* dest, const uint8_t* src, const dseed::size3i& destSize, const dseed::size3i& srcSize) noexcept
 {
 	size_t destStride = dseed::get_bitmap_stride (dseed::type2format<TPixel> (), destSize.width)
@@ -211,9 +215,9 @@ inline bool bmprsz_lanczos (uint8_t* dest, const uint8_t* src, const dseed::size
 				int cx = (int)(x * xRatio);
 				int cy = (int)(y * yRatio);
 
-				for (int ly = -LANCZOS_WINDOW + 1; ly <= LANCZOS_WINDOW; ++ly)
+				for (int ly = -window + 1; ly <= window; ++ly)
 				{
-					for (int lx = -LANCZOS_WINDOW + 1; lx <= LANCZOS_WINDOW; ++lx)
+					for (int lx = -window + 1; lx <= window; ++lx)
 					{
 						int ix = cx + lx;
 						int iy = cy + ly;
@@ -223,8 +227,8 @@ inline bool bmprsz_lanczos (uint8_t* dest, const uint8_t* src, const dseed::size
 
 						int deltaX = cx - ix;
 						int deltaY = cy - iy;
-						float weight = lanczos_weight ((float)LANCZOS_WINDOW, (float)lx)
-							* lanczos_weight ((float)LANCZOS_WINDOW, (float)ly);
+						float weight = lanczos_weight ((float)window, (float)lx)
+							* lanczos_weight ((float)window, (float)ly);
 
 						color_processor srcPixel = *((const TPixel*)(srcPtr + (srcStride * iy)) + ix);
 						srcPixel = srcPixel * weight;
@@ -282,17 +286,65 @@ std::map<rztp, rzfn> g_resizes = {
 	{ rztp (resize_bicubic, pixelformat_yuva8888), bmprsz_bicubic<yuva> },
 	{ rztp (resize_bicubic, pixelformat_yuv888), bmprsz_bicubic<yuv> },
 
-	{ rztp (resize_lanczos, pixelformat_rgba8888), bmprsz_lanczos<rgba> },
-	{ rztp (resize_lanczos, pixelformat_rgb888), bmprsz_lanczos<rgb> },
-	{ rztp (resize_lanczos, pixelformat_rgbaf), bmprsz_lanczos<rgbaf> },
-	{ rztp (resize_lanczos, pixelformat_bgra8888), bmprsz_lanczos<bgra> },
-	{ rztp (resize_lanczos, pixelformat_bgr888), bmprsz_lanczos<bgr> },
-	{ rztp (resize_lanczos, pixelformat_bgra4444), bmprsz_lanczos<bgra4> },
-	{ rztp (resize_lanczos, pixelformat_bgr565), bmprsz_lanczos<bgr565> },
-	{ rztp (resize_lanczos, pixelformat_grayscale8), bmprsz_lanczos<grayscale> },
-	{ rztp (resize_lanczos, pixelformat_grayscalef), bmprsz_lanczos<grayscalef> },
-	{ rztp (resize_lanczos, pixelformat_yuva8888), bmprsz_lanczos<yuva> },
-	{ rztp (resize_lanczos, pixelformat_yuv888), bmprsz_lanczos<yuv> },
+	{ rztp (resize_lanczos, pixelformat_rgba8888), bmprsz_lanczos<rgba, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_rgb888), bmprsz_lanczos<rgb, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_rgbaf), bmprsz_lanczos<rgbaf, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_bgra8888), bmprsz_lanczos<bgra, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_bgr888), bmprsz_lanczos<bgr, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_bgra4444), bmprsz_lanczos<bgra4, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_bgr565), bmprsz_lanczos<bgr565, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_grayscale8), bmprsz_lanczos<grayscale, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_grayscalef), bmprsz_lanczos<grayscalef, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_yuva8888), bmprsz_lanczos<yuva, LANCZOS_WINDOW1> },
+	{ rztp (resize_lanczos, pixelformat_yuv888), bmprsz_lanczos<yuv, LANCZOS_WINDOW1> },
+
+	{ rztp (resize_lanczos2, pixelformat_rgba8888), bmprsz_lanczos<rgba, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_rgb888), bmprsz_lanczos<rgb, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_rgbaf), bmprsz_lanczos<rgbaf, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_bgra8888), bmprsz_lanczos<bgra, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_bgr888), bmprsz_lanczos<bgr, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_bgra4444), bmprsz_lanczos<bgra4, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_bgr565), bmprsz_lanczos<bgr565, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_grayscale8), bmprsz_lanczos<grayscale, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_grayscalef), bmprsz_lanczos<grayscalef, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_yuva8888), bmprsz_lanczos<yuva, LANCZOS_WINDOW2> },
+	{ rztp (resize_lanczos2, pixelformat_yuv888), bmprsz_lanczos<yuv, LANCZOS_WINDOW2> },
+
+	{ rztp (resize_lanczos3, pixelformat_rgba8888), bmprsz_lanczos<rgba, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_rgb888), bmprsz_lanczos<rgb, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_rgbaf), bmprsz_lanczos<rgbaf, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_bgra8888), bmprsz_lanczos<bgra, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_bgr888), bmprsz_lanczos<bgr, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_bgra4444), bmprsz_lanczos<bgra4, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_bgr565), bmprsz_lanczos<bgr565, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_grayscale8), bmprsz_lanczos<grayscale, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_grayscalef), bmprsz_lanczos<grayscalef, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_yuva8888), bmprsz_lanczos<yuva, LANCZOS_WINDOW3> },
+	{ rztp (resize_lanczos3, pixelformat_yuv888), bmprsz_lanczos<yuv, LANCZOS_WINDOW3> },
+
+	{ rztp (resize_lanczos4, pixelformat_rgba8888), bmprsz_lanczos<rgba, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_rgb888), bmprsz_lanczos<rgb, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_rgbaf), bmprsz_lanczos<rgbaf, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_bgra8888), bmprsz_lanczos<bgra, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_bgr888), bmprsz_lanczos<bgr, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_bgra4444), bmprsz_lanczos<bgra4, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_bgr565), bmprsz_lanczos<bgr565, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_grayscale8), bmprsz_lanczos<grayscale, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_grayscalef), bmprsz_lanczos<grayscalef, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_yuva8888), bmprsz_lanczos<yuva, LANCZOS_WINDOW4> },
+	{ rztp (resize_lanczos4, pixelformat_yuv888), bmprsz_lanczos<yuv, LANCZOS_WINDOW4> },
+
+	{ rztp (resize_lanczos5, pixelformat_rgba8888), bmprsz_lanczos<rgba, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_rgb888), bmprsz_lanczos<rgb, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_rgbaf), bmprsz_lanczos<rgbaf, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_bgra8888), bmprsz_lanczos<bgra, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_bgr888), bmprsz_lanczos<bgr, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_bgra4444), bmprsz_lanczos<bgra4, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_bgr565), bmprsz_lanczos<bgr565, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_grayscale8), bmprsz_lanczos<grayscale, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_grayscalef), bmprsz_lanczos<grayscalef, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_yuva8888), bmprsz_lanczos<yuva, LANCZOS_WINDOW5> },
+	{ rztp (resize_lanczos5, pixelformat_yuv888), bmprsz_lanczos<yuv, LANCZOS_WINDOW5> },
 };
 
 dseed::error_t dseed::resize_bitmap (dseed::bitmap* original, resize_t resize_method, const size3i& size, dseed::bitmap** bitmap)
