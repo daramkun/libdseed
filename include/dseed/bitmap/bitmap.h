@@ -187,6 +187,20 @@ namespace dseed
 	// Bitmap Filtering
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
 	DSEEDEXP error_t filter_bitmap (dseed::bitmap* original, const bitmap_filter_mask& mask, dseed::bitmap** bitmap);
+
+	// Bitmap Horizontal Flipping¡ê
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
+	DSEEDEXP error_t flip_horizontal_bitmap (dseed::bitmap* original, dseed::bitmap** bitmap);
+	// Bitmap Vertical Flipping¢Õ
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
+	DSEEDEXP error_t flip_vertical_bitmap (dseed::bitmap* original, dseed::bitmap** bitmap);
+
+	// Bitmap Binary Operation
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
+	DSEEDEXP error_t bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap* b2, dseed::binary_operator_t op, dseed::bitmap** bitmap);
+	// Bitmap Unary Operation
+	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
+	DSEEDEXP error_t bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator_t op, dseed::bitmap** bitmap);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>

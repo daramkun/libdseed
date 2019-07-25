@@ -139,6 +139,24 @@ namespace dseed
 	constexpr T wrap (T v, T max) noexcept { return v % max; }
 	template<class T>
 	constexpr T mirror (T v, T max) noexcept { while (v < max || v > 0) { v = max - v; if (v < 0) v *= -1; } return v; }
+
+	enum binary_operator_t
+	{
+		binary_operator_add,
+		binary_operator_subtract,
+		binary_operator_multiply,
+		binary_operator_divide,
+		binary_operator_and,
+		binary_operator_or,
+		binary_operator_xor,
+	};
+
+	enum unary_operator_t
+	{
+		unary_operator_negate,
+		unary_operator_not,
+		unary_operator_invert,
+	};
 }
 
 #include <dseed/math/math.simd.inl>
