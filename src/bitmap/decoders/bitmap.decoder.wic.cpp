@@ -5,7 +5,7 @@
 #	include <wincodec.h>
 #	include <atlbase.h>
 
-#	include "../../Microsoft/IStreamHelper.hxx"
+#	include "../../libs/Microsoft/IStreamHelper.hxx"
 
 #if PLATFORM_WINDOWS
 using IWICImagingFactoryP = IWICImagingFactory;

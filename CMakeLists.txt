@@ -242,6 +242,8 @@ SET ( DSEED_BUILD_FILES
 	src/media/audio.filter.cpp
 	src/media/audio.spectrum.cpp
 	src/media/audio.reformat.cpp
+	src/media/audio.resample.cpp
+	src/media/audio.rechannel.cpp
 
 	# Media Decoders with Non-external Library
 	src/media/decoders/media.decoder.mf.cpp
@@ -344,7 +346,7 @@ ENDIF ()
 IF ( ${DSEED_USE_OPUS} )
 	MESSAGE ( "-- Use opus" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_OPUS )
-	LIST ( APPEND DSEED_PRIVATE_INCS ${OPUS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src/opusfile )
+	LIST ( APPEND DSEED_PRIVATE_INCS ${OPUS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/opusfile )
 	LIST ( APPEND DSEED_LINK_LIBS ogg opus )
 ENDIF ()
 IF ( ${DSEED_USE_FLAC} )

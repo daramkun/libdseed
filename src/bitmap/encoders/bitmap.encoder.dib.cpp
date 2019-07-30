@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#include "../../Microsoft/DIBCommon.hxx"
+#include "../../libs/Microsoft/DIBCommon.hxx"
 
 class __dib_encoder : public dseed::bitmap_encoder
 {

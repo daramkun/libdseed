@@ -50,4 +50,8 @@
 #include <dseed/bitmap/bitmap.h>
 #include <dseed/media/media.h>
 
+#include <dseed/platform/platform.h>
+#include <dseed/graphics/graphics.h>
+#include <dseed/audio/audio.h>
+
 #endif

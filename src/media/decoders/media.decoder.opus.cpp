@@ -1,11 +1,11 @@
 #include <dseed.h>
 
 #if defined ( USE_OPUS )
-#	include "../opusfile/opusfile.h"
-#	include "../opusfile/opusfile.c"
-#	include "../opusfile/internal.c"
-#	include "../opusfile/info.c"
-#	include "../opusfile/stream.c"
+#	include "../../libs/opusfile/opusfile.h"
+#	include "../../libs/opusfile/opusfile.c"
+#	include "../../libs/opusfile/internal.c"
+#	include "../../libs/opusfile/info.c"
+#	include "../../libs/opusfile/stream.c"
 
 #	include "media.decoder.hxx"
 

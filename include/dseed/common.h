@@ -70,6 +70,16 @@ constexpr char PATH_SEPARATOR = '/';
 #   define DSEEDEXP
 #endif
 
+#ifndef PURE
+#define PURE												= 0
+#endif
+
+#if COMPILER_MSVC
+#	define ALIGN(x)											__declspec(align(x))
+#else
+#	define ALIGN(x)											__attribute__ ((aligned (x)))
+#endif
+
 namespace dseed
 {
 	using error_t = int32_t;

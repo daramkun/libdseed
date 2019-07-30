@@ -1,7 +1,7 @@
 #include <dseed.h>
 
 #define DR_WAV_IMPLEMENTATION
-#include "../../dr_libs/dr_wav.h"
+#include "../../libs/dr_libs/dr_wav.h"
 
 #include "media.decoder.hxx"
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include <string.h>
 
-#include "../../Microsoft/DIBCommon.hxx"
+#include "../../libs/Microsoft/DIBCommon.hxx"
 
 dseed::error_t dseed::create_dib_bitmap_decoder (dseed::stream* stream, dseed::bitmap_decoder** decoder)
 {

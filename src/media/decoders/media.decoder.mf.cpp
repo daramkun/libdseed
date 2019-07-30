@@ -7,8 +7,8 @@
 #	include <mfreadwrite.h>
 #	include <mftransform.h>
 
-#	include "../../Microsoft/WaveFormatHelper.hxx"
-#	include "../../Microsoft/IStreamHelper.hxx"
+#	include "../../libs/Microsoft/WaveFormatHelper.hxx"
+#	include "../../libs/Microsoft/IStreamHelper.hxx"
 
 class MFSupportChecker
 {

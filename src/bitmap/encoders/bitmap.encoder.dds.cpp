@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#include "../Microsoft/DDSCommon.hxx"
+#include "../../libs/Microsoft/DDSCommon.hxx"
 
 class __dds_encoder : public dseed::bitmap_encoder
 {

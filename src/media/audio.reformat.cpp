@@ -1,7 +1,7 @@
 #include <dseed.h>
 
 #include <vector>
-#include "../AudEar/TypeConverter.hpp"
+#include "../libs/AudEar/TypeConverter.hpp"
 
 const __TC_SAMPLE_CONVERTERS& sample_converters = __TC_get_optimal_converter ();
 

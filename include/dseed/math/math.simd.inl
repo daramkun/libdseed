@@ -21,6 +21,20 @@
 #	pragma warning (disable : 4556)
 #endif
 
+#if COMPILER_MSVC
+#	if ARCH_X86SET
+#		define FASTCALL										__vectorcall
+#	else
+#		define FASTCALL										__fastcall
+#	endif
+#else
+#	define FASTCALL											__fastcall
+#endif
+
+#include "simd/math.simd.nosimd.inl"
+#include "simd/math.simd.x86.inl"
+#include "simd/math.simd.neon.inl"
+
 namespace dseed
 {
 	////////////////////////////////////////////////////////////////////////////////////////

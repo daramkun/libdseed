@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../Microsoft/WaveFileHelper.hxx"
+#include "../../libs/Microsoft/WaveFileHelper.hxx"
 
 class __wav_encoder : public dseed::media_encoder
 {

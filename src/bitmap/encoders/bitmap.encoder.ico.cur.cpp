@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#include "../../Microsoft/ICOCURCommon.hxx"
+#include "../../libs/Microsoft/ICOCURCommon.hxx"
 
 class __ico_cur_encoder : public dseed::bitmap_encoder
 {

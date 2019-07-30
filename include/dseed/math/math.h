@@ -119,6 +119,9 @@ namespace dseed
 	template<typename T>
 	constexpr T maximum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
 
+	constexpr single to_degree (single radian) noexcept { return radian * 180 / pi; }
+	constexpr single to_radian (single degree) noexcept { return degree * pi / 180; }
+
 	constexpr int gcd (int a, int b) { return (b == 0) ? a : gcd (b, a % b); }
 
 	struct DSEEDEXP fraction

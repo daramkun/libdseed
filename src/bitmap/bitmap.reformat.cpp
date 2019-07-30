@@ -3,11 +3,11 @@
 #include <vector>
 #include <map>
 
-#include "../exoquant/exoquant.h"
-#include "../exoquant/exoquant.c"
+#include "../libs/exoquant/exoquant.h"
+#include "../libs/exoquant/exoquant.c"
 
-#include "../etc1_utils/etc1_utils.h"
-#include "../etc1_utils/etc1_utils.c"
+#include "../libs/etc1_utils/etc1_utils.h"
+#include "../libs/etc1_utils/etc1_utils.c"
 
 #if defined ( USE_SQUISH )
 #	include <squish.h>

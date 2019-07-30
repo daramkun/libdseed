@@ -216,6 +216,22 @@ namespace dseed
 	DSEEDEXP error_t convert_pcm_to_decibel (const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels_t ch, float* out);
 
 	DSEEDEXP error_t reformat_audio (audio_stream* original, pulseformat_t fmt, int bits_per_sample, audio_stream** stream);
+
+	enum resample_t
+	{
+		resample_nearest,
+		resample_linear,
+		resample_cubic,
+		resample_lanczos1,
+		resample_lanczos2,
+		resample_lanczos3,
+		resample_lanczos4,
+		resample_lanczos5,
+	};
+
+	DSEEDEXP error_t resample_audio (audio_stream* original, int32_t samplerate, resample_t interpolation, audio_stream** stream);
+
+	DSEEDEXP error_t rechannel_audio (audio_stream* original, int16_t channels, audio_stream** stream);
 }
 
 #include <dseed/media/media.decoders.h>

@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#include "../../Microsoft/ICOCURCommon.hxx"
+#include "../../libs/Microsoft/ICOCURCommon.hxx"
 #include "bitmap.decoder.hxx"
 
 dseed::error_t __create_ico_cur_bitmap_decoder (dseed::stream* stream, bool ico, dseed::bitmap_decoder** decoder)
