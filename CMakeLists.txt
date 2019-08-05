@@ -175,12 +175,14 @@ ENDIF ()
 SET ( DSEED_BUILD_FILES 
 	# Library Core
     src/dseed.cpp
+	src/common.cpp
 
 	# Reference Counting Object
 	src/object.cpp
 
 	# Scalar objects
 	src/math/math.cpp
+	src/math/math.simd.cpp
 	src/geometry.cpp
 	src/color.cpp
 	src/time.cpp

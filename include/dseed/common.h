@@ -119,4 +119,92 @@ namespace dseed
 	constexpr error_t error_network_sync_fail = 0x80060003;
 }
 
+namespace dseed
+{
+#	if COMPILER_MSVC
+#		pragma pack (push, 1)
+#	else
+#		pragma pack (1)
+#	endif
+#	if ARCH_X86SET
+	struct x86_instruction_info
+	{
+	public:
+		char cpu_vender[64];
+		char cpu_brand[64];
+
+		bool sse : 1, sse2 : 1, sse3 : 1, ssse3 : 1, sse4_1 : 1, sse4_2 : 1, sse4a : 1;
+		bool avx : 1, avx2 : 1, fma3 : 1;
+
+		bool rdrand : 1, aes : 1, sha : 1;
+
+		bool f16c : 1;
+
+		static const x86_instruction_info& instance ();
+
+	private:
+		x86_instruction_info ();
+	};
+#	endif
+
+#	if ARCH_ARMSET
+	struct arm_instruction_info
+	{
+	public:
+
+		bool neon : 1;
+
+		static const arm_instruction_info& instance ();
+	};
+#	endif
+#	if COMPILER_MSVC
+#		pragma pack (pop)
+#	else
+#		pragma pack ()
+#	endif
+
+	inline uint16_t hwrand16_sw () noexcept
+	{
+		static std::random_device rd;
+		static std::mt19937 rnd (rd ());
+		static std::uniform_int_distribution<uint16_t> range;
+		return range (rnd);
+	}
+	inline uint32_t hwrand32_sw () noexcept
+	{
+		static std::random_device rd;
+		static std::mt19937 rnd (rd ());
+		static std::uniform_int_distribution<uint32_t> range;
+		return range (rnd);
+	}
+	inline uint32_t hwrand64_sw () noexcept
+	{
+		static std::random_device rd;
+		static std::mt19937_64 rnd (rd ());
+		static std::uniform_int_distribution<uint64_t> range;
+		return range (rnd);
+	}
+
+#if ARCH_X86SET
+	inline uint16_t hwrand16_x86 () noexcept
+	{
+		uint16_t ret;
+		_rdrand16_step (&ret);
+		return ret;
+	}
+	inline uint32_t hwrand32_x86 () noexcept
+	{
+		uint32_t ret;
+		_rdrand32_step (&ret);
+		return ret;
+	}
+	inline uint64_t hwrand64_x86 () noexcept
+	{
+		uint64_t ret;
+		_rdrand64_step (&ret);
+		return ret;
+	}
+#endif
+}
+
 #endif
