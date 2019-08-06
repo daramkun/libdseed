@@ -8,6 +8,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <random>
 using namespace std::string_literals;
 
 #define COMPILER_MSVC										defined ( _MSC_VER )
@@ -61,6 +62,10 @@ constexpr char PATH_SEPARATOR = '/';
 #define ARCH_RISCV32										( ( defined ( __riscv ) || defined ( __riscv__ ) ) && ( __riscv_xlen == 32 ) )
 #define ARCH_RISCV64										( ( defined ( __riscv ) || defined ( __riscv__ ) ) && ( __riscv_xlen == 64 ) )
 #define ARCH_RISCVSET										( ARCH_RISCV32 || ARCH_RISCV64 )
+
+#if ARCH_X86SET
+#	include <immintrin.h>
+#endif
 
 #if COMPILER_MSVC && defined ( DSEED_WINDOWS_DLL_EXPORT )
 #   define DSEEDEXP											__declspec ( dllexport )
@@ -177,7 +182,7 @@ namespace dseed
 		static std::uniform_int_distribution<uint32_t> range;
 		return range (rnd);
 	}
-	inline uint32_t hwrand64_sw () noexcept
+	inline uint64_t hwrand64_sw () noexcept
 	{
 		static std::random_device rd;
 		static std::mt19937_64 rnd (rd ());

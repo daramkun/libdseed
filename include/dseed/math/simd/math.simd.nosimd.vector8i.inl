@@ -830,7 +830,7 @@ namespace dseed
 	{
 		const int64_t* ia = reinterpret_cast<const int64_t*>(v.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int64_t*>(ret.v);
 
 		retia[0] = abs (ia[0]);
@@ -845,7 +845,7 @@ namespace dseed
 		const int64_t* ia1 = reinterpret_cast<const int64_t*>(v1.v);
 		const int64_t* ia2 = reinterpret_cast<const int64_t*>(v2.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int64_t*>(ret.v);
 
 		retia[0] = minimum (ia1[0], ia2[0]);
@@ -860,7 +860,7 @@ namespace dseed
 		const int64_t* ia1 = reinterpret_cast<const int64_t*>(v1.v);
 		const int64_t* ia2 = reinterpret_cast<const int64_t*>(v2.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int64_t*>(ret.v);
 
 		retia[0] = maximum (ia1[0], ia2[0]);
@@ -875,7 +875,7 @@ namespace dseed
 	{
 		const int16_t* ia = reinterpret_cast<const int16_t*>(v.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int16_t*>(ret.v);
 
 		retia[0] = abs (ia[0]); retia[1] = abs (ia[1]); retia[2] = abs (ia[2]); retia[3] = abs (ia[3]);
@@ -890,7 +890,7 @@ namespace dseed
 		const int16_t* ia1 = reinterpret_cast<const int16_t*>(v1.v);
 		const int16_t* ia2 = reinterpret_cast<const int16_t*>(v2.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int16_t*>(ret.v);
 
 		retia[0] = minimum (ia1[0], ia2[0]); retia[1] = minimum (ia1[1], ia2[1]);
@@ -909,7 +909,7 @@ namespace dseed
 		const int16_t* ia1 = reinterpret_cast<const int16_t*>(v1.v);
 		const int16_t* ia2 = reinterpret_cast<const int16_t*>(v2.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int16_t*>(ret.v);
 
 		retia[0] = maximum (ia1[0], ia2[0]); retia[1] = maximum (ia1[1], ia2[1]);
@@ -928,7 +928,7 @@ namespace dseed
 	{
 		const int8_t* ia = reinterpret_cast<const int8_t*>(v.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int8_t*>(ret.v);
 
 		for (int i = 0; i < 32; ++i)
@@ -941,7 +941,7 @@ namespace dseed
 		const int8_t* ia1 = reinterpret_cast<const int8_t*>(v1.v);
 		const int8_t* ia2 = reinterpret_cast<const int8_t*>(v2.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int8_t*>(ret.v);
 
 		for (int i = 0; i < 32; ++i)
@@ -954,7 +954,7 @@ namespace dseed
 		const int8_t* ia1 = reinterpret_cast<const int8_t*>(v1.v);
 		const int8_t* ia2 = reinterpret_cast<const int8_t*>(v2.v);
 
-		vectori_def ret;
+		vector8i_def ret;
 		auto retia = reinterpret_cast<int8_t*>(ret.v);
 
 		for (int i = 0; i < 32; ++i)

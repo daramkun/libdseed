@@ -16,62 +16,47 @@ namespace dseed
 	struct vector8i_x86;
 
 	inline vectori_x86 FASTCALL conv_f32_to_i32 (const vectorf_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_f32_to_i32 (const vector8f_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_f32_to_i32 (const vector8f_x86& v) noexcept;
 	inline vectori_x86 FASTCALL reinterpret_f32_to_i32 (const vectorf_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL reinterpret_f32_to_i32 (const vector8f_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL reinterpret8_f32_to_i32 (const vector8f_x86& v) noexcept;
 
 	inline vectorf_x86 FASTCALL conv_i32_to_f32 (const vectori_x86& v) noexcept;
-	inline vector8f_x86 FASTCALL conv_i32_to_f32 (const vector8i_x86& v) noexcept;
+	inline vector8f_x86 FASTCALL conv8_i32_to_f32 (const vector8i_x86& v) noexcept;
 	inline vectorf_x86 FASTCALL reinterpret_i32_to_f32 (const vectori_x86& v) noexcept;
-	inline vector8f_x86 FASTCALL reinterpret_i32_to_f32 (const vector8i_x86& v) noexcept;
+	inline vector8f_x86 FASTCALL reinterpret8_i32_to_f32 (const vector8i_x86& v) noexcept;
 
 	inline vectori_x86 FASTCALL conv_i64_to_i32 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i64_to_i32 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i64_to_i24 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i64_to_i24 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i64_to_i32 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i64_to_i16 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i64_to_i16 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i64_to_i16 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i64_to_i8 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i64_to_i8 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i64_to_i8 (const vector8i_x86& v) noexcept;
 
 	inline vectori_x86 FASTCALL conv_i32_to_i64 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i32_to_i64 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i32_to_i24 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i32_to_i24 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i32_to_i64 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i32_to_i16 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i32_to_i16 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i32_to_i16 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i32_to_i8 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i32_to_i8 (const vector8i_x86& v) noexcept;
-
-	inline vectori_x86 FASTCALL conv_i24_to_i64 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i24_to_i64 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i24_to_i32 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i24_to_i32 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i24_to_i16 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i24_to_i16 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i24_to_i8 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i24_to_i8 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i32_to_i8 (const vector8i_x86& v) noexcept;
 
 	inline vectori_x86 FASTCALL conv_i16_to_i64 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i16_to_i64 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i16_to_i64 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i16_to_i32 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i16_to_i32 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i16_to_i24 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i16_to_i24 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i16_to_i32 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i16_to_i8 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i16_to_i8 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i16_to_i8 (const vector8i_x86& v) noexcept;
 
 	inline vectori_x86 FASTCALL conv_i8_to_i64 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i8_to_i64 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i8_to_i64 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i8_to_i32 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i8_to_i32 (const vector8i_x86& v) noexcept;
-	inline vectori_x86 FASTCALL conv_i8_to_i24 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i8_to_i24 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i8_to_i32 (const vector8i_x86& v) noexcept;
 	inline vectori_x86 FASTCALL conv_i8_to_i16 (const vectori_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL conv_i8_to_i16 (const vector8i_x86& v) noexcept;
+	inline vector8i_x86 FASTCALL conv8_i8_to_i16 (const vector8i_x86& v) noexcept;
 
 	inline int movemaskvf (const vectorf_x86& v) noexcept;
+	inline int movemaskv8f (const vector8f_x86& v) noexcept;
 	inline int movemaskvi (const vectori_x86& v) noexcept;
+	inline int movemaskv8i (const vector8i_x86& v) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -163,6 +148,7 @@ namespace dseed
 	inline vectorf_x86 FASTCALL roundvf (const vectorf_x86& v) noexcept;
 	inline vectorf_x86 FASTCALL floorvf (const vectorf_x86& v) noexcept;
 	inline vectorf_x86 FASTCALL ceilvf (const vectorf_x86& v) noexcept;
+	inline vectorf_x86 FASTCALL absvf (const vectorf_x86& v) noexcept;
 	inline vectorf_x86 FASTCALL minvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept;
 	inline vectorf_x86 FASTCALL maxvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept;
 
@@ -193,7 +179,7 @@ namespace dseed
 		static inline vectori_x86 FASTCALL shuffle32 (const vectori_x86 & v1, const vectori_x86 & v2) noexcept
 		{
 			return _mm_castps_si128 (_mm_shuffle_ps (
-				_mm_castsi128_ps (v), _mm_castsi128_ps (v2.v), _MM_SHUFFLE (w, z, y, x)
+				_mm_castsi128_ps (v1.v), _mm_castsi128_ps (v2.v), _MM_SHUFFLE (w, z, y, x)
 			));
 		}
 		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
@@ -459,13 +445,19 @@ namespace dseed
 		template<uint32_t x1, uint32_t y1, uint32_t z1, uint32_t w1, uint32_t x2, uint32_t y2, uint32_t z2, uint32_t w2>
 		static inline vector8i_x86 FASTCALL shuffle32 (const vector8i_x86 & v1, const vector8i_x86 & v2) noexcept
 		{
-			return _mm256_shuffle_epi32 (v1, v2, _MM_SHUFFLE (w2, z2, y2, x2) << 8 | _MM_SHUFFLE (w1, z1, y1, x1));
+			return _mm256_castps_si256 (
+				_mm_256_shuffle_ps (
+					_mm256_castsi256_ps (v1.v),
+					_mm256_castsi256_ps (v2.v),
+					_MM_SHUFFLE (w2, z2, y2, x2) << 8 | _MM_SHUFFLE (w1, z1, y1, x1)
+				)
+			);
 		}
 
 		template<uint32_t x1, uint32_t y1, uint32_t z1, uint32_t w1, uint32_t x2, uint32_t y2, uint32_t z2, uint32_t w2>
 		inline vector8i_x86 FASTCALL permute32 () const noexcept
 		{
-			return shuffle32<x1, y1, z1, w1, x2, y2, z2, w2> (*this, *this);
+			return _mm256_shuffle_epi32 (v, _MM_SHUFFLE (w2, z2, y2, x2) << 8 | _MM_SHUFFLE (w1, z1, y1, x1));
 		}
 		template<uint8_t s1, uint8_t s2, uint8_t s3, uint8_t s4, uint8_t s5, uint8_t s6, uint8_t s7, uint8_t s8,
 			uint8_t s9, uint8_t s10, uint8_t s11, uint8_t s12, uint8_t s13, uint8_t s14, uint8_t s15, uint8_t s16,
@@ -606,121 +598,42 @@ namespace dseed
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
 	inline vectori_x86 FASTCALL conv_f32_to_i32 (const vectorf_x86& v) noexcept { return _mm_cvtps_epi32 (v); }
-	inline vector8i_x86 FASTCALL conv_f32_to_i32 (const vector8f_x86& v) noexcept { return _mm256_cvtps_epi32 (v); }
+	inline vector8i_x86 FASTCALL conv8_f32_to_i32 (const vector8f_x86& v) noexcept { return _mm256_cvtps_epi32 (v); }
 	inline vectori_x86 FASTCALL reinterpret_f32_to_i32 (const vectorf_x86& v) noexcept { return _mm_castps_si128 (v); }
-	inline vector8i_x86 FASTCALL reinterpret_f32_to_i32 (const vector8f_x86& v) noexcept { return _mm256_castps_si256 (v); }
+	inline vector8i_x86 FASTCALL reinterpret8_f32_to_i32 (const vector8f_x86& v) noexcept { return _mm256_castps_si256 (v); }
 
 	inline vectorf_x86 FASTCALL conv_i32_to_f32 (const vectori_x86& v) noexcept { return _mm_cvtepi32_ps (v); }
-	inline vector8f_x86 FASTCALL conv_i32_to_f32 (const vector8i_x86& v) noexcept { return _mm256_cvtepi32_ps (v); }
+	inline vector8f_x86 FASTCALL conv8_i32_to_f32 (const vector8i_x86& v) noexcept { return _mm256_cvtepi32_ps (v); }
 	inline vectorf_x86 FASTCALL reinterpret_i32_to_f32 (const vectori_x86& v) noexcept { return _mm_castsi128_ps (v); }
-	inline vector8f_x86 FASTCALL reinterpret_i32_to_f32 (const vector8i_x86& v) noexcept { return _mm256_castsi256_ps (v); }
+	inline vector8f_x86 FASTCALL reinterpret8_i32_to_f32 (const vector8i_x86& v) noexcept { return _mm256_castsi256_ps (v); }
 
 	inline vectori_x86 FASTCALL conv_i64_to_i32 (const vectori_x86& v) noexcept { return _mm_cvtepi64_epi32 (v); }
-	inline vector8i_x86 FASTCALL conv_i64_to_i32 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi64_epi32 (v), vectori_x86 ()); }
-	inline vectori_x86 FASTCALL conv_i64_to_i24 (const vectori_x86& v) noexcept { return conv_i32_to_i24 (conv_i64_to_i32 (v)); }
-	inline vector8i_x86 FASTCALL conv_i64_to_i24 (const vector8i_x86& v) noexcept { return conv_i32_to_i24 (conv_i64_to_i32 (v)); }
+	inline vector8i_x86 FASTCALL conv8_i64_to_i32 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi64_epi32 (v), vectori_x86 ()); }
 	inline vectori_x86 FASTCALL conv_i64_to_i16 (const vectori_x86& v) noexcept { return _mm_cvtepi64_epi16 (v); }
-	inline vector8i_x86 FASTCALL conv_i64_to_i16 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi64_epi16 (v), vectori_x86 ()); }
+	inline vector8i_x86 FASTCALL conv8_i64_to_i16 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi64_epi16 (v), vectori_x86 ()); }
 	inline vectori_x86 FASTCALL conv_i64_to_i8 (const vectori_x86& v) noexcept { return _mm_cvtepi64_epi8 (v); }
-	inline vector8i_x86 FASTCALL conv_i64_to_i8 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi64_epi8 (v), vectori_x86 ()); }
+	inline vector8i_x86 FASTCALL conv8_i64_to_i8 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi64_epi8 (v), vectori_x86 ()); }
 
 	inline vectori_x86 FASTCALL conv_i32_to_i64 (const vectori_x86& v) noexcept { return _mm_cvtepi32_epi64 (v); }
-	inline vector8i_x86 FASTCALL conv_i32_to_i64 (const vector8i_x86& v) noexcept { return _mm256_cvtepi32_epi64 (v.vector1 ()); }
-	inline vectori_x86 FASTCALL conv_i32_to_i24 (const vectori_x86& v) noexcept
-	{
-		return v.permute8<
-			0, 1, 2, 4,
-			5, 6, 8, 9,
-			10, 12, 13, 14,
-			0, 0, 0, 0
-		> ();
-	}
-	inline vector8i_x86 FASTCALL conv_i32_to_i24 (const vector8i_x86& v) noexcept
-	{
-		return v.permute8<
-			0, 1, 2, 4,
-			5, 6, 8, 9,
-			10, 12, 13, 14,
-			16, 17, 18, 20,
-			21, 22, 24, 25,
-			26, 28, 29, 30,
-			0, 0, 0, 0,
-			0, 0, 0, 0
-		> ();
-	}
+	inline vector8i_x86 FASTCALL conv8_i32_to_i64 (const vector8i_x86& v) noexcept { return _mm256_cvtepi32_epi64 (v.vector1 ()); }
 	inline vectori_x86 FASTCALL conv_i32_to_i16 (const vectori_x86& v) noexcept { return _mm_cvtepi32_epi16 (v); }
-	inline vector8i_x86 FASTCALL conv_i32_to_i16 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi32_epi16 (v), vectori_x86 ()); }
+	inline vector8i_x86 FASTCALL conv8_i32_to_i16 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi32_epi16 (v), vectori_x86 ()); }
 	inline vectori_x86 FASTCALL conv_i32_to_i8 (const vectori_x86& v) noexcept { return _mm_cvtepi32_epi8 (v); }
-	inline vector8i_x86 FASTCALL conv_i32_to_i8 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi32_epi8 (v), vectori_x86 ()); }
-
-	inline vectori_x86 FASTCALL conv_i24_to_i64 (const vectori_x86& v) noexcept { return conv_i32_to_i64 (conv_i24_to_i32 (v)); }
-	inline vector8i_x86 FASTCALL conv_i24_to_i64 (const vector8i_x86& v) noexcept { return conv_i32_to_i64 (conv_i24_to_i32 (v)); }
-	inline vectori_x86 FASTCALL conv_i24_to_i32 (const vectori_x86& v) noexcept
-	{
-		static vectori_x86 and (0x80000000);
-		auto integer = v.permute8<
-			0, 1, 2, 0,
-			3, 4, 5, 0,
-			6, 7, 8, 0,
-			9, 10, 11, 0
-		> ();
-		auto sign = integer.permute8<
-			0, 0, 0, 2,
-			0, 0, 0, 6,
-			0, 0, 0, 10,
-			0, 0, 0, 14
-		> ();
-		sign = andvi (sign, and);
-		return orvi (integer, sign);
-	}
-	inline vector8i_x86 FASTCALL conv_i24_to_i32 (const vector8i_x86& v) noexcept
-	{
-		static vector8i_x86 and (0x80000000);
-		auto integer = v.permute8<
-			0, 1, 2, 0,
-			3, 4, 5, 0,
-			6, 7, 8, 0,
-			9, 10, 11, 0,
-			13, 14, 15, 0,
-			17, 18, 19, 0,
-			21, 22, 23, 0,
-			25, 26, 27, 0
-		> ();
-		auto sign = integer.permute8<
-			0, 0, 0, 2,
-			0, 0, 0, 6,
-			0, 0, 0, 10,
-			0, 0, 0, 14,
-			0, 0, 0, 18,
-			0, 0, 0, 22,
-			0, 0, 0, 26,
-			0, 0, 0, 30
-		> ();
-		sign = andv8i (sign, and);
-		return orv8i (integer, sign);
-	}
-	inline vectori_x86 FASTCALL conv_i24_to_i16 (const vectori_x86& v) noexcept { return conv_i32_to_i16 (conv_i24_to_i32 (v)); }
-	inline vector8i_x86 FASTCALL conv_i24_to_i16 (const vector8i_x86& v) noexcept { return conv_i32_to_i16 (conv_i24_to_i32 (v)); }
-	inline vectori_x86 FASTCALL conv_i24_to_i8 (const vectori_x86& v) noexcept { return conv_i32_to_i8 (conv_i24_to_i32 (v)); }
-	inline vector8i_x86 FASTCALL conv_i24_to_i8 (const vector8i_x86& v) noexcept { return conv_i32_to_i8 (conv_i24_to_i32 (v)); }
+	inline vector8i_x86 FASTCALL conv8_i32_to_i8 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi32_epi8 (v), vectori_x86 ()); }
 
 	inline vectori_x86 FASTCALL conv_i16_to_i64 (const vectori_x86& v) noexcept { return _mm_cvtepi16_epi64 (v); }
-	inline vector8i_x86 FASTCALL conv_i16_to_i64 (const vector8i_x86& v) noexcept { return _mm256_cvtepi16_epi64 (v.vector1 ()); }
+	inline vector8i_x86 FASTCALL conv8_i16_to_i64 (const vector8i_x86& v) noexcept { return _mm256_cvtepi16_epi64 (v.vector1 ()); }
 	inline vectori_x86 FASTCALL conv_i16_to_i32 (const vectori_x86& v) noexcept { return _mm_cvtepi16_epi32 (v); }
-	inline vector8i_x86 FASTCALL conv_i16_to_i32 (const vector8i_x86& v) noexcept { return _mm256_cvtepi16_epi32 (v.vector1 ()); }
-	inline vectori_x86 FASTCALL conv_i16_to_i24 (const vectori_x86& v) noexcept { return conv_i32_to_i24 (conv_i16_to_i32 (v)); }
-	inline vector8i_x86 FASTCALL conv_i16_to_i24 (const vector8i_x86& v) noexcept { return conv_i32_to_i24 (conv_i16_to_i32 (v)); }
+	inline vector8i_x86 FASTCALL conv8_i16_to_i32 (const vector8i_x86& v) noexcept { return _mm256_cvtepi16_epi32 (v.vector1 ()); }
 	inline vectori_x86 FASTCALL conv_i16_to_i8 (const vectori_x86& v) noexcept { return _mm_cvtepi16_epi8 (v); }
-	inline vector8i_x86 FASTCALL conv_i16_to_i8 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi16_epi8 (v), vectori_x86 ()); }
+	inline vector8i_x86 FASTCALL conv8_i16_to_i8 (const vector8i_x86& v) noexcept { return vector8i_x86 (_mm256_cvtepi16_epi8 (v), vectori_x86 ()); }
 
 	inline vectori_x86 FASTCALL conv_i8_to_i64 (const vectori_x86& v) noexcept { return _mm_cvtepi8_epi64 (v); }
-	inline vector8i_x86 FASTCALL conv_i8_to_i64 (const vector8i_x86& v) noexcept { return _mm256_cvtepi8_epi64 (v.vector1 ()); }
+	inline vector8i_x86 FASTCALL conv8_i8_to_i64 (const vector8i_x86& v) noexcept { return _mm256_cvtepi8_epi64 (v.vector1 ()); }
 	inline vectori_x86 FASTCALL conv_i8_to_i32 (const vectori_x86& v) noexcept { return _mm_cvtepi8_epi32 (v); }
-	inline vector8i_x86 FASTCALL conv_i8_to_i32 (const vector8i_x86& v) noexcept { return _mm256_cvtepi8_epi32 (v.vector1 ()); }
-	inline vectori_x86 FASTCALL conv_i8_to_i24 (const vectori_x86& v) noexcept { return conv_i32_to_i24 (conv_i8_to_i32 (v)); }
-	inline vector8i_x86 FASTCALL conv_i8_to_i24 (const vector8i_x86& v) noexcept { return conv_i32_to_i24 (conv_i8_to_i32 (v)); }
+	inline vector8i_x86 FASTCALL conv8_i8_to_i32 (const vector8i_x86& v) noexcept { return _mm256_cvtepi8_epi32 (v.vector1 ()); }
 	inline vectori_x86 FASTCALL conv_i8_to_i16 (const vectori_x86& v) noexcept { return _mm_cvtepi8_epi16 (v); }
-	inline vector8i_x86 FASTCALL conv_i8_to_i16 (const vector8i_x86& v) noexcept { return _mm256_cvtepi8_epi16 (v.vector1 ()); }
+	inline vector8i_x86 FASTCALL conv8_i8_to_i16 (const vector8i_x86& v) noexcept { return _mm256_cvtepi8_epi16 (v.vector1 ()); }
 
 	inline int movemaskvf (const vectorf_x86& v) noexcept { return _mm_movemask_ps (v); }
 	inline int movemaskv8f (const vector8f_x86& v) noexcept { return _mm256_movemask_ps (v); }
@@ -771,6 +684,11 @@ namespace dseed
 	inline vectorf_x86 FASTCALL roundvf (const vectorf_x86& v) noexcept { return _mm_round_ps (v, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC); }
 	inline vectorf_x86 FASTCALL floorvf (const vectorf_x86& v) noexcept { return _mm_floor_ps (v); }
 	inline vectorf_x86 FASTCALL ceilvf (const vectorf_x86& v) noexcept { return _mm_ceil_ps (v); }
+	inline vectorf_x86 FASTCALL absvf (const vectorf_x86& v) noexcept
+	{
+		static vectori_x86 signing (0x7fffffff);
+		return reinterpret_i32_to_f32 (andvi (reinterpret_f32_to_i32 (v), signing));
+	}
 	inline vectorf_x86 FASTCALL minvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept { return _mm_min_ps (v1, v2); }
 	inline vectorf_x86 FASTCALL maxvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept { return _mm_max_ps (v1, v2); }
 
@@ -791,8 +709,7 @@ namespace dseed
 	inline vectori_x86 FASTCALL multiplyvi (int s, const vectori_x86& v) noexcept { return multiplyvi (v, s); }
 	inline vectori_x86 FASTCALL dividevi (const vectori_x86& v1, const vectori_x86& v2) noexcept
 	{
-		//return vectori_x86 (v1.x () / v2.x (), v1.y () / v2.y (), v1.z () / v2.z (), v1.w () / v2.w ());
-		// TODO
+		return conv_f32_to_i32 (dividevf (conv_i32_to_f32 (v1), conv_i32_to_f32 (v2)));
 	}
 	inline vectori_x86 FASTCALL dividevi (const vectori_x86& v, int s) noexcept { return dividevi (v, vectori_x86 (s)); }
 	inline vectori_x86 FASTCALL fmavi (const vectori_x86& mv1, const vectori_x86& mv2, const vectori_x86& av) noexcept { return addvi (multiplyvi (mv1, mv2), av); }
@@ -873,20 +790,14 @@ namespace dseed
 	inline vectori_x86 FASTCALL multiplyvi64 (const vectori_x86& v1, const vectori_x86& v2) noexcept
 	{
 		// https://stackoverflow.com/questions/17863411/sse-multiplication-of-2-64-bit-integers
-		auto ax0_ax1_ay0_ay1 = v1;
-		auto bx0_bx1_by0_by1 = v2;
-
-		auto ax1_i_ay1_i = _mm_shuffle_epi32 (ax0_ax1_ay0_ay1, _MM_SHUFFLE (3, 3, 1, 1));
-		auto bx1_i_by1_i = _mm_shuffle_epi32 (bx0_bx1_by0_by1, _MM_SHUFFLE (3, 3, 1, 1));
-
-		auto ax0bx0_ay0by0 = _mm_mul_epi32 (ax0_ax1_ay0_ay1, bx0_bx1_by0_by1);
-		auto ax0bx1_ay0by1 = _mm_mul_epi32 (ax0_ax1_ay0_ay1, bx1_i_by1_i);
-		auto ax1bx0_ay1by0 = _mm_mul_epi32 (ax1_i_ay1_i, bx0_bx1_by0_by1);
-
-		auto ax0bx1_ay0by1_32 = _mm_slli_epi64 (ax0bx1_ay0by1, 32);
-		auto ax1bx0_ay1by0_32 = _mm_slli_epi64 (ax1bx0_ay1by0, 32);
-
-		return _mm_add_epi64 (ax0bx0_ay0by0, _mm_add_epi64 (ax0bx1_ay0by1_32, ax1bx0_ay1by0_32));
+		__m128i ac = _mm_mul_epu32 (v1, v2);
+		__m128i b = _mm_srli_epi64 (v1, 32);
+		__m128i bc = _mm_mul_epu32 (b, v2);
+		__m128i d = _mm_srli_epi64 (v2, 32);
+		__m128i ad = _mm_mul_epu32 (v1, d);
+		__m128i high = _mm_add_epi64 (bc, ad);
+		high = _mm_slli_epi64 (high, 32);
+		return _mm_add_epi64 (high, ac);
 	}
 	inline vectori_x86 FASTCALL multiplyvi64 (const vectori_x86& v, int s) noexcept { return multiplyvi64 (v, vectori_x86 (s)); }
 	inline vectori_x86 FASTCALL multiplyvi64 (int s, const vectori_x86& v) noexcept { return multiplyvi64 (v, s); }
@@ -964,10 +875,10 @@ namespace dseed
 	inline vector8f_x86 FASTCALL fmav8f (const vector8f_x86& mv1, const vector8f_x86& mv2, const vector8f_x86& av) noexcept { return _mm256_fmadd_ps (mv1, mv2, av); }
 	inline vector8f_x86 FASTCALL fmsv8f (const vector8f_x86& mv1, const vector8f_x86& mv2, const vector8f_x86& sv) noexcept { return _mm256_fmsub_ps (mv1, mv2, sv); }
 	inline vector8f_x86 FASTCALL fnmsv8f (const vector8f_x86& sv, const vector8f_x86& mv1, const vector8f_x86& mv2) noexcept { return _mm256_fnmsub_ps (mv1, mv2, sv); }
-	inline vector8f_x86 FASTCALL andv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return reinterpret_i32_to_f32 (andv8i (reinterpret_f32_to_i32 (v1), reinterpret_f32_to_i32 (v2))); }
-	inline vector8f_x86 FASTCALL orv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return reinterpret_i32_to_f32 (orv8i (reinterpret_f32_to_i32 (v1), reinterpret_f32_to_i32 (v2))); }
-	inline vector8f_x86 FASTCALL xorv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return reinterpret_i32_to_f32 (xorv8i (reinterpret_f32_to_i32 (v1), reinterpret_f32_to_i32 (v2))); }
-	inline vector8f_x86 FASTCALL notv8f (const vector8f_x86& v) noexcept { return reinterpret_i32_to_f32 (notv8i (reinterpret_f32_to_i32 (v))); }
+	inline vector8f_x86 FASTCALL andv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return reinterpret8_i32_to_f32 (andv8i (reinterpret8_f32_to_i32 (v1), reinterpret8_f32_to_i32 (v2))); }
+	inline vector8f_x86 FASTCALL orv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return reinterpret8_i32_to_f32 (orv8i (reinterpret8_f32_to_i32 (v1), reinterpret8_f32_to_i32 (v2))); }
+	inline vector8f_x86 FASTCALL xorv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return reinterpret8_i32_to_f32 (xorv8i (reinterpret8_f32_to_i32 (v1), reinterpret8_f32_to_i32 (v2))); }
+	inline vector8f_x86 FASTCALL notv8f (const vector8f_x86& v) noexcept { return reinterpret8_i32_to_f32 (notv8i (reinterpret8_f32_to_i32 (v))); }
 	inline vector8f_x86 FASTCALL equalsv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return vector8f_x86 (equalsvf (v1.vector1 (), v2.vector1 ()), equalsvf (v1.vector2 (), v2.vector2 ())); }
 	inline vector8f_x86 FASTCALL not_equalsv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return vector8f_x86 (not_equalsvf (v1.vector1 (), v2.vector1 ()), not_equalsvf (v1.vector2 (), v2.vector2 ())); }
 	inline vector8f_x86 FASTCALL lesserv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept { return vector8f_x86 (lesservf (v1.vector1 (), v2.vector1 ()), lesservf (v1.vector2 (), v2.vector2 ())); }
@@ -1003,7 +914,10 @@ namespace dseed
 	inline vector8i_x86 FASTCALL multiplyv8i (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_mul_epi32 (v1, v2); }
 	inline vector8i_x86 FASTCALL multiplyv8i (const vector8i_x86& v, int s) noexcept { return _mm256_mul_epi32 (v, _mm256_set1_epi32 (s)); }
 	inline vector8i_x86 FASTCALL multiplyv8i (int s, const vector8i_x86& v) noexcept { return multiplyv8i (v, s); }
-	inline vector8i_x86 FASTCALL dividev8i (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_div_epi32 (v1, v2); }
+	inline vector8i_x86 FASTCALL dividev8i (const vector8i_x86& v1, const vector8i_x86& v2) noexcept
+	{
+		// TODO
+	}
 	inline vector8i_x86 FASTCALL dividev8i (const vector8i_x86& v, int s) noexcept { return _mm256_div_epi32 (v, _mm256_set1_epi32 (s)); }
 	inline vector8i_x86 FASTCALL fmav8i (const vector8i_x86& mv1, const vector8i_x86& mv2, const vector8i_x86& av) noexcept { return addv8i (multiplyv8i (mv1, mv2), av); }
 	inline vector8i_x86 FASTCALL fmsv8i (const vector8i_x86& mv1, const vector8i_x86& mv2, const vector8i_x86& sv) noexcept { return subtractv8i (multiplyv8i (mv1, mv2), sv); }
@@ -1040,11 +954,11 @@ namespace dseed
 	}
 	inline vector8i_x86 FASTCALL dividev8i8 (const vector8i_x86& v, int s) noexcept { return dividev8i8 (v, _mm256_set1_epi8 (s)); }
 	inline vector8i_x86 FASTCALL equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_cmpeq_epi8 (v1, v2); }
-	inline vector8i_x86 FASTCALL not_equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return notv8i (equalsv8i (v1, v2)); }
-	inline vector8i_x86 FASTCALL lesserv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL lesser_equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL greaterv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL greater_equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
+	inline vector8i_x86 FASTCALL not_equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return notv8i (equalsv8i8 (v1, v2)); }
+	inline vector8i_x86 FASTCALL lesserv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (lesservi8 (v1.vector1 (), v2.vector1 ()), lesservi8 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL lesser_equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (lesser_equalsvi8 (v1.vector1 (), v2.vector1 ()), lesser_equalsvi8 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL greaterv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (greatervi8 (v1.vector1 (), v2.vector1 ()), greatervi8 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL greater_equalsv8i8 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (greater_equalsvi8 (v1.vector1 (), v2.vector1 ()), greater_equalsvi8 (v1.vector2 (), v2.vector2 ())); }
 
 	inline vector8i_x86 FASTCALL addv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_add_epi16 (v1, v2); }
 	inline vector8i_x86 FASTCALL subtractv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_sub_epi16 (v1, v2); }
@@ -1055,44 +969,54 @@ namespace dseed
 	}
 	inline vector8i_x86 FASTCALL multiplyv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept
 	{
-
+		// TODO
 	}
 	inline vector8i_x86 FASTCALL multiplyv8i16 (const vector8i_x86& v, int s) noexcept { return multiplyv8i16 (v, _mm256_set1_epi16 (s)); }
 	inline vector8i_x86 FASTCALL multiplyv8i16 (int s, const vector8i_x86& v) noexcept { return multiplyv8i16 (v, s); }
 	inline vector8i_x86 FASTCALL dividev8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept
 	{
-
+		// TODO
 	}
 	inline vector8i_x86 FASTCALL dividev8i16 (const vector8i_x86& v, int s) noexcept { return dividev8i16 (v, _mm256_set1_epi16 (s)); }
 	inline vector8i_x86 FASTCALL shiftlv8i16 (const vector8i_x86& v, int s) noexcept { return _mm256_slli_epi16 (v, s); }
 	inline vector8i_x86 FASTCALL shiftrv8i16 (const vector8i_x86& v, int s) noexcept { return _mm256_srai_epi16 (v, s); }
-	inline vector8i_x86 FASTCALL equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL not_equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL lesserv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL lesser_equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL greaterv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL greater_equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
+	inline vector8i_x86 FASTCALL equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_cmpeq_epi16 (v1, v2); }
+	inline vector8i_x86 FASTCALL not_equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return notv8i (equalsv8i16 (v1, v2)); }
+	inline vector8i_x86 FASTCALL lesserv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (lesservi16 (v1.vector1 (), v2.vector1 ()), lesservi16 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL lesser_equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (lesser_equalsvi16 (v1.vector1 (), v2.vector1 ()), lesser_equalsvi16 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL greaterv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (greatervi16 (v1.vector1 (), v2.vector1 ()), greatervi16 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL greater_equalsv8i16 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (greater_equalsvi16 (v1.vector1 (), v2.vector1 ()), greater_equalsvi16 (v1.vector2 (), v2.vector2 ())); }
 
-	inline vector8i_x86 FASTCALL addv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL subtractv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL negatev8i64 (const vector8i_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL multiplyv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL multiplyv8i64 (const vector8i_x86& v, int s) noexcept;
-	inline vector8i_x86 FASTCALL multiplyv8i64 (int s, const vector8i_x86& v) noexcept;
-	inline vector8i_x86 FASTCALL dividev8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL dividev8i64 (const vector8i_x86& v, int s) noexcept;
-	inline vector8i_x86 FASTCALL shiftlv8i64 (const vector8i_x86& v, int s) noexcept;
-	inline vector8i_x86 FASTCALL shiftrv8i64 (const vector8i_x86& v, int s) noexcept;
-	inline vector8i_x86 FASTCALL equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL not_equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL lesserv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL lesser_equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL greaterv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL greater_equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
+	inline vector8i_x86 FASTCALL addv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_add_epi64 (v1, v2); }
+	inline vector8i_x86 FASTCALL subtractv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_sub_epi64 (v1, v2); }
+	inline vector8i_x86 FASTCALL negatev8i64 (const vector8i_x86& v) noexcept
+	{
+		static vector8i_x86 zero (0, 0, 0, 0, 0, 0, 0, 0);
+		return subtractv8i64 (zero, v);
+	}
+	inline vector8i_x86 FASTCALL multiplyv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept
+	{
+		// TODO
+	}
+	inline vector8i_x86 FASTCALL multiplyv8i64 (const vector8i_x86& v, int s) noexcept { return multiplyv8i64 (v, _mm256_set1_epi64x (s)); }
+	inline vector8i_x86 FASTCALL multiplyv8i64 (int s, const vector8i_x86& v) noexcept { return multiplyv8i64 (v, s); }
+	inline vector8i_x86 FASTCALL dividev8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept
+	{
+		// TODO
+	}
+	inline vector8i_x86 FASTCALL dividev8i64 (const vector8i_x86& v, int s) noexcept { return dividev8i64 (v, _mm256_set1_epi64x (s)); }
+	inline vector8i_x86 FASTCALL shiftlv8i64 (const vector8i_x86& v, int s) noexcept { return _mm256_slli_epi64 (v, s); }
+	inline vector8i_x86 FASTCALL shiftrv8i64 (const vector8i_x86& v, int s) noexcept { return _mm256_srai_epi64 (v, s); }
+	inline vector8i_x86 FASTCALL equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_cmpeq_epi64 (v1, v2); }
+	inline vector8i_x86 FASTCALL not_equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return notv8i (equalsv8i64 (v1, v2)); }
+	inline vector8i_x86 FASTCALL lesserv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (lesservi64 (v1.vector1 (), v2.vector1 ()), lesservi64 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL lesser_equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (lesser_equalsvi64 (v1.vector1 (), v2.vector1 ()), lesser_equalsvi64 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL greaterv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (greatervi64 (v1.vector1 (), v2.vector1 ()), greatervi64 (v1.vector2 (), v2.vector2 ())); }
+	inline vector8i_x86 FASTCALL greater_equalsv8i64 (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (greater_equalsvi64 (v1.vector1 (), v2.vector1 ()), greater_equalsvi64 (v1.vector2 (), v2.vector2 ())); }
 
-	inline vector8i_x86 FASTCALL dotvf2d (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL dotvf3d (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
-	inline vector8i_x86 FASTCALL dotvf4d (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
+	inline vector8i_x86 FASTCALL dotvf2d (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (dotvi2d (v1.vector1 (), v2.vector1 ()), dotvi2d (v1.vector1 (), v2.vector1 ())); }
+	inline vector8i_x86 FASTCALL dotvf3d (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (dotvi3d (v1.vector1 (), v2.vector1 ()), dotvi3d (v1.vector1 (), v2.vector1 ())); }
+	inline vector8i_x86 FASTCALL dotvf4d (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return vector8i_x86 (dotvi4d (v1.vector1 (), v2.vector1 ()), dotvi4d (v1.vector1 (), v2.vector1 ())); }
 
 	inline vector8i_x86 FASTCALL absv8i (const vector8i_x86& v) noexcept { return _mm256_abs_epi32 (v); }
 	inline vector8i_x86 FASTCALL minv8i (const vector8i_x86& v1, const vector8i_x86& v2) noexcept { return _mm256_min_epi32 (v1, v2); }

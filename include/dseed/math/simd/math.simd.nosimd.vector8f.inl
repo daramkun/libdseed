@@ -72,23 +72,23 @@ namespace dseed
 	}
 	inline vector8f_def FASTCALL andv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (andv8i (reinterpret_f32_to_i32 (v1), reinterpret_f32_to_i32 (v2)));
+		return reinterpret8_i32_to_f32 (andv8i (reinterpret8_f32_to_i32 (v1), reinterpret8_f32_to_i32 (v2)));
 	}
 	inline vector8f_def FASTCALL orv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (orv8i (reinterpret_f32_to_i32 (v1), reinterpret_f32_to_i32 (v2)));
+		return reinterpret8_i32_to_f32 (orv8i (reinterpret8_f32_to_i32 (v1), reinterpret8_f32_to_i32 (v2)));
 	}
 	inline vector8f_def FASTCALL xorv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (xorv8i (reinterpret_f32_to_i32 (v1), reinterpret_f32_to_i32 (v2)));
+		return reinterpret8_i32_to_f32 (xorv8i (reinterpret8_f32_to_i32 (v1), reinterpret8_f32_to_i32 (v2)));
 	}
 	inline vector8f_def FASTCALL notv8f (const vector8f_def& v) noexcept
 	{
-		return reinterpret_i32_to_f32 (notv8i (reinterpret_f32_to_i32 (v)));
+		return reinterpret8_i32_to_f32 (notv8i (reinterpret8_f32_to_i32 (v)));
 	}
 	inline vector8f_def FASTCALL equalsv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (vector8i_def (
+		return reinterpret8_i32_to_f32 (vector8i_def (
 			v1.x1 () == v2.x1 () ? -1 : 0,
 			v1.y1 () == v2.y1 () ? -1 : 0,
 			v1.z1 () == v2.z1 () ? -1 : 0,
@@ -100,7 +100,7 @@ namespace dseed
 	}
 	inline vector8f_def FASTCALL not_equalsv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (vector8i_def (
+		return reinterpret8_i32_to_f32 (vector8i_def (
 			v1.x1 () != v2.x1 () ? -1 : 0,
 			v1.y1 () != v2.y1 () ? -1 : 0,
 			v1.z1 () != v2.z1 () ? -1 : 0,
@@ -112,7 +112,7 @@ namespace dseed
 	}
 	inline vector8f_def FASTCALL lesserv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (vector8i_def (
+		return reinterpret8_i32_to_f32 (vector8i_def (
 			v1.x1 () < v2.x1 () ? -1 : 0,
 			v1.y1 () < v2.y1 () ? -1 : 0,
 			v1.z1 () < v2.z1 () ? -1 : 0,
@@ -124,7 +124,7 @@ namespace dseed
 	}
 	inline vector8f_def FASTCALL lesser_equalsv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (vector8i_def (
+		return reinterpret8_i32_to_f32 (vector8i_def (
 			v1.x1 () <= v2.x1 () ? -1 : 0,
 			v1.y1 () <= v2.y1 () ? -1 : 0,
 			v1.z1 () <= v2.z1 () ? -1 : 0,
@@ -136,7 +136,7 @@ namespace dseed
 	}
 	inline vector8f_def FASTCALL greaterv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (vector8i_def (
+		return reinterpret8_i32_to_f32 (vector8i_def (
 			v1.x1 () > v2.x1 () ? -1 : 0,
 			v1.y1 () > v2.y1 () ? -1 : 0,
 			v1.z1 () > v2.z1 () ? -1 : 0,
@@ -148,7 +148,7 @@ namespace dseed
 	}
 	inline vector8f_def FASTCALL greater_equalsv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept
 	{
-		return reinterpret_i32_to_f32 (vector8i_def (
+		return reinterpret8_i32_to_f32 (vector8i_def (
 			v1.x1 () >= v2.x1 () ? -1 : 0,
 			v1.y1 () >= v2.y1 () ? -1 : 0,
 			v1.z1 () >= v2.z1 () ? -1 : 0,
@@ -214,8 +214,8 @@ namespace dseed
 	inline vector8f_def FASTCALL absv8f (const vector8f_def& v) noexcept
 	{
 		return vector8f_def (
-			absf (v.x1 ()), absf (v.y1 ()), absf (v.z1 ()), absf (v.w1 ()),
-			absf (v.x2 ()), absf (v.y2 ()), absf (v.z2 ()), absf (v.w2 ())
+			fabs (v.x1 ()), fabs (v.y1 ()), fabs (v.z1 ()), fabs (v.w1 ()),
+			fabs (v.x2 ()), fabs (v.y2 ()), fabs (v.z2 ()), fabs (v.w2 ())
 		);
 	}
 	inline vector8f_def FASTCALL minv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept

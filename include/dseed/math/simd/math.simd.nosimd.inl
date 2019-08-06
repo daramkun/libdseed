@@ -1,7 +1,7 @@
 #ifndef __DSEED_MATH_SIMD_NOSIMD_INL__
 #define __DSEED_MATH_SIMD_NOSIMD_INL__
 
-#include <random>
+#include <cmath>
 
 namespace dseed
 {
@@ -11,59 +11,42 @@ namespace dseed
 	struct vector8i_def;
 
 	inline vectori_def FASTCALL conv_f32_to_i32 (const vectorf_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_f32_to_i32 (const vector8f_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_f32_to_i32 (const vector8f_def& v) noexcept;
 	inline vectori_def FASTCALL reinterpret_f32_to_i32 (const vectorf_def& v) noexcept;
-	inline vector8i_def FASTCALL reinterpret_f32_to_i32 (const vector8f_def& v) noexcept;
+	inline vector8i_def FASTCALL reinterpret8_f32_to_i32 (const vector8f_def& v) noexcept;
 
 	inline vectorf_def FASTCALL conv_i32_to_f32 (const vectori_def& v) noexcept;
-	inline vector8f_def FASTCALL conv_i32_to_f32 (const vector8i_def& v) noexcept;
+	inline vector8f_def FASTCALL conv8_i32_to_f32 (const vector8i_def& v) noexcept;
 	inline vectorf_def FASTCALL reinterpret_i32_to_f32 (const vectori_def& v) noexcept;
-	inline vector8f_def FASTCALL reinterpret_i32_to_f32 (const vector8i_def& v) noexcept;
+	inline vector8f_def FASTCALL reinterpret8_i32_to_f32 (const vector8i_def& v) noexcept;
 
 	inline vectori_def FASTCALL conv_i64_to_i32 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i64_to_i32 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i64_to_i24 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i64_to_i24 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i64_to_i32 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i64_to_i16 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i64_to_i16 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i64_to_i16 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i64_to_i8 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i64_to_i8 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i64_to_i8 (const vector8i_def& v) noexcept;
 
 	inline vectori_def FASTCALL conv_i32_to_i64 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i32_to_i64 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i32_to_i24 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i32_to_i24 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i32_to_i64 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i32_to_i16 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i32_to_i16 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i32_to_i16 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i32_to_i8 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i32_to_i8 (const vector8i_def& v) noexcept;
-
-	inline vectori_def FASTCALL conv_i24_to_i64 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i24_to_i64 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i24_to_i32 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i24_to_i32 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i24_to_i16 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i24_to_i16 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i24_to_i8 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i24_to_i8 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i32_to_i8 (const vector8i_def& v) noexcept;
 
 	inline vectori_def FASTCALL conv_i16_to_i64 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i16_to_i64 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i16_to_i64 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i16_to_i32 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i16_to_i32 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i16_to_i24 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i16_to_i24 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i16_to_i32 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i16_to_i8 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i16_to_i8 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i16_to_i8 (const vector8i_def& v) noexcept;
 
 	inline vectori_def FASTCALL conv_i8_to_i64 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i8_to_i64 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i8_to_i64 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i8_to_i32 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i8_to_i32 (const vector8i_def& v) noexcept;
-	inline vectori_def FASTCALL conv_i8_to_i24 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i8_to_i24 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i8_to_i32 (const vector8i_def& v) noexcept;
 	inline vectori_def FASTCALL conv_i8_to_i16 (const vectori_def& v) noexcept;
-	inline vector8i_def FASTCALL conv_i8_to_i16 (const vector8i_def& v) noexcept;
+	inline vector8i_def FASTCALL conv8_i8_to_i16 (const vector8i_def& v) noexcept;
 
 	inline int movemaskvf (const vectorf_def& v) noexcept;
 	inline int movemaskv8f (const vector8f_def& v) noexcept;
@@ -165,21 +148,13 @@ namespace dseed
 	{
 		union
 		{
-			int v[4];
+			int32_t v[4];
 			int64_t v64[2];
-			int24_t v24[4];
 			int16_t v16[8];
 			int8_t v8[16];
 		};
 		inline vectori_def () noexcept = default;
-		inline vectori_def (const int* vector) noexcept { memcpy (v, vector, sizeof (int) * 4); }
-		inline vectori_def (const float* vector) noexcept
-		{
-			v[0] = (int)vector[0];
-			v[1] = (int)vector[1];
-			v[2] = (int)vector[2];
-			v[3] = (int)vector[3];
-		}
+		inline vectori_def (const int* vector) noexcept { load (vector); }
 		inline vectori_def (int x, int y, int z, int w) noexcept { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
 		inline vectori_def (int i) noexcept { v[0] = v[1] = v[2] = v[3] = i; }
 

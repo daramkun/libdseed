@@ -1,19 +1,6 @@
 #ifndef __DSEED_MATH_SIMD_INL__
 #define __DSEED_MATH_SIMD_INL__
 
-#if ( ARCH_X86SET ) && !defined ( NO_INTRINSIC )
-#	include <xmmintrin.h>									// SSE
-#	include <emmintrin.h>									// SSE 2
-#	include <pmmintrin.h>									// SSE 3
-#	include <smmintrin.h>									// SSE 4.x
-#	include <nmmintrin.h>									// SSE 4.x
-#	include <immintrin.h>									// AVX
-#elif ARCH_ARM && !defined ( NO_INTRINSIC )
-#	include <arm_neon.h>
-#elif ARCH_ARM64 && !defined ( NO_INTRINSIC )
-#	include <arm64_neon.h>
-#endif
-
 #include <cmath>
 #include <cassert>
 
@@ -33,7 +20,7 @@
 
 #include "simd/math.simd.nosimd.inl"
 #include "simd/math.simd.x86.inl"
-#include "simd/math.simd.neon.inl"
+#include "simd/math.simd.arm.inl"
 
 namespace dseed
 {

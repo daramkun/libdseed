@@ -156,7 +156,7 @@ namespace dseed
 	}
 	inline vectorf_def FASTCALL absvf (const vectorf_def& v) noexcept
 	{
-		return vectorf_def (absf (v.x ()), absf (v.y ()), absf (v.z ()), absf (v.w ()));
+		return vectorf_def (fabs (v.x ()), fabs (v.y ()), fabs (v.z ()), fabs (v.w ()));
 	}
 	inline vectorf_def FASTCALL minvf (const vectorf_def& v1, const vectorf_def& v2) noexcept
 	{

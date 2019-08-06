@@ -10,13 +10,13 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 	inline vectori_def FASTCALL conv_f32_to_i32 (const vectorf_def& v) noexcept
 	{
-		return vectori_def ((int)v.v[0], (int)v.v[1], (int)v.v[2], (int)v.v[3]);
+		return vectori_def ((int)v.x (), (int)v.y (), (int)v.z (), (int)v.w ());
 	}
-	inline vector8i_def FASTCALL conv_f32_to_i32 (const vector8f_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_f32_to_i32 (const vector8f_def& v) noexcept
 	{
 		return vector8i_def (
-			(int)v.v[0], (int)v.v[1], (int)v.v[2], (int)v.v[3],
-			(int)v.v[4], (int)v.v[5], (int)v.v[6], (int)v.v[7]
+			(int)v.x1 (), (int)v.y1 (), (int)v.z1 (), (int)v.w1 (),
+			(int)v.x2 (), (int)v.y2 (), (int)v.z2 (), (int)v.w2 ()
 		);
 	}
 	inline vectori_def FASTCALL reinterpret_f32_to_i32 (const vectorf_def& v) noexcept
@@ -24,21 +24,21 @@ namespace dseed
 		const int* reinterpret = reinterpret_cast<const int*>(v.v);
 		return vectori_def (reinterpret);
 	}
-	inline vector8i_def FASTCALL reinterpret_f32_to_i32 (const vector8f_def& v) noexcept
+	inline vector8i_def FASTCALL reinterpret8_f32_to_i32 (const vector8f_def& v) noexcept
 	{
-		const int* reinterpret = reinterpret_cast<const int*>(v.v);
+		auto reinterpret = reinterpret_cast<const int*>(v.v);
 		return vector8i_def (reinterpret);
 	}
 
 	inline vectorf_def FASTCALL conv_i32_to_f32 (const vectori_def& v) noexcept
 	{
-		return vectorf_def ((float)v.v[0], (float)v.v[1], (float)v.v[2], (float)v.v[3]);
+		return vectorf_def ((float)v.x (), (float)v.y (), (float)v.z (), (float)v.w ());
 	}
-	inline vector8f_def FASTCALL conv_i32_to_f32 (const vector8i_def& v) noexcept
+	inline vector8f_def FASTCALL conv8_i32_to_f32 (const vector8i_def& v) noexcept
 	{
 		return vector8f_def (
-			(float)v.v[0], (float)v.v[1], (float)v.v[2], (float)v.v[3],
-			(float)v.v[4], (float)v.v[5], (float)v.v[6], (float)v.v[7]
+			(float)v.x1 (), (float)v.y1 (), (float)v.z1 (), (float)v.w1 (),
+			(float)v.x2 (), (float)v.y2 (), (float)v.z2 (), (float)v.w2 ()
 		);
 	}
 	inline vectorf_def FASTCALL reinterpret_i32_to_f32 (const vectori_def& v) noexcept
@@ -46,9 +46,9 @@ namespace dseed
 		const float* reinterpret = reinterpret_cast<const float*>(v.v);
 		return vectorf_def (reinterpret);
 	}
-	inline vector8f_def FASTCALL reinterpret_i32_to_f32 (const vector8i_def& v) noexcept
+	inline vector8f_def FASTCALL reinterpret8_i32_to_f32 (const vector8i_def& v) noexcept
 	{
-		const float* reinterpret = reinterpret_cast<const float*>(v.v);
+		auto reinterpret = reinterpret_cast<const float*>(v.v);
 		return vector8f_def (reinterpret);
 	}
 
@@ -60,28 +60,10 @@ namespace dseed
 		conv[1] = origin[1];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i64_to_i32 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i64_to_i32 (const vector8i_def& v) noexcept
 	{
 		const int32_t* origin = (const int32_t*)v.v;
 		int64_t conv[4] = {};
-		conv[0] = origin[0];
-		conv[1] = origin[1];
-		conv[2] = origin[2];
-		conv[3] = origin[3];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i64_to_i24 (const vectori_def& v) noexcept
-	{
-		const int32_t* origin = (const int32_t*)v.v;
-		int24_t conv[5] = {};
-		conv[0] = origin[0];
-		conv[1] = origin[1];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i64_to_i24 (const vector8i_def& v) noexcept
-	{
-		const int32_t* origin = (const int32_t*)v.v;
-		int24_t conv[8] = {};
 		conv[0] = origin[0];
 		conv[1] = origin[1];
 		conv[2] = origin[2];
@@ -96,7 +78,7 @@ namespace dseed
 		conv[1] = origin[1];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i64_to_i16 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i64_to_i16 (const vector8i_def& v) noexcept
 	{
 		const int32_t* origin = (const int32_t*)v.v;
 		int16_t conv[8] = {};
@@ -104,7 +86,7 @@ namespace dseed
 		conv[1] = origin[1];
 		conv[2] = origin[2];
 		conv[3] = origin[3];
-		return vectori_def ((const int*)conv);
+		return vector8i_def ((const int*)conv);
 	}
 	inline vectori_def FASTCALL conv_i64_to_i8 (const vectori_def& v) noexcept
 	{
@@ -114,7 +96,7 @@ namespace dseed
 		conv[1] = origin[1];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i64_to_i8 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i64_to_i8 (const vector8i_def& v) noexcept
 	{
 		const int32_t* origin = (const int32_t*)v.v;
 		int8_t conv[32] = {};
@@ -122,36 +104,20 @@ namespace dseed
 		conv[1] = origin[1];
 		conv[2] = origin[2];
 		conv[3] = origin[3];
-		return vectori_def ((const int*)conv);
+		return vector8i_def ((const int*)conv);
 	}
 
 	inline vectori_def FASTCALL conv_i32_to_i64 (const vectori_def& v) noexcept
 	{
 		int64_t conv[2] = {};
 		conv[0] = (int64_t)v.v[0]; conv[1] = (int64_t)v.v[1];
-		return vector8i_def ((const int*)conv);
+		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i32_to_i64 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i32_to_i64 (const vector8i_def& v) noexcept
 	{
 		int64_t conv[4] = {};
 		conv[0] = (int64_t)v.v[0]; conv[1] = (int64_t)v.v[1];
 		conv[2] = (int64_t)v.v[2]; conv[3] = (int64_t)v.v[3];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i32_to_i24 (const vectori_def& v) noexcept
-	{
-		int24_t conv[6] = {};
-		conv[0] = (int24_t)v.v[0]; conv[1] = (int24_t)v.v[1];
-		conv[2] = (int24_t)v.v[2]; conv[3] = (int24_t)v.v[3];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i32_to_i24 (const vector8i_def& v) noexcept
-	{
-		int24_t conv[11] = {};
-		conv[0] = (int24_t)v.v[0]; conv[1] = (int24_t)v.v[1];
-		conv[2] = (int24_t)v.v[2]; conv[3] = (int24_t)v.v[3];
-		conv[4] = (int24_t)v.v[4]; conv[5] = (int24_t)v.v[5];
-		conv[6] = (int24_t)v.v[6]; conv[7] = (int24_t)v.v[7];
 		return vector8i_def ((const int*)conv);
 	}
 	inline vectori_def FASTCALL conv_i32_to_i16 (const vectori_def& v) noexcept
@@ -161,7 +127,7 @@ namespace dseed
 		conv[2] = (short)v.v[2]; conv[3] = (short)v.v[3];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i32_to_i16 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i32_to_i16 (const vector8i_def& v) noexcept
 	{
 		short conv[16] = {};
 		conv[0] = (short)v.v[0]; conv[1] = (short)v.v[1];
@@ -177,7 +143,7 @@ namespace dseed
 		conv[2] = (char)v.v[2]; conv[3] = (char)v.v[3];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i32_to_i8 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i32_to_i8 (const vector8i_def& v) noexcept
 	{
 		char conv[32] = {};
 		conv[0] = (char)v.v[0]; conv[1] = (char)v.v[1];
@@ -187,88 +153,15 @@ namespace dseed
 		return vector8i_def ((const int*)conv);
 	}
 
-	inline vectori_def FASTCALL conv_i24_to_i64 (const vectori_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		int64_t conv[2] = {};
-		conv[0] = (int64_t)(int32_t)origin[0];
-		conv[1] = (int64_t)(int32_t)origin[1];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i24_to_i64 (const vector8i_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		int64_t conv[4] = {};
-		conv[0] = (int64_t)(int32_t)origin[0];
-		conv[1] = (int64_t)(int32_t)origin[1];
-		conv[2] = (int64_t)(int32_t)origin[2];
-		conv[3] = (int64_t)(int32_t)origin[3];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i24_to_i32 (const vectori_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		int32_t conv[4] = {};
-		conv[0] = (int32_t)origin[0]; conv[1] = (int32_t)origin[1];
-		conv[2] = (int32_t)origin[2]; conv[3] = (int32_t)origin[3];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i24_to_i32 (const vector8i_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		int32_t conv[8] = {};
-		conv[0] = (int32_t)origin[0]; conv[1] = (int32_t)origin[1];
-		conv[2] = (int32_t)origin[2]; conv[3] = (int32_t)origin[3];
-		conv[4] = (int32_t)origin[4]; conv[5] = (int32_t)origin[5];
-		conv[6] = (int32_t)origin[6]; conv[7] = (int32_t)origin[7];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i24_to_i16 (const vectori_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		short conv[8] = {};
-		conv[0] = (short)(int)origin[0]; conv[1] = (short)(int)origin[1]; conv[2] = (short)(int)origin[2];
-		conv[3] = (short)(int)origin[3];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i24_to_i16 (const vector8i_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		short conv[16] = {};
-		conv[0] = (short)(int)v.v[0]; conv[1] = (short)(int)v.v[1];
-		conv[2] = (short)(int)v.v[2]; conv[3] = (short)(int)v.v[3];
-		conv[4] = (short)(int)v.v[4]; conv[5] = (short)(int)v.v[5];
-		conv[6] = (short)(int)v.v[6]; conv[7] = (short)(int)v.v[7];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i24_to_i8 (const vectori_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		char conv[16] = {};
-		conv[0] = (char)(int)origin[0]; conv[1] = (char)(int)origin[1];
-		conv[2] = (char)(int)origin[2]; conv[3] = (char)(int)origin[3];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i24_to_i8 (const vector8i_def& v) noexcept
-	{
-		const int24_t* origin = (const int24_t*)v.v;
-		char conv[32] = {};
-		conv[0] = (char)(int)origin[0]; conv[1] = (char)(int)origin[1];
-		conv[2] = (char)(int)origin[2]; conv[3] = (char)(int)origin[3];
-		conv[4] = (char)(int)origin[4]; conv[5] = (char)(int)origin[5];
-		conv[6] = (char)(int)origin[6]; conv[7] = (char)(int)origin[7];
-		return vector8i_def ((const int*)conv);
-	}
-
 	inline vectori_def FASTCALL conv_i16_to_i64 (const vectori_def& v) noexcept
 	{
 		const int16_t* origin = (const int16_t*)v.v;
 		int64_t conv[2] = {};
 		conv[0] = (int64_t)origin[0];
 		conv[1] = (int64_t)origin[1];
-		return vector8i_def ((const int*)conv);
+		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i16_to_i64 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i16_to_i64 (const vector8i_def& v) noexcept
 	{
 		const int16_t* origin = (const int16_t*)v.v;
 		int64_t conv[4] = {};
@@ -286,7 +179,7 @@ namespace dseed
 		conv[2] = (int)origin[2]; conv[3] = (int)origin[3];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i16_to_i32 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i16_to_i32 (const vector8i_def& v) noexcept
 	{
 		const int16_t* origin = (const int16_t*)v.v;
 		int conv[8] = {};
@@ -294,25 +187,6 @@ namespace dseed
 		conv[2] = (int)origin[2]; conv[3] = (int)origin[3];
 		conv[4] = (int)origin[4]; conv[5] = (int)origin[5];
 		conv[6] = (int)origin[6]; conv[7] = (int)origin[7];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i16_to_i24 (const vectori_def& v) noexcept
-	{
-		const int16_t* origin = (const int16_t*)v.v;
-		int24_t conv[6] = {};
-		conv[0] = (int24_t)origin[0]; conv[1] = (int24_t)origin[1];
-		conv[2] = (int24_t)origin[2]; conv[3] = (int24_t)origin[3];
-		conv[4] = (int24_t)origin[4];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i16_to_i24 (const vector8i_def& v) noexcept
-	{
-		const int16_t* origin = (const int16_t*)v.v;
-		int24_t conv[11] = {};
-		conv[0] = (int24_t)origin[0]; conv[1] = (int24_t)origin[1];
-		conv[2] = (int24_t)origin[2]; conv[3] = (int24_t)origin[3];
-		conv[4] = (int24_t)origin[4]; conv[5] = (int24_t)origin[5];
-		conv[6] = (int24_t)origin[6]; conv[7] = (int24_t)origin[7];
 		return vector8i_def ((const int*)conv);
 	}
 	inline vectori_def FASTCALL conv_i16_to_i8 (const vectori_def& v) noexcept
@@ -325,7 +199,7 @@ namespace dseed
 		conv[6] = (char)origin[6]; conv[7] = (char)origin[7];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i16_to_i8 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i16_to_i8 (const vector8i_def& v) noexcept
 	{
 		const int16_t* origin = (const int16_t*)v.v;
 		char conv[32] = {};
@@ -346,9 +220,9 @@ namespace dseed
 		int64_t conv[2] = {};
 		conv[0] = (int64_t)origin[0];
 		conv[1] = (int64_t)origin[1];
-		return vector8i_def ((const int*)conv);
+		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i8_to_i64 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i8_to_i64 (const vector8i_def& v) noexcept
 	{
 		const int8_t* origin = (const int8_t*)v.v;
 		int64_t conv[4] = {};
@@ -366,7 +240,7 @@ namespace dseed
 		conv[2] = (int)origin[2]; conv[3] = (int)origin[3];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i8_to_i32 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i8_to_i32 (const vector8i_def& v) noexcept
 	{
 		const int8_t* origin = (const int8_t*)v.v;
 		int conv[8] = {};
@@ -374,25 +248,6 @@ namespace dseed
 		conv[2] = (int)origin[2]; conv[3] = (int)origin[3];
 		conv[4] = (int)origin[4]; conv[5] = (int)origin[5];
 		conv[6] = (int)origin[6]; conv[7] = (int)origin[7];
-		return vector8i_def ((const int*)conv);
-	}
-	inline vectori_def FASTCALL conv_i8_to_i24 (const vectori_def& v) noexcept
-	{
-		const int8_t* origin = (const int8_t*)v.v;
-		int24_t conv[6] = {};
-		conv[0] = (int24_t)origin[0]; conv[1] = (int24_t)origin[1];
-		conv[2] = (int24_t)origin[2]; conv[3] = (int24_t)origin[3];
-		conv[4] = (int24_t)origin[4];
-		return vectori_def ((const int*)conv);
-	}
-	inline vector8i_def FASTCALL conv_i8_to_i24 (const vector8i_def& v) noexcept
-	{
-		const int8_t* origin = (const int8_t*)v.v;
-		int24_t conv[11] = {};
-		conv[0] = (int24_t)origin[0]; conv[1] = (int24_t)origin[1];
-		conv[2] = (int24_t)origin[2]; conv[3] = (int24_t)origin[3];
-		conv[4] = (int24_t)origin[4]; conv[5] = (int24_t)origin[5];
-		conv[6] = (int24_t)origin[6]; conv[7] = (int24_t)origin[7];
 		return vector8i_def ((const int*)conv);
 	}
 	inline vectori_def FASTCALL conv_i8_to_i16 (const vectori_def& v) noexcept
@@ -405,7 +260,7 @@ namespace dseed
 		conv[6] = (char)origin[6]; conv[7] = (char)origin[7];
 		return vectori_def ((const int*)conv);
 	}
-	inline vector8i_def FASTCALL conv_i8_to_i16 (const vector8i_def& v) noexcept
+	inline vector8i_def FASTCALL conv8_i8_to_i16 (const vector8i_def& v) noexcept
 	{
 		const int8_t* origin = (const int8_t*)v.v;
 		short conv[16] = {};
@@ -434,28 +289,36 @@ namespace dseed
 	inline int movemaskvi (const vectori_def& v) noexcept
 	{
 		auto ia = reinterpret_cast<const uint8_t*> (v.v);
-		return (ia[0] >> 31)
-			| ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8)
-			| ((ia[4] >> 27) & 16) | ((ia[5] >> 26) & 32) | ((ia[6] >> 25) & 64)
-			| ((ia[7] >> 24) & 128) | ((ia[8] >> 23) & 256) | ((ia[9] >> 22) & 512)
-			| ((ia[10] >> 21) & 1024) | ((ia[11] >> 20) & 2048) | ((ia[12] >> 19) & 4096)
-			| ((ia[13] >> 18) & 8192) | ((ia[14] >> 17) & 16384) | ((ia[15] >> 16) & 32768);
+		return ((uint32_t)ia[0] >> 31)
+			| (((uint32_t)ia[1] >> 30) & 2) | (((uint32_t)ia[2] >> 29) & 4)
+			| (((uint32_t)ia[3] >> 28) & 8) | (((uint32_t)ia[4] >> 27) & 16)
+			| (((uint32_t)ia[5] >> 26) & 32) | (((uint32_t)ia[6] >> 25) & 64)
+			| (((uint32_t)ia[7] >> 24) & 128) | (((uint32_t)ia[8] >> 23) & 256)
+			| (((uint32_t)ia[9] >> 22) & 512) | (((uint32_t)ia[10] >> 21) & 1024)
+			| (((uint32_t)ia[11] >> 20) & 2048) | (((uint32_t)ia[12] >> 19) & 4096)
+			| (((uint32_t)ia[13] >> 18) & 8192) | (((uint32_t)ia[14] >> 17) & 16384)
+			| (((uint32_t)ia[15] >> 16) & 32768);
 	}
 	inline int movemaskv8i (const vector8i_def& v) noexcept
 	{
 		auto ia = reinterpret_cast<const uint8_t*> (v.v);
-		return (ia[0] >> 31)
-			| ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8)
-			| ((ia[4] >> 27) & 16) | ((ia[5] >> 26) & 32) | ((ia[6] >> 25) & 64)
-			| ((ia[7] >> 24) & 128) | ((ia[8] >> 23) & 256) | ((ia[9] >> 22) & 512)
-			| ((ia[10] >> 21) & 1024) | ((ia[11] >> 20) & 2048) | ((ia[12] >> 19) & 4096)
-			| ((ia[13] >> 18) & 8192) | ((ia[14] >> 17) & 16384) | ((ia[15] >> 16) & 32768)
-			| ((ia[16] >> 15) & 65536) | ((ia[17] >> 14) & 131072) | ((ia[18] >> 13) & 262144)
-			| ((ia[19] >> 12) & 524288) | ((ia[20] >> 11) & 1048576) | ((ia[21] >> 10) & 2097152)
-			| ((ia[22] >> 9) & 4194304) | ((ia[23] >> 8) & 8388608) | ((ia[24] >> 7) & 16777216)
-			| ((ia[25] >> 6) & 33554432) | ((ia[26] >> 5) & 67108864) | ((ia[27] >> 4) & 134217728)
-			| ((ia[28] >> 3) & 268435456) | ((ia[29] >> 2) & 536870912) | ((ia[30] >> 1) & 1073741824)
-			| (ia[31] & 2147483648);
+		return ((uint32_t)ia[0] >> 31)
+			| (((uint32_t)ia[1] >> 30) & 2) | (((uint32_t)ia[2] >> 29) & 4)
+			| (((uint32_t)ia[3] >> 28) & 8) | (((uint32_t)ia[4] >> 27) & 16)
+			| (((uint32_t)ia[5] >> 26) & 32) | (((uint32_t)ia[6] >> 25) & 64)
+			| (((uint32_t)ia[7] >> 24) & 128) | (((uint32_t)ia[8] >> 23) & 256)
+			| (((uint32_t)ia[9] >> 22) & 512) | (((uint32_t)ia[10] >> 21) & 1024)
+			| (((uint32_t)ia[11] >> 20) & 2048) | (((uint32_t)ia[12] >> 19) & 4096)
+			| (((uint32_t)ia[13] >> 18) & 8192) | (((uint32_t)ia[14] >> 17) & 16384)
+			| (((uint32_t)ia[15] >> 16) & 32768) | (((uint32_t)ia[16] >> 15) & 65536)
+			| (((uint32_t)ia[17] >> 14) & 131072) | (((uint32_t)ia[18] >> 13) & 262144)
+			| (((uint32_t)ia[19] >> 12) & 524288) | (((uint32_t)ia[20] >> 11) & 1048576)
+			| (((uint32_t)ia[21] >> 10) & 2097152) | (((uint32_t)ia[22] >> 9) & 4194304)
+			| (((uint32_t)ia[23] >> 8) & 8388608) | (((uint32_t)ia[24] >> 7) & 16777216)
+			| (((uint32_t)ia[25] >> 6) & 33554432) | (((uint32_t)ia[26] >> 5) & 67108864)
+			| (((uint32_t)ia[27] >> 4) & 134217728) | (((uint32_t)ia[28] >> 3) & 268435456)
+			| (((uint32_t)ia[29] >> 2) & 536870912) | (((uint32_t)ia[30] >> 1) & 1073741824)
+			| ((uint32_t)ia[31] & 2147483648);
 	}
 }
 
