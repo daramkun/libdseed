@@ -125,7 +125,7 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 	inline vectorf dot_plane_normal (const vectorf& p, const vectorf& n)
 	{
-		return dot3 (p, n);
+		return dotvf3d (p, n);
 	}
 	inline vectorf dot_plane_coord (const vectorf& p, const vectorf& v)
 	{
@@ -138,10 +138,10 @@ namespace dseed
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
 	inline plane::plane (const float3& p1, const float3& p2, const float3& p3)
-	: plane (p1, normalize3 (cross3 ((vectorf)p2 - p1, (vectorf)p3 - p1)))
+	: plane (p1, normalizevf3d (crossvf3d ((vectorf)p2 - p1, (vectorf)p3 - p1)))
 	{ }
 	inline plane::plane (const float3& p, const float3& n)
-		: plane (n.x, n.y, n.z, -dot3 (p, n).x ())
+		: plane (n.x, n.y, n.z, -dotvf3d (p, n).x ())
 	{ }
 	inline vectorf plane::normalize () { return normalize_plane ((float4)* this); }
 
@@ -156,13 +156,13 @@ namespace dseed
 	{
 		if (ip1 == nullptr || ip2 == nullptr) return;
 
-		vectorf v1 = cross3 ((float4)p, (float4)* this);
-		vectorf lengthsq = length_squared3 (v1);
+		vectorf v1 = crossvf3d ((float4)p, (float4)* this);
+		vectorf lengthsq = length_squaredvf3d (v1);
 
-		vectorf v2 = cross3 ((float4)p, v1);
+		vectorf v2 = crossvf3d ((float4)p, v1);
 		vectorf point = v1 * float4 (w, w, w, w);
 
-		point = fmavf (cross3 (v1, (float4)* this), float4 (p.w, p.w, p.w, p.w), point);
+		point = fmavf (crossvf3d (v1, (float4)* this), float4 (p.w, p.w, p.w, p.w), point);
 
 		if (equalsvf (lengthsq, vectorf (0, 0, 0, 0)) == 0xF)
 			* ip2 = (*ip1 = point / lengthsq) + v1;
@@ -181,7 +181,7 @@ namespace dseed
 		if (ip == nullptr)
 			return;
 
-		vectorf d = dot3 ((float4)* this, lp1) - dot3 ((float4)* this, lp2);
+		vectorf d = dotvf3d ((float4)* this, lp1) - dotvf3d ((float4)* this, lp2);
 		*ip = (equalsvf (d, vectorf (0, 0, 0, 0)) == 0xF)
 			? float3 (fmavf (lp2 - lp1, float3 (dot_plane_coord ((float4)* this, lp1) / d), lp1))
 			: float3 (dseed::single_nan);
@@ -221,7 +221,7 @@ namespace dseed
 		vectorf center2 = bs.center;
 
 		vectorf v = center2 - center1;
-		float distance = length3 (v).x ();
+		float distance = lengthvf3d (v).x ();
 
 		return (radius + bs.radius >= distance)
 			? (radius - bs.radius >= distance ? intersect_contains : intersect_intersects)
@@ -247,13 +247,13 @@ namespace dseed
 
 		matrixf matInverse = projection.invertmf ();
 		vectorf points[6] = {
-			transform4 (homogenousPoints[0], matInverse),
-			transform4 (homogenousPoints[1], matInverse),
-			transform4 (homogenousPoints[2], matInverse),
-			transform4 (homogenousPoints[3], matInverse),
+			transformvf4d (homogenousPoints[0], matInverse),
+			transformvf4d (homogenousPoints[1], matInverse),
+			transformvf4d (homogenousPoints[2], matInverse),
+			transformvf4d (homogenousPoints[3], matInverse),
 
-			transform4 (homogenousPoints[4], matInverse),
-			transform4 (homogenousPoints[5], matInverse),
+			transformvf4d (homogenousPoints[4], matInverse),
+			transformvf4d (homogenousPoints[5], matInverse),
 		};
 
 		position = float3 (0.0f, 0.0f, 0.0f);

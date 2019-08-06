@@ -56,7 +56,7 @@ namespace dseed
 		inline operator const float32x4_t& () const noexcept { return v; }
 
 		inline void FASTCALL load (const float* arr) noexcept { v = vld1q_f32 (arr); }
-		inline void FASTCALL store (float* arr) noexcept { vst1q_f32 (arr, v); }
+		inline void FASTCALL store (float* arr) const noexcept { vst1q_f32 (arr, v); }
 
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
 		static inline vectorf_arm FASTCALL shuffle32 (const vectorf_arm & v1, const vectorf_arm & v2) noexcept
@@ -178,7 +178,7 @@ namespace dseed
 		inline operator const int32x4_t& () const noexcept { return v; }
 
 		inline void FASTCALL load (const int* vector) noexcept { v = vld1q_s32 ((const __m128i*)vector); }
-		inline void FASTCALL store (int* vector) noexcept { vst1q_s32 ((__m128i*)vector, v); }
+		inline void FASTCALL store (int* vector) const noexcept { vst1q_s32 ((__m128i*)vector, v); }
 
 		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		static inline vectori_arm FASTCALL shuffle32 (const vectori_arm & v1, const vectori_arm & v2) noexcept

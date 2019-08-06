@@ -77,7 +77,7 @@ namespace dseed
 		inline operator const __m128& () const noexcept { return v; }
 
 		inline void FASTCALL load (const float* arr) noexcept { v = _mm_load_ps (arr); }
-		inline void FASTCALL store (float* arr) noexcept { _mm_store_ps (arr, v); }
+		inline void FASTCALL store (float* arr) const noexcept { _mm_store_ps (arr, v); }
 
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
 		static inline vectorf_x86 FASTCALL shuffle32 (const vectorf_x86 & v1, const vectorf_x86 & v2) noexcept
@@ -173,7 +173,7 @@ namespace dseed
 		inline operator const __m128i& () const noexcept { return v; }
 
 		inline void FASTCALL load (const int* vector) noexcept { v = _mm_load_si128 ((const __m128i*)vector); }
-		inline void FASTCALL store (int* vector) noexcept { _mm_store_si128 ((__m128i*)vector, v); }
+		inline void FASTCALL store (int* vector) const noexcept { _mm_store_si128 ((__m128i*)vector, v); }
 
 		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		static inline vectori_x86 FASTCALL shuffle32 (const vectori_x86 & v1, const vectori_x86 & v2) noexcept
@@ -329,7 +329,7 @@ namespace dseed
 		inline operator const __m256& () const noexcept { return v; }
 
 		inline void FASTCALL load (const float* arr) noexcept { v = _mm256_load_ps (arr); }
-		inline void FASTCALL store (float* arr) noexcept { _mm256_store_ps (arr, v); }
+		inline void FASTCALL store (float* arr) const noexcept { _mm256_store_ps (arr, v); }
 
 		template<uint32_t x1, uint32_t y1, uint32_t z1, uint32_t w1, uint32_t x2, uint32_t y2, uint32_t z2, uint32_t w2>
 		static inline vector8f_x86 FASTCALL shuffle32 (const vector8f_x86 & v1, const vector8f_x86 & v2) noexcept
@@ -440,7 +440,7 @@ namespace dseed
 		inline operator const __m256i& () const noexcept { return v; }
 
 		inline void FASTCALL load (const int* arr) noexcept { v = _mm256_load_si256 ((const __m256i*)arr); }
-		inline void FASTCALL store (int* arr) noexcept { _mm256_store_si256 ((__m256i*)arr, v); }
+		inline void FASTCALL store (int* arr) const noexcept { _mm256_store_si256 ((__m256i*)arr, v); }
 
 		template<uint32_t x1, uint32_t y1, uint32_t z1, uint32_t w1, uint32_t x2, uint32_t y2, uint32_t z2, uint32_t w2>
 		static inline vector8i_x86 FASTCALL shuffle32 (const vector8i_x86 & v1, const vector8i_x86 & v2) noexcept

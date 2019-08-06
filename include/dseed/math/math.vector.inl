@@ -173,21 +173,21 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 	inline dseed::float2::float2 (const vectorf& v) noexcept { float4 temp = v; x = temp.x; y = temp.y; }
 	inline float2::operator vectorf () const noexcept { return float4 (x, y, 0, 0); }
-	inline vectorf float2::normalize () const noexcept { return normalize2 (*this); }
-	inline float float2::length_squared () const noexcept { return length_squared2 (*this).x (); }
-	inline float float2::length () const noexcept { return length2 (*this).x (); }
+	inline vectorf float2::normalize () const noexcept { return normalizevf2d (*this); }
+	inline float float2::length_squared () const noexcept { return length_squaredvf2d (*this).x (); }
+	inline float float2::length () const noexcept { return lengthvf2d (*this).x (); }
 
 	inline dseed::float3::float3 (const vectorf& v) noexcept { float4 temp = v; x = temp.x; y = temp.y; z = temp.z; }
 	inline float3::operator vectorf () const noexcept { return float4 (x, y, z, 0); }
-	inline vectorf float3::normalize () const noexcept { return normalize3 (*this); }
-	inline float float3::length_squared () const noexcept { return length_squared3 (*this).x (); }
-	inline float float3::length () const noexcept { return length3 (*this).x (); }
+	inline vectorf float3::normalize () const noexcept { return normalizevf3d (*this); }
+	inline float float3::length_squared () const noexcept { return length_squaredvf3d (*this).x (); }
+	inline float float3::length () const noexcept { return lengthvf3d (*this).x (); }
 
 	inline dseed::float4::float4 (const vectorf& v) noexcept { v.store (arr); }
 	inline float4::operator vectorf () const noexcept { return vectorf (arr); }
-	inline vectorf float4::normalize () const noexcept { return normalize4 (*this); }
-	inline float float4::length_squared () const noexcept { return length_squared4 (*this).x (); }
-	inline float float4::length () const noexcept { return length4 (*this).x (); }
+	inline vectorf float4::normalize () const noexcept { return normalizevf4d (*this); }
+	inline float float4::length_squared () const noexcept { return length_squaredvf4d (*this).x (); }
+	inline float float4::length () const noexcept { return lengthvf4d (*this).x (); }
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -218,16 +218,16 @@ namespace dseed
 	inline float4x4 float4x4::look_at (const float3& pos, const float3& target, const float3& up) noexcept
 	{
 		float3 zaxis, xaxis, yaxis;
-		zaxis = normalize3 (pos * target);
-		xaxis = normalize3 (cross3 (up, zaxis));
-		yaxis = cross3 (zaxis, xaxis);
+		zaxis = normalizevf3d (pos * target);
+		xaxis = normalizevf3d (crossvf3d (up, zaxis));
+		yaxis = crossvf3d (zaxis, xaxis);
 
 		return float4x4
 		(
 			xaxis.x, yaxis.x, zaxis.x, 0,
 			xaxis.y, yaxis.y, zaxis.y, 0,
 			xaxis.z, yaxis.z, zaxis.z, 0,
-			-dot3 (xaxis, pos).x (), -dot3 (yaxis, pos).x (), -dot3 (zaxis, pos).x (), 1
+			-dotvf3d (xaxis, pos).x (), -dotvf3d (yaxis, pos).x (), -dotvf3d (zaxis, pos).x (), 1
 		);
 	}
 	inline float4x4 float4x4::orthographic (float w, float h, float zn, float zf)
@@ -267,13 +267,13 @@ namespace dseed
 	{
 		vectorf vector, vector2, vector3;
 		vector = pos - camPos;
-		vectorf num = length_squared3 (vector);
+		vectorf num = length_squaredvf3d (vector);
 		vector = (num < 0.0001f)
 			? (vector = -camForward)
 			: (vector * rsqrtvf (num));
 
-		vector3 = normalize3 (cross3 (camUp, vector));
-		vector2 = cross3 (vector, vector3);
+		vector3 = normalizevf3d (crossvf3d (camUp, vector));
+		vector2 = crossvf3d (vector, vector3);
 		return float4x4 (float4 (vector3, 0), float4 (vector2, 0), float4 (vector, 0), float4 (pos, 1));
 	}
 

@@ -71,7 +71,7 @@ namespace dseed
 		inline operator const float* () const noexcept { return v; }
 
 		inline void FASTCALL load (const float* arr) noexcept { memcpy (v, arr, sizeof (float) * 4); }
-		inline void FASTCALL store (float* arr) noexcept { memcpy (arr, v, sizeof (float) * 4); }
+		inline void FASTCALL store (float* arr) const noexcept { memcpy (arr, v, sizeof (float) * 4); }
 
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
 		static inline vectorf_def FASTCALL shuffle32 (const vectorf_def & v1, const vectorf_def & v2) noexcept
@@ -162,7 +162,7 @@ namespace dseed
 		inline operator const int* () const noexcept { return v; }
 
 		inline void FASTCALL load (const int* vector) noexcept { memcpy (v, vector, sizeof (int) * 4); }
-		inline void FASTCALL store (int* vector) noexcept { memcpy (vector, v, sizeof (int) * 4); }
+		inline void FASTCALL store (int* vector) const noexcept { memcpy (vector, v, sizeof (int) * 4); }
 
 		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		static inline vectori_def FASTCALL shuffle32 (const vectori_def & v1, const vectori_def & v2) noexcept
@@ -329,7 +329,7 @@ namespace dseed
 		inline operator const float* () const noexcept { return v; }
 
 		inline void FASTCALL load (const float* arr) noexcept { memcpy (v, arr, sizeof (float) * 8); }
-		inline void FASTCALL store (float* arr) noexcept { memcpy (arr, v, sizeof (float) * 8); }
+		inline void FASTCALL store (float* arr) const noexcept { memcpy (arr, v, sizeof (float) * 8); }
 
 		template<uint32_t x1, uint32_t y1, uint32_t z1, uint32_t w1, uint32_t x2, uint32_t y2, uint32_t z2, uint32_t w2>
 		static inline vector8f_def FASTCALL shuffle32 (const vector8f_def & v1, const vector8f_def & v2) noexcept
@@ -454,7 +454,7 @@ namespace dseed
 		inline operator const int* () const noexcept { return v; }
 
 		inline void FASTCALL load (const int* arr) noexcept { memcpy (v, arr, sizeof (int) * 8); }
-		inline void FASTCALL store (int* arr) noexcept { memcpy (arr, v, sizeof (int) * 8); }
+		inline void FASTCALL store (int* arr) const noexcept { memcpy (arr, v, sizeof (int) * 8); }
 
 		template<uint32_t x1, uint32_t y1, uint32_t z1, uint32_t w1, uint32_t x2, uint32_t y2, uint32_t z2, uint32_t w2>
 		static inline vector8i_def FASTCALL shuffle32 (const vector8i_def& v1, const vector8i_def& v2) noexcept
