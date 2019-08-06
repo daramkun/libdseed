@@ -259,18 +259,18 @@ namespace dseed
 		position = float3 (0.0f, 0.0f, 0.0f);
 		orientation = float4 (0.0f, 0.0f, 0.0f, 1.0f);
 
-		points[0] = points[0] * (float4 (1) / points[0].splat_z ());
-		points[1] = points[1] * (float4 (1) / points[1].splat_z ());
-		points[2] = points[2] * (float4 (1) / points[2].splat_z ());
-		points[3] = points[3] * (float4 (1) / points[3].splat_z ());
+		points[0] = points[0] * (vectorf (1) / points[0].splat_z ());
+		points[1] = points[1] * (vectorf (1) / points[1].splat_z ());
+		points[2] = points[2] * (vectorf (1) / points[2].splat_z ());
+		points[3] = points[3] * (vectorf (1) / points[3].splat_z ());
 
 		right = points[0].x ();
 		left = points[1].x ();
 		top = points[2].y ();
 		bottom = points[3].y ();
 
-		points[4] = points[4] * (float4 (1) / points[4].splat_w ());
-		points[5] = points[5] * (float4 (1) / points[5].splat_w ());
+		points[4] = points[4] * (vectorf (1) / points[4].splat_w ());
+		points[5] = points[5] * (vectorf (1) / points[5].splat_w ());
 
 		znear = points[4].z ();
 		zfar = points[5].z ();

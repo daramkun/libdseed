@@ -51,9 +51,16 @@ namespace dseed
 		inline vectorf_arm (float x, float y, float z, float w) noexcept { float temp[] = { x,y,z,w }; load (temp); }
 		inline vectorf_arm (float scalar) noexcept : v (vmovq_n_f32 (scalar)) { }
 		inline vectorf_arm (const float32x4_t& v) noexcept : v (v) { }
+		inline explicit vectorf_arm (const vectorf_def& v) noexcept { load (v.v); }
 
 		inline operator float32x4_t& () noexcept { return v; }
 		inline operator const float32x4_t& () const noexcept { return v; }
+		inline explicit operator vectorf_def () const noexcept
+		{
+			vectorf_def ret;
+			store (ret.v);
+			return ret;
+		}
 
 		inline void FASTCALL load (const float* arr) noexcept { v = vld1q_f32 (arr); }
 		inline void FASTCALL store (float* arr) const noexcept { vst1q_f32 (arr, v); }
@@ -173,9 +180,16 @@ namespace dseed
 		inline vectori_arm (int x, int y, int z, int w) noexcept { float temp[] = { x,y,z,w }; load (temp); }
 		inline vectori_arm (int i) noexcept : v (vmovq_n_s32 (i)) { }
 		inline vectori_arm (const int32x4_t& v) noexcept : v (v) { }
+		inline explicit vectori_arm (const vectori_def& v) noexcept { load (v.v); }
 
 		inline operator int32x4_t& () noexcept { return v; }
 		inline operator const int32x4_t& () const noexcept { return v; }
+		inline explicit operator vectori_def() const noexcept
+		{
+			vectori_def ret;
+			store (ret.v);
+			return ret;
+		}
 
 		inline void FASTCALL load (const int* vector) noexcept { v = vld1q_s32 ((const __m128i*)vector); }
 		inline void FASTCALL store (int* vector) const noexcept { vst1q_s32 ((__m128i*)vector, v); }
@@ -545,6 +559,7 @@ namespace dseed
 	inline vectori_arm FASTCALL dividevi8 (const vectori_arm& v1, const vectori_arm& v2) noexcept
 	{
 		// TODO
+		return (vectori_arm)dividevi8 ((const vectori_def&)v1, (const vectori_def&)v2);
 	}
 	inline vectori_arm FASTCALL dividevi8 (const vectori_arm& v, int s) noexcept { return dividevi8 (v, vmovq_n_s8 (s)); }
 	inline vectori_arm FASTCALL equalsvi8 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vceqq_s8 (v1, v2); }
@@ -563,6 +578,7 @@ namespace dseed
 	inline vectori_arm FASTCALL dividevi16 (const vectori_arm& v1, const vectori_arm& v2) noexcept
 	{
 		// TODO
+		return (vectori_arm)dividevi16 ((const vectori_def&)v1, (const vectori_def&)v2);
 	}
 	inline vectori_arm FASTCALL dividevi16 (const vectori_arm& v, int s) noexcept { return dividevi16 (v, vmovq_n_s16 (s)); }
 	inline vectori_arm FASTCALL shiftlvi16 (const vectori_arm& v, int s) noexcept { return vshlq_n_s16 (v, s); }
@@ -583,6 +599,7 @@ namespace dseed
 	inline vectori_arm FASTCALL dividevi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept
 	{
 		// TODO
+		return (vectori_arm)dividevi64 ((const vectori_def&)v1, (const vectori_def&)v2);
 	}
 	inline vectori_arm FASTCALL dividevi64 (const vectori_arm& v, int s) noexcept { return dividevi64 (v, vmovq_n_s64 (s)); }
 	inline vectori_arm FASTCALL shiftlvi64 (const vectori_arm& v, int s) noexcept { return vshlq_n_s64 (v, s); }
