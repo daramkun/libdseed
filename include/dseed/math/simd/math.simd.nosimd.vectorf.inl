@@ -176,6 +176,25 @@ namespace dseed
 			maximum (v1.w (), v2.w ())
 		);
 	}
+
+	inline vectorf_def FASTCALL selectvf (const vectorf_def& v1, const vectorf_def& v2, const vectorf_def& controlv) noexcept
+	{
+		vectori_def v1i = reinterpret_f32_to_i32 (v1), v2i = reinterpret_f32_to_i32 (v2);
+		vectori_def ci = reinterpret_f32_to_i32 (controlv);
+		vectori_def ret (
+			(v1i.x () & ~ci.x ()) | (v2i.x () & ci.x ()),
+			(v1i.y () & ~ci.y ()) | (v2i.y () & ci.y ()),
+			(v1i.z () & ~ci.z ()) | (v2i.z () & ci.z ()),
+			(v1i.w () & ~ci.w ()) | (v2i.w () & ci.w ())
+		);
+		return reinterpret_i32_to_f32 (ret);
+	}
+	inline bool FASTCALL inboundsvf3d (const vectorf_def& v, const vectorf_def& bounds) noexcept
+	{
+		return (((v.x () <= bounds.x () && v.x () >= -bounds.x ()) &&
+			(v.y () <= bounds.y () && v.y () >= -bounds.y ()) &&
+			(v.z () <= bounds.z () && v.z () >= -bounds.y ())) != 0);
+	}
 }
 
 #endif

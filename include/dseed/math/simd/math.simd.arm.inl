@@ -94,6 +94,7 @@ namespace dseed
 			auto& instInfo = arm_instruction_info::instance ();
 			return instInfo.neon;
 		}
+		static inline bool hwvector () noexcept { return true; }
 
 	private:
 		template<uint8_t x, uint8_t y>
@@ -163,6 +164,9 @@ namespace dseed
 	inline vectorf_arm FASTCALL absvf (const vectorf_arm& v) noexcept;
 	inline vectorf_arm FASTCALL minvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept;
 	inline vectorf_arm FASTCALL maxvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept;
+	
+	inline vectorf_arm FASTCALL selectvf (const vectorf_arm& v1, const vectorf_arm& v2, const vectorf_arm& controlv) noexcept;
+	inline bool FASTCALL inboundsvf3d (const vectorf_arm& v, const vectorf_arm& bounds) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -235,6 +239,7 @@ namespace dseed
 			auto& instInfo = arm_instruction_info::instance ();
 			return instInfo.neon;
 		}
+		static inline bool hwvector () noexcept { return true; }
 	
 	private:
 		template<uint8_t x, uint8_t y>
@@ -520,6 +525,17 @@ namespace dseed
 	inline vectorf_arm FASTCALL absvf (const vectorf_arm& v) noexcept { return vabs_f32 (v); }
 	inline vectorf_arm FASTCALL minvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vminq_f32 (v1, v2); }
 	inline vectorf_arm FASTCALL maxvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vmaxq_f32 (v1, v2); }
+	
+	inline vectorf_arm FASTCALL selectvf (const vectorf_arm& v1, const vectorf_arm& v2, const vectorf_arm& controlv) noexcept
+	{
+		return vbslq_f32 (controlv, v2, v1);
+	}
+	inline bool FASTCALL inboundsvf3d (const vectorf_arm& v, const vectorf_arm& bounds) noexcept
+	{
+		vectorf_arm temp1 = lesser_equalsvf (v, bounds);
+		vectorf_arm temp2 = lesser_equalsvf (negatevf (bounds), v);
+		return (((movemaskvf (andvf (temp1, temp2)) & 0x7) == 0x7) != 0);
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//

@@ -101,6 +101,7 @@ namespace dseed
 		inline float FASTCALL w () const noexcept { return v[3]; }
 
 		static inline bool support () noexcept { return true; }
+		static inline bool hwvector () noexcept { return false; }
 	};
 
 	inline vectorf_def FASTCALL addvf (const vectorf_def& v1, const vectorf_def& v2) noexcept;
@@ -138,6 +139,9 @@ namespace dseed
 	inline vectorf_def FASTCALL absvf (const vectorf_def& v) noexcept;
 	inline vectorf_def FASTCALL minvf (const vectorf_def& v1, const vectorf_def& v2) noexcept;
 	inline vectorf_def FASTCALL maxvf (const vectorf_def& v1, const vectorf_def& v2) noexcept;
+	
+	inline vectorf_def FASTCALL selectvf (const vectorf_def& v1, const vectorf_def& v2, const vectorf_def& controlv) noexcept;
+	inline bool FASTCALL inboundsvf3d (const vectorf_def& v, const vectorf_def& bounds) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -204,6 +208,7 @@ namespace dseed
 		inline int FASTCALL w () const { return v[3]; }
 
 		static inline bool support () noexcept { return true; }
+		static inline bool hwvector () noexcept { return false; }
 	};
 
 	inline vectori_def FASTCALL addvi (const vectori_def& v1, const vectori_def& v2) noexcept;
@@ -374,6 +379,7 @@ namespace dseed
 		inline vectorf_def FASTCALL vector2 () const noexcept { return vectorf_def (v + 4); }
 
 		static inline bool support () noexcept { return true; }
+		static inline bool hwvector () noexcept { return false; }
 	};
 
 	inline vector8f_def FASTCALL addv8f (const vector8f_def& v1, const vector8f_def& v2) noexcept;
@@ -518,6 +524,7 @@ namespace dseed
 		inline vectori_def FASTCALL vector2 () const noexcept { return vectori_def (v + 4); }
 
 		static inline bool support () noexcept { return true; }
+		static inline bool hwvector () noexcept { return false; }
 	};
 
 	inline vector8i_def FASTCALL addv8i (const vector8i_def& v1, const vector8i_def& v2) noexcept;

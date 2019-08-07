@@ -141,7 +141,7 @@ namespace dseed
 	: plane (p1, normalizevf3d (crossvf3d ((vectorf)p2 - p1, (vectorf)p3 - p1)))
 	{ }
 	inline plane::plane (const float3& p, const float3& n)
-		: plane (n.x, n.y, n.z, -dotvf3d (p, n).x ())
+		: plane (n.x, n.y, n.z, -dotvf3d (vectorf(p), vectorf(n)).x ())
 	{ }
 	inline vectorf plane::normalize () { return normalize_plane ((float4)* this); }
 
@@ -181,7 +181,7 @@ namespace dseed
 		if (ip == nullptr)
 			return;
 
-		vectorf d = dotvf3d ((float4)* this, lp1) - dotvf3d ((float4)* this, lp2);
+		vectorf d = dotvf3d ((vectorf)((float4)* this), lp1) - dotvf3d ((vectorf)((float4)* this), lp2);
 		*ip = (equalsvf (d, vectorf (0, 0, 0, 0)) == 0xF)
 			? float3 (fmavf (lp2 - lp1, float3 (dot_plane_coord ((float4)* this, lp1) / d), lp1))
 			: float3 (dseed::single_nan);
@@ -200,11 +200,169 @@ namespace dseed
 
 	inline intersect_t bounding_box::intersects (const bounding_box& bb) const
 	{
-		// TODO
+		vectorf A_quat = orientation;
+		vectorf B_quat = bb.orientation;
+
+		vectorf Q = quaternion_multiply (A_quat, conjugateq (B_quat));
+		matrixf R = to_matrixq (Q);
+
+		vectorf A_cent = center;
+		vectorf B_cent = bb.center;
+		vectorf t = inverse_rotate3d ((B_cent - A_cent), A_quat);
+
+		vectorf h_A = extents;
+		vectorf h_B = bb.extents;
+
+		vectorf R0X = R.column1;
+		vectorf R1X = R.column2;
+		vectorf R2X = R.column3;
+
+		R = transposemf (R);
+
+		vectorf RX0 = R.column1;
+		vectorf RX1 = R.column2;
+		vectorf RX2 = R.column3;
+
+		vectorf AR0X = absvf (R0X);
+		vectorf AR1X = absvf (R1X);
+		vectorf AR2X = absvf (R2X);
+
+		vectorf ARX0 = absvf (RX0);
+		vectorf ARX1 = absvf (RX1);
+		vectorf ARX2 = absvf (RX2);
+
+		vectorf d, d_A, d_B;
+
+		d = t.splat_x ();
+		d_A = h_A.splat_x ();
+		d_B = dotvf3d (h_B, AR0X);
+		vectorf NoIntersection = greatervf (absvf (d), (d_A + d_B));
+
+		d = t.splat_y ();
+		d_A = h_A.splat_y ();
+		d_B = dotvf3d (h_B, AR1X);
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = t.splat_z ();
+		d_A = h_A.splat_z ();
+		d_B = dotvf3d (h_B, AR2X);
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, RX0);
+		d_A = dotvf3d (h_A, ARX0);
+		d_B = h_B.splat_x();
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, RX1);
+		d_A = dotvf3d (h_A, ARX1);
+		d_B = h_B.splat_y ();
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, RX2);
+		d_A = dotvf3d (h_A, ARX2);
+		d_B = h_B.splat_z ();
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_aw1, shuffle_az2, shuffle_by1, shuffle_bx1> (RX0, negatevf (RX0)));
+		d_A = dotvf3d (h_A, ARX0.permute32<3, 2, 1, 0> ());
+		d_B = dotvf3d (h_B, AR0X.permute32<3, 2, 1, 0> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_aw1, shuffle_az2, shuffle_by1, shuffle_bx1> (RX1, negatevf (RX1)));
+		d_A = dotvf3d (h_A, ARX1.permute32<3, 2, 1, 0> ());
+		d_B = dotvf3d (h_B, AR0X.permute32<2, 3, 0, 1> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_aw1, shuffle_az2, shuffle_by1, shuffle_bx1> (RX2, negatevf (RX2)));
+		d_A = dotvf3d (h_A, ARX2.permute32<3, 2, 1, 0> ());
+		d_B = dotvf3d (h_B, AR0X.permute32<1, 0, 3, 2> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_az1, shuffle_aw1, shuffle_bx2, shuffle_by1> (RX0, negatevf (RX0)));
+		d_A = dotvf3d (h_A, ARX0.permute32<2, 3, 0, 1> ());
+		d_B = dotvf3d (h_B, AR1X.permute32<3, 2, 1, 0> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_az1, shuffle_aw1, shuffle_bx2, shuffle_by1> (RX1, negatevf (RX1)));
+		d_A = dotvf3d (h_A, ARX1.permute32<2, 3, 0, 1> ());
+		d_B = dotvf3d (h_B, AR1X.permute32<2, 3, 0, 1> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_az1, shuffle_aw1, shuffle_bx2, shuffle_by1> (RX2, negatevf (RX2)));
+		d_A = dotvf3d (h_A, ARX2.permute32<2, 3, 0, 1> ());
+		d_B = dotvf3d (h_B, AR1X.permute32<1, 0, 3, 2> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_ay2, shuffle_ax1, shuffle_bw1, shuffle_bz1> (RX0, negatevf (RX0)));
+		d_A = dotvf3d (h_A, ARX0.permute32<1, 0, 3, 2> ());
+		d_B = dotvf3d (h_B, AR2X.permute32<3, 2, 1, 0> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_ay2, shuffle_ax1, shuffle_bw1, shuffle_bz1> (RX1, negatevf (RX1)));
+		d_A = dotvf3d (h_A, ARX1.permute32<1, 0, 3, 2> ());
+		d_B = dotvf3d (h_B, AR2X.permute32<2, 3, 0, 1> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		d = dotvf3d (t, vectorf::shuffle32<shuffle_ay2, shuffle_ax1, shuffle_bw1, shuffle_bz1> (RX2, negatevf (RX2)));
+		d_A = dotvf3d (h_A, ARX2.permute32<1, 0, 3, 2> ());
+		d_B = dotvf3d (h_B, AR2X.permute32<1, 0, 3, 2> ());
+		NoIntersection = orvf (NoIntersection, greatervf (absvf (d), (d_A + d_B)));
+
+		if (reinterpret_f32_to_i32 (NoIntersection) == vectori (-1))
+			return dseed::intersect_disjoint;
+
+		vectorf aCenter = center;
+		vectorf aExtents = extents;
+		vectorf aOrientation = orientation;
+
+		vectorf bCenter = bb.center;
+		vectorf bExtents = bb.extents;
+		vectorf bOrientation = bb.orientation;
+
+		vectorf offset = bCenter - aCenter;
+
+		for (size_t i = 0; i < 8; ++i)
+		{
+			vectorf C = rotate3d (bExtents * ____bounding_box_polygon[i], bOrientation) + offset;
+			C = inverse_rotate3d (C, aOrientation);
+
+			if (!inboundsvf3d (C, aExtents))
+				return dseed::intersect_intersects;
+		}
+
+		return dseed::intersect_contains;
 	}
 	inline intersect_t bounding_box::intersects (const bounding_sphere& bs) const
 	{
-		// TODO
+		vectorf sphereCenter = bs.center;
+		vectorf sphereRadius = bs.radius;
+
+		vectorf boxCenter = center;
+		vectorf boxExtents = extents;
+		vectorf boxOrient = orientation;
+
+		sphereCenter = inverse_rotate3d ((sphereCenter - boxCenter), boxOrient);
+
+		vectorf lesserThanMin = lesservf (sphereCenter, negatevf (boxExtents));
+		vectorf greaterThanMax = greatervf (sphereCenter, boxExtents);
+
+		vectorf minDelta = sphereCenter + boxExtents;
+		vectorf maxDelta = sphereCenter - boxExtents;
+
+		vectorf d = selectvf (selectvf (vectorf (0.000f), minDelta, lesserThanMin), maxDelta, greaterThanMax);
+		vectorf d2 = dotvf3d (d, d);
+
+		vectorf sphereRadiusSquared = sphereRadius * sphereRadius;
+
+		if (d2 > sphereRadiusSquared)
+			return dseed::intersect_disjoint;
+
+		vectorf min = sphereCenter - sphereRadius;
+		vectorf max = sphereCenter + sphereRadius;
+
+		return (inboundsvf3d (min, boxExtents) && inboundsvf3d (max, boxExtents))
+			? dseed::intersect_contains
+			: dseed::intersect_intersects;
 	}
 	inline intersect_t bounding_box::intersects (const bounding_frustum& bf) const
 	{
@@ -213,7 +371,7 @@ namespace dseed
 
 	inline intersect_t bounding_sphere::intersects (const bounding_box& bb) const
 	{
-		// TODO
+		return bb.intersects (*this);
 	}
 	inline intersect_t bounding_sphere::intersects (const bounding_sphere& bs) const
 	{
@@ -236,13 +394,13 @@ namespace dseed
 	{
 		static vectorf homogenousPoints[6] =
 		{
-			float4 (1.0f,  0.0f, 1.0f, 1.0f),
-			float4 (-1.0f,  0.0f, 1.0f, 1.0f),
-			float4 (0.0f,  1.0f, 1.0f, 1.0f),
-			float4 (0.0f, -1.0f, 1.0f, 1.0f),
+			vectorf (+1.0f, +0.0f, +1.0f, +1.0f),
+			vectorf (-1.0f, +0.0f, +1.0f, +1.0f),
+			vectorf (+0.0f, +1.0f, +1.0f, +1.0f),
+			vectorf (+0.0f, -1.0f, +1.0f, +1.0f),
 
-			float4 (0.0f, 0.0f, 0.0f, 1.0f),
-			float4 (0.0f, 0.0f, 1.0f, 1.0f)
+			vectorf (+0.0f, +0.0f, +0.0f, +1.0f),
+			vectorf (+0.0f, +0.0f, +1.0f, +1.0f)
 		};
 
 		matrixf matInverse = projection.invertmf ();

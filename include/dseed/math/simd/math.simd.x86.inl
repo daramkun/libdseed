@@ -116,8 +116,9 @@ namespace dseed
 		static inline bool support () noexcept
 		{
 			auto& instInfo = x86_instruction_info::instance ();
-			return instInfo.sse && instInfo.sse2 && instInfo.sse3 && instInfo.fma3;
+			return instInfo.sse && instInfo.sse2 && instInfo.sse3 && instInfo.ssse3 && instInfo.sse41 && instInfo.fma3;
 		}
+		static inline bool hwvector () noexcept { return true; }
 	};
 
 	inline vectorf_x86 FASTCALL addvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept;
@@ -158,6 +159,9 @@ namespace dseed
 	inline vectorf_x86 FASTCALL absvf (const vectorf_x86& v) noexcept;
 	inline vectorf_x86 FASTCALL minvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept;
 	inline vectorf_x86 FASTCALL maxvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept;
+	
+	inline vectorf_x86 FASTCALL selectvf (const vectorf_x86& v1, const vectorf_x86& v2, const vectorf_x86& controlv) noexcept;
+	inline bool FASTCALL inboundsvf3d (const vectorf_x86& v, const vectorf_x86& bounds) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -219,7 +223,12 @@ namespace dseed
 		inline int FASTCALL z () const { return _mm_cvtss_si32 (_mm_castsi128_ps (splat_z ())); }
 		inline int FASTCALL w () const { return _mm_cvtss_si32 (_mm_castsi128_ps (splat_w ())); }
 
-		static inline bool support () noexcept { return true; }
+		static inline bool support () noexcept
+		{
+			auto& instInfo = x86_instruction_info::instance ();
+			return instInfo.sse2 && instInfo.sse3 && instInfo.ssse3 && instInfo.sse41;
+		}
+		static inline bool hwvector () noexcept { return true; }
 	};
 
 	inline vectori_x86 FASTCALL addvi (const vectori_x86& v1, const vectori_x86& v2) noexcept;
@@ -396,6 +405,7 @@ namespace dseed
 			auto& instInfo = x86_instruction_info::instance ();
 			return instInfo.avx && instInfo.fma3;
 		}
+		static inline bool hwvector () noexcept { return true; }
 	};
 
 	inline vector8f_x86 FASTCALL addv8f (const vector8f_x86& v1, const vector8f_x86& v2) noexcept;
@@ -525,6 +535,7 @@ namespace dseed
 		}
 
 		static inline bool support () noexcept { return x86_instruction_info::instance ().avx2; }
+		static inline bool hwvector () noexcept { return true; }
 	};
 
 	inline vector8i_x86 FASTCALL addv8i (const vector8i_x86& v1, const vector8i_x86& v2) noexcept;
@@ -719,6 +730,19 @@ namespace dseed
 	}
 	inline vectorf_x86 FASTCALL minvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept { return _mm_min_ps (v1, v2); }
 	inline vectorf_x86 FASTCALL maxvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept { return _mm_max_ps (v1, v2); }
+	
+	inline vectorf_x86 FASTCALL selectvf (const vectorf_x86& v1, const vectorf_x86& v2, const vectorf_x86& controlv) noexcept
+	{
+		vectorf_x86 temp1 = _mm_andnot_ps (controlv, v1);
+		vectorf_x86 temp2 = _mm_and_ps (v2, controlv);
+		return _mm_or_ps (temp1, temp2);
+	}
+	inline bool FASTCALL inboundsvf3d (const vectorf_x86& v, const vectorf_x86& bounds) noexcept
+	{
+		vectorf_x86 temp1 = lesser_equalsvf (v, bounds);
+		vectorf_x86 temp2 = lesser_equalsvf (negatevf(bounds), v);
+		return (((movemaskvf (andvf (temp1, temp2)) & 0x7) == 0x7) != 0);
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
