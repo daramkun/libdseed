@@ -29,16 +29,19 @@ namespace dseed
 	using vectori = vectori_x86;
 	using vector8f = vector8f_x86;
 	using vector8i = vector8i_x86;
+#	define selectcontrolvf selectcontrolvf_x86
 #elif ARCH_ARMSET
 	using vectorf = vectorf_arm;
 	using vectori = vectori_arm;
 	using vector8f = vector8f_def;
 	using vector8i = vector8i_def;
+#	define selectcontrolvf selectcontrolvf_arm
 #else
 	using vectorf = vectorf_def;
 	using vectori = vectori_def;
 	using vector8f = vector8f_def;
 	using vector8i = vector8i_def;
+#	define selectcontrolvf selectcontrolvf_def
 #endif
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -220,6 +223,17 @@ namespace dseed
 	inline vectorf FASTCALL is_unit3 (const vectorf& v) noexcept { return equalsvf (length_squaredvf3d (v), vectorf (1)); }
 	inline vectorf FASTCALL is_unit4 (const vectorf& v) noexcept { return equalsvf (length_squaredvf4d (v), vectorf (1)); }
 
+	template<uint32_t elements>
+	inline vectorf FASTCALL shift_leftvf (const vectorf& v) noexcept
+	{
+		return v.permute32<elements & 3, (elements + 1) & 3, (elements + 2) & 3, (elements + 3) & 3> ();
+	}
+	template<uint32_t elements>
+	inline vectorf FASTCALL shift_rightvf (const vectorf& v) noexcept
+	{
+		return v.permute32<(4 - elements) & 3, (5 - elements) & 3, (6 - elements) & 3, (7 - elements) & 3> ();
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Vector Type Utility operations
@@ -294,6 +308,11 @@ namespace dseed
 	{
 		return vectorf (atan2f (y.x (), x.x ()), atan2f (y.y (), x.y ()),
 			atan2f (y.z (), x.z ()), atan2f (y.w (), x.w ()));
+	}
+	template<uint32_t leftRotate, uint32_t s0, uint32_t s1, uint32_t s2, uint32_t s3>
+	inline vectorf FASTCALL insertvf (const vectorf& v1, const vectorf& v2) noexcept
+	{
+		return selectvf (v1, shift_leftvf<leftRotate> (v2), selectcontrolvf (s0 & 1, s1 & 1, s2 & 2, s3 & 3));
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////

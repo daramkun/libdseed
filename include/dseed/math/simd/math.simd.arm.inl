@@ -166,6 +166,7 @@ namespace dseed
 	inline vectorf_arm FASTCALL maxvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept;
 	
 	inline vectorf_arm FASTCALL selectvf (const vectorf_arm& v1, const vectorf_arm& v2, const vectorf_arm& controlv) noexcept;
+	inline vectorf_arm FASTCALL selectcontrolvf_arm (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept;
 	inline bool FASTCALL inboundsvf3d (const vectorf_arm& v, const vectorf_arm& bounds) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -529,6 +530,15 @@ namespace dseed
 	inline vectorf_arm FASTCALL selectvf (const vectorf_arm& v1, const vectorf_arm& v2, const vectorf_arm& controlv) noexcept
 	{
 		return vbslq_f32 (controlv, v2, v1);
+	}
+	inline vectorf_arm FASTCALL selectcontrolvf_arm (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept
+	{
+		static vectori_arm zero (0, 0, 0, 0);
+		int32x4_t temp = vcombine_s32 (
+			vcreate_s32 (static_cast<uint64_t>(v0) | (static_cast<uint64_t>(v1) << 32)),
+			vcreate_s32 (static_cast<uint64_t>(v2) | (static_cast<uint64_t>(v3) << 32))
+		);
+		return reinterpret_i32_to_f32 (vcgtq_s32 (temp, zero));
 	}
 	inline bool FASTCALL inboundsvf3d (const vectorf_arm& v, const vectorf_arm& bounds) noexcept
 	{

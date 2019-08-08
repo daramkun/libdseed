@@ -189,6 +189,16 @@ namespace dseed
 		);
 		return reinterpret_i32_to_f32 (ret);
 	}
+	inline vectorf_def FASTCALL selectcontrolvf_def (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept
+	{
+		uint32_t elements[] = { 0, 0xffffffff };
+		return reinterpret_i32_to_f32 (vectori_def (
+			elements[v0],
+			elements[v1],
+			elements[v2],
+			elements[v3]
+		));
+	}
 	inline bool FASTCALL inboundsvf3d (const vectorf_def& v, const vectorf_def& bounds) noexcept
 	{
 		return (((v.x () <= bounds.x () && v.x () >= -bounds.x ()) &&

@@ -116,7 +116,7 @@ namespace dseed
 		static inline bool support () noexcept
 		{
 			auto& instInfo = x86_instruction_info::instance ();
-			return instInfo.sse && instInfo.sse2 && instInfo.sse3 && instInfo.ssse3 && instInfo.sse41 && instInfo.fma3;
+			return instInfo.sse && instInfo.sse2 && instInfo.sse3 && instInfo.ssse3 && instInfo.sse4_1 && instInfo.fma3;
 		}
 		static inline bool hwvector () noexcept { return true; }
 	};
@@ -161,6 +161,7 @@ namespace dseed
 	inline vectorf_x86 FASTCALL maxvf (const vectorf_x86& v1, const vectorf_x86& v2) noexcept;
 	
 	inline vectorf_x86 FASTCALL selectvf (const vectorf_x86& v1, const vectorf_x86& v2, const vectorf_x86& controlv) noexcept;
+	inline vectorf_x86 FASTCALL selectcontrolvf_x86 (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept;
 	inline bool FASTCALL inboundsvf3d (const vectorf_x86& v, const vectorf_x86& bounds) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +227,7 @@ namespace dseed
 		static inline bool support () noexcept
 		{
 			auto& instInfo = x86_instruction_info::instance ();
-			return instInfo.sse2 && instInfo.sse3 && instInfo.ssse3 && instInfo.sse41;
+			return instInfo.sse2 && instInfo.sse3 && instInfo.ssse3 && instInfo.sse4_1;
 		}
 		static inline bool hwvector () noexcept { return true; }
 	};
@@ -736,6 +737,11 @@ namespace dseed
 		vectorf_x86 temp1 = _mm_andnot_ps (controlv, v1);
 		vectorf_x86 temp2 = _mm_and_ps (v2, controlv);
 		return _mm_or_ps (temp1, temp2);
+	}
+	inline vectorf_x86 FASTCALL selectcontrolvf_x86 (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept
+	{
+		static vectori_x86 zero (0, 0, 0, 0);
+		return _mm_castsi128_ps (_mm_cmpgt_epi32 (_mm_set_epi32 (v3, v2, v1, v0), zero));
 	}
 	inline bool FASTCALL inboundsvf3d (const vectorf_x86& v, const vectorf_x86& bounds) noexcept
 	{

@@ -141,6 +141,7 @@ namespace dseed
 	inline vectorf_def FASTCALL maxvf (const vectorf_def& v1, const vectorf_def& v2) noexcept;
 	
 	inline vectorf_def FASTCALL selectvf (const vectorf_def& v1, const vectorf_def& v2, const vectorf_def& controlv) noexcept;
+	inline vectorf_def FASTCALL selectcontrolvf_def (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept;
 	inline bool FASTCALL inboundsvf3d (const vectorf_def& v, const vectorf_def& bounds) noexcept;
 
 	////////////////////////////////////////////////////////////////////////////////////////

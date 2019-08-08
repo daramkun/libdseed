@@ -160,6 +160,9 @@ namespace dseed
 		bool neon : 1;
 
 		static const arm_instruction_info& instance ();
+
+	private:
+		arm_instruction_info ();
 	};
 #	endif
 #	if COMPILER_MSVC

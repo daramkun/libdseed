@@ -11,7 +11,7 @@ namespace dseed
 	struct bounding_frustum;
 
 	enum intersect_t { intersect_disjoint = 0, intersect_intersects, intersect_contains };
-	enum plane_intersect_t { plane_intersect_front, plane_intersect_end, plane_intersect_intersecting };
+	enum plane_intersect_t { plane_intersect_front, plane_intersect_back, plane_intersect_intersecting };
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -70,6 +70,7 @@ namespace dseed
 		{ }
 
 	public:
+		plane_intersect_t intersects (const plane& p) const;
 		intersect_t intersects (const bounding_box& bb) const;
 		intersect_t intersects (const bounding_sphere& bs) const;
 		intersect_t intersects (const bounding_frustum& bf) const;
@@ -88,6 +89,7 @@ namespace dseed
 		{ }
 
 	public:
+		plane_intersect_t intersects (const plane& p) const;
 		intersect_t intersects (const bounding_box& bb) const;
 		intersect_t intersects (const bounding_sphere& bs) const;
 		intersect_t intersects (const bounding_frustum& bf) const;
@@ -113,6 +115,7 @@ namespace dseed
 		inline bounding_frustum (const float4x4& projection);
 
 	public:
+		plane_intersect_t intersects (const plane& p) const;
 		intersect_t intersects (const bounding_box& bb) const;
 		intersect_t intersects (const bounding_sphere& bs) const;
 		intersect_t intersects (const bounding_frustum& bf) const;
@@ -123,18 +126,82 @@ namespace dseed
 	// Bounding Shape Type Operators
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
-	inline vectorf dot_plane_normal (const vectorf& p, const vectorf& n)
+	inline vectorf dot_plane_normal (const vectorf& p, const vectorf& n) noexcept
 	{
 		return dotvf3d (p, n);
 	}
-	inline vectorf dot_plane_coord (const vectorf& p, const vectorf& v)
+	inline vectorf dot_plane_coord (const vectorf& p, const vectorf& v) noexcept
 	{
 		return dot_plane_normal (p, v) + p.splat_w ();
 	}
 
+	inline void intersects_sphere_plane (const vectorf& center, const vectorf& radius,
+		const vectorf& plane, vectorf* outside, vectorf* inside) noexcept
+	{
+		vectorf dist = dotvf4d (center, plane);
+		*outside = greatervf (dist, radius);
+		*inside = lesservf (dist, negatevf (radius));
+	}
+	inline void intersects_box_plane (const vectorf& center, const vectorf& extents,
+		const vectorf& axis0, const vectorf& axis1, const vectorf& axis2,
+		const vectorf& plane, vectorf* outside, vectorf* inside) noexcept
+	{
+		vectorf dist = dotvf4d (center, plane);
+
+		vectorf radius = dotvf3d (plane, axis0);
+		radius = insertvf<0, 0, 1, 0, 0> (radius, dotvf3d (plane, axis1));
+		radius = insertvf<0, 0, 0, 1, 0> (radius, dotvf3d (plane, axis2));
+		radius = dotvf3d (extents, absvf (radius));
+
+		*outside = greatervf (dist, radius);
+		*inside = lesservf (dist, negatevf (radius));
+	}
+	inline void intersects_frustum_plane (
+		const vectorf& p1, const vectorf& p2, const vectorf& p3, const vectorf& p4,
+		const vectorf& p5, const vectorf& p6, const vectorf& p7, const vectorf& p8,
+		const vectorf& plane, vectorf* outside, vectorf* inside) noexcept
+	{
+		vectorf min, max, dist;
+
+		min = max = dotvf3d (plane, p1);
+
+		dist = dotvf3d (plane, p2);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		dist = dotvf3d (plane, p3);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		dist = dotvf3d (plane, p4);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		dist = dotvf3d (plane, p5);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		dist = dotvf3d (plane, p6);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		dist = dotvf3d (plane, p7);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		dist = dotvf3d (plane, p8);
+		min = minvf (min, dist);
+		max = maxvf (max, dist);
+
+		vectorf planeDist = negatevf (plane.splat_w ());
+
+		*outside = greatervf (min, planeDist);
+		*inside = lesservf (max, planeDist);
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
-	// Bounding Shape Type Implement
+	// Plane Type Implement
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
 	inline plane::plane (const float3& p1, const float3& p2, const float3& p3)
@@ -187,6 +254,11 @@ namespace dseed
 			: float3 (dseed::single_nan);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Bounding Box Type Implement
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	const static vectorf ____bounding_box_polygon[] = {
 		float3 (-1.0f, -1.0f, +1.0f),
 		float3 (+1.0f, -1.0f, +1.0f),
@@ -198,6 +270,28 @@ namespace dseed
 		float3 (-1.0f, +1.0f, -1.0f),
 	};
 
+	inline plane_intersect_t bounding_box::intersects (const plane& p) const
+	{
+		vectorf vCenter = center;
+		vectorf vExtents = extents;
+		vectorf BoxOrientation = orientation;
+
+		vCenter = insertvf<0, 0, 0, 0, 1> (vCenter, vectorf (1));
+
+		matrixf R = to_matrixq (BoxOrientation);
+
+		vectorf outside, inside;
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3,
+			(vectorf)(float4)p, &outside, &inside);
+
+		if (outside == reinterpret_i32_to_f32 (vectori (-1)))
+			return plane_intersect_front;
+
+		if (inside == reinterpret_i32_to_f32 (vectori (-1)))
+			return plane_intersect_back;
+
+		return plane_intersect_intersecting;
+	}
 	inline intersect_t bounding_box::intersects (const bounding_box& bb) const
 	{
 		vectorf A_quat = orientation;
@@ -369,6 +463,30 @@ namespace dseed
 		return bf.intersects (*this);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Bounding Sphere Type Implement
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
+	inline plane_intersect_t bounding_sphere::intersects (const plane& p) const
+	{
+		vectorf vCenter = center;
+		vectorf vRadius = radius;
+
+		vCenter = insertvf<0, 0, 0, 0, 1> (vCenter, vectorf (1));
+
+		vectorf outside, inside;
+		intersects_sphere_plane (vCenter, vRadius,
+			(vectorf)(float4)p, &outside, &inside);
+
+		if (outside == reinterpret_i32_to_f32 (vectori (-1)))
+			return plane_intersect_front;
+
+		if (inside == reinterpret_i32_to_f32 (vectori (-1)))
+			return plane_intersect_back;
+
+		return plane_intersect_intersecting;
+	}
 	inline intersect_t bounding_sphere::intersects (const bounding_box& bb) const
 	{
 		return bb.intersects (*this);
@@ -390,6 +508,11 @@ namespace dseed
 		return bf.intersects (*this);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Bounding Frustum Type Implement
+	//
+	////////////////////////////////////////////////////////////////////////////////////////
 	inline bounding_frustum::bounding_frustum (const float4x4& projection)
 	{
 		static vectorf homogenousPoints[6] =
@@ -432,6 +555,47 @@ namespace dseed
 
 		znear = points[4].z ();
 		zfar = points[5].z ();
+	}
+	inline plane_intersect_t bounding_frustum::intersects (const plane& p) const
+	{
+		vectorf vOrigin = position;
+		vectorf vOrientation = orientation;
+
+		vOrigin = insertvf<0, 0, 0, 0, 1> (vOrigin, vectorf (1));
+
+		vectorf RightTop (right, top, 1.0f, 0.0f);
+		vectorf RightBottom (right, bottom, 1.0f, 0.0f);
+		vectorf LeftTop (left, top, 1.0f, 0.0f);
+		vectorf LeftBottom (left, bottom, 1.0f, 0.0f);
+		vectorf vNear = znear;
+		vectorf vFar = zfar;
+
+		RightTop = rotate3d (RightTop, vOrientation);
+		RightBottom = rotate3d (RightBottom, vOrientation);
+		LeftTop = rotate3d (LeftTop, vOrientation);
+		LeftBottom = rotate3d (LeftBottom, vOrientation);
+
+		vectorf Corners0 = fmavf (RightTop, vNear, vOrigin);
+		vectorf Corners1 = fmavf (RightBottom, vNear, vOrigin);
+		vectorf Corners2 = fmavf (LeftTop, vNear, vOrigin);
+		vectorf Corners3 = fmavf (LeftBottom, vNear, vOrigin);
+		vectorf Corners4 = fmavf (RightTop, vFar, vOrigin);
+		vectorf Corners5 = fmavf (RightBottom, vFar, vOrigin);
+		vectorf Corners6 = fmavf (LeftTop, vFar, vOrigin);
+		vectorf Corners7 = fmavf (LeftBottom, vFar, vOrigin);
+
+		vectorf outside, inside;
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)p, &outside, &inside);
+
+		if (outside == reinterpret_i32_to_f32 (vectori (-1)))
+			return plane_intersect_front;
+
+		if (inside == reinterpret_i32_to_f32 (vectori (-1)))
+			return plane_intersect_back;
+
+		return plane_intersect_intersecting;
 	}
 	inline intersect_t bounding_frustum::intersects (const bounding_box& bb) const
 	{
