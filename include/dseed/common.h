@@ -171,21 +171,21 @@ namespace dseed
 #		pragma pack ()
 #	endif
 
-	inline uint16_t hwrand16_sw () noexcept
+	inline uint16_t hwrand16_def () noexcept
 	{
 		static std::random_device rd;
 		static std::mt19937 rnd (rd ());
 		static std::uniform_int_distribution<uint16_t> range;
 		return range (rnd);
 	}
-	inline uint32_t hwrand32_sw () noexcept
+	inline uint32_t hwrand32_def () noexcept
 	{
 		static std::random_device rd;
 		static std::mt19937 rnd (rd ());
 		static std::uniform_int_distribution<uint32_t> range;
 		return range (rnd);
 	}
-	inline uint64_t hwrand64_sw () noexcept
+	inline uint64_t hwrand64_def () noexcept
 	{
 		static std::random_device rd;
 		static std::mt19937_64 rnd (rd ());
@@ -212,6 +212,14 @@ namespace dseed
 		_rdrand64_step (&ret);
 		return ret;
 	}
+
+	inline uint16_t hwrand16 () noexcept { return hwrand16_x86 (); }
+	inline uint32_t hwrand32 () noexcept { return hwrand32_x86 (); }
+	inline uint64_t hwrand64 () noexcept { return hwrand64_x86 (); }
+#else
+	inline uint16_t hwrand16 () noexcept { return hwrand16_def (); }
+	inline uint32_t hwrand32 () noexcept { return hwrand32_def (); }
+	inline uint64_t hwrand64 () noexcept { return hwrand64_def (); }
 #endif
 }
 
