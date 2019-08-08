@@ -1,6 +1,8 @@
 #ifndef __DSEED_MATH_COLLISION_INL__
 #define __DSEED_MATH_COLLISION_INL__
 
+// Most of Sources from DirectXMath's Collision
+
 namespace dseed
 {
 	struct plane;
@@ -113,6 +115,9 @@ namespace dseed
 			, znear (znear), zfar (zfar)
 		{}
 		inline bounding_frustum (const float4x4& projection);
+
+	public:
+		void generate_planes (plane* n, plane* f, plane* l, plane* r, plane* t, plane* b) const noexcept;
 
 	public:
 		plane_intersect_t intersects (const plane& p) const;
@@ -302,7 +307,7 @@ namespace dseed
 
 		vectorf A_cent = center;
 		vectorf B_cent = bb.center;
-		vectorf t = inverse_rotate3d ((B_cent - A_cent), A_quat);
+		vectorf t = inverse_rotatevf3d ((B_cent - A_cent), A_quat);
 
 		vectorf h_A = extents;
 		vectorf h_B = bb.extents;
@@ -417,8 +422,8 @@ namespace dseed
 
 		for (size_t i = 0; i < 8; ++i)
 		{
-			vectorf C = rotate3d (bExtents * ____bounding_box_polygon[i], bOrientation) + offset;
-			C = inverse_rotate3d (C, aOrientation);
+			vectorf C = rotatevf3d (bExtents * ____bounding_box_polygon[i], bOrientation) + offset;
+			C = inverse_rotatevf3d (C, aOrientation);
 
 			if (!inboundsvf3d (C, aExtents))
 				return dseed::intersect_intersects;
@@ -435,7 +440,7 @@ namespace dseed
 		vectorf boxExtents = extents;
 		vectorf boxOrient = orientation;
 
-		sphereCenter = inverse_rotate3d ((sphereCenter - boxCenter), boxOrient);
+		sphereCenter = inverse_rotatevf3d ((sphereCenter - boxCenter), boxOrient);
 
 		vectorf lesserThanMin = lesservf (sphereCenter, negatevf (boxExtents));
 		vectorf greaterThanMax = greatervf (sphereCenter, boxExtents);
@@ -556,6 +561,18 @@ namespace dseed
 		znear = points[4].z ();
 		zfar = points[5].z ();
 	}
+	inline void bounding_frustum::generate_planes (plane* n, plane* f, plane* l, plane* r, plane* t, plane* b) const noexcept
+	{
+		vectorf vOrigin = position;
+		vectorf vOrientation = orientation;
+
+		*n = (float4)normalize_plane (transform_plane (vectorf (0.0f, 0.0f, -1.0f, znear), vOrientation, vOrigin));
+		*f = (float4)normalize_plane (transform_plane (vectorf (0.0f, 0.0f, 1.0f, -zfar), vOrientation, vOrigin));
+		*l = (float4)normalize_plane (transform_plane (vectorf (-1.0f, 0.0f, left, 0.0f), vOrientation, vOrigin));
+		*r = (float4)normalize_plane (transform_plane (vectorf (1.0f, 0.0f, -right, 0.0f), vOrientation, vOrigin));
+		*t = (float4)normalize_plane (transform_plane (vectorf (0.0f, 1.0f, -top, 0.0f), vOrientation, vOrigin));
+		*b = (float4)normalize_plane (transform_plane (vectorf (0.0f, -1.0f, bottom, 0.0f), vOrientation, vOrigin));
+	}
 	inline plane_intersect_t bounding_frustum::intersects (const plane& p) const
 	{
 		vectorf vOrigin = position;
@@ -570,10 +587,10 @@ namespace dseed
 		vectorf vNear = znear;
 		vectorf vFar = zfar;
 
-		RightTop = rotate3d (RightTop, vOrientation);
-		RightBottom = rotate3d (RightBottom, vOrientation);
-		LeftTop = rotate3d (LeftTop, vOrientation);
-		LeftBottom = rotate3d (LeftBottom, vOrientation);
+		RightTop = rotatevf3d (RightTop, vOrientation);
+		RightBottom = rotatevf3d (RightBottom, vOrientation);
+		LeftTop = rotatevf3d (LeftTop, vOrientation);
+		LeftBottom = rotatevf3d (LeftBottom, vOrientation);
 
 		vectorf Corners0 = fmavf (RightTop, vNear, vOrigin);
 		vectorf Corners1 = fmavf (RightBottom, vNear, vOrigin);
@@ -600,14 +617,171 @@ namespace dseed
 	inline intersect_t bounding_frustum::intersects (const bounding_box& bb) const
 	{
 		// TODO
+		plane n, f, l, r, t, b;
+		generate_planes (&n, &f, &l, &r, &t, &b);
+
+		vectorf vCenter = bb.center;
+		vectorf vExtents = bb.extents;
+		vectorf BoxOrientation = bb.orientation;
+
+		vCenter = insertvf<0, 0, 0, 0, 1> (vCenter, vectorf (1));
+
+		matrixf R = to_matrixq (BoxOrientation);
+
+		vectorf outside, inside;
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3, (vectorf)(float4)n, &outside, &inside);
+
+		vectorf AnyOutside = outside;
+		vectorf AllInside = inside;
+
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3, (vectorf)(float4)f, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3, (vectorf)(float4)l, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3, (vectorf)(float4)r, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3, (vectorf)(float4)t, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_box_plane (vCenter, vExtents, R.column1, R.column2, R.column3, (vectorf)(float4)b, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		if (AnyOutside == reinterpret_i32_to_f32 (vectori (-1)))
+			return intersect_disjoint;
+
+		if (AllInside == reinterpret_i32_to_f32 (vectori (-1)))
+			return intersect_contains;
+
+		return intersect_intersects;
 	}
 	inline intersect_t bounding_frustum::intersects (const bounding_sphere& bs) const
 	{
-		// TODO
+		plane n, f, l, r, t, b;
+		generate_planes (&n, &f, &l, &r, &t, &b);
+
+		vectorf vCenter = bs.center;
+		vectorf vRadius = bs.radius;
+
+		vCenter = insertvf<0, 0, 0, 0, 1> (vCenter, vectorf (1));
+
+		vectorf outside, inside;
+		intersects_sphere_plane (vCenter, vRadius, (vectorf)(float4)n, &outside, &inside);
+
+		vectorf AnyOutside = outside;
+		vectorf AllInside = inside;
+
+		intersects_sphere_plane (vCenter, vRadius, (vectorf)(float4)f, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_sphere_plane (vCenter, vRadius, (vectorf)(float4)l, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_sphere_plane (vCenter, vRadius, (vectorf)(float4)r, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_sphere_plane (vCenter, vRadius, (vectorf)(float4)t, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_sphere_plane (vCenter, vRadius, (vectorf)(float4)b, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		if (AnyOutside == reinterpret_i32_to_f32 (vectori (-1)))
+			return intersect_disjoint;
+
+		if (AllInside == reinterpret_i32_to_f32 (vectori (-1)))
+			return intersect_contains;
+
+		return intersect_intersects;
 	}
 	inline intersect_t bounding_frustum::intersects (const bounding_frustum& bf) const
 	{
-		// TODO
+		plane n, f, l, r, t, b;
+		generate_planes (&n, &f, &l, &r, &t, &b);
+
+		vectorf vOrigin = bf.position;
+		vectorf vOrientation = bf.orientation;
+
+		vOrigin = insertvf<0, 0, 0, 0, 1> (vOrigin, vectorf (1));
+
+		vectorf RightTop (right, top, 1.0f, 0.0f);
+		vectorf RightBottom (right, bottom, 1.0f, 0.0f);
+		vectorf LeftTop (left, top, 1.0f, 0.0f);
+		vectorf LeftBottom (left, bottom, 1.0f, 0.0f);
+		vectorf vNear = znear;
+		vectorf vFar = zfar;
+
+		RightTop = rotatevf3d (RightTop, vOrientation);
+		RightBottom = rotatevf3d (RightBottom, vOrientation);
+		LeftTop = rotatevf3d (LeftTop, vOrientation);
+		LeftBottom = rotatevf3d (LeftBottom, vOrientation);
+
+		vectorf Corners0 = fmavf (RightTop, vNear, vOrigin);
+		vectorf Corners1 = fmavf (RightBottom, vNear, vOrigin);
+		vectorf Corners2 = fmavf (LeftTop, vNear, vOrigin);
+		vectorf Corners3 = fmavf (LeftBottom, vNear, vOrigin);
+		vectorf Corners4 = fmavf (RightTop, vFar, vOrigin);
+		vectorf Corners5 = fmavf (RightBottom, vFar, vOrigin);
+		vectorf Corners6 = fmavf (LeftTop, vFar, vOrigin);
+		vectorf Corners7 = fmavf (LeftBottom, vFar, vOrigin);
+
+		vectorf outside, inside;
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)n, &outside, &inside);
+
+		vectorf AnyOutside = outside;
+		vectorf AllInside = inside;
+
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)f, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)l, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)r, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)t, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		intersects_frustum_plane (Corners0, Corners1, Corners2, Corners3,
+			Corners4, Corners5, Corners6, Corners7,
+			(vectorf)(float4)b, &outside, &inside);
+		AnyOutside = orvf (AnyOutside, outside);
+		AllInside = andvf (AllInside, inside);
+
+		if (AnyOutside == reinterpret_i32_to_f32 (vectori (-1)))
+			return intersect_disjoint;
+
+		if (AllInside == reinterpret_i32_to_f32 (vectori (-1)))
+			return intersect_contains;
+
+		return intersect_intersects;
 	}
 }
 

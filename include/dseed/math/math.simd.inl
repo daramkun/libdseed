@@ -18,6 +18,8 @@
 #	define FASTCALL											__fastcall
 #endif
 
+// Most of Sources from DirectXMath's Collision
+
 #include "simd/math.simd.nosimd.inl"
 #include "simd/math.simd.x86.inl"
 #include "simd/math.simd.arm.inl"
@@ -732,11 +734,11 @@ namespace dseed
 	// Vector * Quaternion Operations
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
-	inline vectorf FASTCALL rotate3d (const vectorf& v, const vectorf& q) noexcept
+	inline vectorf FASTCALL rotatevf3d (const vectorf& v, const vectorf& q) noexcept
 	{
 		return (conjugateq (q) * v) * q;
 	}
-	inline vectorf FASTCALL inverse_rotate3d (const vectorf& v, const vectorf& q) noexcept
+	inline vectorf FASTCALL inverse_rotatevf3d (const vectorf& v, const vectorf& q) noexcept
 	{
 		return (conjugateq (q * v)) * q;
 	}
@@ -769,6 +771,12 @@ namespace dseed
 	inline vectorf FASTCALL transform_plane (const vectorf& p, const matrixf& m) noexcept
 	{
 		return transformvf4d (p, m);
+	}
+	inline vectorf FASTCALL transform_plane (const vectorf& p, const vectorf& rot, const vectorf& tr) noexcept
+	{
+		vectorf vNormal = rotatevf3d (p, rot);
+		vectorf vD = p.splat_w () * dotvf3d (vNormal, tr);
+		return insertvf<0, 0, 0, 0, 1> (vNormal, vD);
 	}
 }
 
