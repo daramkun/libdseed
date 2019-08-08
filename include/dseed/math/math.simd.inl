@@ -31,19 +31,19 @@ namespace dseed
 	using vectori = vectori_x86;
 	using vector8f = vector8f_x86;
 	using vector8i = vector8i_x86;
-	vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_x86 (v0, v1, v2, v3); }
+	inline vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_x86 (v0, v1, v2, v3); }
 #elif ARCH_ARMSET
 	using vectorf = vectorf_arm;
 	using vectori = vectori_arm;
 	using vector8f = vector8f_def;
 	using vector8i = vector8i_def;
-	vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_def (v0, v1, v2, v3); }
+	inline vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_def (v0, v1, v2, v3); }
 #else
 	using vectorf = vectorf_def;
 	using vectori = vectori_def;
 	using vector8f = vector8f_def;
 	using vector8i = vector8i_def;
-	vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_def (v0, v1, v2, v3); }
+	inline vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_def (v0, v1, v2, v3); }
 #endif
 
 	////////////////////////////////////////////////////////////////////////////////////////
