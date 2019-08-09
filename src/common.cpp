@@ -186,7 +186,7 @@ dseed::arm_instruction_info::arm_instruction_info ()
 }
 #endif
 
-#if ARCH_ARM64
+#if ARCH_ARM64 && !(COMPILER_MSVC)
 #	include <arm_acle.h>
 #endif
 
@@ -250,7 +250,7 @@ uint32_t dseed::crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) 
 		for (size_t i = s16BytesCount * 2; i < bytesCount; ++i)
 			crc = _mm_crc32_u8 (crc, bytes[i]);
 	}
-#elif ARCH_ARM64
+#elif ARCH_ARM64 && !(COMPILER_MSVC)
 	if (arm_instruction_info::instance ().neon)
 	{
 		size_t s64BytesCount = bytesCount / 8;
@@ -267,6 +267,11 @@ uint32_t dseed::crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) 
 
 		for (size_t i = s16BytesCount * 2; i < bytesCount; ++i)
 			crc = __crc32cb (crc, bytes[i]);
+	}
+#else
+	if (false)
+	{
+
 	}
 #endif
 	else

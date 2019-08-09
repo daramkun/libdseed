@@ -2,6 +2,9 @@
 
 #define DR_MP3_IMPLEMENTATION
 #define DR_MP3_NO_STDIO
+#if ARCH_ARM64
+#	define __ARM_NEON
+#endif
 #include "../../libs/dr_libs/dr_mp3.h"
 
 #include "media.decoder.hxx"
