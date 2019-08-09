@@ -157,7 +157,7 @@ namespace dseed
 	{
 	public:
 
-		bool neon : 1;
+		bool neon : 1, crc32 : 1;
 
 		static const arm_instruction_info& instance ();
 
@@ -221,6 +221,8 @@ namespace dseed
 	inline uint32_t hwrand32 () noexcept { return hwrand32_def (); }
 	inline uint64_t hwrand64 () noexcept { return hwrand64_def (); }
 #endif
+
+	DSEEDEXP uint32_t crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept;
 }
 
 #endif

@@ -76,7 +76,7 @@ namespace dseed
 		template<uint32_t x, uint32_t y, uint32_t z, uint32_t w>
 		inline vectorf_arm FASTCALL permute32 () const noexcept
 		{
-			return shuffle32 (*this, *this);
+			return shuffle32<x, y, z, w> (*this, *this);
 		}
 
 		inline vectorf_arm FASTCALL splat_x () const noexcept { return vdupq_lane_f32 (vget_low_f32 (v), 0); }
@@ -179,10 +179,7 @@ namespace dseed
 		int32x4_t v;
 		inline vectori_arm () noexcept = default;
 		inline vectori_arm (const int* vector) noexcept : v (vld1q_s32 (vector)) { }
-		inline vectori_arm (const float* vector) noexcept
-			: v (_mm_cvtps_epi32 (_mm_load_ps (vector)))
-		{ }
-		inline vectori_arm (int x, int y, int z, int w) noexcept { float temp[] = { x,y,z,w }; load (temp); }
+		inline vectori_arm (int x, int y, int z, int w) noexcept { int temp[] = { x,y,z,w }; load (temp); }
 		inline vectori_arm (int i) noexcept : v (vmovq_n_s32 (i)) { }
 		inline vectori_arm (const int32x4_t& v) noexcept : v (v) { }
 		inline explicit vectori_arm (const vectori_def& v) noexcept { load (v.v); }
@@ -196,8 +193,8 @@ namespace dseed
 			return ret;
 		}
 
-		inline void FASTCALL load (const int* vector) noexcept { v = vld1q_s32 ((const __m128i*)vector); }
-		inline void FASTCALL store (int* vector) const noexcept { vst1q_s32 ((__m128i*)vector, v); }
+		inline void FASTCALL load (const int* vector) noexcept { v = vld1q_s32 (vector); }
+		inline void FASTCALL store (int* vector) const noexcept { vst1q_s32 (vector, v); }
 
 		template<uint8_t x, uint8_t y, uint8_t z, uint8_t w>
 		static inline vectori_arm FASTCALL shuffle32 (const vectori_arm & v1, const vectori_arm & v2) noexcept
@@ -393,7 +390,7 @@ namespace dseed
 
 	inline vectori_arm FASTCALL conv_i8_to_i64 (const vectori_arm& v) noexcept { return vmovl_s32 (vget_low_s32 (conv_i8_to_i32 (v))); }
 	inline vectori_arm FASTCALL conv_i8_to_i32 (const vectori_arm& v) noexcept { return vmovl_s16 (vget_low_s32 (conv_i8_to_i16 (v))); }
-	inline vectori_arm FASTCALL conv_i8_to_i16 (const vectori_arm& v) noexcept { return vmovl_s8 (v); }
+	inline vectori_arm FASTCALL conv_i8_to_i16 (const vectori_arm& v) noexcept { return vmovl_s8 (vget_low_s32(v)); }
 
 	inline int movemaskvf (const vectorf_arm& v) noexcept
 	{
@@ -461,14 +458,14 @@ namespace dseed
 	inline vectorf_arm FASTCALL fnmsvf (const vectorf_arm& sv, const vectorf_arm& mv1, const vectorf_arm& mv2) noexcept
 	{
 #if ARCH_ARM
-		return vmlsq_f32 (av, mv1, mv2);
+		return vmlsq_f32 (sv, mv1, mv2);
 #elif ARCH_ARM64
-		return vfmsq_f32 (av, mv1, mv2);
+		return vfmsq_f32 (sv, mv1, mv2);
 #endif
 	}
-	inline vectorf_arm FASTCALL andvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vandq_s32 (v1, 2); }
-	inline vectorf_arm FASTCALL orvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vorrq_s32 (v1, 2); }
-	inline vectorf_arm FASTCALL xorvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return veorq_s32 (v1, 2); }
+	inline vectorf_arm FASTCALL andvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vandq_s32 (v1, v2); }
+	inline vectorf_arm FASTCALL orvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vorrq_s32 (v1, v2); }
+	inline vectorf_arm FASTCALL xorvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return veorq_s32 (v1, v2); }
 	inline vectorf_arm FASTCALL notvf (const vectorf_arm& v) noexcept { return vmvnq_s32 (v); }
 	inline vectorf_arm FASTCALL equalsvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vceqq_f32 (v1, v2); }
 	inline vectorf_arm FASTCALL not_equalsvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vmvnq_u32 (vceqq_f32 (v1, v2)); }
@@ -523,7 +520,7 @@ namespace dseed
 	{
 		return floorvf (addvf (v, vectorf_arm (0.99999999f)));
 	}
-	inline vectorf_arm FASTCALL absvf (const vectorf_arm& v) noexcept { return vabs_f32 (v); }
+	inline vectorf_arm FASTCALL absvf (const vectorf_arm& v) noexcept { return vabsq_f32 (v); }
 	inline vectorf_arm FASTCALL minvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vminq_f32 (v1, v2); }
 	inline vectorf_arm FASTCALL maxvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vmaxq_f32 (v1, v2); }
 	
@@ -616,26 +613,22 @@ namespace dseed
 	inline vectori_arm FASTCALL greatervi16 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vcgtq_s16 (v1, v2); }
 	inline vectori_arm FASTCALL greater_equalsvi16 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vcgeq_s16 (v1, v2); }
 
-	inline vectori_arm FASTCALL addvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vaddq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL subtractvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vsubq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL negatevi64 (const vectori_arm& v) noexcept { return vnegq_s64 (v); }
-	inline vectori_arm FASTCALL multiplyvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vmulq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL multiplyvi64 (const vectori_arm& v, int s) noexcept { return vmulq_s64 (v, vmovq_n_s64 (s)); }
+	inline vectori_arm FASTCALL addvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)addvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL subtractvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)subtractvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL negatevi64 (const vectori_arm& v) noexcept { return (vectori_arm)negatevi64 ((vectori_def)v); }
+	inline vectori_arm FASTCALL multiplyvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)multiplyvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL multiplyvi64 (const vectori_arm& v, int s) noexcept { return (vectori_arm)multiplyvi64 ((vectori_def)v, s); }
 	inline vectori_arm FASTCALL multiplyvi64 (int s, const vectori_arm& v) noexcept { return multiplyvi64 (v, s); }
-	inline vectori_arm FASTCALL dividevi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept
-	{
-		// TODO
-		return (vectori_arm)dividevi64 ((const vectori_def&)v1, (const vectori_def&)v2);
-	}
+	inline vectori_arm FASTCALL dividevi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)dividevi64 ((const vectori_def&)v1, (const vectori_def&)v2); }
 	inline vectori_arm FASTCALL dividevi64 (const vectori_arm& v, int s) noexcept { return dividevi64 (v, vmovq_n_s64 (s)); }
-	inline vectori_arm FASTCALL shiftlvi64 (const vectori_arm& v, int s) noexcept { return vshlq_n_s64 (v, s); }
-	inline vectori_arm FASTCALL shiftrvi64 (const vectori_arm& v, int s) noexcept { return vshrq_n_s64 (v, s); }
-	inline vectori_arm FASTCALL equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vceqq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL not_equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vmvnq_s64 (equalsvi64 (v1, v2)); }
-	inline vectori_arm FASTCALL lesservi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vcltq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL lesser_equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vcleq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL greatervi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vcgtq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL greater_equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vcgeq_s64 (v1, v2); }
+	inline vectori_arm FASTCALL shiftlvi64 (const vectori_arm& v, int s) noexcept { return (vectori_arm)shiftlvi64 ((vectori_def)v, s); }
+	inline vectori_arm FASTCALL shiftrvi64 (const vectori_arm& v, int s) noexcept { return (vectori_arm)shiftrvi64 ((vectori_def)v, s); }
+	inline vectori_arm FASTCALL equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)equalsvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL not_equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)not_equalsvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL lesservi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)lesservi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL lesser_equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)lesser_equalsvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL greatervi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)greatervi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL greater_equalsvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)greater_equalsvi64 ((vectori_def)v1, (vectori_def)v2); }
 
 	inline vectori_arm FASTCALL dotvi2d (const vectori_arm& v1, const vectori_arm& v2) noexcept
 	{
@@ -645,7 +638,7 @@ namespace dseed
 	}
 	inline vectori_arm FASTCALL dotvi3d (const vectori_arm& v1, const vectori_arm& v2) noexcept
 	{
-		int32x2_t temp = vmulq_s32 (v1, v2);
+		int32x4_t temp = vmulq_s32 (v1, v2);
 		int32x2_t tv1 = vpadd_s32 (vget_low_s32 (temp), vget_low_s32 (temp));
 		int32x2_t tv2 = vdup_lane_s32 (vget_high_s32 (temp), 0);
 		tv1 = vadd_s32 (tv1, tv2);
@@ -653,7 +646,7 @@ namespace dseed
 	}
 	inline vectori_arm FASTCALL dotvi4d (const vectori_arm& v1, const vectori_arm& v2) noexcept
 	{
-		int32x2_t temp = vmulq_s32 (v1, v2);
+		int32x4_t temp = vmulq_s32 (v1, v2);
 		int32x2_t tv1 = vget_low_s32 (temp);
 		int32x2_t tv2 = vget_high_s32 (temp);
 		tv1 = vadd_s32 (tv1, tv2);
@@ -661,19 +654,19 @@ namespace dseed
 		return vcombine_s32 (tv1, tv1);
 	}
 
-	inline vectori_arm FASTCALL absvi (const vectori_arm& v) noexcept { return vabs_s32 (v); }
+	inline vectori_arm FASTCALL absvi (const vectori_arm& v) noexcept { return vabsq_s32 (v); }
 	inline vectori_arm FASTCALL minvi (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vminq_s32 (v1, v2); }
 	inline vectori_arm FASTCALL maxvi (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vmaxq_s32 (v1, v2); }
 
-	inline vectori_arm FASTCALL absvi64 (const vectori_arm& v) noexcept { return vabs_s64 (v); }
-	inline vectori_arm FASTCALL minvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vminq_s64 (v1, v2); }
-	inline vectori_arm FASTCALL maxvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vmaxq_s64 (v1, v2); }
+	inline vectori_arm FASTCALL absvi64 (const vectori_arm& v) noexcept { return (vectori_arm)absvi64 ((vectori_def)v); }
+	inline vectori_arm FASTCALL minvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)minvi64 ((vectori_def)v1, (vectori_def)v2); }
+	inline vectori_arm FASTCALL maxvi64 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return (vectori_arm)maxvi64 ((vectori_def)v1, (vectori_def)v2); }
 
-	inline vectori_arm FASTCALL absvi16 (const vectori_arm& v) noexcept { return vabs_s16 (v); }
+	inline vectori_arm FASTCALL absvi16 (const vectori_arm& v) noexcept { return vabsq_s16 (v); }
 	inline vectori_arm FASTCALL minvi16 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vminq_s16 (v1, v2); }
 	inline vectori_arm FASTCALL maxvi16 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vmaxq_s16 (v1, v2); }
 
-	inline vectori_arm FASTCALL absvi8 (const vectori_arm& v) noexcept { return vabs_s8 (v); }
+	inline vectori_arm FASTCALL absvi8 (const vectori_arm& v) noexcept { return vabsq_s8 (v); }
 	inline vectori_arm FASTCALL minvi8 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vminq_s8 (v1, v2); }
 	inline vectori_arm FASTCALL maxvi8 (const vectori_arm& v1, const vectori_arm& v2) noexcept { return vmaxq_s8 (v1, v2); }
 }

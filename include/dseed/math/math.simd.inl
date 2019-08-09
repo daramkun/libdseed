@@ -37,7 +37,7 @@ namespace dseed
 	using vectori = vectori_arm;
 	using vector8f = vector8f_def;
 	using vector8i = vector8i_def;
-	inline vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return selectcontrolvf_def (v0, v1, v2, v3); }
+	inline vectorf selectcontrolvf (uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3) noexcept { return (vectorf)selectcontrolvf_def (v0, v1, v2, v3); }
 #else
 	using vectorf = vectorf_def;
 	using vectori = vectori_def;
