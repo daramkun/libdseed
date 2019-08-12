@@ -265,6 +265,9 @@ SET ( DSEED_BUILD_FILES
 	# Audio Streams
 	src/media/streams/media.audiostream.basic.cpp
 	src/media/streams/media.audiostream.filter.cpp
+
+	# Platform Dependencies
+	src/platform/platform.cpp
 )
 
 link_directories ( ${INSTALL_LIB_DIR} )

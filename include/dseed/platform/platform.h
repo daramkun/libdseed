@@ -50,6 +50,8 @@ namespace dseed
 	public:
 		virtual error_t run (event_handler* handler) = 0;
 	};
+
+	DSEEDEXP error_t create_application (application** app);
 }
 
 #endif
