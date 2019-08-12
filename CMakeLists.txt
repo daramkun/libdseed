@@ -390,6 +390,10 @@ IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 	ADD_EXECUTABLE ( dseed_test_audio app/test_audio/test.cpp )
 	TARGET_INCLUDE_DIRECTORIES ( dseed_test_audio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
 	TARGET_LINK_LIBRARIES ( dseed_test_audio dseed )
+	
+	ADD_EXECUTABLE ( dseed_test_simd app/test_simd/test.cpp )
+	TARGET_INCLUDE_DIRECTORIES ( dseed_test_simd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
+	TARGET_LINK_LIBRARIES ( dseed_test_simd dseed )
 ENDIF ()
 
 IF ( NOT ${DSEED_SKIP_INSTALL} )

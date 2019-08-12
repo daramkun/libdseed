@@ -120,11 +120,14 @@ dseed::x86_instruction_info::x86_instruction_info ()
 	avx2 = ebx7[5];
 	fma3 = ecx1[12];
 
-	rdrand = ebx7[18];
+	rdrand = ecx1[30];
 	aes = ecx1[25];
 	sha = ebx7[29];
 
 	f16c = ecx1[29];
+
+	tsx = isIntel && ebx7[11];
+	asf = false;//isAMD && edx1[0];
 }
 #endif
 
@@ -234,7 +237,7 @@ uint32_t dseed::crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) 
 #	if ARCH_AMD64
 		size_t s64BytesCount = bytesCount / 8;
 		for (size_t i = 0; i < s64BytesCount; ++i)
-			crc = _mm_crc32_u64 (crc, reinterpret_cast<const uint64_t*>(bytes)[i]);
+			crc = (uint32_t)(_mm_crc32_u64 ((uint64_t)crc, reinterpret_cast<const uint64_t*>(bytes)[i]) & 0xffffffff);
 #	else
 		size_t s64BytesCount = 0;
 #	endif

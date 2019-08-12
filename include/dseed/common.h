@@ -132,18 +132,31 @@ namespace dseed
 #		pragma pack (1)
 #	endif
 #	if ARCH_X86SET
-	struct x86_instruction_info
+	struct DSEEDEXP x86_instruction_info
 	{
 	public:
-		char cpu_vender[64];
-		char cpu_brand[64];
+		char cpu_vender[64];								//< CPU Vender(Intel, AMD, ...)
+		char cpu_brand[64];									//< CPU Brand(i5-4790K, Ryzen 5 2600X, ...)
 
-		bool sse : 1, sse2 : 1, sse3 : 1, ssse3 : 1, sse4_1 : 1, sse4_2 : 1, sse4a : 1;
-		bool avx : 1, avx2 : 1, fma3 : 1;
+		bool sse : 1,										//< SSE
+			sse2 : 1,										//< SSE 2
+			sse3 : 1,										//< SSE 3
+			ssse3 : 1,										//< SSSE 3
+			sse4_1 : 1,										//< SSE 4.1
+			sse4_2 : 1,										//< SSE 4.2
+			sse4a : 1;										//< SSE 4a
+		bool avx : 1,										//< AVX (Fp 256-bit operators)
+			avx2 : 1,										//< AVX 2 (Integer 256-bit operators)
+			fma3 : 1;										//< FMA3 (Fused Multiply-Add)
 
-		bool rdrand : 1, aes : 1, sha : 1;
+		bool rdrand : 1,									//< RDRAND(Hardware Random Number Generator)
+			aes : 1,										//< AES Encrypter/Decrypter
+			sha : 1;										//< SHA Hash
 
-		bool f16c : 1;
+		bool f16c : 1;										//< F16C(Half-precision <-> Single-precision Conversion)
+
+		bool tsx : 1,										//< Transactional Synchronization Extensions(for Intel)
+			asf : 1;										//< Advanced Synchronization Facility(for AMD)
 
 		static const x86_instruction_info& instance ();
 
@@ -153,11 +166,12 @@ namespace dseed
 #	endif
 
 #	if ARCH_ARMSET
-	struct arm_instruction_info
+	struct DSEEDEXP arm_instruction_info
 	{
 	public:
 
-		bool neon : 1, crc32 : 1;
+		bool neon : 1,										//< ARM Neon SIMD operators
+			crc32 : 1;										//< CRC32
 
 		static const arm_instruction_info& instance ();
 
