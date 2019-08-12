@@ -1073,6 +1073,156 @@ namespace dseed
 			saturate8 ((int32_t)c)
 		);
 	}
+
+	namespace colours
+	{
+		inline bgra transparent () noexcept { return bgra (0); }
+
+		inline bgra black () { return bgra (0xff000000); }
+		inline bgra white () { return bgra (0xffffffff); }
+
+		inline bgra red () { return bgra (0xff0000ff); }
+		inline bgra green () { return bgra (0xff00ff00); }
+		inline bgra blue () { return bgra (0xffff0000); }
+
+		inline bgra cyan () { return bgra (0xffffff00); }
+		inline bgra magenta () { return bgra (0xffff00ff); }
+		inline bgra yellow () { return bgra (0xff00ffff); }
+
+		inline bgra aliceblue () { return bgra (0xfffff8f0); }
+		inline bgra antiquewhite () { return bgra (0xffd7ebfa); }
+		inline bgra aqua () { return bgra (0xffffff00); }
+		inline bgra aquamarine () { return bgra (0xffd4ff7f); }
+		inline bgra azure () { return bgra (0xfffffff0); }
+		inline bgra beige () { return bgra (0xffdcf5f5); }
+		inline bgra bisque () { return bgra (0xffc4e4ff); }
+		inline bgra blanchedalmond () { return bgra (0xffcdebff); }
+		inline bgra blueviolet () { return bgra (0xffe22b8a); }
+		inline bgra brown () { return bgra (0xff2a2aa5); }
+		inline bgra burlywood () { return bgra (0xff87b8de); }
+		inline bgra cadetblue () { return bgra (0xffa09e5f); }
+		inline bgra chartreuse () { return bgra (0xff00ff7f); }
+		inline bgra chocolate () { return bgra (0xff1e69d2); }
+		inline bgra coral () { return bgra (0xff507fff); }
+		inline bgra cornflowerblue () { return bgra (0xffed9564); }
+		inline bgra cornsilk () { return bgra (0xffdcf8ff); }
+		inline bgra crimson () { return bgra (0xff3c14dc); }
+		inline bgra darkblue () { return bgra (0xff8b0000); }
+		inline bgra darkcyan () { return bgra (0xff8b8b00); }
+		inline bgra darkgoldenrod () { return bgra (0xff0b86b8); }
+		inline bgra darkgray () { return bgra (0xffa9a9a9); }
+		inline bgra darkgreen () { return bgra (0xff006400); }
+		inline bgra darkkhaki () { return bgra (0xff6bb7bd); }
+		inline bgra darkmagenta () { return bgra (0xff8b008b); }
+		inline bgra darkolivegreen () { return bgra (0xff2f6b55); }
+		inline bgra darkorange () { return bgra (0xff008cff); }
+		inline bgra darkorchid () { return bgra (0xffcc3299); }
+		inline bgra darkred () { return bgra (0xff00008b); }
+		inline bgra darksalmon () { return bgra (0xff7a96e9); }
+		inline bgra darkseaGreen () { return bgra (0xff8bbc8f); }
+		inline bgra darkslateBlue () { return bgra (0xff8b3d48); }
+		inline bgra darkslateGray () { return bgra (0xff4f4f2f); }
+		inline bgra darkturquoise () { return bgra (0xffd1ce00); }
+		inline bgra darkviolet () { return bgra (0xffd30094); }
+		inline bgra deeppink () { return bgra (0xff9314ff); }
+		inline bgra deepskyblue () { return bgra (0xffffbf00); }
+		inline bgra dimgray () { return bgra (0xff696969); }
+		inline bgra dodgerblue () { return bgra (0xffff901e); }
+		inline bgra firebrick () { return bgra (0xff2222b2); }
+		inline bgra floralwhite () { return bgra (0xfff0faff); }
+		inline bgra forestgreen () { return bgra (0xff228b22); }
+		inline bgra fuchsia () { return bgra (0xffff00ff); }
+		inline bgra gainsboro () { return bgra (0xffdcdcdc); }
+		inline bgra ghostwhite () { return bgra (0xfffff8f8); }
+		inline bgra gold () { return bgra (0xff00d7ff); }
+		inline bgra goldenrod () { return bgra (0xff20a5da); }
+		inline bgra gray () { return bgra (0xff808080); }
+		inline bgra greenyellow () { return bgra (0xff2fffad); }
+		inline bgra honeydew () { return bgra (0xfff0fff0); }
+		inline bgra hotpink () { return bgra (0xffb469ff); }
+		inline bgra indianred () { return bgra (0xff5c5ccd); }
+		inline bgra indigo () { return bgra (0xff82004b); }
+		inline bgra ivory () { return bgra (0xfff0ffff); }
+		inline bgra khaki () { return bgra (0xff8ce6f0); }
+		inline bgra lavender () { return bgra (0xfffae6e6); }
+		inline bgra lavenderblush () { return bgra (0xfff5f0ff); }
+		inline bgra lawngreen () { return bgra (0xff00fc7c); }
+		inline bgra lemonchiffon () { return bgra (0xffcdfaff); }
+		inline bgra lightblue () { return bgra (0xffe6d8ad); }
+		inline bgra lightcoral () { return bgra (0xff8080f0); }
+		inline bgra lightcyan () { return bgra (0xffffffe0); }
+		inline bgra lightgoldenrodyellow () { return bgra (0xffd2fafa); }
+		inline bgra lightgray () { return bgra (0xffd3d3d3); }
+		inline bgra lightgreen () { return bgra (0xff90ee90); }
+		inline bgra lightpink () { return bgra (0xffc1b6ff); }
+		inline bgra lightsalmon () { return bgra (0xff7aa0ff); }
+		inline bgra lightseaGreen () { return bgra (0xffaab220); }
+		inline bgra lightskyBlue () { return bgra (0xffface87); }
+		inline bgra lightslateGray () { return bgra (0xff998877); }
+		inline bgra lightsteelBlue () { return bgra (0xffdec4b0); }
+		inline bgra lightyellow () { return bgra (0xffe0ffff); }
+		inline bgra lime () { return bgra (0xff00ff00); }
+		inline bgra limegreen () { return bgra (0xff32cd32); }
+		inline bgra linen () { return bgra (0xffe6f0fa); }
+		inline bgra maroon () { return bgra (0xff000080); }
+		inline bgra mediumaquamarine () { return bgra (0xffaacd66); }
+		inline bgra mediumblue () { return bgra (0xffcd0000); }
+		inline bgra mediumorchid () { return bgra (0xffd355ba); }
+		inline bgra mediumpurple () { return bgra (0xffdb7093); }
+		inline bgra mediumseagreen () { return bgra (0xff71b33c); }
+		inline bgra mediumslateblue () { return bgra (0xffee687b); }
+		inline bgra mediumspringgreen () { return bgra (0xff9afa00); }
+		inline bgra mediumturquoise () { return bgra (0xffccd148); }
+		inline bgra mediumvioletred () { return bgra (0xff8515c7); }
+		inline bgra midnightblue () { return bgra (0xff701919); }
+		inline bgra mintcream () { return bgra (0xfffafff5); }
+		inline bgra mistyrose () { return bgra (0xffe1e4ff); }
+		inline bgra moccasin () { return bgra (0xffb5e4ff); }
+		inline bgra navajowhite () { return bgra (0xffaddeff); }
+		inline bgra navy () { return bgra (0xff800000); }
+		inline bgra oldlace () { return bgra (0xffe6f5fd); }
+		inline bgra olive () { return bgra (0xff008080); }
+		inline bgra olivedrab () { return bgra (0xff238e6b); }
+		inline bgra orange () { return bgra (0xff00a5ff); }
+		inline bgra orangered () { return bgra (0xff0045ff); }
+		inline bgra orchid () { return bgra (0xffd670da); }
+		inline bgra palegoldenrod () { return bgra (0xffaae8ee); }
+		inline bgra palegreen () { return bgra (0xff98fb98); }
+		inline bgra paleturquoise () { return bgra (0xffeeeeaf); }
+		inline bgra palevioletred () { return bgra (0xff9370db); }
+		inline bgra papayawhip () { return bgra (0xffd5efff); }
+		inline bgra peachpuff () { return bgra (0xffb9daff); }
+		inline bgra peru () { return bgra (0xff3f85cd); }
+		inline bgra pink () { return bgra (0xffcbc0ff); }
+		inline bgra plum () { return bgra (0xffdda0dd); }
+		inline bgra powderblue () { return bgra (0xffe6e0b0); }
+		inline bgra purple () { return bgra (0xff800080); }
+		inline bgra rosybrown () { return bgra (0xff8f8fbc); }
+		inline bgra royalblue () { return bgra (0xffe16941); }
+		inline bgra saddlebrown () { return bgra (0xff13458b); }
+		inline bgra salmon () { return bgra (0xff7280fa); }
+		inline bgra sandybrown () { return bgra (0xff60a4f4); }
+		inline bgra seagreen () { return bgra (0xff578b2e); }
+		inline bgra seashell () { return bgra (0xffeef5ff); }
+		inline bgra sienna () { return bgra (0xff2d52a0); }
+		inline bgra silver () { return bgra (0xffc0c0c0); }
+		inline bgra skyblue () { return bgra (0xffebce87); }
+		inline bgra slateblue () { return bgra (0xffcd5a6a); }
+		inline bgra slategray () { return bgra (0xff908070); }
+		inline bgra snow () { return bgra (0xfffafaff); }
+		inline bgra springgreen () { return bgra (0xff7fff00); }
+		inline bgra steelblue () { return bgra (0xffb48246); }
+		inline bgra tan () { return bgra (0xff8cb4d2); }
+		inline bgra teal () { return bgra (0xff808000); }
+		inline bgra thistle () { return bgra (0xffd8bfd8); }
+		inline bgra tomato () { return bgra (0xff4763ff); }
+		inline bgra turquoise () { return bgra (0xffd0e040); }
+		inline bgra violet () { return bgra (0xffee82ee); }
+		inline bgra webgreen () { return bgra (0xff008000); }
+		inline bgra wheat () { return bgra (0xffb3def5); }
+		inline bgra whitesmoke () { return bgra (0xfff5f5f5); }
+		inline bgra yellowgreen () { return bgra (0xff32cd9a); }
+	}
 }
 
 #endif
