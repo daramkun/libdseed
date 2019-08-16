@@ -18,13 +18,15 @@ inline bool resampl_nearest (uint8_t* dest, const uint8_t* src, size_t srcLength
 
 	for (size_t i = 0; i < destCount; i += ch)
 	{
-		size_t srcI = destCount * src / nsr;
+		size_t srcI = destCount * sr / nsr;
 
 		for (size_t c = 0; c < ch; ++c)
 		{
-			destCount[i + c] = srcCount[srcI + c];
+			dest[i + c] = src[srcI + c];
 		}
 	}
+
+	return true;
 }
 
 std::map<rstp, rsfn> g_resamples = {

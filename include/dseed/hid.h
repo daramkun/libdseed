@@ -180,33 +180,6 @@ namespace dseed
 		virtual error_t state (void* state, size_t state_size, playerindex_t playerindex = playerindex_player1) = 0;
 		virtual error_t send_feedback (const void* feedback, size_t feedback_size, playerindex_t playerindex = playerindex_player1) = 0;
 	};
-
-	template<typename TState>
-	class DSEEDEXP namedstate_inputdevice : public inputdevice
-	{
-	public:
-		inline error_t state (TState* state, playerindex_t playerindex = playerindex_player1)
-		{
-			return state (state, sizeof (TState), playerindex);
-		}
-	};
-
-	template<typename TFeedback>
-	class DSEEDEXP namedfeedback_inputdevice : public inputdevice
-	{
-	public:
-		inline error_t send_feedback (const TFeedback* feedback, playerindex_t playerindex = playerindex_player1)
-		{
-			return send_feedback (feedback, sizeof (TFeedback), playerindex);
-		}
-	};
-
-	template<typename TState, typename TFeedback>
-	class DSEEDEXP named_inputdevice : public namedstate_inputdevice<TState>
-		, public namedfeedback_inputdevice<TFeedback>
-	{
-
-	};
 }
 
 #endif
