@@ -27,6 +27,7 @@ namespace dseed
 
 	enum DSEEDEXP windowmode_t : int32_t
 	{
+		windowmode_unknown,
 		windowmode_windowed,
 		windowmode_borderless_fullscreen,
 	};
@@ -48,7 +49,14 @@ namespace dseed
 		virtual error_t set_window_mode (windowmode_t mode) = 0;
 
 	public:
-		virtual error_t run (event_handler* handler) = 0;
+		virtual error_t event_handler (dseed::event_handler** handler) = 0;
+		virtual error_t set_event_handler (dseed::event_handler* handler) = 0;
+
+	public:
+		virtual error_t run (dseed::event_handler* handler) = 0;
+
+	public:
+		static error_t shared_app (dseed::application** app);
 	};
 
 	DSEEDEXP error_t create_application (application** app);
