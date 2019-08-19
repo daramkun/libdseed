@@ -438,17 +438,6 @@ public:
 	{
 		WNDCLASS wndClass =
 		{
-			/*
-	UINT        style;
-	WNDPROC     lpfnWndProc;
-	int         cbClsExtra;
-	int         cbWndExtra;
-	HINSTANCE   hInstance;
-	HICON       hIcon;
-	HCURSOR     hCursor;
-	HBRUSH      hbrBackground;
-	LPCWSTR     lpszMenuName;
-	LPCWSTR     lpszClassName;*/
 			NULL, __win32_application::WndProc, 0, 0, GetModuleHandle (nullptr),
 			LoadIcon (NULL, IDI_APPLICATION), LoadCursor (NULL, IDC_ARROW),
 			NULL, nullptr, WINDOW_CLASSNAME

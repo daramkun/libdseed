@@ -120,7 +120,7 @@ dseed::x86_instruction_info::x86_instruction_info ()
 	avx2 = ebx7[5];
 	fma3 = ecx1[12];
 
-	rdrand = ecx1[30];
+	rdrand = ebx7[18];
 	aes = ecx1[25];
 	sha = ebx7[29];
 
