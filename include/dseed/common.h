@@ -239,4 +239,24 @@ namespace dseed
 	DSEEDEXP uint32_t crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept;
 }
 
+#if PLATFORM_WINDOWS
+#	define ENTRYPOINT_ATTRIBUTE								
+#	define ENTRYPOINT_RETURNTYPE							int
+#	define ENTRYPOINT_CALLTYPE								__stdcall
+#	define ENTRYPOINT_NAME									WinMain
+#	define ENTRYPOINT_ARGUMENTS								HINSTANCE, HINSTANCE, LPSTR, int
+#elif PLATFORM_UWP
+#	define ENTRYPOINT_ATTRIBUTE								[Platform::MTAThread]
+#	define ENTRYPOINT_RETURNTYPE							int
+#	define ENTRYPOINT_CALLTYPE								
+#	define ENTRYPOINT_NAME									main
+#	define ENTRYPOINT_ARGUMENTS								Platform::Array<Platform::String^>^
+#else
+#	define ENTRYPOINT_ATTRIBUTE								
+#	define ENTRYPOINT_RETURNTYPE							int
+#	define ENTRYPOINT_CALLTYPE								
+#	define ENTRYPOINT_NAME									main
+#	define ENTRYPOINT_ARGUMENTS								int, char*[]
+#endif
+
 #endif

@@ -268,6 +268,7 @@ SET ( DSEED_BUILD_FILES
 
 	# Platform Dependencies
 	src/platform/platform.cpp
+	src/platform/platform.desktop.cpp
 )
 
 link_directories ( ${INSTALL_LIB_DIR} )
@@ -276,7 +277,12 @@ SET ( DSEED_DEFINITIONS  )
 SET ( DSEED_LINK_LIBS  )
 
 IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "MSYS" )
-	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib )
+	LIST ( APPEND DSEED_DEFINITIONS -DWINDOWS )
+	LIST ( APPEND DSEED_DEFINITIONS -DUNICODE )
+	SET ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
+	SET ( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
+	SET ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
+	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib )
 ENDIF ()
 
 IF ( ${DSEED_USE_BITMAP_ENCODERS} )
@@ -397,6 +403,24 @@ IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 	ADD_EXECUTABLE ( dseed_test_simd app/test_simd/test.cpp )
 	TARGET_INCLUDE_DIRECTORIES ( dseed_test_simd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
 	TARGET_LINK_LIBRARIES ( dseed_test_simd dseed )
+	
+	IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "MSYS" )
+		SET ( TARGET_TO  "WIN32" )
+	ENDIF ()
+
+	ADD_EXECUTABLE ( dseed_test_app ${TARGET_TO} app/test_app/test.cpp )
+	TARGET_INCLUDE_DIRECTORIES ( dseed_test_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
+	TARGET_LINK_LIBRARIES ( dseed_test_app dseed )
+	if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+		MESSAGE ( "Enable add manifest to test_app." )
+		SET ( TEST_APP_NAME "dseed_test_app" )
+		#ADD_CUSTOM_COMMAND (
+		#	TARGET dseed_test_app
+		#	POST_BUILD
+		#	COMMAND "mt.exe" -nologo -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.manifest\" -outputresource:\"$<TARGET_FILE:${TEST_APP_NAME}>\"\;\#1
+		#	COMMENT "Adding Win32 manifest resource..." 
+		#)
+	endif()
 ENDIF ()
 
 IF ( NOT ${DSEED_SKIP_INSTALL} )

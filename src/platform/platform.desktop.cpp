@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-extern static dseed::application* g_sharedApp;
+extern dseed::application* g_sharedApp;
 
 class dummy_handler : public dseed::event_handler
 {
@@ -47,8 +47,8 @@ public:
 	}
 
 public:
-	virtual dseed::error_t update () = 0;
-	virtual dseed::error_t cleanup () = 0;
+	virtual void update () noexcept { }
+	virtual void cleanup () noexcept { }
 
 private:
 	std::atomic<int32_t> _refCount;
@@ -58,10 +58,10 @@ template<typename TState, dseed::inputdevice_t device_type, size_t maximum_playe
 class inputdevice_internal_template1 : public inputdevice_internal
 {
 public:
-	inputdevice_internal_template1 () { memset (state, 0, sizeof (state)); }
+	inputdevice_internal_template1 () { memset (_state, 0, sizeof (_state)); }
 
 public:
-	virtual inputdevice_t type () override { return device_type; }
+	virtual dseed::inputdevice_t type () override { return device_type; }
 
 public:
 	virtual dseed::error_t state (void* state, size_t state_size, int32_t player_index = 0) override
@@ -69,21 +69,21 @@ public:
 		if ((player_index < 0 || player_index > maximum_player_index)
 			|| state_size != sizeof (TState) || state == nullptr)
 			return dseed::error_invalid_args;
-		*(reinterpret_cast<TState*> (state)) = this->state[player_index];
+		*(reinterpret_cast<TState*> (state)) = this->_state[player_index];
 		return dseed::error_good;
 	}
 
-	virtual error_t send_feedback (const void* feedback, size_t feedback_size, int32_t player_index = 0) override { return KB_NOT_SUPPORT; }
+	virtual dseed::error_t send_feedback (const void* feedback, size_t feedback_size, int32_t player_index = 0) override { return dseed::error_not_support; }
 
 public:
-	TState state[maximum_player_index];
+	TState _state[maximum_player_index];
 };
 
 template<typename TState, typename TFeedback, dseed::inputdevice_t device_type, size_t maximum_player_index = 1>
 class inputdevice_internal_template2 : public inputdevice_internal_template1<TState, device_type, maximum_player_index>
 {
 public:
-	virtual error_t send_feedback (const void* feedback, size_t feedbackSize, int32_t playerIndex = 0) override
+	virtual dseed::error_t send_feedback (const void* feedback, size_t feedbackSize, int32_t playerIndex = 0) override
 	{
 		if (playerIndex < 0 || playerIndex > maximum_player_index
 			|| feedbackSize != sizeof (TFeedback) || feedback == nullptr)
@@ -92,7 +92,7 @@ public:
 	}
 
 private:
-	virtual error_t do_feedback (const TFeedback* feedback, int32_t player_index) = 0;
+	virtual dseed::error_t do_feedback (const TFeedback* feedback, int32_t player_index) = 0;
 };
 
 class keyboard_common : public inputdevice_internal_template1<dseed::keyboard_state, dseed::inputdevice_keyboard> { };
@@ -115,16 +115,16 @@ public:
 class touchpanel_common : public inputdevice_internal_template1<dseed::touchpanel_state, dseed::inputdevice_touchpanel>
 {
 public:
-	virtual void cleanup () override
+	virtual void cleanup () noexcept override
 	{
-		if (state[0].pointerCount == 0)
+		if (_state[0].pointerCount == 0)
 			return;
 
-		std::vector<touchpointer> pointers (&state[0].pointers[0], &state[0].pointers[state[0].pointerCount]);
-		std::vector<std::vector<touchpointer>::iterator> removeList;
+		std::vector<dseed::touchpointer> pointers (&_state[0].pointers[0], &_state[0].pointers[_state[0].pointerCount]);
+		std::vector<std::vector<dseed::touchpointer>::iterator> removeList;
 		for (auto i = pointers.begin (); i != pointers.end (); ++i)
 		{
-			touchpointer& p = *i;
+			dseed::touchpointer& p = *i;
 			if (p.state == dseed::touchstate_pressed)
 				p.state = dseed::touchstate_moved;
 			else if (p.state == dseed::touchstate_released)
@@ -134,17 +134,17 @@ public:
 		for (auto i : removeList)
 			pointers.erase (i);
 
-		std::copy (pointers.begin (), pointers.end (), state[0].pointers);
-		memset (&state[0].pointers[pointers.size ()], 0, sizeof (dseed::touchpointer) * (256 - pointers.size () - 1));
-		state[0].pointerCount = pointers.size ();
+		std::copy (pointers.begin (), pointers.end (), _state[0].pointers);
+		memset (&_state[0].pointers[pointers.size ()], 0, sizeof (dseed::touchpointer) * (256 - pointers.size () - 1));
+		_state[0].pointerCount = pointers.size ();
 	}
 
 public:
 	dseed::touchpointer* pointer (int32_t pid)
 	{
-		for (int i = 0; i < state[0].pointerCount; ++i)
-			if (state[0].pointers[i].pointerId == pid)
-				return &(state[0].pointers[i]);
+		for (int i = 0; i < _state[0].pointerCount; ++i)
+			if (_state[0].pointers[i].pointerId == pid)
+				return &(_state[0].pointers[i]);
 		return nullptr;
 	}
 };
@@ -171,7 +171,7 @@ bool update_rawinput (HWND hWnd, bool no_legacy)
 class mouse_win32 : public mouse_common
 {
 public:
-	virtual dseed::error_t do_feedback (const dseed::mouse_feedback* feedback, int32_t player_index) override
+	virtual dseed::error_t do_feedback (const dseed::mouse_feedback* feedback, int32_t player_index) noexcept override
 	{
 		dseed::auto_object<dseed::application> app;
 		dseed::application::shared_app (&app);
@@ -193,7 +193,7 @@ public:
 		else ::ClipCursor (nullptr);
 
 		::ShowCursor (!feedback->hide_cursor);
-		if (state->is_relative != feedback->set_relative)
+		if (_state->is_relative != feedback->set_relative)
 		{
 			if (feedback->set_relative)
 			{
@@ -203,7 +203,7 @@ public:
 			{
 				update_rawinput (hWnd, false);
 			}
-			state->is_relative = feedback->set_relative;
+			_state->is_relative = feedback->set_relative;
 		}
 
 		if (feedback->move_position.x == INT_MIN && feedback->move_position.y == INT_MIN)
@@ -220,7 +220,7 @@ public:
 class gamepad_win32 : public gamepad_common
 {
 public:
-	virtual void update () override
+	virtual void update () noexcept override
 	{
 		for (int i = 0; i < 8; ++i)
 		{
@@ -228,37 +228,37 @@ public:
 			_deviceConnected[i] = ::XInputGetState (i, &s);
 			if (_deviceConnected[i] == ERROR_SUCCESS)
 			{
-				state[i].left_thumbstick = kkaebi::float2 (
+				_state[i].left_thumbstick = dseed::float2 (
 					s.Gamepad.sThumbLX / 32767.0f, s.Gamepad.sThumbLY / 32767.0f
 				);
-				state[i].right_thumbstick = kkaebi::float2 (
+				_state[i].right_thumbstick = dseed::float2 (
 					s.Gamepad.sThumbRX / 32767.0f, s.Gamepad.sThumbRY / 32767.0f
 				);
-				state[i].left_trigger = s.Gamepad.bLeftTrigger / 255.0f;
-				state[i].right_trigger = s.Gamepad.bRightTrigger / 255.0f;
+				_state[i].left_trigger = s.Gamepad.bLeftTrigger / 255.0f;
+				_state[i].right_trigger = s.Gamepad.bRightTrigger / 255.0f;
 
 				int32_t buttons = 0;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_A) buttons |= kkaebi::input::gamepadbuttons_t_a;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_B) buttons |= kkaebi::input::gamepadbuttons_t_b;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_X) buttons |= kkaebi::input::gamepadbuttons_t_x;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_Y) buttons |= kkaebi::input::gamepadbuttons_t_y;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) buttons |= kkaebi::input::gamepadbuttons_t_dpad_left;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) buttons |= kkaebi::input::gamepadbuttons_t_dpad_right;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) buttons |= kkaebi::input::gamepadbuttons_t_dpad_up;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) buttons |= kkaebi::input::gamepadbuttons_t_dpad_down;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) buttons |= kkaebi::input::gamepadbuttons_t_left_bumper;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) buttons |= kkaebi::input::gamepadbuttons_t_right_thumbstick;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) buttons |= kkaebi::input::gamepadbuttons_t_left_thumbstick;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) buttons |= kkaebi::input::gamepadbuttons_t_right_thumbstick;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) buttons |= kkaebi::input::gamepadbuttons_t_back;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_START) buttons |= kkaebi::input::gamepadbuttons_t_start;
-				state[i].buttons = (kkaebi::input::gamepadbuttons_t) buttons;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_A) buttons |= dseed::gamepadbuttons_a;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_B) buttons |= dseed::gamepadbuttons_b;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_X) buttons |= dseed::gamepadbuttons_x;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_Y) buttons |= dseed::gamepadbuttons_y;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) buttons |= dseed::gamepadbuttons_dpad_left;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) buttons |= dseed::gamepadbuttons_dpad_right;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) buttons |= dseed::gamepadbuttons_dpad_up;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) buttons |= dseed::gamepadbuttons_dpad_down;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) buttons |= dseed::gamepadbuttons_left_bumper;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) buttons |= dseed::gamepadbuttons_right_thumbstick;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) buttons |= dseed::gamepadbuttons_left_thumbstick;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) buttons |= dseed::gamepadbuttons_right_thumbstick;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) buttons |= dseed::gamepadbuttons_back;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_START) buttons |= dseed::gamepadbuttons_start;
+				_state[i].buttons = (dseed::gamepadbuttons_t) buttons;
 			}
 		}
 	}
 
 public:
-	virtual dseed::error_t do_feedback (const dseed::gamepad_feedback* feedback, int32_t player_index) override
+	virtual dseed::error_t do_feedback (const dseed::gamepad_feedback* feedback, int32_t player_index) noexcept override
 	{
 		XINPUT_VIBRATION vib;
 		vib.wLeftMotorSpeed = (WORD)(feedback->left_motor_speed * 65535);
@@ -278,6 +278,8 @@ public:
 	__win32_application ()
 		: _refCount (1), _hWnd (nullptr), _handler (new dummy_handler ())
 	{
+		g_sharedApp = this;
+
 		*&_inputDevices[dseed::inputdevice_keyboard] = new keyboard_common ();
 		*&_inputDevices[dseed::inputdevice_mouse] = new mouse_win32 ();
 		*&_inputDevices[dseed::inputdevice_gamepad] = new gamepad_win32 ();
@@ -286,6 +288,10 @@ public:
 		*&_inputDevices[dseed::inputdevice_gyroscope] = new gyroscope_common ();
 		*&_inputDevices[dseed::inputdevice_gps] = nullptr;
 		*&_inputDevices[dseed::inputdevice_headtracker] = nullptr;
+	}
+	~__win32_application ()
+	{
+		UnregisterClass (WINDOW_CLASSNAME, GetModuleHandle (nullptr));
 	}
 
 public:
@@ -325,6 +331,7 @@ public:
 			return dseed::error_not_support;
 
 		*device = _inputDevices[(int)type];
+		(*device)->retain ();
 
 		return dseed::error_good;
 	}
@@ -429,6 +436,26 @@ public:
 public:
 	virtual dseed::error_t run (dseed::event_handler* handler) override
 	{
+		WNDCLASS wndClass =
+		{
+			/*
+	UINT        style;
+	WNDPROC     lpfnWndProc;
+	int         cbClsExtra;
+	int         cbWndExtra;
+	HINSTANCE   hInstance;
+	HICON       hIcon;
+	HCURSOR     hCursor;
+	HBRUSH      hbrBackground;
+	LPCWSTR     lpszMenuName;
+	LPCWSTR     lpszClassName;*/
+			NULL, __win32_application::WndProc, 0, 0, GetModuleHandle (nullptr),
+			LoadIcon (NULL, IDI_APPLICATION), LoadCursor (NULL, IDC_ARROW),
+			NULL, nullptr, WINDOW_CLASSNAME
+		};
+		if (RegisterClass (&wndClass) == INVALID_ATOM)
+			return dseed::error_fail;
+
 		set_event_handler (handler);
 
 		RECT clientRect = { 0, 0, 640, 360 };
@@ -448,8 +475,7 @@ public:
 		if (!update_rawinput (_hWnd, false))
 			return dseed::error_fail;
 
-		if (!::ShowWindow (_hWnd, SW_SHOW))
-			return dseed::error_fail;
+		::ShowWindow (_hWnd, SW_SHOW);
 
 		MSG msg; bool running = true;
 		dseed::timespan_t lastTime = dseed::timespan_t::current_ticks (), currentTime;
@@ -468,13 +494,15 @@ public:
 			}
 
 			for (dseed::auto_object<inputdevice_internal>& inputdevice : _inputDevices)
-				inputdevice->update ();
+				if(inputdevice != nullptr)
+					inputdevice->update ();
 
 			currentTime = dseed::timespan_t::current_ticks ();
-			handler->next_frame (currentTime - lastTime);
+			_handler->next_frame (currentTime - lastTime);
 
 			for (dseed::auto_object<inputdevice_internal>& inputdevice : _inputDevices)
-				inputdevice->cleanup ();
+				if (inputdevice != nullptr)
+					inputdevice->cleanup ();
 
 			lastTime = currentTime;
 
@@ -540,21 +568,21 @@ private:
 			ZeroMemory (raw, dwSize);
 
 			if (raw->header.dwType == RIM_TYPEMOUSE)
-				raw->data.mouse.usFlags = mouse->state[0].is_relative ? MOUSE_MOVE_RELATIVE : (MOUSE_MOVE_ABSOLUTE | MOUSE_VIRTUAL_DESKTOP);
+				raw->data.mouse.usFlags = mouse->_state[0].is_relative ? MOUSE_MOVE_RELATIVE : (MOUSE_MOVE_ABSOLUTE | MOUSE_VIRTUAL_DESKTOP);
 
 			if (GetRawInputData ((HRAWINPUT)lParam, RID_INPUT, &lpb[0], &dwSize, sizeof (RAWINPUTHEADER)) != dwSize)
 				break;
 
 			if (raw->header.dwType == RIM_TYPEKEYBOARD)
-				keyboard->state[0].key_states[raw->data.keyboard.VKey] = ((raw->data.keyboard.Flags & RI_KEY_BREAK) == 0);
+				keyboard->_state[0].key_states[raw->data.keyboard.VKey] = ((raw->data.keyboard.Flags & RI_KEY_BREAK) == 0);
 			else if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
 				POINT p = { raw->data.mouse.lLastX, raw->data.mouse.lLastY };
-				if (!mouse->state[0].is_relative)
+				if (!mouse->_state[0].is_relative)
 					ScreenToClient (hWnd, &p);
-				mouse->state[0].position = dseed::point2i (p.x, p.y);
+				mouse->_state[0].position = dseed::point2i (p.x, p.y);
 
-				int8_t buttons = mouse->state[0].buttons;
+				int8_t buttons = mouse->_state[0].buttons;
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)	buttons |= dseed::mousebuttons_left;
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)	buttons &= ~dseed::mousebuttons_left;
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)	buttons |= dseed::mousebuttons_right;
@@ -565,12 +593,12 @@ private:
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)		buttons &= ~dseed::mousebuttons_x_button1;
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN)		buttons |= dseed::mousebuttons_x_button2;
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)		buttons &= ~dseed::mousebuttons_x_button2;
-				mouse->state[0].buttons = (dseed::mousebuttons_t)buttons;
+				mouse->_state[0].buttons = (dseed::mousebuttons_t)buttons;
 
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
-					mouse->state[0].wheel = dseed::float2 (0, raw->data.mouse.usButtonData / (float)WHEEL_DELTA);
+					mouse->_state[0].wheel = dseed::float2 (0, raw->data.mouse.usButtonData / (float)WHEEL_DELTA);
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_HWHEEL)
-					mouse->state[0].wheel = dseed::float2 (raw->data.mouse.usButtonData / (float)WHEEL_DELTA, 0);
+					mouse->_state[0].wheel = dseed::float2 (raw->data.mouse.usButtonData / (float)WHEEL_DELTA, 0);
 			}
 			else
 				DefRawInputProc (&raw, dwSize, sizeof (RAWINPUTHEADER));
@@ -592,7 +620,7 @@ private:
 					if (ti.dwFlags & TOUCHEVENTF_DOWN)
 					{
 						dseed::touchpointer p = { (int32_t)ti.dwID, dseed::point2i (ti.x, ti.y), dseed::touchstate_pressed };
-						touchpanel->state[0].pointers[touchpanel->state[0].pointerCount++] = p;
+						touchpanel->_state[0].pointers[touchpanel->_state[0].pointerCount++] = p;
 					}
 					else
 					{
