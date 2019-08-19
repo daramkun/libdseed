@@ -159,7 +159,6 @@ namespace dseed
 	constexpr inputdevice_t inputdevice_accelerometer = 4;
 	constexpr inputdevice_t inputdevice_gyroscope = 5;
 	constexpr inputdevice_t inputdevice_gps = 6;
-	constexpr inputdevice_t inputdevice_headtracker = 7;
 
 	using playerindex_t = int32_t;
 	constexpr playerindex_t playerindex_player1 = 0;

@@ -54,11 +54,15 @@ private:
 	std::atomic<int32_t> _refCount;
 };
 
-template<typename TState, dseed::inputdevice_t device_type, size_t maximum_player_index = 1>
+template<typename TState, dseed::inputdevice_t device_type, size_t maximum_player_index = 1, bool device_conn_default = false>
 class inputdevice_internal_template1 : public inputdevice_internal
 {
 public:
-	inputdevice_internal_template1 () { memset (_state, 0, sizeof (_state)); }
+	inputdevice_internal_template1 ()
+	{
+		memset (_state, 0, sizeof (_state));
+		memset (_deviceConnected, device_conn_default, sizeof(_deviceConnected));
+	}
 
 public:
 	virtual dseed::inputdevice_t type () override { return device_type; }
@@ -69,6 +73,8 @@ public:
 		if ((player_index < 0 || player_index > maximum_player_index)
 			|| state_size != sizeof (TState) || state == nullptr)
 			return dseed::error_invalid_args;
+		if (!_deviceConnected[player_index])
+			return dseed::error_device_disconn;
 		*(reinterpret_cast<TState*> (state)) = this->_state[player_index];
 		return dseed::error_good;
 	}
@@ -77,10 +83,11 @@ public:
 
 public:
 	TState _state[maximum_player_index];
+	bool _deviceConnected[maximum_player_index];
 };
 
-template<typename TState, typename TFeedback, dseed::inputdevice_t device_type, size_t maximum_player_index = 1>
-class inputdevice_internal_template2 : public inputdevice_internal_template1<TState, device_type, maximum_player_index>
+template<typename TState, typename TFeedback, dseed::inputdevice_t device_type, size_t maximum_player_index = 1, bool device_conn_default = false>
+class inputdevice_internal_template2 : public inputdevice_internal_template1<TState, device_type, maximum_player_index, device_conn_default>
 {
 public:
 	virtual dseed::error_t send_feedback (const void* feedback, size_t feedbackSize, int32_t playerIndex = 0) override
@@ -95,8 +102,8 @@ private:
 	virtual dseed::error_t do_feedback (const TFeedback* feedback, int32_t player_index) = 0;
 };
 
-class keyboard_common : public inputdevice_internal_template1<dseed::keyboard_state, dseed::inputdevice_keyboard> { };
-class mouse_common : public inputdevice_internal_template2<dseed::mouse_state, dseed::mouse_feedback, dseed::inputdevice_mouse>
+class keyboard_common : public inputdevice_internal_template1<dseed::keyboard_state, dseed::inputdevice_keyboard, 1, true> { };
+class mouse_common : public inputdevice_internal_template2<dseed::mouse_state, dseed::mouse_feedback, dseed::inputdevice_mouse, 1, true>
 {
 public:
 	virtual dseed::error_t do_feedback (const dseed::mouse_feedback* feedback, int32_t player_index) noexcept
@@ -150,6 +157,7 @@ public:
 };
 class accelerometer_common : public inputdevice_internal_template1<dseed::accelerometer_state, dseed::inputdevice_accelerometer> { };
 class gyroscope_common : public inputdevice_internal_template1<dseed::gyroscope_state, dseed::inputdevice_gyroscope> { };
+class gps_common : public inputdevice_internal_template1<dseed::gps_state, dseed::inputdevice_gps> { };
 
 #if PLATFORM_WINDOWS
 constexpr LPCWSTR WINDOW_CLASSNAME = L"libdseed";
@@ -167,6 +175,10 @@ bool update_rawinput (HWND hWnd, bool no_legacy)
 }
 
 #include <XInput.h>
+#include <initguid.h>
+#include <SensorsApi.h>
+#include <Sensors.h>
+#include <atlbase.h>
 
 class mouse_win32 : public mouse_common
 {
@@ -225,7 +237,7 @@ public:
 		for (int i = 0; i < 8; ++i)
 		{
 			XINPUT_STATE s;
-			_deviceConnected[i] = ::XInputGetState (i, &s);
+			_deviceConnected[i] = ::XInputGetState (i, &s) != ERROR_DEVICE_NOT_CONNECTED;
 			if (_deviceConnected[i] == ERROR_SUCCESS)
 			{
 				_state[i].left_thumbstick = dseed::float2 (
@@ -267,9 +279,87 @@ public:
 			return dseed::error_fail;
 		return dseed::error_good;
 	}
+};
+
+class accelerometer_win32 : public accelerometer_common
+{
+public:
+	accelerometer_win32 (ISensor* sensor)
+		: _sensor (sensor)
+	{ }
+
+public:
+	virtual void update () noexcept override
+	{
+		CComPtr<ISensorDataReport> report;
+		if (SUCCEEDED (_sensor->GetData (&report)))
+		{
+			PROPVARIANT px = {}, py = {}, pz = {};
+			report->GetSensorValue (SENSOR_DATA_TYPE_ACCELERATION_X_G, &px);
+			report->GetSensorValue (SENSOR_DATA_TYPE_ACCELERATION_Y_G, &py);
+			report->GetSensorValue (SENSOR_DATA_TYPE_ACCELERATION_Z_G, &pz);
+
+			_state[0].accelerometer = dseed::float3 (px.dblVal, py.dblVal, pz.dblVal);
+		}
+		else _state[0].accelerometer = dseed::float3 ();
+	}
 
 private:
-	DWORD _deviceConnected[8];
+	CComPtr<ISensor> _sensor;
+};
+
+class gyroscope_win32 : public gyroscope_common
+{
+public:
+	gyroscope_win32 (ISensor* sensor)
+		: _sensor (sensor)
+	{ }
+
+public:
+	virtual void update () noexcept override
+	{
+		CComPtr<ISensorDataReport> report;
+		if (SUCCEEDED (_sensor->GetData (&report)))
+		{
+			PROPVARIANT px = {}, py = {}, pz = {};
+			report->GetSensorValue (SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND, &px);
+			report->GetSensorValue (SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &py);
+			report->GetSensorValue (SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &pz);
+
+			_state[0].gyroscope = dseed::float3 (px.dblVal, py.dblVal, pz.dblVal);
+		}
+		else _state[0].gyroscope = dseed::float3 ();
+	}
+
+private:
+	CComPtr<ISensor> _sensor;
+};
+
+class gps_win32 : public gps_common
+{
+public:
+	gps_win32 (ISensor* sensor)
+		: _sensor (sensor)
+	{ }
+
+public:
+	virtual void update () noexcept override
+	{
+		CComPtr<ISensorDataReport> report;
+		if (SUCCEEDED (_sensor->GetData (&report)))
+		{
+			PROPVARIANT plg = {}, plt = {};
+			report->GetSensorValue (SENSOR_DATA_TYPE_LONGITUDE_DEGREES, &plg);
+			report->GetSensorValue (SENSOR_DATA_TYPE_LATITUDE_DEGREES, &plt);
+
+			_state[0].longitude = plg.dblVal;
+			_state[0].latitude = plt.dblVal;
+		}
+		else _state[0].longitude = _state[0].latitude = 0;
+	}
+
+private:
+	CComPtr<ISensor> _sensor;
 };
 
 class __win32_application : public dseed::application
@@ -280,14 +370,61 @@ public:
 	{
 		g_sharedApp = this;
 
+		CComPtr<ISensorManager> sensorManager;
+		CComPtr<ISensor> accelerometerSensor, gyroSensor, gpsSensor;
+		if (SUCCEEDED (CoCreateInstance (CLSID_SensorManager, NULL, CLSCTX_INPROC_SERVER,
+			__uuidof(ISensorManager), (void**) &sensorManager)))
+		{
+			CComPtr<ISensorCollection> sensors;
+			ULONG count;
+
+			if (SUCCEEDED (sensorManager->GetSensorsByType (SENSOR_TYPE_LOCATION_GPS, &sensors)))
+			{
+				if (SUCCEEDED (sensors->GetCount (&count)))
+				{
+					if (count > 0)
+					{
+						sensors->GetAt (0, &gpsSensor);
+						gpsSensor->SetEventSink (nullptr);
+					}
+				}
+				sensors = nullptr;
+			}
+
+			if (SUCCEEDED (sensorManager->GetSensorsByType (SENSOR_TYPE_ACCELEROMETER_3D, &sensors)))
+			{
+				if (SUCCEEDED (sensors->GetCount (&count)))
+				{
+					if (count > 0)
+					{
+						sensors->GetAt (0, &accelerometerSensor);
+						accelerometerSensor->SetEventSink (nullptr);
+					}
+				}
+				sensors = nullptr;
+			}
+
+			if (SUCCEEDED (sensorManager->GetSensorsByType (SENSOR_TYPE_GYROMETER_3D, &sensors)))
+			{
+				if (SUCCEEDED (sensors->GetCount (&count)))
+				{
+					if (count > 0)
+					{
+						sensors->GetAt (0, &gyroSensor);
+						gyroSensor->SetEventSink (nullptr);
+					}
+				}
+				sensors = nullptr;
+			}
+		}
+
 		*&_inputDevices[dseed::inputdevice_keyboard] = new keyboard_common ();
 		*&_inputDevices[dseed::inputdevice_mouse] = new mouse_win32 ();
 		*&_inputDevices[dseed::inputdevice_gamepad] = new gamepad_win32 ();
 		*&_inputDevices[dseed::inputdevice_touchpanel] = new touchpanel_common ();
-		*&_inputDevices[dseed::inputdevice_accelerometer] = new accelerometer_common ();
-		*&_inputDevices[dseed::inputdevice_gyroscope] = new gyroscope_common ();
-		*&_inputDevices[dseed::inputdevice_gps] = nullptr;
-		*&_inputDevices[dseed::inputdevice_headtracker] = nullptr;
+		*&_inputDevices[dseed::inputdevice_accelerometer] = (accelerometerSensor != nullptr) ? new accelerometer_win32 (accelerometerSensor) : nullptr;
+		*&_inputDevices[dseed::inputdevice_gyroscope] = (gyroSensor != nullptr) ? new gyroscope_win32 (gyroSensor) : nullptr;
+		*&_inputDevices[dseed::inputdevice_gps] = (gpsSensor != nullptr) ? new gps_win32 (gpsSensor) : nullptr;
 	}
 	~__win32_application ()
 	{
@@ -324,7 +461,7 @@ public:
 		if (_hWnd == nullptr)
 			return dseed::error_invalid_op;
 
-		if (type > dseed::inputdevice_headtracker || type < dseed::inputdevice_keyboard)
+		if (type > dseed::inputdevice_gps || type < dseed::inputdevice_keyboard)
 			return dseed::error_invalid_args;
 
 		if (_inputDevices[(int)type] == nullptr)
