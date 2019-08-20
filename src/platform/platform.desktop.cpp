@@ -162,6 +162,7 @@ class gps_common : public inputdevice_internal_template1<dseed::gps_state, dseed
 #if PLATFORM_WINDOWS
 constexpr LPCWSTR WINDOW_CLASSNAME = L"libdseed";
 constexpr DWORD WINDOW_STYLE_WINDOWED = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+constexpr DWORD WINDOW_STYLE_SIZABLE_WINDOWED = WS_OVERLAPPEDWINDOW;
 constexpr DWORD WINDOW_STYLE_FRAMELESS_FULLSCREEN = WS_VISIBLE | WS_POPUP | WS_CHILDWINDOW | WS_SYSMENU;
 
 bool update_rawinput (HWND hWnd, bool no_legacy)
@@ -299,7 +300,7 @@ public:
 			report->GetSensorValue (SENSOR_DATA_TYPE_ACCELERATION_Y_G, &py);
 			report->GetSensorValue (SENSOR_DATA_TYPE_ACCELERATION_Z_G, &pz);
 
-			_state[0].accelerometer = dseed::float3 (px.dblVal, py.dblVal, pz.dblVal);
+			_state[0].accelerometer = dseed::float3 ((float)px.dblVal, (float)py.dblVal, (float)pz.dblVal);
 		}
 		else _state[0].accelerometer = dseed::float3 ();
 	}
@@ -326,7 +327,7 @@ public:
 			report->GetSensorValue (SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Y_DEGREES_PER_SECOND, &py);
 			report->GetSensorValue (SENSOR_DATA_TYPE_ANGULAR_VELOCITY_Z_DEGREES_PER_SECOND, &pz);
 
-			_state[0].gyroscope = dseed::float3 (px.dblVal, py.dblVal, pz.dblVal);
+			_state[0].gyroscope = dseed::float3 ((float)px.dblVal, (float)py.dblVal, (float)pz.dblVal);
 		}
 		else _state[0].gyroscope = dseed::float3 ();
 	}
@@ -421,14 +422,14 @@ public:
 		*&_inputDevices[dseed::inputdevice_keyboard] = new keyboard_common ();
 		*&_inputDevices[dseed::inputdevice_mouse] = new mouse_win32 ();
 		*&_inputDevices[dseed::inputdevice_gamepad] = new gamepad_win32 ();
-		*&_inputDevices[dseed::inputdevice_touchpanel] = new touchpanel_common ();
+		*&_inputDevices[dseed::inputdevice_touchpanel] = (GetSystemMetrics (SM_MAXIMUMTOUCHES) > 0) ? new touchpanel_common () : nullptr;
 		*&_inputDevices[dseed::inputdevice_accelerometer] = (accelerometerSensor != nullptr) ? new accelerometer_win32 (accelerometerSensor) : nullptr;
 		*&_inputDevices[dseed::inputdevice_gyroscope] = (gyroSensor != nullptr) ? new gyroscope_win32 (gyroSensor) : nullptr;
 		*&_inputDevices[dseed::inputdevice_gps] = (gpsSensor != nullptr) ? new gps_win32 (gpsSensor) : nullptr;
 	}
 	~__win32_application ()
 	{
-		UnregisterClass (WINDOW_CLASSNAME, GetModuleHandle (nullptr));
+		UnregisterClassW (WINDOW_CLASSNAME, GetModuleHandle (nullptr));
 	}
 
 public:
@@ -526,6 +527,8 @@ public:
 
 		if ((style & WINDOW_STYLE_WINDOWED) == WINDOW_STYLE_WINDOWED)
 			* mode = dseed::windowmode_windowed;
+		else if ((style & WINDOW_STYLE_SIZABLE_WINDOWED) == WINDOW_STYLE_SIZABLE_WINDOWED)
+			* mode = dseed::windowmode_sizable_windowed;
 		else if ((style & WINDOW_STYLE_FRAMELESS_FULLSCREEN) == WINDOW_STYLE_FRAMELESS_FULLSCREEN)
 			* mode = dseed::windowmode_borderless_fullscreen;
 		else
@@ -542,6 +545,10 @@ public:
 		{
 		case dseed::windowmode_windowed:
 			::SetWindowLong (_hWnd, GWL_STYLE, WINDOW_STYLE_WINDOWED);
+			break;
+
+		case dseed::windowmode_sizable_windowed:
+			::SetWindowLong (_hWnd, GWL_STYLE, WINDOW_STYLE_SIZABLE_WINDOWED);
 			break;
 
 		case dseed::windowmode_borderless_fullscreen:
@@ -573,18 +580,18 @@ public:
 public:
 	virtual dseed::error_t run (dseed::event_handler* handler) override
 	{
-		WNDCLASS wndClass =
+		WNDCLASSW wndClass =
 		{
 			NULL, __win32_application::WndProc, 0, 0, GetModuleHandle (nullptr),
 			LoadIcon (NULL, IDI_APPLICATION), LoadCursor (NULL, IDC_ARROW),
 			NULL, nullptr, WINDOW_CLASSNAME
 		};
-		if (RegisterClass (&wndClass) == INVALID_ATOM)
+		if (RegisterClassW (&wndClass) == INVALID_ATOM)
 			return dseed::error_fail;
 
 		set_event_handler (handler);
 
-		RECT clientRect = { 0, 0, 640, 360 };
+		RECT clientRect = { 0, 0, 800, (int)(800 * (360.0f / 640)) };
 		AdjustWindowRect (&clientRect, WINDOW_STYLE_WINDOWED, FALSE);
 
 		int width = clientRect.right - clientRect.left,
@@ -592,7 +599,7 @@ public:
 			x = GetSystemMetrics (SM_CXSCREEN) / 2 - width / 2,
 			y = GetSystemMetrics (SM_CYSCREEN) / 2 - height / 2;
 
-		_hWnd = CreateWindowW (WINDOW_CLASSNAME, L"DSeed Window", WINDOW_STYLE_WINDOWED,
+		_hWnd = CreateWindowW (WINDOW_CLASSNAME, L"DSeed Window", WINDOW_STYLE_SIZABLE_WINDOWED,
 			x, y, width, height, nullptr, nullptr, GetModuleHandle (nullptr), nullptr);
 
 		if (_hWnd == nullptr)
@@ -607,7 +614,7 @@ public:
 		dseed::timespan_t lastTime = dseed::timespan_t::current_ticks (), currentTime;
 		do
 		{
-			while (::PeekMessage (&msg, nullptr, 0, 0, PM_REMOVE))
+			while (::PeekMessageW (&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				if (msg.message == WM_QUIT)
 				{
@@ -616,7 +623,7 @@ public:
 				}
 
 				::TranslateMessage (&msg);
-				::DispatchMessage (&msg);
+				::DispatchMessageW (&msg);
 			}
 
 			for (dseed::auto_object<inputdevice_internal>& inputdevice : _inputDevices)
@@ -657,7 +664,7 @@ private:
 			app->_handler->closing (cancel);
 			if (cancel)
 				return 0;
-			return DefWindowProc (hWnd, uMsg, wParam, lParam);
+			return DefWindowProcW (hWnd, uMsg, wParam, lParam);
 		}
 		break;
 
@@ -733,13 +740,15 @@ private:
 
 		case WM_TOUCH:
 		{
+			dseed::auto_object<touchpanel_common> touchpanel;
+			if (dseed::failed (app->input_device (dseed::inputdevice_touchpanel, reinterpret_cast<dseed::inputdevice * *>(&touchpanel)))
+				|| touchpanel == nullptr)
+				return DefWindowProcW (hWnd, uMsg, wParam, lParam);
+			
 			UINT touchInputsCount = LOWORD (wParam);
 			std::shared_ptr<TOUCHINPUT[]> touchInputs (new TOUCHINPUT[touchInputsCount]);
 			if (GetTouchInputInfo ((HTOUCHINPUT)lParam, touchInputsCount, &touchInputs[0], sizeof (TOUCHINPUT)))
 			{
-				dseed::auto_object<touchpanel_common> touchpanel;
-				app->input_device (dseed::inputdevice_touchpanel, reinterpret_cast<dseed::inputdevice * *>(&touchpanel));
-
 				for (UINT i = 0; i < touchInputsCount; ++i)
 				{
 					TOUCHINPUT& ti = touchInputs[i];
@@ -760,11 +769,11 @@ private:
 				}
 				CloseTouchInputHandle ((HTOUCHINPUT)lParam);
 			}
-			else return DefWindowProc (hWnd, uMsg, wParam, lParam);
+			else return DefWindowProcW (hWnd, uMsg, wParam, lParam);
 		}
 		break;
 
-		default: return DefWindowProc (hWnd, uMsg, wParam, lParam);
+		default: return DefWindowProcW (hWnd, uMsg, wParam, lParam);
 		}
 
 		return 0;

@@ -29,6 +29,7 @@ namespace dseed
 	{
 		windowmode_unknown,
 		windowmode_windowed,
+		windowmode_sizable_windowed,
 		windowmode_borderless_fullscreen,
 	};
 
