@@ -268,7 +268,11 @@ SET ( DSEED_BUILD_FILES
 
 	# Platform Dependencies
 	src/platform/platform.cpp
-	src/platform/platform.desktop.cpp
+	src/platform/platform.win32.cpp
+	src/platform/platform.uwp.cpp
+	src/platform/platform.macos.mm
+	src/platform/platform.ios.mm
+	src/platform/platform.android.cpp
 )
 
 link_directories ( ${INSTALL_LIB_DIR} )

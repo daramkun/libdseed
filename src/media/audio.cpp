@@ -10,7 +10,7 @@ size_t dseed::get_audio_bytes_count (const dseed::audioformat& wf, dseed::timesp
 	return (size_t)(duration.total_seconds () * wf.bytes_per_sec);
 }
 
-DSEEDEXP size_t dseed::get_audio_bytes_count (uint32_t bytes_per_sec, dseed::timespan_t duration)
+size_t dseed::get_audio_bytes_count (uint32_t bytes_per_sec, dseed::timespan_t duration)
 {
 	return (size_t)(duration.total_seconds () * bytes_per_sec);
 }

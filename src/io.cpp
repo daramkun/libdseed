@@ -530,11 +530,11 @@ std::string ____GetAssetsDirectory ()
 #elif PLATFORM_UWP
 	wchar_t path[MAX_PATH + 1] = { 0, };
 	wcscat_s (path, MAX_PATH, Windows::ApplicationModel::Package::Current->InstalledLocation->Path->Data ());
-	if (path[wcslen (path) - 1] != KB_PATH_SEPARATOR)
+	if (path[wcslen (path) - 1] != L'\\')
 	{
 		size_t len = wcslen (path);
-		path[len] = KB_PATH_SEPARATOR;
-		path[len + 1] = '\0';
+		path[len] = L'\\';
+		path[len + 1] = L'\0';
 	}
 	//wcscat_s ( path, MAX_PATH, L"Assets\\" );
 	USES_CONVERSION;

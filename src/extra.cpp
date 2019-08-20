@@ -1,5 +1,7 @@
 #include <dseed.h>
 
+#include <unordered_map>
+
 class __memblob : public dseed::blob
 {
 public:

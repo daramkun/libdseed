@@ -23,9 +23,9 @@ void dseed::utf8_to_utf16 (const char* u8, char16_t* u16, size_t u16size)
 void dseed::utf16_to_utf8 (const char16_t* u16, char* u8, size_t u8size)
 {
 #if COMPILER_MSVC
-	int nLen = WideCharToMultiByte (CP_UTF8, 0, (LPCWSTR) u16, (int)lstrlenW ((LPCWSTR) u16), nullptr, 0, nullptr, nullptr);
+	int nLen = WideCharToMultiByte (CP_UTF8, 0, (LPCWSTR) u16, (int)wcslen ((LPCWSTR) u16), nullptr, 0, nullptr, nullptr);
 	std::shared_ptr<char[]> ret (new char[nLen + 1]);
-	WideCharToMultiByte (CP_UTF8, 0, (LPCWSTR)u16, (int)lstrlenW ((LPCWSTR)u16), &ret[0], nLen, nullptr, nullptr);
+	WideCharToMultiByte (CP_UTF8, 0, (LPCWSTR)u16, (int)wcslen ((LPCWSTR)u16), &ret[0], nLen, nullptr, nullptr);
 	ret[nLen] = '\0';
 	memcpy (u8, &ret[0], dseed::minimum ((int)u8size, nLen + 1) * sizeof (char));
 #else

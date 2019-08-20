@@ -295,6 +295,7 @@ dseed::error_t dseed::create_windows_imaging_codec_bitmap_decoder (dseed::stream
 		if (FAILED (CoCreateInstance (CLSID_WICImagingFactoryP, nullptr, CLSCTX_ALL,
 			__uuidof (IWICImagingFactoryP), (void**)& factory)))
 		{
+#if PLATFORM_WINDOWS
 			if (coinit == false)
 			{
 				if (FAILED (CoInitialize (nullptr)))
@@ -303,6 +304,7 @@ dseed::error_t dseed::create_windows_imaging_codec_bitmap_decoder (dseed::stream
 				continue;
 			}
 			else
+#endif
 				return dseed::error_platform_not_support;
 		}
 		break;

@@ -503,14 +503,8 @@ namespace dseed
 	inline vectorf_arm FASTCALL rcpvf (const vectorf_arm& v) noexcept { return vrecpeq_f32 (v); }
 	inline vectorf_arm FASTCALL roundvf (const vectorf_arm& v) noexcept
 	{
-		int32x4_t reinterpretInt = vreinterpretq_s32_f32 (v);
-		int32x4_t signExtract = vdupq_n_s32 (-2147483648);
-		int32x4_t signSignal = vandq_s32 (reinterpretInt, signExtract);
-
-		float32x4_t roundValue = vdupq_n_f32 (0.5);
-		float32x4_t plusValue = vreinterpretq_f32_s32 (vorrq_s32 (vreinterpretq_s32_f32 (roundValue), signSignal));
-
-		return vaddq_f32 (v, plusValue);
+		static vectorf_arm half (0.5f);
+		return floorvf (addvf (v, half));
 	}
 	inline vectorf_arm FASTCALL floorvf (const vectorf_arm& v) noexcept
 	{
@@ -518,7 +512,8 @@ namespace dseed
 	}
 	inline vectorf_arm FASTCALL ceilvf (const vectorf_arm& v) noexcept
 	{
-		return floorvf (addvf (v, vectorf_arm (0.99999999f)));
+		static vectorf_arm add_factor (0.99999999f);
+		return floorvf (addvf (v, add_factor));
 	}
 	inline vectorf_arm FASTCALL absvf (const vectorf_arm& v) noexcept { return vabsq_f32 (v); }
 	inline vectorf_arm FASTCALL minvf (const vectorf_arm& v1, const vectorf_arm& v2) noexcept { return vminq_f32 (v1, v2); }
