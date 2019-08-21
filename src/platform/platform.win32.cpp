@@ -637,7 +637,6 @@ using __application = __win32_application;
 dseed::error_t dseed::create_application (dseed::application** app)
 {
 	if (g_sharedApp != nullptr) return dseed::error_invalid_op;
-
 	if (app == nullptr) return dseed::error_invalid_args;
 
 	*app = g_sharedApp = new __application ();
