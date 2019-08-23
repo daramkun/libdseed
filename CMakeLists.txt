@@ -3,41 +3,68 @@ cmake_minimum_required ( VERSION 3.10 )
 INCLUDE ( GenerateExportHeader )
 INCLUDE ( CMakePackageConfigHelpers )
 
+############################################################################################
+#
+# Define Versions
+#
+############################################################################################
 SET ( DSEED_VERSION_MAJOR 1 )
 SET ( DSEED_VERSION_MINOR 0 )
 SET ( DSEED_VERSION_REVISION 0 )
 SET ( DSEED_VERSION ${DSEED_VERSION_MAJOR}.${DSEED_VERSION_MINOR}.${DSEED_VERSION_REVISION} )
 
+############################################################################################
+#
+# Define Project Informations
+#
+############################################################################################
 PROJECT ( dseed
 	VERSION ${DSEED_VERSION}
 	LANGUAGES C CXX
 	DESCRIPTION "This is Core library for personal."
 )
 
-SET ( INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables." )
-SET ( INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries." )
-SET ( INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers." )
-SET ( INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files" )
+############################################################################################
+#
+# Setting Install Pathes
+#
+############################################################################################
+SET ( INSTALL_BIN_DIR				"${CMAKE_INSTALL_PREFIX}/bin"			CACHE PATH "Installation directory for executables." )
+SET ( INSTALL_LIB_DIR				"${CMAKE_INSTALL_PREFIX}/lib"			CACHE PATH "Installation directory for libraries." )
+SET ( INSTALL_INC_DIR				"${CMAKE_INSTALL_PREFIX}/include"		CACHE PATH "Installation directory for headers." )
+SET ( INSTALL_PKGCONFIG_DIR			"${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"	CACHE PATH "Installation directory for pkgconfig (.pc) files" )
 
-OPTION ( DSEED_SKIP_INSTALL        "libdseed do not install."              OFF )
-OPTION ( DSEED_SKIP_BUILD_APP      "libdseed do not build app."            OFF )
+############################################################################################
+#
+# Setting CMake Build Options
+#
+############################################################################################
+OPTION ( DSEED_SKIP_INSTALL			"libdseed do not install."				OFF )
+OPTION ( DSEED_SKIP_BUILD_APP		"libdseed do not build app."			OFF )
 
-OPTION ( DSEED_USE_PNG             "libdseed use PNG Decode/Encode."       ON  )
-OPTION ( DSEED_USE_JPEG            "libdseed use JPEG Decode/Encode."      ON  )
-OPTION ( DSEED_USE_JPEG2000        "libdseed use JPEG2000 Decode."         ON  )
-OPTION ( DSEED_USE_WEBP            "libdseed use Webp Decode/Encode."      ON  )
-OPTION ( DSEED_USE_TIFF            "libdseed use TIFF Decode/Encode."      ON  )
-OPTION ( DSEED_USE_GIF             "libdseed use GIF Decode/Encode."       ON  )
-OPTION ( DSEED_USE_SQUISH          "libdseed use BC1~5 Decode/Encode."     ON  )
-OPTION ( DSEED_USE_ZOPFLI          "libdseed use PNG Zopfli Optimization." ON  )
+OPTION ( DSEED_USE_PNG				"libdseed use PNG Decode/Encode."		ON  )
+OPTION ( DSEED_USE_JPEG				"libdseed use JPEG Decode/Encode."		ON  )
+OPTION ( DSEED_USE_JPEG2000			"libdseed use JPEG2000 Decode."			ON  )
+OPTION ( DSEED_USE_WEBP				"libdseed use Webp Decode/Encode."		ON  )
+OPTION ( DSEED_USE_TIFF				"libdseed use TIFF Decode/Encode."		ON  )
+OPTION ( DSEED_USE_GIF				"libdseed use GIF Decode/Encode."		ON  )
+OPTION ( DSEED_USE_SQUISH			"libdseed use BC1~5 Decode/Encode."		ON  )
+OPTION ( DSEED_USE_ZOPFLI			"libdseed use PNG Zopfli Optimization."	ON  )
 
-OPTION ( DSEED_USE_VORBIS          "libdseed use Vorbis Decode/Encode."    ON  )
-OPTION ( DSEED_USE_OPUS            "libdseed use Opus Decode/Encode."      ON  )
-OPTION ( DSEED_USE_FLAC            "libdseed use FLAC Decode."             ON  )
+OPTION ( DSEED_USE_VORBIS			"libdseed use Vorbis Decode/Encode."	ON  )
+OPTION ( DSEED_USE_OPUS				"libdseed use Opus Decode/Encode."		ON  )
+OPTION ( DSEED_USE_FLAC				"libdseed use FLAC Decode."				ON  )
 
-OPTION ( DSEED_USE_BITMAP_ENCODERS "libdseed use Encoder APIs."            ON  )
-OPTION ( DSEED_USE_MEDIA_ENCODERS  "libdseed use Encoder APIs."            ON  )
+OPTION ( DSEED_USE_BITMAP_ENCODERS	"libdseed use Encoder APIs."			ON  )
+OPTION ( DSEED_USE_MEDIA_ENCODERS	"libdseed use Encoder APIs."			ON  )
 
+SET_PROPERTY ( GLOBAL PROPERTY USE_FOLDERS ON )
+
+############################################################################################
+#
+# Preconfiguration External Libraries
+#
+############################################################################################
 IF ( ${DSEED_USE_PNG} )
 	FIND_PACKAGE ( zlib COMPONENTS zlibstatic )
 	FIND_PACKAGE ( png COMPONENTS png_static )
@@ -172,6 +199,11 @@ IF ( ${DSEED_USE_FLAC} )
 	ENDIF ()
 ENDIF ()
 
+############################################################################################
+#
+# Define Engine Sources
+#
+############################################################################################
 SET ( DSEED_BUILD_FILES 
 	# Library Core
     src/dseed.cpp
@@ -275,6 +307,11 @@ SET ( DSEED_BUILD_FILES
 	src/platform/platform.android.cpp
 )
 
+############################################################################################
+#
+# Define Linking Libraries
+#
+############################################################################################
 link_directories ( ${INSTALL_LIB_DIR} )
 
 SET ( DSEED_DEFINITIONS  )
@@ -289,6 +326,7 @@ IF ( ${CMAKE_SYSTEM_NAME} MATCHES "$Windows^" OR ${CMAKE_SYSTEM_NAME} MATCHES "M
 	SET ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib )
 ELSEIF ( ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore" )
+	SET ( PLATFORM STORE )
 	LIST ( APPEND DSEED_DEFINITIONS -DUNICODE )
 	SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZW" )
 	# Find Windows.winmd
@@ -388,6 +426,11 @@ IF ( MSVC )
 	LIST ( APPEND DSEED_DEFINITIONS -DDSEED_WINDOWS_DLL_EXPORT )
 ENDIF ()
 
+############################################################################################
+#
+# Build Engine
+#
+############################################################################################
 ADD_LIBRARY ( dseed ${DSEED_BUILD_TYPE} ${DSEED_BUILD_FILES} )
 TARGET_INCLUDE_DIRECTORIES (
     dseed
@@ -413,6 +456,11 @@ ENDIF ()
 
 SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
 
+############################################################################################
+#
+# Build Apps
+#
+############################################################################################
 IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 	ADD_EXECUTABLE ( dseed_test_bitmap app/test_bitmap/test.cpp )
 	TARGET_INCLUDE_DIRECTORIES ( dseed_test_bitmap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
@@ -429,22 +477,38 @@ IF ( NOT ${DSEED_SKIP_BUILD_APP} )
 	IF ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "MSYS" )
 		SET ( TARGET_TO  "WIN32" )
 	ENDIF ()
-
-	ADD_EXECUTABLE ( dseed_test_app ${TARGET_TO} app/test_app/test.cpp )
-	TARGET_INCLUDE_DIRECTORIES ( dseed_test_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-	TARGET_LINK_LIBRARIES ( dseed_test_app dseed )
-	if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+	
+	SET ( TEST_APP_NAME dseed_test_app )
+	SET ( TEST_APP_PACKAGE_GUID "6514377e-dfd4-4cdb-80df-4e0366346eff" )
+	ADD_EXECUTABLE ( ${TEST_APP_NAME} ${TARGET_TO} app/test_app/test.cpp )
+	TARGET_INCLUDE_DIRECTORIES ( ${TEST_APP_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
+	TARGET_LINK_LIBRARIES ( ${TEST_APP_NAME} dseed )
+	IF ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
 		MESSAGE ( "Enable add manifest to test_app." )
-		SET ( TEST_APP_NAME "dseed_test_app" )
 		#ADD_CUSTOM_COMMAND (
 		#	TARGET dseed_test_app
 		#	POST_BUILD
 		#	COMMAND "mt.exe" -nologo -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.manifest\" -outputresource:\"$<TARGET_FILE:${TEST_APP_NAME}>\"\;\#1
 		#	COMMENT "Adding Win32 manifest resource..." 
 		#)
-	endif()
+	ENDIF ()
+
+	IF ( ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore" )
+		SET_PROPERTY ( TARGET ${TEST_APP_NAME} PROPERTY VS_WINRT_COMPONENT TRUE )
+		CONFIGURE_FILE (
+			${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.appxmanifest.in
+			${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest
+			@ONLY
+		)
+		SET_PROPERTY ( SOURCE ${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest PROPERTY VS_DEPLOYMENT_CONTENT 1 )
+	ENDIF ()
 ENDIF ()
 
+############################################################################################
+#
+# Installation
+#
+############################################################################################
 IF ( NOT ${DSEED_SKIP_INSTALL} )
 	generate_export_header ( dseed )
 	SET_PROPERTY ( TARGET dseed PROPERTY VERSION ${DSEED_VERSION} )

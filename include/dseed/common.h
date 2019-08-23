@@ -248,7 +248,7 @@ namespace dseed
 #elif PLATFORM_UWP
 #	define ENTRYPOINT_ATTRIBUTE								[Platform::MTAThread]
 #	define ENTRYPOINT_RETURNTYPE							int
-#	define ENTRYPOINT_CALLTYPE								
+#	define ENTRYPOINT_CALLTYPE								__cdecl
 #	define ENTRYPOINT_NAME									main
 #	define ENTRYPOINT_ARGUMENTS								Platform::Array<Platform::String^>^
 #else

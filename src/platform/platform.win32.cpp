@@ -435,7 +435,7 @@ public:
 
 		set_event_handler (handler);
 
-		RECT clientRect = { 0, 0, 800, (int)(800 * (360.0f / 640)) };
+		RECT clientRect = { 0, 0, 800, (int)(800 * (GetSystemMetrics (SM_CYSCREEN) / (float)GetSystemMetrics (SM_CXSCREEN))) };
 		AdjustWindowRect (&clientRect, WINDOW_STYLE_WINDOWED, FALSE);
 
 		int width = clientRect.right - clientRect.left,
@@ -632,14 +632,12 @@ private:
 	dseed::auto_object<dseed::event_handler> _handler;
 };
 
-using __application = __win32_application;
-
 dseed::error_t dseed::create_application (dseed::application** app)
 {
 	if (g_sharedApp != nullptr) return dseed::error_invalid_op;
 	if (app == nullptr) return dseed::error_invalid_args;
 
-	*app = g_sharedApp = new __application ();
+	*app = g_sharedApp = new __win32_application ();
 	if (*app == nullptr)
 		return dseed::error_out_of_memory;
 
