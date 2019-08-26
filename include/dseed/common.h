@@ -32,8 +32,8 @@ using namespace std::string_literals;
 #if ( defined ( _WINDOWS ) || defined ( _WIN32 ) || defined ( _WIN64 ) ) \
 	&& !( PLATFORM_APPLE || PLATFORM_GOOGLE || PLATFORM_UNIX || PLATFORM_WEBASSEMBLY )
 #	include <Windows.h>
-#	define PLATFORM_UWP										( WINAPI_FAMILY_PARTITION ( WINAPI_PARTITION_PC_APP ) )
-#	define PLATFORM_WINDOWS									( WINAPI_FAMILY_PARTITION ( WINAPI_PARTITION_DESKTOP ) && !PLATFORM_UWP )
+#	define PLATFORM_UWP										( defined ( WINAPI_FAMILY ) && ( WINAPI_FAMILY == WINAPI_FAMILY_APP ) )
+#	define PLATFORM_WINDOWS									( !defined ( WINAPI_FAMILY ) || ( WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP ) )
 #	if PLATFORM_UWP
 #		include <wrl.h>
 #	endif
@@ -251,6 +251,12 @@ namespace dseed
 #	define ENTRYPOINT_CALLTYPE								__cdecl
 #	define ENTRYPOINT_NAME									main
 #	define ENTRYPOINT_ARGUMENTS								Platform::Array<Platform::String^>^
+#elif PLATFORM_ANDROID
+#	define ENTRYPOINT_ATTRIBUTE								
+#	define ENTRYPOINT_RETURNTYPE							void
+#	define ENTRYPOINT_CALLTYPE								
+#	define ENTRYPOINT_NAME									android_main
+#	define ENTRYPOINT_ARGUMENTS								struct android_app* app
 #else
 #	define ENTRYPOINT_ATTRIBUTE								
 #	define ENTRYPOINT_RETURNTYPE							int

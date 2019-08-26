@@ -69,13 +69,28 @@ namespace dseed
 
 	class pipeline;
 
+	enum clearflag_t
+	{
+		clearflag_none = 0,
+
+		clearflag_color = 1,
+		clearflag_depth = 2,
+		clearflag_stencil = 4,
+
+		clearflag_all = clearflag_color | clearflag_depth | clearflag_stencil
+	};
+
 	class DSEEDEXP vga_context : public object
 	{
 	public:
-		virtual error_t set_rendertarget (rendertarget** rendertargets, size_t rendertargetCount) = 0;
+		virtual error_t set_rendertarget (clearflag_t cf, rendertarget** rendertargets, size_t rendertargetCount, rendertarget* depthstencil) = 0;
+		virtual error_t clear_rendertargets (const rgba& color, float depth, float stencil) = 0;
 
 	public:
 		virtual error_t set_viewport (viewport* viewports, size_t viewportCount) = 0;
+
+	public:
+
 	};
 
 	class DSEEDEXP vga_device : public object, public wrapped
@@ -85,6 +100,7 @@ namespace dseed
 
 	public:
 		virtual bool is_support_format (pixelformat_t pf) = 0;
+		virtual bool is_support_parallel_render () = 0;
 
 	public:
 		virtual error_t create_texture1d (int32_t size, pixelformat_t pf, texture1d** texture) = 0;
@@ -113,7 +129,7 @@ namespace dseed
 		virtual error_t create_program (computeshader* cs, program** program) = 0;
 
 	public:
-
+		virtual error_t create_context (vga_context** contex) = 0;
 
 	public:
 		virtual error_t present () = 0;
