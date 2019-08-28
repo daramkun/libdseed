@@ -305,6 +305,10 @@ SET ( DSEED_BUILD_FILES
 	src/platform/platform.macos.mm
 	src/platform/platform.ios.mm
 	src/platform/platform.android.cpp
+
+	# Graphics
+	src/graphics/graphics.dxgi.cpp
+	src/graphics/graphics.d3d11.cpp
 )
 
 ############################################################################################

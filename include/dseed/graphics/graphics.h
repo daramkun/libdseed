@@ -10,12 +10,6 @@ namespace dseed
 		fraction refresh_rate;
 	};
 
-	struct DSEEDEXP viewport
-	{
-		rectanglef viewport;
-		float znear, zfar;
-	};
-
 	class DSEEDEXP display : public object, public wrapped
 	{
 	public:
@@ -24,6 +18,9 @@ namespace dseed
 	public:
 		virtual error_t displaymode (int index, displaymode* mode) = 0;
 		virtual size_t displaymode_count () = 0;
+
+	public:
+		virtual error_t refresh () = 0;
 	};
 
 	class DSEEDEXP vga_adapter : public object, public wrapped
@@ -34,6 +31,9 @@ namespace dseed
 	public:
 		virtual error_t display (int index, display** display) = 0;
 		virtual size_t display_count () = 0;
+
+	public:
+		virtual error_t refresh () = 0;
 	};
 
 	class DSEEDEXP vga_adapter_enumerator : public object
@@ -41,6 +41,9 @@ namespace dseed
 	public:
 		virtual error_t vga_adapter (int index, vga_adapter** adapter) = 0;
 		virtual size_t vga_adapter_count () = 0;
+
+	public:
+		virtual error_t refresh () = 0;
 	};
 
 	class texture;
@@ -80,6 +83,12 @@ namespace dseed
 		clearflag_all = clearflag_color | clearflag_depth | clearflag_stencil
 	};
 
+	struct DSEEDEXP viewport
+	{
+		rectanglef viewport;
+		float znear, zfar;
+	};
+
 	class DSEEDEXP vga_context : public object
 	{
 	public:
@@ -90,7 +99,11 @@ namespace dseed
 		virtual error_t set_viewport (viewport* viewports, size_t viewportCount) = 0;
 
 	public:
+		virtual error_t draw (int vertexCount, int startIndex) = 0;
+		virtual error_t drawIndexed (int indexCount, int startIndex) = 0;
 
+		virtual error_t drawInstanced (int vertexCountPerInstance, int instanceCount, int startIndex) = 0;
+		virtual error_t drawIndexedInstanced (int indexCountPerInstance, int instanceCount, int startIndex) = 0;
 	};
 
 	class DSEEDEXP vga_device : public object, public wrapped
@@ -135,5 +148,8 @@ namespace dseed
 		virtual error_t present () = 0;
 	};
 }
+
+#include "graphics.dxgi.h"
+#include "graphics.d3d11.h"
 
 #endif
