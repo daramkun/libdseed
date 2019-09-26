@@ -74,6 +74,13 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 
+	uint8_t sig[3];
+	stream->read (sig, 3);
+	stream->seek (dseed::seekorigin_begin, 0);
+
+	if (sig[0] != 0xff || sig[1] != 0xd8 || sig[2] != 0xff)
+		return dseed::error_fail;
+
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
 
@@ -81,7 +88,7 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 	jpeg_create_decompress (&cinfo);
 
 	jpeg_stream_src (&cinfo, stream);
-
+	
 	int r = jpeg_read_header (&cinfo, 1);
 	if (r != JPEG_HEADER_OK)
 		return dseed::error_fail;

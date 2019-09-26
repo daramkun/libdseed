@@ -83,14 +83,6 @@ dseed::error_t dseed::histogram_equalization (histogram* histogram)
 	}
 	histogram->calced_table = true;
 
-	memset (histogram->histogram, 0, sizeof (histogram->histogram));
-
-	for (int i = 0; i < 256; ++i)
-		++histogram->histogram[histogram->histogram_table[i]];
-
-	for (int i = 0; i < 256; ++i)
-		histogram->histogram[i] = (int)((histogram->histogram[i] / 255.0f) * histogram->total_pixels);
-
 	return dseed::error_good;
 }
 
