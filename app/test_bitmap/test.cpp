@@ -46,15 +46,23 @@ int main (int argc, char* argv[])
 				return -8;
 			
 			dseed::auto_object<dseed::bitmap> reformated4;
-			if (dseed::failed (dseed::reformat_bitmap (reformated3, dseed::pixelformat_rgba8888, &reformated4)))
+			if (dseed::failed (dseed::reformat_bitmap (reformated3, dseed::pixelformat_hsva8888, &reformated4)))
 				return -9;
+
+			dseed::auto_object<dseed::bitmap> reformated5;
+			if (dseed::failed (dseed::bitmap_auto_histogram_equalization (reformated4, dseed::histogram_color_third, 0, &reformated5)))
+				return -10;
+
+			dseed::auto_object<dseed::bitmap> reformated6;
+			if (dseed::failed (dseed::reformat_bitmap (reformated5, dseed::pixelformat_rgba8888, &reformated6)))
+				return -11;
 			
 			dseed::timespan_t end = dseed::timespan_t::current_ticks ();
 			printf ("Reformat time: %lf\n", (end - start).total_seconds ());
 
 			{
-				if (dseed::failed (encoder->encode_frame (/**/reformated4/**//*bitmap/**/, duration)))
-					return -10;
+				if (dseed::failed (encoder->encode_frame (/**/reformated6/**//*bitmap/**/, duration)))
+					return -12;
 			}
 		}
 

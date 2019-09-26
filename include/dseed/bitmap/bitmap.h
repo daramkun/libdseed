@@ -218,6 +218,8 @@ namespace dseed
 	DSEEDEXP error_t histogram_equalization (histogram* histogram);
 	// Apply Histogram to Bitmap
 	DSEEDEXP error_t bitmap_apply_histogram (dseed::bitmap* original, histogram_color_t color, uint32_t depth, const histogram* histogram, dseed::bitmap** bitmap);
+	// Bitmap Processing to Generate Histogram, Histogram Equalization, Apply Histogram
+	DSEEDEXP error_t bitmap_auto_histogram_equalization (dseed::bitmap* original, histogram_color_t color, uint32_t depth, dseed::bitmap** bitmap);
 
 	// Bitmap Binary Operation
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.

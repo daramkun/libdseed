@@ -79,7 +79,7 @@ dseed::error_t dseed::histogram_equalization (histogram* histogram)
 	{
 		int current = histogram->histogram[i];
 		total += current;
-		histogram->histogram_table[i] = (int)round (total / (double)histogram->total_pixels);
+		histogram->histogram_table[i] = (int)round (total / (double)histogram->total_pixels * 255);
 	}
 	histogram->calced_table = true;
 
@@ -171,6 +171,22 @@ dseed::error_t dseed::bitmap_apply_histogram (dseed::bitmap* original, histogram
 		return dseed::error_fail;
 
 	*bitmap = temp.detach ();
+
+	return dseed::error_good;
+}
+
+dseed::error_t dseed::bitmap_auto_histogram_equalization (dseed::bitmap* original, histogram_color_t color, uint32_t depth, dseed::bitmap** bitmap)
+{
+	dseed::histogram histogram = {};
+
+	if (dseed::failed (dseed::bitmap_generate_histogram (original, color, depth, &histogram)))
+		return dseed::error_fail;
+
+	if (dseed::failed (dseed::histogram_equalization (&histogram)))
+		return dseed::error_fail;
+
+	if (dseed::failed (dseed::bitmap_apply_histogram (original, color, depth, &histogram, bitmap)))
+		return dseed::error_fail;
 
 	return dseed::error_good;
 }

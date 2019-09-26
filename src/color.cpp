@@ -11,12 +11,14 @@ size_t dseed::get_bitmap_stride (dseed::pixelformat_t format, int32_t width) noe
 	case pixelformat_rgba8888:
 	case pixelformat_bgra8888:
 	case pixelformat_yuva8888:
+	case pixelformat_hsva8888:
 	case pixelformat_grayscalef:
 		return width * 4;
 
 	case pixelformat_rgb888:
 	case pixelformat_bgr888:
 	case pixelformat_yuv888:
+	case pixelformat_hsv888:
 		return 4 * ((width * ((24 + 7) / 8) + 3) / 4);
 
 	case pixelformat_bgra4444:
@@ -52,6 +54,8 @@ size_t dseed::get_bitmap_plane_size (dseed::pixelformat_t format, int32_t width,
 	case pixelformat_grayscalef:
 	case pixelformat_yuv888:
 	case pixelformat_yuva8888:
+	case pixelformat_hsv888:
+	case pixelformat_hsva8888:
 		return get_bitmap_stride (format, width) * height;
 
 	case pixelformat_yuyv8888:
