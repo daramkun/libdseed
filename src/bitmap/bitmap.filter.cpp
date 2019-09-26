@@ -151,6 +151,8 @@ std::map<dseed::pixelformat_t, ftfn> g_resizes = {
 	{ dseed::pixelformat_grayscalef, filter_bitmap<dseed::grayscalef> },
 	{ dseed::pixelformat_yuva8888, filter_bitmap<dseed::yuva> },
 	{ dseed::pixelformat_yuv888, filter_bitmap<dseed::yuv> },
+	{ dseed::pixelformat_hsva8888, filter_bitmap<dseed::hsva> },
+	{ dseed::pixelformat_hsv888, filter_bitmap<dseed::hsv> },
 };
 
 dseed::error_t dseed::filter_bitmap (dseed::bitmap* original, const dseed::bitmap_filter_mask& mask, dseed::bitmap** bitmap)

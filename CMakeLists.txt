@@ -240,6 +240,7 @@ SET ( DSEED_BUILD_FILES
 	src/bitmap/bitmap.filter.cpp
 	src/bitmap/bitmap.flip.cpp
 	src/bitmap/bitmap.operation.cpp
+	src/bitmap/bitmap.histogram.cpp
 
 	# Bitmap Decoders with Non-external Library
 	src/bitmap/decoders/bitmap.decoder.wic.cpp
@@ -328,7 +329,7 @@ IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" OR ${CMAKE_SYSTEM_NAME} STREQUAL "M
 	SET ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	SET ( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	SET ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
-	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib )
+	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib dxgi.lib d3d11.lib )
 ELSEIF ( ${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore" )
 	SET ( PLATFORM STORE )
 	LIST ( APPEND DSEED_DEFINITIONS -DUNICODE )

@@ -443,6 +443,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_rgba8888, pixelformat_grayscalef), pixelconv_plaincolor<rgba, grayscalef> },
 	{ pctp (pixelformat_rgba8888, pixelformat_yuva8888), pixelconv_plaincolor<rgba, yuva> },
 	{ pctp (pixelformat_rgba8888, pixelformat_yuv888), pixelconv_plaincolor<rgba, yuv> },
+	{ pctp (pixelformat_rgba8888, pixelformat_hsva8888), pixelconv_plaincolor<rgba, hsva> },
+	{ pctp (pixelformat_rgba8888, pixelformat_hsv888), pixelconv_plaincolor<rgba, hsv> },
 
 	{ pctp (pixelformat_rgb888, pixelformat_rgba8888), pixelconv_plaincolor<rgb, rgba> },
 	{ pctp (pixelformat_rgb888, pixelformat_rgbaf), pixelconv_plaincolor<rgb, rgbaf> },
@@ -454,6 +456,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_rgb888, pixelformat_grayscalef), pixelconv_plaincolor<rgb, grayscalef> },
 	{ pctp (pixelformat_rgb888, pixelformat_yuva8888), pixelconv_plaincolor<rgb, yuva> },
 	{ pctp (pixelformat_rgb888, pixelformat_yuv888), pixelconv_plaincolor<rgb, yuv> },
+	{ pctp (pixelformat_rgb888, pixelformat_hsva8888), pixelconv_plaincolor<rgb, hsva> },
+	{ pctp (pixelformat_rgb888, pixelformat_hsv888), pixelconv_plaincolor<rgb, hsv> },
 
 	{ pctp (pixelformat_rgbaf, pixelformat_rgba8888), pixelconv_plaincolor<rgbaf, rgba> },
 	{ pctp (pixelformat_rgbaf, pixelformat_rgb888), pixelconv_plaincolor<rgbaf, rgb> },
@@ -465,6 +469,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_rgbaf, pixelformat_grayscalef), pixelconv_plaincolor<rgbaf, grayscalef> },
 	{ pctp (pixelformat_rgbaf, pixelformat_yuva8888), pixelconv_plaincolor<rgbaf, yuva> },
 	{ pctp (pixelformat_rgbaf, pixelformat_yuv888), pixelconv_plaincolor<rgbaf, yuv> },
+	{ pctp (pixelformat_rgbaf, pixelformat_hsva8888), pixelconv_plaincolor<rgbaf, hsva> },
+	{ pctp (pixelformat_rgbaf, pixelformat_hsv888), pixelconv_plaincolor<rgbaf, hsv> },
 
 	{ pctp (pixelformat_bgra8888, pixelformat_rgba8888), pixelconv_plaincolor<bgra, rgba> },
 	{ pctp (pixelformat_bgra8888, pixelformat_rgb888), pixelconv_plaincolor<bgra, rgb> },
@@ -476,6 +482,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgra8888, pixelformat_grayscalef), pixelconv_plaincolor<bgra, grayscalef> },
 	{ pctp (pixelformat_bgra8888, pixelformat_yuva8888), pixelconv_plaincolor<bgra, yuva> },
 	{ pctp (pixelformat_bgra8888, pixelformat_yuv888), pixelconv_plaincolor<bgra, yuv> },
+	{ pctp (pixelformat_bgra8888, pixelformat_hsva8888), pixelconv_plaincolor<bgra, hsva> },
+	{ pctp (pixelformat_bgra8888, pixelformat_hsv888), pixelconv_plaincolor<bgra, hsv> },
 
 	{ pctp (pixelformat_bgr888, pixelformat_rgba8888), pixelconv_plaincolor<bgr, rgba> },
 	{ pctp (pixelformat_bgr888, pixelformat_rgb888), pixelconv_plaincolor<bgr, rgb> },
@@ -487,6 +495,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgr888, pixelformat_grayscalef), pixelconv_plaincolor<bgr, grayscalef> },
 	{ pctp (pixelformat_bgr888, pixelformat_yuva8888), pixelconv_plaincolor<bgr, yuva> },
 	{ pctp (pixelformat_bgr888, pixelformat_yuv888), pixelconv_plaincolor<bgr, yuv> },
+	{ pctp (pixelformat_bgr888, pixelformat_hsva8888), pixelconv_plaincolor<bgr, hsva> },
+	{ pctp (pixelformat_bgr888, pixelformat_hsv888), pixelconv_plaincolor<bgr, hsv> },
 
 	{ pctp (pixelformat_bgra4444, pixelformat_rgba8888), pixelconv_plaincolor<bgra4, rgba> },
 	{ pctp (pixelformat_bgra4444, pixelformat_rgb888), pixelconv_plaincolor<bgra4, rgb> },
@@ -498,6 +508,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgra4444, pixelformat_grayscalef), pixelconv_plaincolor<bgra4, grayscalef> },
 	{ pctp (pixelformat_bgra4444, pixelformat_yuva8888), pixelconv_plaincolor<bgra4, yuva> },
 	{ pctp (pixelformat_bgra4444, pixelformat_yuv888), pixelconv_plaincolor<bgra4, yuv> },
+	{ pctp (pixelformat_bgra4444, pixelformat_hsva8888), pixelconv_plaincolor<bgra4, hsva> },
+	{ pctp (pixelformat_bgra4444, pixelformat_hsv888), pixelconv_plaincolor<bgra4, hsv> },
 
 	{ pctp (pixelformat_bgr565, pixelformat_rgba8888), pixelconv_plaincolor<bgr565, rgba> },
 	{ pctp (pixelformat_bgr565, pixelformat_rgb888), pixelconv_plaincolor<bgr565, rgb> },
@@ -509,6 +521,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgr565, pixelformat_grayscalef), pixelconv_plaincolor<bgr565, grayscalef> },
 	{ pctp (pixelformat_bgr565, pixelformat_yuva8888), pixelconv_plaincolor<bgr565, yuva> },
 	{ pctp (pixelformat_bgr565, pixelformat_yuv888), pixelconv_plaincolor<bgr565, yuv> },
+	{ pctp (pixelformat_bgr565, pixelformat_hsva8888), pixelconv_plaincolor<bgr565, hsva> },
+	{ pctp (pixelformat_bgr565, pixelformat_hsv888), pixelconv_plaincolor<bgr565, hsv> },
 
 	{ pctp (pixelformat_grayscale8, pixelformat_rgba8888), pixelconv_plaincolor<grayscale, rgba> },
 	{ pctp (pixelformat_grayscale8, pixelformat_rgb888), pixelconv_plaincolor<grayscale, rgb> },
@@ -520,6 +534,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_grayscale8, pixelformat_grayscalef), pixelconv_plaincolor<grayscale, grayscalef> },
 	{ pctp (pixelformat_grayscale8, pixelformat_yuva8888), pixelconv_plaincolor<grayscale, yuva> },
 	{ pctp (pixelformat_grayscale8, pixelformat_yuv888), pixelconv_plaincolor<grayscale, yuv> },
+	{ pctp (pixelformat_grayscale8, pixelformat_hsva8888), pixelconv_plaincolor<grayscale, hsva> },
+	{ pctp (pixelformat_grayscale8, pixelformat_hsv888), pixelconv_plaincolor<grayscale, hsv> },
 
 	{ pctp (pixelformat_grayscalef, pixelformat_rgba8888), pixelconv_plaincolor<grayscalef, rgba> },
 	{ pctp (pixelformat_grayscalef, pixelformat_rgb888), pixelconv_plaincolor<grayscalef, rgb> },
@@ -531,6 +547,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_grayscalef, pixelformat_grayscale8), pixelconv_plaincolor<grayscalef, grayscale> },
 	{ pctp (pixelformat_grayscalef, pixelformat_yuva8888), pixelconv_plaincolor<grayscalef, yuva> },
 	{ pctp (pixelformat_grayscalef, pixelformat_yuv888), pixelconv_plaincolor<grayscalef, yuv> },
+	{ pctp (pixelformat_grayscalef, pixelformat_hsva8888), pixelconv_plaincolor<grayscalef, hsva> },
+	{ pctp (pixelformat_grayscalef, pixelformat_hsv888), pixelconv_plaincolor<grayscalef, hsv> },
 
 	{ pctp (pixelformat_yuva8888, pixelformat_rgba8888), pixelconv_plaincolor<yuva, rgba> },
 	{ pctp (pixelformat_yuva8888, pixelformat_rgb888), pixelconv_plaincolor<yuva, rgb> },
@@ -542,6 +560,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_yuva8888, pixelformat_grayscale8), pixelconv_plaincolor<yuva, grayscale> },
 	{ pctp (pixelformat_yuva8888, pixelformat_grayscalef), pixelconv_plaincolor<yuva, grayscalef> },
 	{ pctp (pixelformat_yuva8888, pixelformat_yuv888), pixelconv_plaincolor<yuva, yuv> },
+	{ pctp (pixelformat_yuva8888, pixelformat_hsva8888), pixelconv_plaincolor<yuva, hsva> },
+	{ pctp (pixelformat_yuva8888, pixelformat_hsv888), pixelconv_plaincolor<yuva, hsv> },
 
 	{ pctp (pixelformat_yuv888, pixelformat_rgba8888), pixelconv_plaincolor<yuv, rgba> },
 	{ pctp (pixelformat_yuv888, pixelformat_rgb888), pixelconv_plaincolor<yuv, rgb> },
@@ -553,6 +573,34 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_yuv888, pixelformat_grayscale8), pixelconv_plaincolor<yuv, grayscale> },
 	{ pctp (pixelformat_yuv888, pixelformat_grayscalef), pixelconv_plaincolor<yuv, grayscalef> },
 	{ pctp (pixelformat_yuv888, pixelformat_yuva8888), pixelconv_plaincolor<yuv, yuva> },
+	{ pctp (pixelformat_yuv888, pixelformat_hsva8888), pixelconv_plaincolor<yuv, hsva> },
+	{ pctp (pixelformat_yuv888, pixelformat_hsv888), pixelconv_plaincolor<yuv, hsv> },
+
+	{ pctp (pixelformat_hsva8888, pixelformat_rgba8888), pixelconv_plaincolor<hsva, rgba> },
+	{ pctp (pixelformat_hsva8888, pixelformat_rgb888), pixelconv_plaincolor<hsva, rgb> },
+	{ pctp (pixelformat_hsva8888, pixelformat_rgbaf), pixelconv_plaincolor<hsva, rgbaf> },
+	{ pctp (pixelformat_hsva8888, pixelformat_bgra8888), pixelconv_plaincolor<hsva, bgra> },
+	{ pctp (pixelformat_hsva8888, pixelformat_bgr888), pixelconv_plaincolor<hsva, bgr> },
+	{ pctp (pixelformat_hsva8888, pixelformat_bgra4444), pixelconv_plaincolor<hsva, bgra4> },
+	{ pctp (pixelformat_hsva8888, pixelformat_bgr565), pixelconv_plaincolor<hsva, bgr565> },
+	{ pctp (pixelformat_hsva8888, pixelformat_grayscale8), pixelconv_plaincolor<hsva, grayscale> },
+	{ pctp (pixelformat_hsva8888, pixelformat_grayscalef), pixelconv_plaincolor<hsva, grayscalef> },
+	{ pctp (pixelformat_hsva8888, pixelformat_yuva8888), pixelconv_plaincolor<hsva, yuva> },
+	{ pctp (pixelformat_hsva8888, pixelformat_yuv888), pixelconv_plaincolor<hsva, yuv> },
+	{ pctp (pixelformat_hsva8888, pixelformat_hsv888), pixelconv_plaincolor<hsva, hsv> },
+
+	{ pctp (pixelformat_hsv888, pixelformat_rgba8888), pixelconv_plaincolor<hsv, rgba> },
+	{ pctp (pixelformat_hsv888, pixelformat_rgb888), pixelconv_plaincolor<hsv, rgb> },
+	{ pctp (pixelformat_hsv888, pixelformat_rgbaf), pixelconv_plaincolor<hsv, rgbaf> },
+	{ pctp (pixelformat_hsv888, pixelformat_bgra8888), pixelconv_plaincolor<hsv, bgra> },
+	{ pctp (pixelformat_hsv888, pixelformat_bgr888), pixelconv_plaincolor<hsv, bgr> },
+	{ pctp (pixelformat_hsv888, pixelformat_bgra4444), pixelconv_plaincolor<hsv, bgra4> },
+	{ pctp (pixelformat_hsv888, pixelformat_bgr565), pixelconv_plaincolor<hsv, bgr565> },
+	{ pctp (pixelformat_hsv888, pixelformat_grayscale8), pixelconv_plaincolor<hsv, grayscale> },
+	{ pctp (pixelformat_hsv888, pixelformat_grayscalef), pixelconv_plaincolor<hsv, grayscalef> },
+	{ pctp (pixelformat_hsv888, pixelformat_yuva8888), pixelconv_plaincolor<hsv, yuva> },
+	{ pctp (pixelformat_hsv888, pixelformat_yuv888), pixelconv_plaincolor<hsv, yuv> },
+	{ pctp (pixelformat_hsv888, pixelformat_hsva8888), pixelconv_plaincolor<hsv, hsva> },
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Indexed Color Conversions
@@ -568,6 +616,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_grayscalef, pixelformat_bgra8888_indexed8), pixelconv_from_indexedcolor<grayscalef, bgra> },
 	{ pctp (pixelformat_yuva8888, pixelformat_bgra8888_indexed8), pixelconv_from_indexedcolor<yuva, bgra> },
 	{ pctp (pixelformat_yuv888, pixelformat_bgra8888_indexed8), pixelconv_from_indexedcolor<yuv, bgra> },
+	{ pctp (pixelformat_hsva8888, pixelformat_bgra8888_indexed8), pixelconv_from_indexedcolor<hsva, bgra> },
+	{ pctp (pixelformat_hsv888, pixelformat_bgra8888_indexed8), pixelconv_from_indexedcolor<hsv, bgra> },
 
 	{ pctp (pixelformat_rgba8888, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<rgba, bgr> },
 	{ pctp (pixelformat_rgb888, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<rgb, bgr> },
@@ -580,6 +630,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_grayscalef, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<grayscalef, bgr> },
 	{ pctp (pixelformat_yuva8888, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<yuva, bgr> },
 	{ pctp (pixelformat_yuv888, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<yuv, bgr> },
+	{ pctp (pixelformat_hsva8888, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<hsva, bgr> },
+	{ pctp (pixelformat_hsv888, pixelformat_bgr888_indexed8), pixelconv_from_indexedcolor<hsv, bgr> },
 
 	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_rgba8888), pixelconv_to_indexedcolor<bgra, rgba> },
 	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_rgb888), pixelconv_to_indexedcolor<bgra, rgb> },
@@ -592,6 +644,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_grayscalef), pixelconv_to_indexedcolor<bgra, grayscalef> },
 	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_yuva8888), pixelconv_to_indexedcolor<bgra, yuva> },
 	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_yuv888), pixelconv_to_indexedcolor<bgra, yuv> },
+	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_hsva8888), pixelconv_to_indexedcolor<bgra, hsva> },
+	{ pctp (pixelformat_bgra8888_indexed8, pixelformat_hsv888), pixelconv_to_indexedcolor<bgra, hsv> },
 
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_rgba8888), pixelconv_to_indexedcolor<bgr, rgba> },
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_rgb888), pixelconv_to_indexedcolor<bgr, rgb> },
@@ -604,6 +658,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_grayscalef), pixelconv_to_indexedcolor<bgr, grayscalef> },
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_yuva8888), pixelconv_to_indexedcolor<bgr, yuva> },
 	{ pctp (pixelformat_bgr888_indexed8, pixelformat_yuv888), pixelconv_to_indexedcolor<bgr, yuv> },
+	{ pctp (pixelformat_bgr888_indexed8, pixelformat_hsva8888), pixelconv_to_indexedcolor<bgr, hsva> },
+	{ pctp (pixelformat_bgr888_indexed8, pixelformat_hsv888), pixelconv_to_indexedcolor<bgr, hsv> },
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Subsampled YUV Color Conversions
@@ -619,6 +675,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_yuyv8888, pixelformat_grayscalef), pixelconv_to_chromasubsample_yuv422<grayscalef> },
 	{ pctp (pixelformat_yuyv8888, pixelformat_yuva8888), pixelconv_to_chromasubsample_yuv422<yuva> },
 	{ pctp (pixelformat_yuyv8888, pixelformat_yuv888), pixelconv_to_chromasubsample_yuv422<yuv> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_hsva8888), pixelconv_to_chromasubsample_yuv422<hsva> },
+	{ pctp (pixelformat_yuyv8888, pixelformat_hsv888), pixelconv_to_chromasubsample_yuv422<hsv> },
 
 	{ pctp (pixelformat_nv12, pixelformat_rgba8888), pixelconv_to_chromasubsample_nv12<rgba> },
 	{ pctp (pixelformat_nv12, pixelformat_rgb888), pixelconv_to_chromasubsample_nv12<rgb> },
@@ -631,6 +689,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_nv12, pixelformat_grayscalef), pixelconv_to_chromasubsample_nv12<grayscalef> },
 	{ pctp (pixelformat_nv12, pixelformat_yuva8888), pixelconv_to_chromasubsample_nv12<yuva> },
 	{ pctp (pixelformat_nv12, pixelformat_yuv888), pixelconv_to_chromasubsample_nv12<yuv> },
+	{ pctp (pixelformat_nv12, pixelformat_hsva8888), pixelconv_to_chromasubsample_nv12<hsva> },
+	{ pctp (pixelformat_nv12, pixelformat_hsv888), pixelconv_to_chromasubsample_nv12<hsv> },
 
 	{ pctp (pixelformat_rgba8888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<rgba> },
 	{ pctp (pixelformat_rgb888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<rgb> },
@@ -643,6 +703,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_grayscalef, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<grayscalef> },
 	{ pctp (pixelformat_yuva8888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<yuva> },
 	{ pctp (pixelformat_yuv888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<yuv> },
+	{ pctp (pixelformat_hsva8888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<hsva> },
+	{ pctp (pixelformat_hsv888, pixelformat_yuyv8888), pixelconv_from_chromasubsample_yuv422<hsv> },
 
 	{ pctp (pixelformat_rgba8888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<rgba> },
 	{ pctp (pixelformat_rgb888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<rgb> },
@@ -655,6 +717,8 @@ std::map<pctp, pcfn> g_pixelconvs = {
 	{ pctp (pixelformat_grayscalef, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<grayscalef> },
 	{ pctp (pixelformat_yuva8888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<yuva> },
 	{ pctp (pixelformat_yuv888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<yuv> },
+	{ pctp (pixelformat_hsva8888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<hsva> },
+	{ pctp (pixelformat_hsv888, pixelformat_nv12), pixelconv_from_chromasubsample_nv12<hsv> },
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// DXT Color Conversions

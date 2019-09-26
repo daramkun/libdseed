@@ -72,6 +72,8 @@ std::map<fptp, fpfn> g_flips = {
 	{ fptp (__HV_HORIZONTAL, pixelformat_grayscalef), bmpfp_horizontal<grayscalef> },
 	{ fptp (__HV_HORIZONTAL, pixelformat_yuva8888), bmpfp_horizontal<yuva> },
 	{ fptp (__HV_HORIZONTAL, pixelformat_yuv888), bmpfp_horizontal<yuv> },
+	{ fptp (__HV_HORIZONTAL, pixelformat_hsva8888), bmpfp_horizontal<hsva> },
+	{ fptp (__HV_HORIZONTAL, pixelformat_hsv888), bmpfp_horizontal<hsv> },
 
 	{ fptp (__HV_VERTICAL, pixelformat_rgba8888), bmpfp_vertical<rgba> },
 	{ fptp (__HV_VERTICAL, pixelformat_rgb888), bmpfp_vertical<rgb> },
@@ -84,6 +86,8 @@ std::map<fptp, fpfn> g_flips = {
 	{ fptp (__HV_VERTICAL, pixelformat_grayscalef), bmpfp_vertical<grayscalef> },
 	{ fptp (__HV_VERTICAL, pixelformat_yuva8888), bmpfp_vertical<yuva> },
 	{ fptp (__HV_VERTICAL, pixelformat_yuv888), bmpfp_vertical<yuv> },
+	{ fptp (__HV_VERTICAL, pixelformat_hsva8888), bmpfp_vertical<hsva> },
+	{ fptp (__HV_VERTICAL, pixelformat_hsv888), bmpfp_vertical<hsv> },
 };
 
 dseed::error_t __internal_flip (dseed::bitmap* original, __HV hv, dseed::bitmap** bitmap)

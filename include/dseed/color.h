@@ -206,9 +206,7 @@ namespace dseed
 	{
 		if (s == 0)
 		{
-			r = v;
-			g = v;
-			b = v;
+			r = g = b = v;
 			return;
 		}
 
@@ -276,6 +274,9 @@ namespace dseed
 			: color (rgba)
 		{ }
 
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
+
 		static inline rgba max_color () noexcept { return rgba (255, 255, 255, 255); }
 		static inline rgba min_color () noexcept { return rgba (0, 0, 0, 0); }
 
@@ -327,6 +328,9 @@ namespace dseed
 		inline rgb (uint24_t rgb) noexcept
 			: color (rgb)
 		{ }
+
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
 
 		static inline rgb max_color () noexcept { return rgb (255, 255, 255); }
 		static inline rgb min_color () noexcept { return rgb (0, 0, 0); }
@@ -380,6 +384,9 @@ namespace dseed
 			: color (rgba)
 		{ }
 
+		inline float& operator [] (int index) noexcept { return reinterpret_cast<float*>(this)[index]; }
+		inline const float& operator [] (int index) const noexcept { return reinterpret_cast<const float*>(this)[index]; }
+
 		static inline rgbaf max_color () noexcept { return rgbaf (1, 1, 1, 1); }
 		static inline rgbaf min_color () noexcept { return rgbaf (0, 0, 0, 0); }
 
@@ -429,6 +436,9 @@ namespace dseed
 		inline bgra (uint32_t bgra) noexcept
 			: color (bgra)
 		{ }
+
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
 
 		static inline bgra max_color () noexcept { return bgra (255, 255, 255, 255); }
 		static inline bgra min_color () noexcept { return bgra (0, 0, 0, 0); }
@@ -482,6 +492,9 @@ namespace dseed
 			: color (bgr)
 		{ }
 
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
+
 		static inline bgr max_color () noexcept { return bgr (255, 255, 255); }
 		static inline bgr min_color () noexcept { return bgr (0, 0, 0); }
 
@@ -534,6 +547,18 @@ namespace dseed
 			: color (bgra)
 		{ }
 
+		inline uint8_t operator [] (int index) const noexcept
+		{
+			switch (index)
+			{
+			case 0: return b;
+			case 1: return g;
+			case 2: return r;
+			case 3: return a;
+			default: return 0xff;
+			}
+		}
+
 		static inline bgra4 max_color () noexcept { return bgra4 (15, 15, 15, 15); }
 		static inline bgra4 min_color () noexcept { return bgra4 (0, 0, 0, 0); }
 
@@ -585,6 +610,17 @@ namespace dseed
 		inline bgr565 (uint16_t bgr) noexcept
 			: color (bgr)
 		{ }
+
+		inline uint8_t operator [] (int index) const noexcept
+		{
+			switch (index)
+			{
+			case 0: return b;
+			case 1: return g;
+			case 2: return r;
+			default: return 0xff;
+			}
+		}
 
 		static inline bgr565 max_color () noexcept { return bgr565 (31, 63, 31); }
 		static inline bgr565 min_color () noexcept { return bgr565 (0, 0, 0); }
@@ -650,6 +686,9 @@ namespace dseed
 			: color ((uint8_t)maximum (0.0, minimum (255.0, +0.2627 * rgb.r + +0.678 * rgb.g + +0.0593 * rgb.b)))
 		{ }
 
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
+
 		static inline grayscale max_color () noexcept { return grayscale (255); }
 		static inline grayscale min_color () noexcept { return grayscale (0); }
 
@@ -695,6 +734,9 @@ namespace dseed
 		inline grayscalef (const rgbaf& rgbaf)
 			: color ((float)maximum (0.0, minimum (1.0, (+0.2627 * rgbaf.r + +0.678 * rgbaf.g + +0.0593 * rgbaf.b))))
 		{ }
+
+		inline float& operator [] (int index) noexcept { return reinterpret_cast<float*>(this)[index]; }
+		inline const float& operator [] (int index) const noexcept { return reinterpret_cast<const float*>(this)[index]; }
 
 		static inline grayscalef max_color () noexcept { return grayscalef (1); }
 		static inline grayscalef min_color () noexcept { return grayscalef (0); }
@@ -763,6 +805,9 @@ namespace dseed
 			: color (yuva)
 		{ }
 
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
+
 		static inline yuva max_color () noexcept { return yuva (255, 255, 255, 255); }
 		static inline yuva min_color () noexcept { return yuva (0); }
 
@@ -814,6 +859,9 @@ namespace dseed
 		inline yuv (uint24_t yuv) noexcept
 			: color (yuv)
 		{ }
+
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
 
 		static inline yuv max_color () noexcept { return yuv (255, 255, 255); }
 		static inline yuv min_color () noexcept { return yuv (0); }
@@ -885,6 +933,9 @@ namespace dseed
 			: color (hsva)
 		{ }
 
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
+
 		static inline hsva max_color () noexcept { return hsva (255, 255, 255, 255); }
 		static inline hsva min_color () noexcept { return hsva (0, 0, 0, 0); }
 
@@ -936,6 +987,9 @@ namespace dseed
 		inline hsv (uint24_t hsv) noexcept
 			: color (hsv)
 		{ }
+
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
 
 		static inline hsv max_color () noexcept { return hsv (255, 255, 255); }
 		static inline hsv min_color () noexcept { return hsv (0, 0, 0); }
@@ -993,6 +1047,9 @@ namespace dseed
 		color_processor (float a, float b, float c, float d) noexcept
 			: a (a), b (b), c (c), d (d) { }
 
+		inline float& operator [] (int index) noexcept { return reinterpret_cast<float*>(this)[index]; }
+		inline const float& operator [] (int index) const noexcept { return reinterpret_cast<const float*>(this)[index]; }
+
 		inline operator rgba () const noexcept;
 		inline operator rgb () const noexcept;
 		inline operator rgbaf () const noexcept;
@@ -1026,6 +1083,8 @@ namespace dseed
 		inline void restore_alpha (const grayscalef& oc) noexcept { }
 		inline void restore_alpha (const yuva& oc) noexcept { d = (float)oc.a; }
 		inline void restore_alpha (const yuv& oc) noexcept { }
+		inline void restore_alpha (const hsva& oc) noexcept { d = (float)oc.a; }
+		inline void restore_alpha (const hsv& oc) noexcept { }
 	};
 
 	inline color_processor operator+ (const color_processor& c1, const color_processor& c2) noexcept { return color_processor (c1.a + c2.a, c1.b + c2.b, c1.c + c2.c, c1.d + c2.d); }

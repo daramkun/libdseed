@@ -65,6 +65,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscalef, binary_operator_add), binary_operation<grayscalef, add<grayscalef>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_add), binary_operation<yuva, add<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_add), binary_operation<yuv, add<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_add), binary_operation<hsva, add<hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_add), binary_operation<hsv, add<hsv>> },
 
 	{ binoptp (pixelformat_rgba8888, binary_operator_subtract), binary_operation<rgba, subtract<rgba>> },
 	{ binoptp (pixelformat_rgb888, binary_operator_subtract), binary_operation<rgb, subtract<rgb>> },
@@ -77,6 +79,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscalef, binary_operator_subtract), binary_operation<grayscalef, subtract<grayscalef>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_subtract), binary_operation<yuva, subtract<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_subtract), binary_operation<yuv, subtract<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_subtract), binary_operation<hsva, subtract<hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_subtract), binary_operation<hsv, subtract<hsv>> },
 
 	{ binoptp (pixelformat_rgba8888, binary_operator_multiply), binary_operation<rgba, multiply<rgba>> },
 	{ binoptp (pixelformat_rgb888, binary_operator_multiply), binary_operation<rgb, multiply<rgb>> },
@@ -89,6 +93,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscalef, binary_operator_multiply), binary_operation<grayscalef, multiply<grayscalef>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_multiply), binary_operation<yuva, multiply<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_multiply), binary_operation<yuv, multiply<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_multiply), binary_operation<hsva, multiply<hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_multiply), binary_operation<hsv, multiply<hsv>> },
 
 	{ binoptp (pixelformat_rgba8888, binary_operator_divide), binary_operation<rgba, divide<rgba>> },
 	{ binoptp (pixelformat_rgb888, binary_operator_divide), binary_operation<rgb, divide<rgb>> },
@@ -101,6 +107,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscalef, binary_operator_divide), binary_operation<grayscalef, divide<grayscalef>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_divide), binary_operation<yuva, divide<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_divide), binary_operation<yuv, divide<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_divide), binary_operation<hsva, divide<hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_divide), binary_operation<hsv, divide<hsv>> },
 
 	{ binoptp (pixelformat_rgba8888, binary_operator_and), binary_operation<rgba, and<rgba>> },
 	{ binoptp (pixelformat_rgb888, binary_operator_and), binary_operation<rgb, and<rgb>> },
@@ -111,6 +119,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscale8, binary_operator_and), binary_operation<grayscale, and<grayscale>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_and), binary_operation<yuva, and<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_and), binary_operation<yuv, and<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_and), binary_operation<hsva,and <hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_and), binary_operation<hsv,and <hsv>> },
 
 	{ binoptp (pixelformat_rgba8888, binary_operator_or), binary_operation<rgba, or<rgba>> },
 	{ binoptp (pixelformat_rgb888, binary_operator_or), binary_operation<rgb, or<rgb>> },
@@ -121,6 +131,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscale8, binary_operator_or), binary_operation<grayscale, or<grayscale>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_or), binary_operation<yuva, or<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_or), binary_operation<yuv, or<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_or), binary_operation<hsva, or <hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_or), binary_operation<hsv, or <hsv>> },
 
 	{ binoptp (pixelformat_rgba8888, binary_operator_xor), binary_operation<rgba, xor<rgba>> },
 	{ binoptp (pixelformat_rgb888, binary_operator_xor), binary_operation<rgb, xor<rgb>> },
@@ -131,6 +143,8 @@ std::map<binoptp, binopfn> g_binops = {
 	{ binoptp (pixelformat_grayscale8, binary_operator_xor), binary_operation<grayscale, xor<grayscale>> },
 	{ binoptp (pixelformat_yuva8888, binary_operator_xor), binary_operation<yuva, xor<yuva>> },
 	{ binoptp (pixelformat_yuv888, binary_operator_xor), binary_operation<yuv, xor<yuv>> },
+	{ binoptp (pixelformat_hsva8888, binary_operator_xor), binary_operation<hsva,xor <hsva>> },
+	{ binoptp (pixelformat_hsv888, binary_operator_xor), binary_operation<hsv,xor <hsv>> },
 };
 
 dseed::error_t dseed::bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap* b2, dseed::binary_operator_t op, dseed::bitmap** bitmap)
@@ -165,7 +179,7 @@ dseed::error_t dseed::bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap*
 		return dseed::error_not_support;
 
 	if (!found->second (destPtr, src1Ptr, src2Ptr, b1->size ()))
-		return dseed::error_not_support;
+		return dseed::error_fail;
 
 	*bitmap = temp.detach ();
 
@@ -216,6 +230,8 @@ std::map<unoptp, unopfn> g_unops = {
 	{ unoptp (pixelformat_grayscale8, unary_operator_not), unary_operation<grayscale, not<grayscale>> },
 	{ unoptp (pixelformat_yuva8888, unary_operator_not), unary_operation<yuva, not<yuva>> },
 	{ unoptp (pixelformat_yuv888, unary_operator_not), unary_operation<yuv, not<yuv>> },
+	{ unoptp (pixelformat_hsva8888, unary_operator_not), unary_operation<hsva, not<hsva>> },
+	{ unoptp (pixelformat_hsv888, unary_operator_not), unary_operation<hsv, not<hsv>> },
 
 	{ unoptp (pixelformat_rgba8888, unary_operator_invert), unary_operation<rgba, invert<rgba>> },
 	{ unoptp (pixelformat_rgb888, unary_operator_invert), unary_operation<rgb, invert<rgb>> },
@@ -228,6 +244,8 @@ std::map<unoptp, unopfn> g_unops = {
 	{ unoptp (pixelformat_grayscalef, unary_operator_invert), unary_operation<grayscalef, invert<grayscalef>> },
 	{ unoptp (pixelformat_yuva8888, unary_operator_invert), unary_operation<yuva, invert<yuva>> },
 	{ unoptp (pixelformat_yuv888, unary_operator_invert), unary_operation<yuv, invert<yuv>> },
+	{ unoptp (pixelformat_hsva8888, unary_operator_invert), unary_operation<hsva, invert<hsva>> },
+	{ unoptp (pixelformat_hsv888, unary_operator_invert), unary_operation<hsv, invert<hsv>> },
 };
 
 dseed::error_t dseed::bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator_t op, dseed::bitmap** bitmap)

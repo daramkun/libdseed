@@ -194,6 +194,30 @@ namespace dseed
 	// Bitmap Vertical Flipping¢Õ
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
 	DSEEDEXP error_t flip_vertical_bitmap (dseed::bitmap* original, dseed::bitmap** bitmap);
+	
+	enum histogram_color_t
+	{
+		histogram_color_first,
+		histogram_color_second,
+		histogram_color_third,
+		histogram_color_fourth,
+	};
+
+	struct histogram
+	{
+		int histogram[256];
+		size_t total_pixels;
+
+		bool calced_table;
+		int histogram_table[256];
+	};
+
+	// Generate Histogram from Bitmap
+	DSEEDEXP error_t bitmap_generate_histogram (dseed::bitmap* original, histogram_color_t color, uint32_t depth, histogram* histogram);
+	// Doing Histogram Equalization
+	DSEEDEXP error_t histogram_equalization (histogram* histogram);
+	// Apply Histogram to Bitmap
+	DSEEDEXP error_t bitmap_apply_histogram (dseed::bitmap* original, histogram_color_t color, uint32_t depth, const histogram* histogram, dseed::bitmap** bitmap);
 
 	// Bitmap Binary Operation
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
