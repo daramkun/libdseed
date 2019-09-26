@@ -1,7 +1,9 @@
 #include <dseed.h>
 
-#include <dxgi.h>
-#include <atlbase.h>
+#if PLATFORM_MICROSOFT
+#	include <VersionHelpers.h>
+#	include <dxgi.h>
+#	include <atlbase.h>
 
 class __dxgi_display : public dseed::display
 {
@@ -26,7 +28,7 @@ public:
 	virtual dseed::error_t native_object (void** nativeObject) override
 	{
 		if (nativeObject == nullptr) return dseed::error_invalid_args;
-		(*reinterpret_cast<IDXGIOutput * *>(nativeObject) = _dxgiOutput)->AddRef ();
+		_dxgiOutput->QueryInterface (__uuidof(IDXGIOutput), nativeObject);
 		return dseed::error_good;
 	}
 
@@ -39,13 +41,13 @@ public:
 		DXGI_OUTPUT_DESC desc;
 		_dxgiOutput->GetDesc (&desc);
 
-		MONITORINFOEX monitorInfoEx = {};
-		monitorInfoEx.cbSize = sizeof (MONITORINFOEX);
-		GetMonitorInfo (desc.Monitor, &monitorInfoEx);
+		MONITORINFOEXA monitorInfoEx = {};
+		monitorInfoEx.cbSize = sizeof (MONITORINFOEXA);
+		GetMonitorInfoA (desc.Monitor, &monitorInfoEx);
 
-		DISPLAY_DEVICE displayDevice = {};
-		displayDevice.cb = sizeof (DISPLAY_DEVICE);
-		EnumDisplayDevices (monitorInfoEx.szDevice, 0, &displayDevice, 0);
+		DISPLAY_DEVICEA displayDevice = {};
+		displayDevice.cb = sizeof (DISPLAY_DEVICEA);
+		EnumDisplayDevicesA (monitorInfoEx.szDevice, 0, &displayDevice, 0);
 
 		strcpy_s (name, maxNameCount, displayDevice.DeviceString);
 
@@ -120,7 +122,7 @@ public:
 	virtual dseed::error_t native_object (void** nativeObject) override
 	{
 		if (nativeObject == nullptr) return dseed::error_invalid_args;
-		(*reinterpret_cast<IDXGIAdapter * *>(nativeObject) = _dxgiAdapter)->AddRef ();
+		_dxgiAdapter->QueryInterface (__uuidof(IDXGIAdapter), nativeObject);
 		return dseed::error_good;
 	}
 
@@ -215,8 +217,17 @@ public:
 		for (size_t i = 0; ; ++i)
 		{
 			CComPtr<IDXGIAdapter> adapter;
-			if(FAILED(_dxgiFactory->EnumAdapters (i, &adapter)))
-				break;
+			if (IsWindows8OrGreater ())
+			{
+				CComQIPtr<IDXGIFactory1> factory1 = _dxgiFactory;
+				if (FAILED (factory1->EnumAdapters1 (i, (IDXGIAdapter1 * *)& adapter)))
+					break;
+			}
+			else
+			{
+				if (FAILED (_dxgiFactory->EnumAdapters (i, &adapter)))
+					break;
+			}
 
 			_adapters.push_back (new __dxgi_vga_adapter (adapter));
 		}
@@ -230,6 +241,7 @@ private:
 
 	std::vector<dseed::auto_object<dseed::vga_adapter>> _adapters;
 };
+#endif
 
 dseed::error_t dseed::create_dxgi_vga_adapter_enumerator (dseed::vga_adapter_enumerator** e)
 {
@@ -237,8 +249,17 @@ dseed::error_t dseed::create_dxgi_vga_adapter_enumerator (dseed::vga_adapter_enu
 		return dseed::error_invalid_args;
 
 	CComPtr<IDXGIFactory> factory;
-	if (FAILED (CreateDXGIFactory (__uuidof(IDXGIFactory), (void**)& factory)))
-		return dseed::error_fail;
+
+	if (IsWindows8OrGreater ())
+	{
+		if (FAILED (CreateDXGIFactory (__uuidof(IDXGIFactory1), (void**)& factory)))
+			return dseed::error_fail;
+	}
+	else
+	{
+		if (FAILED (CreateDXGIFactory (__uuidof(IDXGIFactory), (void**)& factory)))
+			return dseed::error_fail;
+	}
 
 	*e = new __dxgi_vga_adapter_enumerator (factory);
 	if (*e == nullptr)
