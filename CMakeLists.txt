@@ -241,6 +241,7 @@ SET ( DSEED_BUILD_FILES
 	src/bitmap/bitmap.flip.cpp
 	src/bitmap/bitmap.operation.cpp
 	src/bitmap/bitmap.histogram.cpp
+	src/bitmap/bitmap.misc.cpp
 
 	# Bitmap Decoders with Non-external Library
 	src/bitmap/decoders/bitmap.decoder.wic.cpp
