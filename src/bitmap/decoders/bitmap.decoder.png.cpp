@@ -31,15 +31,29 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 		return dseed::error_out_of_memory;
 	}
 
+	if (setjmp (png_jmpbuf (png)))
+	{
+		png_destroy_read_struct (&png, nullptr, nullptr);
+		return dseed::error_out_of_memory;
+	}
+
 	png_set_read_fn (png, stream, [](png_structp png, png_bytep buf, size_t size)
 		{
 			reinterpret_cast<dseed::stream*> (png_get_io_ptr (png))->read (buf, size);
 		});
 
-	png_set_sig_bytes (png, PNG_BYTES_TO_CHECK);
 	png_set_crc_action (png, PNG_CRC_QUIET_USE, PNG_CRC_QUIET_USE);
 	png_set_check_for_invalid_index (png, 0);
 	png_set_keep_unknown_chunks (png, PNG_HANDLE_CHUNK_ALWAYS, nullptr, 0);
+	png_set_benign_errors (png, 1);
+
+	png_voidp user_chunkp = png_get_user_chunk_ptr (png);
+	png_set_read_user_chunk_fn (png, user_chunkp, [](png_structp png, png_unknown_chunkp chunk)
+		{
+			return 1;
+		});
+
+	png_set_sig_bytes (png, PNG_BYTES_TO_CHECK);
 	png_read_info (png, info);
 
 	auto colorType = png_get_color_type (png, info);
