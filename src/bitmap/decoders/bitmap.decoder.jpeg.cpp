@@ -85,6 +85,7 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 	struct jpeg_error_mgr jerr;
 
 	cinfo.err = jpeg_std_error (&jerr);
+	jerr.error_exit = [](j_common_ptr cinfo) { };
 	jpeg_create_decompress (&cinfo);
 
 	jpeg_stream_src (&cinfo, stream);
@@ -118,7 +119,12 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 	{
 		unsigned char* buffer_array[1];
 		bitmap->pixels_pointer_per_line ((void**)& buffer_array[0], cinfo.output_scanline);
-		jpeg_read_scanlines (&cinfo, buffer_array, 1);
+		if (jpeg_read_scanlines (&cinfo, buffer_array, 1) != 1)
+		{
+			//jpeg_abort_decompress (&cinfo);
+			jpeg_skip_scanlines (&cinfo, 1);
+			break;
+		}
 	}
 
 	jpeg_finish_decompress (&cinfo);

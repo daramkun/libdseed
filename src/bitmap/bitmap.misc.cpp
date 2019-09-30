@@ -75,7 +75,8 @@ dseed::error_t dseed::bitmap_detect_transparent (dseed::bitmap* bitmap, bool* tr
 	else
 	{
 		uint8_t* srcPtr;
-		bitmap->pixels_pointer ((void**)&srcPtr);
+		if (dseed::failed (bitmap->pixels_pointer ((void**)&srcPtr)))
+			return dseed::error_fail;
 
 		auto size = bitmap->size ();
 

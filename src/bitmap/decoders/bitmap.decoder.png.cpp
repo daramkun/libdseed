@@ -37,6 +37,9 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 		});
 
 	png_set_sig_bytes (png, PNG_BYTES_TO_CHECK);
+	png_set_crc_action (png, PNG_CRC_QUIET_USE, PNG_CRC_QUIET_USE);
+	png_set_check_for_invalid_index (png, 0);
+	png_set_keep_unknown_chunks (png, PNG_HANDLE_CHUNK_ALWAYS, nullptr, 0);
 	png_read_info (png, info);
 
 	auto colorType = png_get_color_type (png, info);
