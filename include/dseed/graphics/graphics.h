@@ -89,7 +89,7 @@ namespace dseed
 		float znear, zfar;
 	};
 
-	class DSEEDEXP vga_context : public object
+	class DSEEDEXP vga_commandbuffer : public object, public wrapped
 	{
 	public:
 		virtual error_t set_rendertarget (clearflag_t cf, rendertarget** rendertargets, size_t rendertargetCount, rendertarget* depthstencil) = 0;
@@ -142,7 +142,13 @@ namespace dseed
 		virtual error_t create_program (computeshader* cs, program** program) = 0;
 
 	public:
-		virtual error_t create_context (vga_context** contex) = 0;
+		virtual error_t create_context (vga_commandbuffer** contex) = 0;
+	};
+
+	class DSEEDEXP vga_swapchain : public object, public wrapped
+	{
+	public:
+		virtual error_t backbuffer (texture2d** buf) = 0;
 
 	public:
 		virtual error_t present () = 0;

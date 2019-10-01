@@ -230,6 +230,8 @@ namespace dseed
 
 	// Detect Transparented Alpha Value from Bitmap
 	DSEEDEXP error_t bitmap_detect_transparent (dseed::bitmap* bitmap, bool* transparent);
+	// Check Is Bitmap Grayscale?
+	DSEEDEXP error_t bitmap_detect_grayscale_bitmap (dseed::bitmap* bitmap, bool* grayscale, int threshold = 10);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>

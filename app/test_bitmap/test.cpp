@@ -4,7 +4,7 @@ int main (int argc, char* argv[])
 {
 	dseed::auto_object<dseed::stream> inputStream;
 	if (dseed::failed (dseed::create_native_filestream (
-		u8"..\\..\\..\\sample\\bitmaps\\sample1.png24.png", false, &inputStream)))
+		u8"..\\..\\..\\sample\\bitmaps\\sample9.green.jpg", false, &inputStream)))
 		return -1;
 
 	dseed::auto_object<dseed::bitmap_decoder> decoder;
@@ -15,10 +15,10 @@ int main (int argc, char* argv[])
 
 	{
 		dseed::auto_object<dseed::stream> outputStream;
-		if (dseed::failed (dseed::create_native_filestream (u8"output.webp", true, &outputStream)))
+		if (dseed::failed (dseed::create_native_filestream (u8"output.jpg", true, &outputStream)))
 			return -3;
 		dseed::auto_object<dseed::bitmap_encoder> encoder;
-		if (dseed::failed (dseed::create_webp_bitmap_encoder (outputStream, nullptr, &encoder)))
+		if (dseed::failed (dseed::create_jpeg_bitmap_encoder (outputStream, nullptr, &encoder)))
 			return -4;
 
 		for (int i = 0; i < /*decoder->frame_count ()*/1; ++i)
@@ -56,12 +56,24 @@ int main (int argc, char* argv[])
 			dseed::auto_object<dseed::bitmap> reformated6;
 			if (dseed::failed (dseed::reformat_bitmap (reformated5, dseed::pixelformat_rgba8888, &reformated6)))
 				return -11;
+
+			dseed::auto_object<dseed::bitmap> reformated7;
+			bool grayscale = false;
+			if (dseed::succeeded (dseed::bitmap_detect_grayscale_bitmap (reformated6, &grayscale)) && grayscale)
+			{
+				if (dseed::failed (dseed::reformat_bitmap (reformated6, dseed::pixelformat_grayscale8, &reformated7)))
+					return -12;
+			}
+			else
+			{
+				reformated7.store (reformated6);
+			}
 			
 			dseed::timespan_t end = dseed::timespan_t::current_ticks ();
 			printf ("Reformat time: %lf\n", (end - start).total_seconds ());
 
 			{
-				if (dseed::failed (encoder->encode_frame (/**/reformated6/**//*bitmap/**/, duration)))
+				if (dseed::failed (encoder->encode_frame (/**/reformated7/**//*bitmap/**/, duration)))
 					return -12;
 			}
 		}
