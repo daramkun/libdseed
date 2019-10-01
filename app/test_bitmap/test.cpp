@@ -4,7 +4,7 @@ int main (int argc, char* argv[])
 {
 	dseed::auto_object<dseed::stream> inputStream;
 	if (dseed::failed (dseed::create_native_filestream (
-		u8"..\\..\\..\\sample\\bitmaps\\sample9.green.jpg", false, &inputStream)))
+		u8"..\\..\\..\\sample\\bitmaps\\sample4.gif", false, &inputStream)))
 		return -1;
 
 	dseed::auto_object<dseed::bitmap_decoder> decoder;
@@ -32,6 +32,12 @@ int main (int argc, char* argv[])
 			dseed::bitmap_filter_mask::unsharpmask_5 (&mask);
 
 			dseed::timespan_t start = dseed::timespan_t::current_ticks ();
+
+			dseed::colorcount_t colours;
+			if (dseed::succeeded (dseed::bitmap_get_total_colours (bitmap, &colours)))
+			{
+				printf ("Colours: %d\n", colours);
+			}
 			
 			dseed::auto_object<dseed::bitmap> reformated;
 			if (dseed::failed (dseed::reformat_bitmap (bitmap, dseed::pixelformat_bgra8888, &reformated)))

@@ -232,6 +232,16 @@ namespace dseed
 	DSEEDEXP error_t bitmap_detect_transparent (dseed::bitmap* bitmap, bool* transparent);
 	// Check Is Bitmap Grayscale?
 	DSEEDEXP error_t bitmap_detect_grayscale_bitmap (dseed::bitmap* bitmap, bool* grayscale, int threshold = 10);
+	enum colorcount_t : uint32_t
+	{
+		colorcount_1bpp = 2,
+		colorcount_2bpp = 4,
+		colorcount_4bpp = 16,
+		colorcount_8bpp = 256,
+		colorcount_over8bpp = 0xffffffff
+	};
+	// Get Total Colours Count
+	DSEEDEXP error_t bitmap_get_total_colours (dseed::bitmap* bitmap, colorcount_t* colours);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>
