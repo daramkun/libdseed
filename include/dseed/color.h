@@ -247,6 +247,21 @@ namespace dseed
 	template<> constexpr pixelformat_t type2indexedformat<bgra> () noexcept { return pixelformat_bgra8888_indexed8; }
 	template<> constexpr pixelformat_t type2indexedformat<bgr> () noexcept { return pixelformat_bgr888_indexed8; }
 
+	template<class color_t> constexpr bool hasalpha () noexcept { return false; }
+	template<> constexpr bool hasalpha<rgba> () noexcept { return true; }
+	template<> constexpr bool hasalpha<rgb> () noexcept { return false; }
+	template<> constexpr bool hasalpha<rgbaf> () noexcept { return true; }
+	template<> constexpr bool hasalpha<bgra> () noexcept { return true; }
+	template<> constexpr bool hasalpha<bgr> () noexcept { return false; }
+	template<> constexpr bool hasalpha<bgra4> () noexcept { return true; }
+	template<> constexpr bool hasalpha<bgr565> () noexcept { return false; }
+	template<> constexpr bool hasalpha<grayscale> () noexcept { return false; }
+	template<> constexpr bool hasalpha<grayscalef> () noexcept { return false; }
+	template<> constexpr bool hasalpha<yuva> () noexcept { return true; }
+	template<> constexpr bool hasalpha<yuv> () noexcept { return false; }
+	template<> constexpr bool hasalpha<hsva> () noexcept { return true; }
+	template<> constexpr bool hasalpha<hsv> () noexcept { return false; }
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Red/Green/Blue Color Types

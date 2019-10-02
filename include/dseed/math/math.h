@@ -92,6 +92,8 @@ namespace dseed
 		half (float v);
 		operator float () const;
 	};
+	inline bool operator== (const half& a, const half& b) noexcept { return a.word == b.word; }
+	inline bool operator!= (const half& a, const half& b) noexcept { return a.word != b.word; }
 #	if COMPILER_MSVC
 #		pragma pack (pop)
 #	else

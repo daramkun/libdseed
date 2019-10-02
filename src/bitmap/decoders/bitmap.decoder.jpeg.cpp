@@ -121,7 +121,6 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 		bitmap->pixels_pointer_per_line ((void**)& buffer_array[0], cinfo.output_scanline);
 		if (jpeg_read_scanlines (&cinfo, buffer_array, 1) != 1)
 		{
-			//jpeg_abort_decompress (&cinfo);
 			jpeg_skip_scanlines (&cinfo, 1);
 			break;
 		}

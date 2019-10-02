@@ -97,6 +97,10 @@ public:
 			return dseed::pixelformat_rgba8888;
 		else if (pixelFormat == GUID_WICPixelFormat24bppRGB)
 			return dseed::pixelformat_rgb888;
+		else if (pixelFormat == GUID_WICPixelFormat32bppBGRA)
+			return dseed::pixelformat_bgra8888;
+		else if (pixelFormat == GUID_WICPixelFormat24bppBGR)
+			return dseed::pixelformat_bgr888;
 		else if (pixelFormat == GUID_WICPixelFormat128bppRGBAFloat)
 			return dseed::pixelformat_rgbaf;
 		else if (pixelFormat == GUID_WICPixelFormat8bppGray)
@@ -229,6 +233,7 @@ public:
 
 		CComPtr<IWICBitmapSource> source;
 		if (!(formatGUID == GUID_WICPixelFormat32bppRGBA || formatGUID == GUID_WICPixelFormat24bppRGB
+			|| formatGUID == GUID_WICPixelFormat32bppBGRA || formatGUID == GUID_WICPixelFormat24bppBGR
 			|| formatGUID == GUID_WICPixelFormat8bppGray || formatGUID == GUID_WICPixelFormat32bppGrayFloat
 			|| formatGUID == GUID_WICPixelFormat8bppIndexed
 			|| formatGUID == GUID_WICPixelFormat128bppRGBAFloat
