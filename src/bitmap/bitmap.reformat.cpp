@@ -120,7 +120,6 @@ inline int pixelconv_to_indexedcolor<bgra, bgra> (PIXELCONV_ARGS) noexcept
 	exq_data* pExq;
 	pExq = exq_init ();
 	exq_feed (pExq, (uint8_t*)src, size.width * size.height * size.depth);
-	exq_quantize (pExq, 256);
 	exq_quantize_hq (pExq, 256);
 	std::vector<bgra> palette (256);
 	exq_get_palette (pExq, (uint8_t*)palette.data (), 256);
