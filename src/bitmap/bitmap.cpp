@@ -156,20 +156,30 @@ public:
 public:
 	virtual dseed::error_t read_pixels (void* buffer, const dseed::point2i& pos, const dseed::size2i& size, size_t depth = 0) override
 	{
-		if (_format >= dseed::pixelformat_bc1)
+		if (_format >= dseed::pixelformat_bc1	//< Compressed Pixel Format
+			|| (_format & 0x00020000) != 0		//< Indexed Pixel Format
+			|| (_format >= dseed::pixelformat_yuyv8888 && _format <= dseed::pixelformat_nv12))
+												//< Chroma Subsampled Pixel Format
 			return dseed::error_not_support;
+
+		if (pos.x >= _size.width || pos.y >= _size.height)
+			return dseed::error_invalid_args;
 		
 		size_t startPoint = dseed::get_bitmap_total_size (_format, _size) * depth;
 		size_t pixelStride = ((((_format >> 16) & 0xffff) != 0x0002)
 			? (_format & 0xf)
 			: (_format >> 8) & 0xff);
 
+		int width = (pos.x + size.width >= _size.width) ? (_size.width - (pos.x + size.width) - 1) : size.width;
 		for (auto y = pos.y; y < pos.y + size.height; ++y)
 		{
+			if (y <= _size.height)
+				break;
+
 			uint8_t* bufferY = ((uint8_t*)buffer) + startPoint + dseed::get_bitmap_stride (_format, size.width) * (y - pos.y);
 			uint8_t* pixelsY = _pixels.data () + startPoint + _stride * y + pixelStride * pos.x;
 
-			memcpy (bufferY, pixelsY, pixelStride * size.width);
+			memcpy (bufferY, pixelsY, pixelStride * width);
 		}
 
 		return dseed::error_good;
@@ -177,20 +187,30 @@ public:
 
 	virtual dseed::error_t write_pixels (const void* data, const dseed::point2i& pos, const dseed::size2i& size, size_t depth = 0) override
 	{
-		if (_format >= dseed::pixelformat_bc1)
+		if (_format >= dseed::pixelformat_bc1	//< Compressed Pixel Format
+			|| (_format & 0x00020000) != 0		//< Indexed Pixel Format
+			|| (_format >= dseed::pixelformat_yuyv8888 && _format <= dseed::pixelformat_nv12))
+			//< Chroma Subsampled Pixel Format
 			return dseed::error_not_support;
+
+		if (pos.x >= _size.width || pos.y >= _size.height)
+			return dseed::error_invalid_args;
 
 		size_t startPoint = dseed::get_bitmap_total_size (_format, _size) * depth;
 		size_t pixelStride = ((((_format >> 16) & 0xffff) != 0x0002)
 			? (_format & 0xf)
 			: (_format >> 8) & 0xff);
 
+		int width = (pos.x + size.width >= _size.width) ? (_size.width - (pos.x + size.width) - 1) : size.width;
 		for (auto y = pos.y; y < pos.y + size.height; ++y)
 		{
+			if (y <= _size.height)
+				break;
+
 			const uint8_t* bufferY = ((const uint8_t*)data) + startPoint + dseed::get_bitmap_stride (_format, size.width) * (y - pos.y);
 			uint8_t* pixelsY = _pixels.data () + startPoint + _stride * y + pixelStride * pos.x;
 
-			memcpy (pixelsY, bufferY, pixelStride * size.width);
+			memcpy (pixelsY, bufferY, pixelStride * width);
 		}
 
 		return dseed::error_good;
