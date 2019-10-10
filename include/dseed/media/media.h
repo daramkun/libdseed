@@ -22,11 +22,11 @@ namespace dseed
 	struct DSEEDEXP imageformat
 	{
 		size2i size;
-		pixelformat_t image_format;
+		pixelformat image_format;
 		fraction frame_rate;
 
 		imageformat () = default;
-		imageformat (const size2i& size, pixelformat_t format, fraction framerate)
+		imageformat (const size2i& size, pixelformat format, fraction framerate)
 			: size (size), image_format (format), frame_rate (framerate)
 		{ }
 	};

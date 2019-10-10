@@ -83,7 +83,7 @@ public:
 		{
 			DXGI_MODE_DESC& mode = modes[i];
 			dseed::displaymode dm = {};
-			dm.format = dseed::pixelformat_bgra8888;
+			dm.format = dseed::pixelformat::bgra8888;
 			dm.resolution = dseed::size2i (mode.Width, mode.Height);
 			dm.refresh_rate = dseed::fraction (mode.RefreshRate.Numerator, mode.RefreshRate.Denominator);
 			_displayModes.push_back (dm);

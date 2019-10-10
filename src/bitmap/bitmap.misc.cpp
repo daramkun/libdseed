@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 using dbpfn = std::function<void (const uint8_t * src, const dseed::size3i & size, int threshold, dseed::bitmap_properties * prop)>;
-using dbptp = dseed::pixelformat_t;
+using dbptp = dseed::pixelformat;
 
 constexpr dseed::colorcount_t get_colorcount_t (size_t i)
 {
@@ -49,7 +49,7 @@ inline void determine_props (const uint8_t* src, const dseed::size3i& size, int 
 						prop->transparent = true;
 				}
 
-				if (prop->grayscale && (dseed::type2format<TPixel> () != dseed::pixelformat_grayscale8 && dseed::type2format<TPixel> () != dseed::pixelformat_grayscalef))
+				if (prop->grayscale && (dseed::type2format<TPixel> () != dseed::pixelformat::grayscale8 && dseed::type2format<TPixel> () != dseed::pixelformat::grayscalef))
 				{
 					dseed::rgb rgb = (dseed::rgb) pixel;
 					if (abs (rgb.r - rgb.g) > threshold || abs (rgb.r - rgb.b) > threshold)
@@ -95,19 +95,19 @@ inline void determine_props_indexed (const uint8_t* src, int bpp, int elements, 
 }
 
 std::map<dbptp, dbpfn> g_dbps = {
-	{ dseed::pixelformat_rgba8888, determine_props<dseed::rgba> },
-	{ dseed::pixelformat_rgbaf, determine_props<dseed::rgbaf> },
-	{ dseed::pixelformat_rgb888, determine_props<dseed::rgb> },
-	{ dseed::pixelformat_bgra8888, determine_props<dseed::bgra> },
-	{ dseed::pixelformat_bgr888, determine_props<dseed::bgr> },
-	{ dseed::pixelformat_bgra4444, determine_props<dseed::bgra4> },
-	{ dseed::pixelformat_bgr565, determine_props<dseed::bgr565> },
-	{ dseed::pixelformat_grayscale8, determine_props<dseed::grayscale> },
-	{ dseed::pixelformat_grayscalef, determine_props<dseed::grayscalef> },
-	{ dseed::pixelformat_yuva8888, determine_props<dseed::yuva> },
-	{ dseed::pixelformat_yuv888, determine_props<dseed::yuv> },
-	{ dseed::pixelformat_hsva8888, determine_props<dseed::hsva> },
-	{ dseed::pixelformat_hsv888, determine_props<dseed::hsv> },
+	{ dseed::pixelformat::rgba8888, determine_props<dseed::rgba> },
+	{ dseed::pixelformat::rgbaf, determine_props<dseed::rgbaf> },
+	{ dseed::pixelformat::rgb888, determine_props<dseed::rgb> },
+	{ dseed::pixelformat::bgra8888, determine_props<dseed::bgra> },
+	{ dseed::pixelformat::bgr888, determine_props<dseed::bgr> },
+	{ dseed::pixelformat::bgra4444, determine_props<dseed::bgra4> },
+	{ dseed::pixelformat::bgr565, determine_props<dseed::bgr565> },
+	{ dseed::pixelformat::grayscale8, determine_props<dseed::grayscale> },
+	{ dseed::pixelformat::grayscalef, determine_props<dseed::grayscalef> },
+	{ dseed::pixelformat::yuva8888, determine_props<dseed::yuva> },
+	{ dseed::pixelformat::yuv888, determine_props<dseed::yuv> },
+	{ dseed::pixelformat::hsva8888, determine_props<dseed::hsva> },
+	{ dseed::pixelformat::hsv888, determine_props<dseed::hsv> },
 };
 
 dseed::error_t dseed::bitmap_determine_bitmap_properties (dseed::bitmap* bitmap, dseed::bitmap_properties* prop, int threshold)
@@ -120,7 +120,7 @@ dseed::error_t dseed::bitmap_determine_bitmap_properties (dseed::bitmap* bitmap,
 
 	auto format = bitmap->format ();
 
-	if (format == dseed::pixelformat_bgra8888_indexed8 || format == dseed::pixelformat_bgr888_indexed8)
+	if (format == dseed::pixelformat::bgra8888_indexed8 || format == dseed::pixelformat::bgr888_indexed8)
 	{
 		dseed::auto_object<dseed::palette> palette;
 		bitmap->palette (&palette);
@@ -129,7 +129,7 @@ dseed::error_t dseed::bitmap_determine_bitmap_properties (dseed::bitmap* bitmap,
 		if (dseed::failed (palette->pixels_pointer ((void**)&pixels)))
 			return dseed::error_fail;
 
-		if (format == dseed::pixelformat_bgra8888_indexed8)
+		if (format == dseed::pixelformat::bgra8888_indexed8)
 			determine_props_indexed<dseed::bgra> (pixels, 4, palette->size (), threshold, prop);
 		else
 			determine_props_indexed<dseed::bgr> (pixels, 3, palette->size (), threshold, prop);

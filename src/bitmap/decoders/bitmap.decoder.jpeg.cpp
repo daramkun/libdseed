@@ -100,12 +100,12 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 	jpeg_start_decompress (&cinfo);
 
 	dseed::size3i size (cinfo.output_width, cinfo.output_height, 1);
-	dseed::pixelformat_t pixelFormat;
+	dseed::pixelformat pixelFormat;
 	switch (cinfo.output_components)
 	{
-	case 3: pixelFormat = (!yuv) ? dseed::pixelformat_rgb888 : dseed::pixelformat_yuv888; break;
-	case 4: pixelFormat = (!yuv) ? dseed::pixelformat_rgba8888 : dseed::pixelformat_yuva8888; break;
-	case 1: pixelFormat = dseed::pixelformat_grayscale8; break;
+	case 3: pixelFormat = (!yuv) ? dseed::pixelformat::rgb888 : dseed::pixelformat::yuv888; break;
+	case 4: pixelFormat = (!yuv) ? dseed::pixelformat::rgba8888 : dseed::pixelformat::yuva8888; break;
+	case 1: pixelFormat = dseed::pixelformat::grayscale8; break;
 	default: return dseed::error_not_support;
 	}
 

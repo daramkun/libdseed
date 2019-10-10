@@ -6,107 +6,115 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Pixel Format
+	//     0x00010002
+	//       __       <= Color Formats. 00: Color Pixels, 01: Depth-Stencil Values
+	//         __     <= Color Pixels Subformat.
+	//                   01: RGBA/BGRA/Grayscale, 02: Indexed BGR(A), 03: YUV
+	//                   , 04: Chroma Subsampled YUV, 05: HSV
+	//                   , 10: DXT Compressed, 11: ETC, ETC2, 12: PVRTC, 13: ASTC
+	//           __   <= Subtypes.
+	//             __ <= Bytes per Pixel for Raw Color Pixel Format(RGB/BGR/Grayscale/YUV/HSV).
 	//
 	////////////////////////////////////////////////////////////////////////////////////////
-	enum pixelformat_t : int32_t
+	enum class pixelformat : int32_t
 	{
 		// Unknown Pixel Format
-		pixelformat_unknown = 0x00000000,
+		unknown = 0x00000000,
 
 		// 8-bit Grayscale Pixel Format
-		pixelformat_grayscale8 = 0x00010001,
+		grayscale8 = 0x00010001,
 		// 32-bit Floating-Point Grayscale Pixel Format
-		pixelformat_grayscalef = 0x00010004,
+		grayscalef = 0x00010004,
 		// 32-bit Integer RGBA Pixel Format
-		pixelformat_rgba8888 = 0x00010104,
+		rgba8888 = 0x00010104,
 		// 128-bit Floating-Point RGBA Pixel Format
-		pixelformat_rgbaf = 0x00010110,
+		rgbaf = 0x00010110,
 		// 24-bit RGB Pixel Format
-		pixelformat_rgb888 = 0x00010103,
+		rgb888 = 0x00010103,
 		// 32-bit Integer BGRA Pixel Format
-		pixelformat_bgra8888 = 0x00010204,
+		bgra8888 = 0x00010204,
 		// 32-bit Integer BGRA Pixel Format
-		pixelformat_bgr888 = 0x00010203,
+		bgr888 = 0x00010203,
 		// 16-bit Integer BGRA Pixel Format
-		pixelformat_bgra4444 = 0x00010202,
+		bgra4444 = 0x00010202,
 
 		// 16-bit Integer BGR Pixel Format(Legacy)
-		pixelformat_bgr565 = 0x00010302,
+		bgr565 = 0x00010302,
 
 		// 8-bit Indexed BGRA Pixel Format
-		pixelformat_bgra8888_indexed8 = 0x00020104,
+		bgra8888_indexed8 = 0x00020104,
 		// 8-bit Indexed BGR Pixel Format
-		pixelformat_bgr888_indexed8 = 0x00020103,
+		bgr888_indexed8 = 0x00020103,
 
 		// 24-bit YCbCr:4:4:4 Pixel Format
-		pixelformat_yuv888 = 0x00030003,
+		yuv888 = 0x00030003,
 		// 32-bit YCbCr:4:4:4 and Alpha Pixel Format
-		pixelformat_yuva8888 = 0x00030004,
+		yuva8888 = 0x00030004,
 
 		// 32-bit YCbCr:4:2:2(YUYV or YUY2) Packed Pixel Format
-		pixelformat_yuyv8888 = 0x00040204,
+		yuyv8888 = 0x00040204,
 		// YCbCr:4:2:0(NV12) Packed Pixel Format
-		pixelformat_yyyyuv888888 = 0x00040406,
-		pixelformat_nv12 = pixelformat_yyyyuv888888,
+		yyyyuv888888 = 0x00040406,
+		nv12 = yyyyuv888888,
 
 		// 24-bit HSV Pixel Format
-		pixelformat_hsv888 = 0x00050103,
+		hsv888 = 0x00050103,
 		// 32-bit HSV and Alpha Pixel Format
-		pixelformat_hsva8888 = 0x00050104,
+		hsva8888 = 0x00050104,
 
 		// BC1(DXT1) Compressed Pixel Format
-		pixelformat_bc1 = 0x00100001, pixelformat_dxt1 = pixelformat_bc1,
+		bc1 = 0x00100001, dxt1 = bc1,
 		// BC2(DXT3) Compressed Pixel Format
-		pixelformat_bc2 = 0x00100002, pixelformat_dxt3 = pixelformat_bc2,
+		bc2 = 0x00100002, dxt3 = bc2,
 		// BC3(DXT5) Compressed Pixel Format
-		pixelformat_bc3 = 0x00100003, pixelformat_dxt5 = pixelformat_bc3,
+		bc3 = 0x00100003, dxt5 = bc3,
 		// BC4(ATI1) Compressed Pixel Format
-		pixelformat_bc4 = 0x00100004, pixelformat_ati1 = pixelformat_bc4,
+		bc4 = 0x00100004, ati1 = bc4,
 		// BC5(ATI2) Compressed Pixel Format
-		pixelformat_bc5 = 0x00100005, pixelformat_ati2 = pixelformat_bc5,
+		bc5 = 0x00100005, ati2 = bc5,
 		// BC6 Compressed Pixel Format(Only support Signed-bit Format now)
-		pixelformat_bc6h = 0x00100006,
+		bc6h = 0x00100006,
 		// BC7 Compressed Pixel Format
-		pixelformat_bc7 = 0x00100007,
+		bc7 = 0x00100007,
 
 		// ETC Compressed Pixel Format
-		pixelformat_etc1 = 0x00110001,
+		etc1 = 0x00110001,
 		// ETC2 Compressed Pixel Format
-		pixelformat_etc2 = 0x00110002,
+		etc2 = 0x00110002,
 		// ETC2 with Alpha Compressed Pixel Format
-		pixelformat_etc2a = 0x00110102,
+		etc2a = 0x00110102,
 		// ETC2 with Dedicated Alpha Compressed Pixel Format
-		pixelformat_etc2a8 = 0x00110103,
+		etc2a8 = 0x00110103,
 
 		// PVRTC Compressed Pixel Formats
-		pixelformat_pvrtc_2bpp = 0x00120001,
-		pixelformat_pvrtc_2abpp = 0x00120101,
-		pixelformat_pvrtc_4bpp = 0x00120002,
-		pixelformat_pvrtc_4abpp = 0x00120102,
+		pvrtc_2bpp = 0x00120001,
+		pvrtc_2abpp = 0x00120101,
+		pvrtc_4bpp = 0x00120002,
+		pvrtc_4abpp = 0x00120102,
 		// PVRTC2 Compressed Pixel Formats
-		pixelformat_pvrtc2_2bpp = 0x00120003,
-		pixelformat_pvrtc2_4bpp = 0x00120004,
+		pvrtc2_2bpp = 0x00120003,
+		pvrtc2_4bpp = 0x00120004,
 
 		// ASTC Compressed Pixel Formats
-		pixelformat_astc_4x4 = 0x00130001,
-		pixelformat_astc_5x4 = 0x00130002,
-		pixelformat_astc_5x5 = 0x00130003,
-		pixelformat_astc_6x5 = 0x00130004,
-		pixelformat_astc_6x6 = 0x00130005,
-		pixelformat_astc_8x5 = 0x00130006,
-		pixelformat_astc_8x6 = 0x00130007,
-		pixelformat_astc_8x8 = 0x00130008,
-		pixelformat_astc_10x5 = 0x00130009,
-		pixelformat_astc_10x6 = 0x0013000a,
-		pixelformat_astc_10x8 = 0x0013000b,
-		pixelformat_astc_10x10 = 0x0013000c,
-		pixelformat_astc_12x10 = 0x0013000d,
-		pixelformat_astc_12x12 = 0x0013000e,
+		astc_4x4 = 0x00130001,
+		astc_5x4 = 0x00130002,
+		astc_5x5 = 0x00130003,
+		astc_6x5 = 0x00130004,
+		astc_6x6 = 0x00130005,
+		astc_8x5 = 0x00130006,
+		astc_8x6 = 0x00130007,
+		astc_8x8 = 0x00130008,
+		astc_10x5 = 0x00130009,
+		astc_10x6 = 0x0013000a,
+		astc_10x8 = 0x0013000b,
+		astc_10x10 = 0x0013000c,
+		astc_12x10 = 0x0013000d,
+		astc_12x12 = 0x0013000e,
 
 		// Depth-Stencil Pixel Formats (Not support in dseed Bitmap object, Only for Texture objects)
-		pixelformat_depth16 = 0x01000002,
-		pixelformat_depth24stencil8 = 0x01000104,
-		pixelformat_depth32 = 0x01000004,
+		depth16 = 0x01000002,
+		depth24_stencil8 = 0x01000104,
+		depth32 = 0x01000004,
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -141,11 +149,11 @@ namespace dseed
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get Stride value
-	DSEEDEXP size_t get_bitmap_stride (pixelformat_t format, int32_t width) noexcept;
+	DSEEDEXP size_t get_bitmap_stride (pixelformat format, int32_t width) noexcept;
 	// Get Bitmap Plane size
-	DSEEDEXP size_t get_bitmap_plane_size (pixelformat_t format, int32_t width, int32_t height) noexcept;
+	DSEEDEXP size_t get_bitmap_plane_size (pixelformat format, int32_t width, int32_t height) noexcept;
 	// Get Total Bitmap Planes Buffer size
-	DSEEDEXP size_t get_bitmap_total_size (pixelformat_t format, const dseed::size3i& size) noexcept;
+	DSEEDEXP size_t get_bitmap_total_size (pixelformat format, const dseed::size3i& size) noexcept;
 	// Get Mipmap Size
 	DSEEDEXP dseed::size3i get_mipmap_size (int mipLevel, const dseed::size3i& size, bool cubemap) noexcept;
 	// Get Maximum Mip-Levels
@@ -228,24 +236,24 @@ namespace dseed
 		}
 	}
 
-	template<class color_t> constexpr pixelformat_t type2format () noexcept { static_assert (true, "Not support type."); return pixelformat_unknown; }
-	template<> constexpr pixelformat_t type2format<rgba> () noexcept { return pixelformat_rgba8888; }
-	template<> constexpr pixelformat_t type2format<rgb> () noexcept { return pixelformat_rgb888; }
-	template<> constexpr pixelformat_t type2format<rgbaf> () noexcept { return pixelformat_rgbaf; }
-	template<> constexpr pixelformat_t type2format<bgra> () noexcept { return pixelformat_bgra8888; }
-	template<> constexpr pixelformat_t type2format<bgr> () noexcept { return pixelformat_bgr888; }
-	template<> constexpr pixelformat_t type2format<bgra4> () noexcept { return pixelformat_bgra4444; }
-	template<> constexpr pixelformat_t type2format<bgr565> () noexcept { return pixelformat_bgr565; }
-	template<> constexpr pixelformat_t type2format<grayscale> () noexcept { return pixelformat_grayscale8; }
-	template<> constexpr pixelformat_t type2format<grayscalef> () noexcept { return pixelformat_grayscalef; }
-	template<> constexpr pixelformat_t type2format<yuva> () noexcept { return pixelformat_yuva8888; }
-	template<> constexpr pixelformat_t type2format<yuv> () noexcept { return pixelformat_yuv888; }
-	template<> constexpr pixelformat_t type2format<hsva> () noexcept { return pixelformat_hsva8888; }
-	template<> constexpr pixelformat_t type2format<hsv> () noexcept { return pixelformat_hsv888; }
+	template<class color_t> constexpr pixelformat type2format () noexcept { static_assert (true, "Not support type."); return pixelformat_unknown; }
+	template<> constexpr pixelformat type2format<rgba> () noexcept { return pixelformat::rgba8888; }
+	template<> constexpr pixelformat type2format<rgb> () noexcept { return pixelformat::rgb888; }
+	template<> constexpr pixelformat type2format<rgbaf> () noexcept { return pixelformat::rgbaf; }
+	template<> constexpr pixelformat type2format<bgra> () noexcept { return pixelformat::bgra8888; }
+	template<> constexpr pixelformat type2format<bgr> () noexcept { return pixelformat::bgr888; }
+	template<> constexpr pixelformat type2format<bgra4> () noexcept { return pixelformat::bgra4444; }
+	template<> constexpr pixelformat type2format<bgr565> () noexcept { return pixelformat::bgr565; }
+	template<> constexpr pixelformat type2format<grayscale> () noexcept { return pixelformat::grayscale8; }
+	template<> constexpr pixelformat type2format<grayscalef> () noexcept { return pixelformat::grayscalef; }
+	template<> constexpr pixelformat type2format<yuva> () noexcept { return pixelformat::yuva8888; }
+	template<> constexpr pixelformat type2format<yuv> () noexcept { return pixelformat::yuv888; }
+	template<> constexpr pixelformat type2format<hsva> () noexcept { return pixelformat::hsva8888; }
+	template<> constexpr pixelformat type2format<hsv> () noexcept { return pixelformat::hsv888; }
 
-	template<class color_t> constexpr pixelformat_t type2indexedformat () noexcept { static_assert (true, "Not support type."); return pixelformat_unknown; }
-	template<> constexpr pixelformat_t type2indexedformat<bgra> () noexcept { return pixelformat_bgra8888_indexed8; }
-	template<> constexpr pixelformat_t type2indexedformat<bgr> () noexcept { return pixelformat_bgr888_indexed8; }
+	template<class color_t> constexpr pixelformat type2indexedformat () noexcept { static_assert (true, "Not support type."); return pixelformat_unknown; }
+	template<> constexpr pixelformat type2indexedformat<bgra> () noexcept { return pixelformat::bgra8888_indexed8; }
+	template<> constexpr pixelformat type2indexedformat<bgr> () noexcept { return pixelformat::bgr888_indexed8; }
 
 	template<class color_t> constexpr bool hasalpha () noexcept { return false; }
 	template<> constexpr bool hasalpha<rgba> () noexcept { return true; }

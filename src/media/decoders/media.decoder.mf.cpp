@@ -162,19 +162,19 @@ public:
 				GUID imageType;
 				type->GetGUID (MF_MT_SUBTYPE, &imageType);
 
-				dseed::pixelformat_t pf;
+				dseed::pixelformat pf;
 				if (imageType == MFVideoFormat_ARGB32 || imageType == MFVideoFormat_RGB32)
-					pf = dseed::pixelformat_bgra8888;
+					pf = dseed::pixelformat::bgra8888;
 				else if (imageType == MFVideoFormat_RGB24)
-					pf = dseed::pixelformat_bgr888;
+					pf = dseed::pixelformat::bgr888;
 				else if (imageType == MFVideoFormat_RGB565)
-					pf = dseed::pixelformat_bgr565;
+					pf = dseed::pixelformat::bgr565;
 				else if (imageType == MFVideoFormat_AYUV)
-					pf = dseed::pixelformat_yuva8888;
+					pf = dseed::pixelformat::yuva8888;
 				else if (imageType == MFVideoFormat_NV12)
-					pf = dseed::pixelformat_yyyyuv888888;
+					pf = dseed::pixelformat::yyyyuv888888;
 				else if (imageType == MFVideoFormat_YVYU)
-					pf = dseed::pixelformat_yuyv8888;
+					pf = dseed::pixelformat::yuyv8888;
 				else return dseed::error_not_support;
 
 				UINT32 width, height;

@@ -35,8 +35,8 @@ public:
 			return dseed::error_not_support;
 
 		auto format = bitmap->format ();
-		if (!(format == dseed::pixelformat_bgra8888 || format == dseed::pixelformat_bgr888
-			|| format == dseed::pixelformat_bgra8888_indexed8))
+		if (!(format == dseed::pixelformat::bgra8888 || format == dseed::pixelformat::bgr888
+			|| format == dseed::pixelformat::bgra8888_indexed8))
 			return dseed::error_not_support;
 
 		for (auto& containedBitmap : _bitmaps)
@@ -68,7 +68,7 @@ public:
 			IcoCurEntry entry;
 			entry.width = size.width == 256 ? 0 : size.width;
 			entry.height = size.width == 256 ? 0 : size.height;
-			if (format & 0x00020000)
+			if ((int)format & 0x00020000)
 			{
 				dseed::auto_object<dseed::palette> palette;
 				bitmap->palette (&palette);
@@ -79,7 +79,7 @@ public:
 			if (_ico)
 			{
 				entry.ico_planes = 1;
-				entry.ico_bits_per_pixels = (format & 0x00020000) ? 1 : format & 0x000000ff;
+				entry.ico_bits_per_pixels = ((int)format & 0x00020000) ? 1 : (int)format & 0x000000ff;
 			}
 			else
 			{

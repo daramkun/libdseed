@@ -42,16 +42,16 @@ dseed::error_t dseed::create_webp_bitmap_decoder (dseed::stream* stream, dseed::
 		return dseed::error_fail;
 
 	dseed::size3i size (width, height, 1);
-	dseed::pixelformat_t format;
+	dseed::pixelformat format;
 	if (iter.has_alpha)
 	{
 		config.output.colorspace = MODE_RGBA;
-		format = dseed::pixelformat_rgba8888;
+		format = dseed::pixelformat::rgba8888;
 	}
 	else
 	{
 		config.output.colorspace = MODE_RGB;
-		format = dseed::pixelformat_rgb888;
+		format = dseed::pixelformat::rgb888;
 	}
 	size_t stride = dseed::get_bitmap_stride (format, width);
 
@@ -71,7 +71,7 @@ dseed::error_t dseed::create_webp_bitmap_decoder (dseed::stream* stream, dseed::
 			if (dseed::failed (bitmap->pixels_pointer ((void**)& ptr)))
 				continue;
 
-			if (format == pixelformat_rgba8888)
+			if (format == pixelformat::rgba8888)
 			{
 				memcpy (ptr, config.output.u.RGBA.rgba, stride * height);
 			}

@@ -139,20 +139,20 @@ inline bool filter_bitmap (uint8_t* dest, const uint8_t* src, const dseed::size3
 	return true;
 }
 
-std::map<dseed::pixelformat_t, ftfn> g_resizes = {
-	{ dseed::pixelformat_rgba8888, filter_bitmap<dseed::rgba> },
-	{ dseed::pixelformat_rgb888, filter_bitmap<dseed::rgb> },
-	{ dseed::pixelformat_rgbaf, filter_bitmap<dseed::rgbaf> },
-	{ dseed::pixelformat_bgra8888, filter_bitmap<dseed::bgra> },
-	{ dseed::pixelformat_bgr888, filter_bitmap<dseed::bgr> },
-	{ dseed::pixelformat_bgra4444, filter_bitmap<dseed::bgra4> },
-	{ dseed::pixelformat_bgr565, filter_bitmap<dseed::bgr565> },
-	{ dseed::pixelformat_grayscale8, filter_bitmap<dseed::grayscale> },
-	{ dseed::pixelformat_grayscalef, filter_bitmap<dseed::grayscalef> },
-	{ dseed::pixelformat_yuva8888, filter_bitmap<dseed::yuva> },
-	{ dseed::pixelformat_yuv888, filter_bitmap<dseed::yuv> },
-	{ dseed::pixelformat_hsva8888, filter_bitmap<dseed::hsva> },
-	{ dseed::pixelformat_hsv888, filter_bitmap<dseed::hsv> },
+std::map<dseed::pixelformat, ftfn> g_resizes = {
+	{ dseed::pixelformat::rgba8888, filter_bitmap<dseed::rgba> },
+	{ dseed::pixelformat::rgb888, filter_bitmap<dseed::rgb> },
+	{ dseed::pixelformat::rgbaf, filter_bitmap<dseed::rgbaf> },
+	{ dseed::pixelformat::bgra8888, filter_bitmap<dseed::bgra> },
+	{ dseed::pixelformat::bgr888, filter_bitmap<dseed::bgr> },
+	{ dseed::pixelformat::bgra4444, filter_bitmap<dseed::bgra4> },
+	{ dseed::pixelformat::bgr565, filter_bitmap<dseed::bgr565> },
+	{ dseed::pixelformat::grayscale8, filter_bitmap<dseed::grayscale> },
+	{ dseed::pixelformat::grayscalef, filter_bitmap<dseed::grayscalef> },
+	{ dseed::pixelformat::yuva8888, filter_bitmap<dseed::yuva> },
+	{ dseed::pixelformat::yuv888, filter_bitmap<dseed::yuv> },
+	{ dseed::pixelformat::hsva8888, filter_bitmap<dseed::hsva> },
+	{ dseed::pixelformat::hsv888, filter_bitmap<dseed::hsv> },
 };
 
 dseed::error_t dseed::filter_bitmap (dseed::bitmap* original, const dseed::bitmap_filter_mask& mask, dseed::bitmap** bitmap)

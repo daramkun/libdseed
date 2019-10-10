@@ -3,7 +3,7 @@
 #include <map>
 
 using ghfn = std::function<bool (dseed::histogram*, const uint8_t*, const dseed::size3i&, uint32_t, dseed::histogram_color_t)>;
-using ghtp = dseed::pixelformat_t;
+using ghtp = dseed::pixelformat;
 
 template<class TPixel>
 inline bool gen_histogram (dseed::histogram* histogram, const uint8_t* src, const dseed::size3i& size, uint32_t targetDepth, dseed::histogram_color_t c) noexcept
@@ -31,15 +31,15 @@ inline bool gen_histogram (dseed::histogram* histogram, const uint8_t* src, cons
 }
 
 std::map<ghtp, ghfn> g_ghs = {
-	{ dseed::pixelformat_rgba8888, gen_histogram<dseed::rgba> },
-	{ dseed::pixelformat_rgb888, gen_histogram<dseed::rgb> },
-	{ dseed::pixelformat_bgra8888, gen_histogram<dseed::bgra> },
-	{ dseed::pixelformat_bgr888, gen_histogram<dseed::bgr> },
-	{ dseed::pixelformat_grayscale8, gen_histogram<dseed::grayscale> },
-	{ dseed::pixelformat_yuva8888, gen_histogram<dseed::yuva> },
-	{ dseed::pixelformat_yuv888, gen_histogram<dseed::yuv> },
-	{ dseed::pixelformat_hsva8888, gen_histogram<dseed::hsva> },
-	{ dseed::pixelformat_hsv888, gen_histogram<dseed::hsv> },
+	{ dseed::pixelformat::rgba8888, gen_histogram<dseed::rgba> },
+	{ dseed::pixelformat::rgb888, gen_histogram<dseed::rgb> },
+	{ dseed::pixelformat::bgra8888, gen_histogram<dseed::bgra> },
+	{ dseed::pixelformat::bgr888, gen_histogram<dseed::bgr> },
+	{ dseed::pixelformat::grayscale8, gen_histogram<dseed::grayscale> },
+	{ dseed::pixelformat::yuva8888, gen_histogram<dseed::yuva> },
+	{ dseed::pixelformat::yuv888, gen_histogram<dseed::yuv> },
+	{ dseed::pixelformat::hsva8888, gen_histogram<dseed::hsva> },
+	{ dseed::pixelformat::hsv888, gen_histogram<dseed::hsv> },
 };
 
 dseed::error_t dseed::bitmap_generate_histogram (dseed::bitmap* original, histogram_color_t color, uint32_t depth, histogram* histogram)
@@ -50,11 +50,11 @@ dseed::error_t dseed::bitmap_generate_histogram (dseed::bitmap* original, histog
 	auto format = original->format ();
 	if (color > dseed::histogram_color_fourth || color < dseed::histogram_color_first)
 		return dseed::error_invalid_args;
-	if (color >= dseed::histogram_color_second && (format == dseed::pixelformat_grayscale8))
+	if (color >= dseed::histogram_color_second && (format == dseed::pixelformat::grayscale8))
 		return dseed::error_invalid_args;
-	if (color >= dseed::histogram_color_fourth && (format == dseed::pixelformat_rgb888
-		|| format == dseed::pixelformat_bgr888 || format == dseed::pixelformat_yuv888
-		|| format == dseed::pixelformat_hsv888))
+	if (color >= dseed::histogram_color_fourth && (format == dseed::pixelformat::rgb888
+		|| format == dseed::pixelformat::bgr888 || format == dseed::pixelformat::yuv888
+		|| format == dseed::pixelformat::hsv888))
 		return dseed::error_invalid_args;
 
 	const uint8_t* srcPtr;
@@ -87,7 +87,7 @@ dseed::error_t dseed::histogram_equalization (histogram* histogram)
 }
 
 using ahfn = std::function<bool (const dseed::histogram*, uint8_t*, const uint8_t*, const dseed::size3i&, uint32_t, dseed::histogram_color_t)>;
-using ahtp = dseed::pixelformat_t;
+using ahtp = dseed::pixelformat;
 
 template<class TPixel>
 inline bool apply_histogram (const dseed::histogram* histogram, uint8_t* dest, const uint8_t* src, const dseed::size3i& size, uint32_t targetDepth, dseed::histogram_color_t c) noexcept
@@ -116,15 +116,15 @@ inline bool apply_histogram (const dseed::histogram* histogram, uint8_t* dest, c
 }
 
 std::map<ahtp, ahfn> g_ahs = {
-	{ dseed::pixelformat_rgba8888, apply_histogram<dseed::rgba> },
-	{ dseed::pixelformat_rgb888, apply_histogram<dseed::rgb> },
-	{ dseed::pixelformat_bgra8888, apply_histogram<dseed::bgra> },
-	{ dseed::pixelformat_bgr888, apply_histogram<dseed::bgr> },
-	{ dseed::pixelformat_grayscale8, apply_histogram<dseed::grayscale> },
-	{ dseed::pixelformat_yuva8888, apply_histogram<dseed::yuva> },
-	{ dseed::pixelformat_yuv888, apply_histogram<dseed::yuv> },
-	{ dseed::pixelformat_hsva8888, apply_histogram<dseed::hsva> },
-	{ dseed::pixelformat_hsv888, apply_histogram<dseed::hsv> },
+	{ dseed::pixelformat::rgba8888, apply_histogram<dseed::rgba> },
+	{ dseed::pixelformat::rgb888, apply_histogram<dseed::rgb> },
+	{ dseed::pixelformat::bgra8888, apply_histogram<dseed::bgra> },
+	{ dseed::pixelformat::bgr888, apply_histogram<dseed::bgr> },
+	{ dseed::pixelformat::grayscale8, apply_histogram<dseed::grayscale> },
+	{ dseed::pixelformat::yuva8888, apply_histogram<dseed::yuva> },
+	{ dseed::pixelformat::yuv888, apply_histogram<dseed::yuv> },
+	{ dseed::pixelformat::hsva8888, apply_histogram<dseed::hsva> },
+	{ dseed::pixelformat::hsv888, apply_histogram<dseed::hsv> },
 };
 
 dseed::error_t dseed::bitmap_apply_histogram (dseed::bitmap* original, histogram_color_t color, uint32_t depth, const histogram* histogram, dseed::bitmap** bitmap)
@@ -137,11 +137,11 @@ dseed::error_t dseed::bitmap_apply_histogram (dseed::bitmap* original, histogram
 	auto format = original->format ();
 	if (color > dseed::histogram_color_fourth || color < dseed::histogram_color_first)
 		return dseed::error_invalid_args;
-	if (color >= dseed::histogram_color_second && (format == dseed::pixelformat_grayscale8))
+	if (color >= dseed::histogram_color_second && (format == dseed::pixelformat::grayscale8))
 		return dseed::error_invalid_args;
-	if (color >= dseed::histogram_color_fourth && (format == dseed::pixelformat_rgb888
-		|| format == dseed::pixelformat_bgr888 || format == dseed::pixelformat_yuv888
-		|| format == dseed::pixelformat_hsv888))
+	if (color >= dseed::histogram_color_fourth && (format == dseed::pixelformat::rgb888
+		|| format == dseed::pixelformat::bgr888 || format == dseed::pixelformat::yuv888
+		|| format == dseed::pixelformat::hsv888))
 		return dseed::error_invalid_args;
 
 	auto size = original->size ();

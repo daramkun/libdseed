@@ -36,21 +36,21 @@ dseed::error_t dseed::create_astc_bitmap_decoder (dseed::stream* stream, dseed::
 		header.ySize[2] | (header.ySize[1] << 8) | (header.ySize[0] << 16),
 		header.ySize[2] | (header.ySize[1] << 8) | (header.ySize[0] << 16));
 
-	dseed::pixelformat_t format;
-	if (header.blockDimX == 4 && header.blockDimY == 4) format = dseed::pixelformat_astc_4x4;
-	else if (header.blockDimX == 5 && header.blockDimY == 4) format = dseed::pixelformat_astc_5x4;
-	else if (header.blockDimX == 5 && header.blockDimY == 5) format = dseed::pixelformat_astc_5x5;
-	else if (header.blockDimX == 6 && header.blockDimY == 5) format = dseed::pixelformat_astc_6x5;
-	else if (header.blockDimX == 6 && header.blockDimY == 6) format = dseed::pixelformat_astc_6x6;
-	else if (header.blockDimX == 8 && header.blockDimY == 5) format = dseed::pixelformat_astc_8x5;
-	else if (header.blockDimX == 8 && header.blockDimY == 6) format = dseed::pixelformat_astc_8x6;
-	else if (header.blockDimX == 8 && header.blockDimY == 8) format = dseed::pixelformat_astc_8x8;
-	else if (header.blockDimX == 10 && header.blockDimY == 5) format = dseed::pixelformat_astc_10x5;
-	else if (header.blockDimX == 10 && header.blockDimY == 6) format = dseed::pixelformat_astc_10x6;
-	else if (header.blockDimX == 10 && header.blockDimY == 8) format = dseed::pixelformat_astc_10x8;
-	else if (header.blockDimX == 10 && header.blockDimY == 10) format = dseed::pixelformat_astc_10x8;
-	else if (header.blockDimX == 12 && header.blockDimY == 10) format = dseed::pixelformat_astc_12x10;
-	else if (header.blockDimX == 12 && header.blockDimY == 12) format = dseed::pixelformat_astc_12x12;
+	dseed::pixelformat format;
+	if (header.blockDimX == 4 && header.blockDimY == 4) format = dseed::pixelformat::astc_4x4;
+	else if (header.blockDimX == 5 && header.blockDimY == 4) format = dseed::pixelformat::astc_5x4;
+	else if (header.blockDimX == 5 && header.blockDimY == 5) format = dseed::pixelformat::astc_5x5;
+	else if (header.blockDimX == 6 && header.blockDimY == 5) format = dseed::pixelformat::astc_6x5;
+	else if (header.blockDimX == 6 && header.blockDimY == 6) format = dseed::pixelformat::astc_6x6;
+	else if (header.blockDimX == 8 && header.blockDimY == 5) format = dseed::pixelformat::astc_8x5;
+	else if (header.blockDimX == 8 && header.blockDimY == 6) format = dseed::pixelformat::astc_8x6;
+	else if (header.blockDimX == 8 && header.blockDimY == 8) format = dseed::pixelformat::astc_8x8;
+	else if (header.blockDimX == 10 && header.blockDimY == 5) format = dseed::pixelformat::astc_10x5;
+	else if (header.blockDimX == 10 && header.blockDimY == 6) format = dseed::pixelformat::astc_10x6;
+	else if (header.blockDimX == 10 && header.blockDimY == 8) format = dseed::pixelformat::astc_10x8;
+	else if (header.blockDimX == 10 && header.blockDimY == 10) format = dseed::pixelformat::astc_10x8;
+	else if (header.blockDimX == 12 && header.blockDimY == 10) format = dseed::pixelformat::astc_12x10;
+	else if (header.blockDimX == 12 && header.blockDimY == 12) format = dseed::pixelformat::astc_12x12;
 	else return dseed::error_not_support;
 
 	dseed::bitmaptype_t type;

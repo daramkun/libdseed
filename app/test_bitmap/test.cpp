@@ -40,7 +40,7 @@ int main (int argc, char* argv[])
 			}
 			
 			dseed::auto_object<dseed::bitmap> reformated;
-			if (dseed::failed (dseed::reformat_bitmap (bitmap, dseed::pixelformat_bgra8888, &reformated)))
+			if (dseed::failed (dseed::reformat_bitmap (bitmap, dseed::pixelformat::bgra8888, &reformated)))
 				return -6;
 			
 			dseed::auto_object<dseed::bitmap> reformated2;
@@ -52,7 +52,7 @@ int main (int argc, char* argv[])
 				return -8;
 			
 			dseed::auto_object<dseed::bitmap> reformated4;
-			if (dseed::failed (dseed::reformat_bitmap (reformated3, dseed::pixelformat_hsva8888, &reformated4)))
+			if (dseed::failed (dseed::reformat_bitmap (reformated3, dseed::pixelformat::hsva8888, &reformated4)))
 				return -9;
 
 			dseed::auto_object<dseed::bitmap> reformated5;
@@ -60,14 +60,14 @@ int main (int argc, char* argv[])
 				return -10;
 
 			dseed::auto_object<dseed::bitmap> reformated6;
-			if (dseed::failed (dseed::reformat_bitmap (reformated5, dseed::pixelformat_rgba8888, &reformated6)))
+			if (dseed::failed (dseed::reformat_bitmap (reformated5, dseed::pixelformat::rgba8888, &reformated6)))
 				return -11;
 
 			dseed::auto_object<dseed::bitmap> reformated7;
 			bool grayscale = false;
 			if (dseed::succeeded (dseed::bitmap_detect_grayscale_bitmap (reformated6, &grayscale)) && grayscale)
 			{
-				if (dseed::failed (dseed::reformat_bitmap (reformated6, dseed::pixelformat_grayscale8, &reformated7)))
+				if (dseed::failed (dseed::reformat_bitmap (reformated6, dseed::pixelformat::grayscale8, &reformated7)))
 					return -12;
 			}
 			else

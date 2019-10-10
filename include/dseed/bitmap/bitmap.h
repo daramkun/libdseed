@@ -50,7 +50,7 @@ namespace dseed
 		virtual bitmaptype_t type () = 0;
 
 	public:
-		virtual pixelformat_t format () = 0;
+		virtual pixelformat format () = 0;
 		virtual size3i size () = 0;
 
 	public:
@@ -72,7 +72,7 @@ namespace dseed
 		virtual error_t extra_info (attributes** attr) = 0;
 	};
 
-	DSEEDEXP error_t create_bitmap (bitmaptype_t type, const size3i& size, pixelformat_t format, palette* palette, bitmap** bitmap);
+	DSEEDEXP error_t create_bitmap (bitmaptype_t type, const size3i& size, pixelformat format, palette* palette, bitmap** bitmap);
 
 	enum frametype_t
 	{
@@ -121,7 +121,7 @@ namespace dseed
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV), Palette color, Chroma Subsampled YCbCr formats(YCbCr 4:2:2 aka YUYV, YCbCr 4:2:0 aka NV12)
 	//    can be converted to each other.
 	//  : Compressed color formats can be converted from/to RGBA only. (BC6H, BC7, ETC2, PVRTC, ASTC not implemented now)
-	DSEEDEXP error_t reformat_bitmap (dseed::bitmap* original, dseed::pixelformat_t reformat, dseed::bitmap** bitmap);
+	DSEEDEXP error_t reformat_bitmap (dseed::bitmap* original, dseed::pixelformat reformat, dseed::bitmap** bitmap);
 
 	// Resize methods
 	enum resize_t

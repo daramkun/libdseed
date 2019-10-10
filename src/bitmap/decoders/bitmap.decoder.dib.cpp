@@ -29,18 +29,18 @@ dseed::error_t dseed::create_dib_bitmap_decoder (dseed::stream* stream, dseed::b
 	if (infoHeader.biCompression != bitmap_compression_rgb)
 		return dseed::error_not_support;
 
-	dseed::pixelformat_t format;
+	dseed::pixelformat format;
 	switch (infoHeader.biBitCount)
 	{
 	case 8:
 		if (infoHeader.biClrUsed > 0)
-			format = dseed::pixelformat_bgra8888_indexed8;
+			format = dseed::pixelformat::bgra8888_indexed8;
 		else
-			format = dseed::pixelformat_grayscale8;
+			format = dseed::pixelformat::grayscale8;
 		break;
-	case 16: format = dseed::pixelformat_bgr565; break;
-	case 24: format = dseed::pixelformat_bgr888; break;
-	case 32: format = dseed::pixelformat_bgra8888; break;
+	case 16: format = dseed::pixelformat::bgr565; break;
+	case 24: format = dseed::pixelformat::bgr888; break;
+	case 32: format = dseed::pixelformat::bgra8888; break;
 	default: return dseed::error_not_support;
 	}
 

@@ -41,8 +41,8 @@ public:
 	virtual dseed::error_t encode_frame (dseed::bitmap* bitmap, dseed::timespan_t duration) override
 	{
 		auto format = bitmap->format ();
-		if (!(format == dseed::pixelformat_rgba8888 || format == dseed::pixelformat_rgb888
-			|| format == dseed::pixelformat_bgra8888 || format == dseed::pixelformat_bgr888))
+		if (!(format == dseed::pixelformat::rgba8888 || format == dseed::pixelformat::rgb888
+			|| format == dseed::pixelformat::bgra8888 || format == dseed::pixelformat::bgr888))
 			return dseed::error_not_support;
 
 		dseed::size3i size = bitmap->size ();
@@ -70,19 +70,19 @@ public:
 
 		size_t stride = dseed::get_bitmap_stride (format, size.width);
 		std::function<int (WebPPicture*, const uint8_t*, int)> importPixels;
-		if (format == dseed::pixelformat_rgba8888)
+		if (format == dseed::pixelformat::rgba8888)
 		{
 			importPixels = WebPPictureImportRGBA;
 			picture.use_argb = true;
 		}
-		else if (format == dseed::pixelformat_bgra8888)
+		else if (format == dseed::pixelformat::bgra8888)
 		{
 			importPixels = WebPPictureImportBGRA;
 			picture.use_argb = true;
 		}
-		else if (format == dseed::pixelformat_rgb888)
+		else if (format == dseed::pixelformat::rgb888)
 			importPixels = WebPPictureImportRGB;
-		else if (format == dseed::pixelformat_bgr888)
+		else if (format == dseed::pixelformat::bgr888)
 			importPixels = WebPPictureImportBGR;
 
 		void* ptr;

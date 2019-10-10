@@ -98,12 +98,12 @@ dseed::error_t dseed::create_jpeg2000_bitmap_decoder (dseed::stream* stream, dse
 	opj_stream_destroy (opjStream);
 	opj_destroy_codec (dec);
 
-	pixelformat_t format;
+	pixelformat format;
 	switch (image->numcomps)
 	{
-	case 1: format = pixelformat_grayscale8; break;
-	case 3: format = pixelformat_rgb888; break;
-	case 4: format = pixelformat_rgba8888; break;
+	case 1: format = pixelformat::grayscale8; break;
+	case 3: format = pixelformat::rgb888; break;
+	case 4: format = pixelformat::rgba8888; break;
 	default:
 		return dseed::error_not_support;
 	}

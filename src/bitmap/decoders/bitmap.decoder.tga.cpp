@@ -55,7 +55,7 @@ dseed::error_t dseed::create_tga_bitmap_decoder (dseed::stream* stream, dseed::b
 		header.depth != 24 && header.depth != 32)
 		return dseed::error_fail;
 
-	dseed::pixelformat_t format = dseed::pixelformat_unknown;
+	dseed::pixelformat format = dseed::pixelformat::unknown;
 
 	std::vector<uint8_t> map;
 	size_t mapSize = header.map_len * header.map_entry / 8;
@@ -78,8 +78,8 @@ dseed::error_t dseed::create_tga_bitmap_decoder (dseed::stream* stream, dseed::b
 
 		switch (header.map_entry)
 		{
-		case 24: format = dseed::pixelformat_bgr888_indexed8; break;
-		case 32: format = dseed::pixelformat_bgra8888_indexed8; break;
+		case 24: format = dseed::pixelformat::bgr888_indexed8; break;
+		case 32: format = dseed::pixelformat::bgra8888_indexed8; break;
 		}
 	}
 	else
@@ -88,8 +88,8 @@ dseed::error_t dseed::create_tga_bitmap_decoder (dseed::stream* stream, dseed::b
 		{
 		case 15:
 		case 16:
-		case 24: format = dseed::pixelformat_bgr888; break;
-		case 32: format = dseed::pixelformat_bgra8888; break;
+		case 24: format = dseed::pixelformat::bgr888; break;
+		case 32: format = dseed::pixelformat::bgra8888; break;
 		}
 	}
 
@@ -154,7 +154,7 @@ dseed::error_t dseed::create_tga_bitmap_decoder (dseed::stream* stream, dseed::b
 	dseed::auto_object<dseed::palette> palette;
 	if (mapSize > 0)
 	{
-		int bpp = (format == dseed::pixelformat_bgr888_indexed8 ? 24 : 32);
+		int bpp = (format == dseed::pixelformat::bgr888_indexed8 ? 24 : 32);
 		if (dseed::failed (dseed::create_palette (map.data (), bpp, mapSize / (bpp / 8), &palette)))
 			return dseed::error_fail;
 	}

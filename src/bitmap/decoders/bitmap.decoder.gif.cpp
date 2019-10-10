@@ -124,7 +124,7 @@ dseed::error_t dseed::create_gif_bitmap_decoder (dseed::stream* stream, dseed::b
 				return dseed::error_fail;
 		}
 
-		if (dseed::failed (dseed::create_bitmap (dseed::bitmaptype_2d, size, dseed::pixelformat_bgra8888_indexed8,
+		if (dseed::failed (dseed::create_bitmap (dseed::bitmaptype_2d, size, dseed::pixelformat::bgra8888_indexed8,
 			localPaletteObj, &_bitmaps[z])))
 			return dseed::error_fail;
 

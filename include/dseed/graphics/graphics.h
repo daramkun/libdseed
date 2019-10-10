@@ -6,7 +6,7 @@ namespace dseed
 	struct DSEEDEXP displaymode
 	{
 		size2i resolution;
-		pixelformat_t format;
+		pixelformat format;
 		fraction refresh_rate;
 	};
 
@@ -112,14 +112,14 @@ namespace dseed
 		virtual error_t adapter (vga_adapter** adapter) = 0;
 
 	public:
-		virtual bool is_support_format (pixelformat_t pf) = 0;
+		virtual bool is_support_format (pixelformat pf) = 0;
 		virtual bool is_support_parallel_render () = 0;
 
 	public:
-		virtual error_t create_texture1d (int32_t size, pixelformat_t pf, texture1d** texture) = 0;
-		virtual error_t create_texture2d (const size2i& size, pixelformat_t pf, texture2d** texture) = 0;
-		virtual error_t create_texture3d (const size3i& size, pixelformat_t pf, texture3d** texture) = 0;
-		virtual error_t create_texturecube (const size2i& size, pixelformat_t pf, texturecube** texture) = 0;
+		virtual error_t create_texture1d (int32_t size, pixelformat pf, texture1d** texture) = 0;
+		virtual error_t create_texture2d (const size2i& size, pixelformat pf, texture2d** texture) = 0;
+		virtual error_t create_texture3d (const size3i& size, pixelformat pf, texture3d** texture) = 0;
+		virtual error_t create_texturecube (const size2i& size, pixelformat pf, texturecube** texture) = 0;
 
 	public:
 		virtual error_t create_rendertarget2d (texture2d* texture, rendertarget2d** rendertarget) = 0;

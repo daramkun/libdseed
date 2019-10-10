@@ -61,7 +61,7 @@ dseed::error_t dseed::create_tiff_bitmap_decoder (dseed::stream* stream, dseed::
 
 	dseed::auto_object<dseed::bitmap> bitmap;
 	if (dseed::failed (dseed::create_bitmap (dseed::bitmaptype_2d, 
-		dseed::size3i (width, height, 1), dseed::pixelformat_rgba8888,
+		dseed::size3i (width, height, 1), dseed::pixelformat::rgba8888,
 		nullptr, &bitmap)))
 		return dseed::error_fail;
 

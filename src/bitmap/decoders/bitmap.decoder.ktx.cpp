@@ -92,42 +92,42 @@ dseed::error_t dseed::create_ktx_bitmap_decoder (dseed::stream* stream, dseed::b
 	if (memcmp (header.identifier, KTXFileIdentifier, 12) != 0)
 		return dseed::error_fail;
 
-	dseed::pixelformat_t format;
+	dseed::pixelformat format;
 	if (header.glType == 0)	//< Compressed Texture
 	{
 		switch (header.glInternalFormat)
 		{
 		case GL_COMPRESSED_RGB_S3TC_DXT1:
-		case GL_COMPRESSED_RGBA_S3TC_DXT1: format = dseed::pixelformat_bc1; break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT3: format = dseed::pixelformat_bc2; break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT5: format = dseed::pixelformat_bc3; break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT1: format = dseed::pixelformat::bc1; break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT3: format = dseed::pixelformat::bc2; break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT5: format = dseed::pixelformat::bc3; break;
 
-		case GL_COMPRESSED_RGB_PVRTC_2BPPV1: format = dseed::pixelformat_pvrtc_2bpp; break;
-		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1: format = dseed::pixelformat_pvrtc_2abpp; break;
-		case GL_COMPRESSED_RGB_PVRTC_4BPPV1: format = dseed::pixelformat_pvrtc_4bpp; break;
-		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1: format = dseed::pixelformat_pvrtc_4abpp; break;
+		case GL_COMPRESSED_RGB_PVRTC_2BPPV1: format = dseed::pixelformat::pvrtc_2bpp; break;
+		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1: format = dseed::pixelformat::pvrtc_2abpp; break;
+		case GL_COMPRESSED_RGB_PVRTC_4BPPV1: format = dseed::pixelformat::pvrtc_4bpp; break;
+		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1: format = dseed::pixelformat::pvrtc_4abpp; break;
 
-		case GL_ETC1_RGB8_OES: format = dseed::pixelformat_etc1; break;
+		case GL_ETC1_RGB8_OES: format = dseed::pixelformat::etc1; break;
 
 		case GL_COMPRESSED_RGB8_ETC2:
-		case GL_COMPRESSED_SRGB8_ETC2: format = dseed::pixelformat_etc2; break;
-		case GL_COMPRESSED_RGBA8_ETC2_EAC:  format = dseed::pixelformat_etc2a; break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: format = dseed::pixelformat_etc2a8; break;
+		case GL_COMPRESSED_SRGB8_ETC2: format = dseed::pixelformat::etc2; break;
+		case GL_COMPRESSED_RGBA8_ETC2_EAC:  format = dseed::pixelformat::etc2a; break;
+		case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: format = dseed::pixelformat::etc2a8; break;
 
-		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR: format = dseed::pixelformat_astc_4x4; break;
-		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR: format = dseed::pixelformat_astc_5x4; break;
-		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR: format = dseed::pixelformat_astc_5x5; break;
-		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR: format = dseed::pixelformat_astc_6x5; break;
-		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR: format = dseed::pixelformat_astc_6x6; break;
-		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR: format = dseed::pixelformat_astc_8x5; break;
-		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR: format = dseed::pixelformat_astc_8x6; break;
-		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR: format = dseed::pixelformat_astc_8x8; break;
-		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR: format = dseed::pixelformat_astc_10x5; break;
-		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR: format = dseed::pixelformat_astc_10x6; break;
-		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR: format = dseed::pixelformat_astc_10x8; break;
-		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR: format = dseed::pixelformat_astc_10x10; break;
-		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR: format = dseed::pixelformat_astc_12x10; break;
-		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR: format = dseed::pixelformat_astc_12x12; break;
+		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR: format = dseed::pixelformat::astc_4x4; break;
+		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR: format = dseed::pixelformat::astc_5x4; break;
+		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR: format = dseed::pixelformat::astc_5x5; break;
+		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR: format = dseed::pixelformat::astc_6x5; break;
+		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR: format = dseed::pixelformat::astc_6x6; break;
+		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR: format = dseed::pixelformat::astc_8x5; break;
+		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR: format = dseed::pixelformat::astc_8x6; break;
+		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR: format = dseed::pixelformat::astc_8x8; break;
+		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR: format = dseed::pixelformat::astc_10x5; break;
+		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR: format = dseed::pixelformat::astc_10x6; break;
+		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR: format = dseed::pixelformat::astc_10x8; break;
+		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR: format = dseed::pixelformat::astc_10x10; break;
+		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR: format = dseed::pixelformat::astc_12x10; break;
+		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR: format = dseed::pixelformat::astc_12x12; break;
 
 		default: return dseed::error_not_support;
 		}
@@ -138,21 +138,21 @@ dseed::error_t dseed::create_ktx_bitmap_decoder (dseed::stream* stream, dseed::b
 		{
 		case GL_RED:
 			if (header.glType == GL_UNSIGNED_BYTE)
-				format = dseed::pixelformat_grayscale8;
+				format = dseed::pixelformat::grayscale8;
 			else return dseed::error_not_support;
 			break;
 
 		case GL_RGB:
 			if (header.glTypeSize == GL_UNSIGNED_BYTE)
-				format = dseed::pixelformat_rgb888;
+				format = dseed::pixelformat::rgb888;
 			else return dseed::error_not_support;
 			break;
 
 		case GL_RGBA:
 			if (header.glTypeSize == GL_UNSIGNED_BYTE)
-				format = dseed::pixelformat_rgba8888;
+				format = dseed::pixelformat::rgba8888;
 			else if (header.glTypeSize == GL_FLOAT)
-				format = dseed::pixelformat_rgbaf;
+				format = dseed::pixelformat::rgbaf;
 			else return dseed::error_not_support;
 			break;
 		}

@@ -80,19 +80,19 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 	colorType = png_get_color_type (png, info);
 	auto channels = png_get_channels (png, info);
 
-	dseed::pixelformat_t format;
+	dseed::pixelformat format;
 	switch (channels)
 	{
 	case 1:
 		if (colorType == PNG_COLOR_TYPE_GRAY)
-			format = dseed::pixelformat_grayscale8;
+			format = dseed::pixelformat::grayscale8;
 		else if (colorType == PNG_COLOR_TYPE_PALETTE)
 		{
 			png_set_bgr (png);
 			if (png_get_valid (png, info, PNG_INFO_tRNS))
-				format = dseed::pixelformat_bgra8888_indexed8;
+				format = dseed::pixelformat::bgra8888_indexed8;
 			else
-				format = dseed::pixelformat_bgr888_indexed8;
+				format = dseed::pixelformat::bgr888_indexed8;
 		}
 		else
 		{
@@ -102,12 +102,12 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 		break;
 
 	case 3:
-		format = dseed::pixelformat_rgb888;
+		format = dseed::pixelformat::rgb888;
 		break;
 
 	case 4:
 		if (bitDepth == 8)
-			format = dseed::pixelformat_rgba8888;
+			format = dseed::pixelformat::rgba8888;
 		else
 		{
 			png_destroy_read_struct (&png, nullptr, nullptr);
@@ -124,18 +124,18 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 	size_t totalBytes = stride * size.height;
 
 	dseed::auto_object<dseed::bitmap> bitmap;
-	if (format == dseed::pixelformat_rgba8888 || format == dseed::pixelformat_rgb888 ||
-		format == dseed::pixelformat_grayscale8)
+	if (format == dseed::pixelformat::rgba8888 || format == dseed::pixelformat::rgb888 ||
+		format == dseed::pixelformat::grayscale8)
 	{
 		create_bitmap (dseed::bitmaptype_2d, size, format, nullptr, &bitmap);
 	}
-	else if (format == dseed::pixelformat_bgr888_indexed8 || format == dseed::pixelformat_bgra8888_indexed8)
+	else if (format == dseed::pixelformat::bgr888_indexed8 || format == dseed::pixelformat::bgra8888_indexed8)
 	{
 		png_colorp palette;
 		int numPalette;
 		png_get_PLTE (png, info, &palette, &numPalette);
 
-		if (format == dseed::pixelformat_bgr888)
+		if (format == dseed::pixelformat::bgr888)
 		{
 			for (int i = 0; i < numPalette; ++i)
 			{
@@ -149,7 +149,7 @@ dseed::error_t dseed::create_png_bitmap_decoder (dseed::stream* stream, dseed::b
 
 			create_bitmap (dseed::bitmaptype_2d, size, format, paletteObj, &bitmap);
 		}
-		else if (format == dseed::pixelformat_bgra8888)
+		else if (format == dseed::pixelformat::bgra8888)
 		{
 			png_bytep alpha;
 			int numAlpha;

@@ -90,14 +90,14 @@ public:
 		if (size.depth > 1)
 			return dseed::error_not_support;
 
-		dseed::pixelformat_t format = bitmap->format ();
-		if (format != dseed::pixelformat_rgb888 &&
-			format != dseed::pixelformat_rgba8888 &&
-			format != dseed::pixelformat_bgr888 &&
-			format != dseed::pixelformat_bgra8888 &&
-			format != dseed::pixelformat_grayscale8 &&
-			format != dseed::pixelformat_yuv888 &&
-			format != dseed::pixelformat_bgr565)
+		dseed::pixelformat format = bitmap->format ();
+		if (format != dseed::pixelformat::rgb888 &&
+			format != dseed::pixelformat::rgba8888 &&
+			format != dseed::pixelformat::bgr888 &&
+			format != dseed::pixelformat::bgra8888 &&
+			format != dseed::pixelformat::grayscale8 &&
+			format != dseed::pixelformat::yuv888 &&
+			format != dseed::pixelformat::bgr565)
 			return dseed::error_not_support;
 
 		size_t streamOriginPos = _stream->position ();
@@ -110,31 +110,31 @@ public:
 		_cinfo.image_height = size.height;
 		switch (format)
 		{
-		case dseed::pixelformat_rgb888:
+		case dseed::pixelformat::rgb888:
 			_cinfo.in_color_space = JCS_EXT_RGB;
 			_cinfo.input_components = 3;
 			break;
-		case dseed::pixelformat_rgba8888:
+		case dseed::pixelformat::rgba8888:
 			_cinfo.in_color_space = JCS_EXT_RGBA;
 			_cinfo.input_components = 4;
 			break;
-		case dseed::pixelformat_bgr888:
+		case dseed::pixelformat::bgr888:
 			_cinfo.in_color_space = JCS_EXT_BGR;
 			_cinfo.input_components = 3;
 			break;
-		case dseed::pixelformat_bgra8888:
+		case dseed::pixelformat::bgra8888:
 			_cinfo.in_color_space = JCS_EXT_BGRA;
 			_cinfo.input_components = 4;
 			break;
-		case dseed::pixelformat_grayscale8:
+		case dseed::pixelformat::grayscale8:
 			_cinfo.in_color_space = JCS_GRAYSCALE;
 			_cinfo.input_components = 1;
 			break;
-		case dseed::pixelformat_yuv888:
+		case dseed::pixelformat::yuv888:
 			_cinfo.in_color_space = JCS_YCbCr;
 			_cinfo.input_components = 3;
 			break;
-		case dseed::pixelformat_bgr565:
+		case dseed::pixelformat::bgr565:
 			_cinfo.in_color_space = JCS_RGB565;
 			_cinfo.input_components = 3;
 			break;

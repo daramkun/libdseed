@@ -88,31 +88,31 @@ public:
 		_bitmap->GetSize (&width, &height);
 		return dseed::size3i (width, height, 1);
 	}
-	virtual dseed::pixelformat_t format () override
+	virtual dseed::pixelformat format () override
 	{
 		WICPixelFormatGUID pixelFormat;
 		_bitmap->GetPixelFormat (&pixelFormat);
 
 		if (pixelFormat == GUID_WICPixelFormat32bppRGBA)
-			return dseed::pixelformat_rgba8888;
+			return dseed::pixelformat::rgba8888;
 		else if (pixelFormat == GUID_WICPixelFormat24bppRGB)
-			return dseed::pixelformat_rgb888;
+			return dseed::pixelformat::rgb888;
 		else if (pixelFormat == GUID_WICPixelFormat32bppBGRA)
-			return dseed::pixelformat_bgra8888;
+			return dseed::pixelformat::bgra8888;
 		else if (pixelFormat == GUID_WICPixelFormat24bppBGR)
-			return dseed::pixelformat_bgr888;
+			return dseed::pixelformat::bgr888;
 		else if (pixelFormat == GUID_WICPixelFormat128bppRGBAFloat)
-			return dseed::pixelformat_rgbaf;
+			return dseed::pixelformat::rgbaf;
 		else if (pixelFormat == GUID_WICPixelFormat8bppGray)
-			return dseed::pixelformat_grayscale8;
+			return dseed::pixelformat::grayscale8;
 		else if (pixelFormat == GUID_WICPixelFormat32bppGrayFloat)
-			return dseed::pixelformat_grayscalef;
+			return dseed::pixelformat::grayscalef;
 		else if (pixelFormat == GUID_WICPixelFormat8bppIndexed)
-			return dseed::pixelformat_bgra8888_indexed8;
+			return dseed::pixelformat::bgra8888_indexed8;
 		else if (pixelFormat == GUID_WICPixelFormat16bppBGR565)
-			return dseed::pixelformat_bgr565;
+			return dseed::pixelformat::bgr565;
 
-		return dseed::pixelformat_unknown;
+		return dseed::pixelformat::unknown;
 	}
 	virtual dseed::bitmaptype_t type () override { return dseed::bitmaptype_2d; }
 

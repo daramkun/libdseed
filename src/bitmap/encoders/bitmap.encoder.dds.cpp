@@ -23,12 +23,20 @@ public:
 	virtual dseed::error_t encode_frame (dseed::bitmap* bitmap, dseed::timespan_t duration) override
 	{
 		using namespace dseed;
-		static dseed::pixelformat_t support_formats[] = {
-			pixelformat_bc1, pixelformat_bc2, pixelformat_bc3, pixelformat_bc4,
-			pixelformat_bc5, pixelformat_bc6h, pixelformat_bc7,
-			pixelformat_rgba8888, pixelformat_bgra8888, pixelformat_bgra4444,
-			pixelformat_yuv888, pixelformat_yuva8888,
-			pixelformat_grayscale8, pixelformat_grayscalef,
+		static dseed::pixelformat support_formats[] = {
+			pixelformat::bc1, pixelformat::bc2, pixelformat::bc3, pixelformat::bc4,
+			pixelformat::bc5, pixelformat::bc6h, pixelformat::bc7,
+			pixelformat::rgba8888, pixelformat::bgra8888, pixelformat::bgra4444,
+			pixelformat::yuv888, pixelformat::yuva8888,
+			pixelformat::yuyv8888, pixelformat::nv12,
+			pixelformat::grayscale8, pixelformat::grayscalef,
+			pixelformat::astc_4x4, pixelformat::astc_5x4, pixelformat::astc_5x5,
+			pixelformat::astc_6x5, pixelformat::astc_6x6, pixelformat::astc_8x5,
+			pixelformat::astc_8x6, pixelformat::astc_8x8, pixelformat::astc_10x5,
+			pixelformat::astc_10x6, pixelformat::astc_10x8, pixelformat::astc_10x10,
+			pixelformat::astc_12x10, pixelformat::astc_12x12,
+			pixelformat::pvrtc_2bpp, pixelformat::pvrtc_2abpp, pixelformat::pvrtc_4bpp,
+			pixelformat::pvrtc_4abpp, pixelformat::pvrtc2_2bpp, pixelformat::pvrtc2_4bpp,
 		};
 
 		if (bitmap == nullptr) return dseed::error_invalid_args;
@@ -83,23 +91,23 @@ public:
 		set_header (header, format, type, mainSize);
 		_stream->write (&header, sizeof (header));
 
-		if (format == dseed::pixelformat_bc6h || format == dseed::pixelformat_bc7
-			|| format == dseed::pixelformat_yuyv8888
-			|| format == dseed::pixelformat_nv12
-			|| format == dseed::pixelformat_astc_4x4
-			|| format == dseed::pixelformat_astc_5x4
-			|| format == dseed::pixelformat_astc_5x5
-			|| format == dseed::pixelformat_astc_6x5
-			|| format == dseed::pixelformat_astc_6x6
-			|| format == dseed::pixelformat_astc_8x5
-			|| format == dseed::pixelformat_astc_8x6
-			|| format == dseed::pixelformat_astc_8x8
-			|| format == dseed::pixelformat_astc_10x5
-			|| format == dseed::pixelformat_astc_10x6
-			|| format == dseed::pixelformat_astc_10x8
-			|| format == dseed::pixelformat_astc_10x10
-			|| format == dseed::pixelformat_astc_12x10
-			|| format == dseed::pixelformat_astc_12x12)
+		if (format == dseed::pixelformat::bc6h || format == dseed::pixelformat::bc7
+			|| format == dseed::pixelformat::yuyv8888
+			|| format == dseed::pixelformat::nv12
+			|| format == dseed::pixelformat::astc_4x4
+			|| format == dseed::pixelformat::astc_5x4
+			|| format == dseed::pixelformat::astc_5x5
+			|| format == dseed::pixelformat::astc_6x5
+			|| format == dseed::pixelformat::astc_6x6
+			|| format == dseed::pixelformat::astc_8x5
+			|| format == dseed::pixelformat::astc_8x6
+			|| format == dseed::pixelformat::astc_8x8
+			|| format == dseed::pixelformat::astc_10x5
+			|| format == dseed::pixelformat::astc_10x6
+			|| format == dseed::pixelformat::astc_10x8
+			|| format == dseed::pixelformat::astc_10x10
+			|| format == dseed::pixelformat::astc_12x10
+			|| format == dseed::pixelformat::astc_12x12)
 		{
 			DDS_HEADER_DXT10 bc7header = {};
 			if (type == dseed::bitmaptype_2d || type == dseed::bitmaptype_2d_cubemap)
@@ -109,26 +117,26 @@ public:
 
 			switch (format)
 			{
-			case dseed::pixelformat_bc6h: bc7header.dxgiFormat = DXGI_FORMAT_BC6H_SF16; break;
-			case dseed::pixelformat_bc7: bc7header.dxgiFormat = DXGI_FORMAT_BC7_UNORM; break;
+			case dseed::pixelformat::bc6h: bc7header.dxgiFormat = DXGI_FORMAT_BC6H_SF16; break;
+			case dseed::pixelformat::bc7: bc7header.dxgiFormat = DXGI_FORMAT_BC7_UNORM; break;
 
-			case dseed::pixelformat_yuva8888: bc7header.dxgiFormat = DXGI_FORMAT_YUY2; break;
-			case dseed::pixelformat_nv12: bc7header.dxgiFormat = DXGI_FORMAT_NV12; break;
+			case dseed::pixelformat::yuva8888: bc7header.dxgiFormat = DXGI_FORMAT_YUY2; break;
+			case dseed::pixelformat::nv12: bc7header.dxgiFormat = DXGI_FORMAT_NV12; break;
 
-			case dseed::pixelformat_astc_4x4: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_4X4_UNORM; break;
-			case dseed::pixelformat_astc_5x4: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_5X4_UNORM; break;
-			case dseed::pixelformat_astc_5x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_5X5_UNORM; break;
-			case dseed::pixelformat_astc_6x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_6X5_UNORM; break;
-			case dseed::pixelformat_astc_6x6: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_6X6_UNORM; break;
-			case dseed::pixelformat_astc_8x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_8X5_UNORM; break;
-			case dseed::pixelformat_astc_8x6: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_8X6_UNORM; break;
-			case dseed::pixelformat_astc_8x8: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_8X8_UNORM; break;
-			case dseed::pixelformat_astc_10x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X5_UNORM; break;
-			case dseed::pixelformat_astc_10x6: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X6_UNORM; break;
-			case dseed::pixelformat_astc_10x8: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X8_UNORM; break;
-			case dseed::pixelformat_astc_10x10: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X10_UNORM; break;
-			case dseed::pixelformat_astc_12x10: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_12X10_UNORM; break;
-			case dseed::pixelformat_astc_12x12: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_12X12_UNORM; break;
+			case dseed::pixelformat::astc_4x4: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_4X4_UNORM; break;
+			case dseed::pixelformat::astc_5x4: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_5X4_UNORM; break;
+			case dseed::pixelformat::astc_5x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_5X5_UNORM; break;
+			case dseed::pixelformat::astc_6x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_6X5_UNORM; break;
+			case dseed::pixelformat::astc_6x6: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_6X6_UNORM; break;
+			case dseed::pixelformat::astc_8x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_8X5_UNORM; break;
+			case dseed::pixelformat::astc_8x6: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_8X6_UNORM; break;
+			case dseed::pixelformat::astc_8x8: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_8X8_UNORM; break;
+			case dseed::pixelformat::astc_10x5: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X5_UNORM; break;
+			case dseed::pixelformat::astc_10x6: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X6_UNORM; break;
+			case dseed::pixelformat::astc_10x8: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X8_UNORM; break;
+			case dseed::pixelformat::astc_10x10: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_10X10_UNORM; break;
+			case dseed::pixelformat::astc_12x10: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_12X10_UNORM; break;
+			case dseed::pixelformat::astc_12x12: bc7header.dxgiFormat = DXGI_FORMAT_ASTC_12X12_UNORM; break;
 
 			default: return dseed::error_fail;
 			}
@@ -157,7 +165,7 @@ public:
 	}
 
 private:
-	void set_header (DDS_HEADER& header, dseed::pixelformat_t format, dseed::bitmaptype_t type, const dseed::size3i& size)
+	void set_header (DDS_HEADER& header, dseed::pixelformat format, dseed::bitmaptype_t type, const dseed::size3i& size)
 	{
 		using namespace dseed;
 		header.size = sizeof (DDS_HEADER);
@@ -169,78 +177,78 @@ private:
 		header.ddspf.size = sizeof (DDS_PIXELFORMAT);
 		switch (format)
 		{
-		case pixelformat_bc1:
+		case pixelformat::bc1:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('D', 'X', 'T', '1');
 			break;
-		case pixelformat_bc2:
+		case pixelformat::bc2:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('D', 'X', 'T', '3');
 			break;
-		case pixelformat_bc3:
+		case pixelformat::bc3:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('D', 'X', 'T', '5');
 			break;
-		case pixelformat_bc4:
+		case pixelformat::bc4:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('A', 'T', 'I', '1');
 			break;
-		case pixelformat_bc5:
+		case pixelformat::bc5:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('A', 'T', 'I', '2');
 			break;
-		case pixelformat_bc6h:
-		case pixelformat_bc7:
-		case pixelformat_astc_4x4:
-		case pixelformat_astc_5x4:
-		case pixelformat_astc_5x5:
-		case pixelformat_astc_6x5:
-		case pixelformat_astc_6x6:
-		case pixelformat_astc_8x5:
-		case pixelformat_astc_8x6:
-		case pixelformat_astc_8x8:
-		case pixelformat_astc_10x5:
-		case pixelformat_astc_10x6:
-		case pixelformat_astc_10x8:
-		case pixelformat_astc_10x10:
-		case pixelformat_astc_12x10:
-		case pixelformat_astc_12x12:
+		case pixelformat::bc6h:
+		case pixelformat::bc7:
+		case pixelformat::astc_4x4:
+		case pixelformat::astc_5x4:
+		case pixelformat::astc_5x5:
+		case pixelformat::astc_6x5:
+		case pixelformat::astc_6x6:
+		case pixelformat::astc_8x5:
+		case pixelformat::astc_8x6:
+		case pixelformat::astc_8x8:
+		case pixelformat::astc_10x5:
+		case pixelformat::astc_10x6:
+		case pixelformat::astc_10x8:
+		case pixelformat::astc_10x10:
+		case pixelformat::astc_12x10:
+		case pixelformat::astc_12x12:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('D', 'X', '1', '0');
 			break;
 
-		case pixelformat_pvrtc_2bpp:
+		case pixelformat::pvrtc_2bpp:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('P', 'V', 'R', '2');
 			break;
-		case pixelformat_pvrtc_4bpp:
+		case pixelformat::pvrtc_4bpp:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('P', 'V', 'R', '4');
 			break;
-		case pixelformat_etc1:
+		case pixelformat::etc1:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_LINEARSIZE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_plane_size (format, size.width, size.height);
 			header.ddspf.flags = DDS_FOURCC;
 			header.ddspf.fourCC = make_fourcc ('E', 'T', 'C', '1');
 			break;
 
-		case pixelformat_rgba8888:
+		case pixelformat::rgba8888:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_RGB | DDS_ALPHA;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -250,7 +258,7 @@ private:
 			header.ddspf.BBitMask = 0x00ff0000;
 			header.ddspf.ABitMask = 0xff000000;
 			break;
-		case pixelformat_rgb888:
+		case pixelformat::rgb888:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_RGB;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -260,7 +268,7 @@ private:
 			header.ddspf.BBitMask = 0x00ff0000;
 			header.ddspf.ABitMask = 0x00000000;
 			break;
-		case pixelformat_bgra8888:
+		case pixelformat::bgra8888:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_RGB | DDS_ALPHA;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -270,7 +278,7 @@ private:
 			header.ddspf.RBitMask = 0x00ff0000;
 			header.ddspf.ABitMask = 0xff000000;
 			break;
-		case pixelformat_bgr888:
+		case pixelformat::bgr888:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_RGB;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -280,7 +288,7 @@ private:
 			header.ddspf.RBitMask = 0x00ff0000;
 			header.ddspf.ABitMask = 0x00000000;
 			break;
-		case pixelformat_bgr565:
+		case pixelformat::bgr565:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_RGB;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -290,7 +298,7 @@ private:
 			header.ddspf.BBitMask = 0x001f;
 			header.ddspf.ABitMask = 0x00000000;
 			break;
-		case pixelformat_bgra4444:
+		case pixelformat::bgra4444:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_RGB | DDS_ALPHA;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -301,7 +309,7 @@ private:
 			header.ddspf.ABitMask = 0xf000;
 			break;
 
-		case pixelformat_yuv888:
+		case pixelformat::yuv888:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_YUV;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -311,7 +319,7 @@ private:
 			header.ddspf.RBitMask = 0x00ff0000;
 			header.ddspf.ABitMask = 0x00000000;
 			break;
-		case pixelformat_yuva8888:
+		case pixelformat::yuva8888:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_YUV | DDS_ALPHA;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -322,7 +330,7 @@ private:
 			header.ddspf.ABitMask = 0xff000000;
 			break;
 
-		case pixelformat_grayscale8:
+		case pixelformat::grayscale8:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_LUMINANCE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);
@@ -332,7 +340,7 @@ private:
 			header.ddspf.RBitMask = 0x00000000;
 			header.ddspf.ABitMask = 0x00000000;
 			break;
-		case pixelformat_grayscalef:
+		case pixelformat::grayscalef:
 			header.flags = DDS_HEADER_FLAGS_REQUIRED | DDS_HEADER_FLAGS_PITCH;
 			header.ddspf.flags = DDS_LUMINANCE;
 			header.pitchOrLinearSize = (uint32_t)dseed::get_bitmap_stride (format, size.width);

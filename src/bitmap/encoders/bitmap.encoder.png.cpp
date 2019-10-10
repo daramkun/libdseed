@@ -48,15 +48,15 @@ public:
 			return dseed::error_invalid_op;
 
 		dseed::size3i size = bitmap->size ();
-		dseed::pixelformat_t format = bitmap->format ();
+		dseed::pixelformat format = bitmap->format ();
 		size_t stride = dseed::get_bitmap_stride (format, size.width);
 
 		if (size.depth > 1)
 			return dseed::error_not_support;
-		if (!(format == dseed::pixelformat_rgba8888 || format == dseed::pixelformat_rgb888
-			|| format == dseed::pixelformat_bgra8888 || format == dseed::pixelformat_bgr888
-			|| format == dseed::pixelformat_bgr888_indexed8 || format == dseed::pixelformat_bgra8888_indexed8
-			|| format == dseed::pixelformat_grayscale8))
+		if (!(format == dseed::pixelformat::rgba8888 || format == dseed::pixelformat::rgb888
+			|| format == dseed::pixelformat::bgra8888 || format == dseed::pixelformat::bgr888
+			|| format == dseed::pixelformat::bgr888_indexed8 || format == dseed::pixelformat::bgra8888_indexed8
+			|| format == dseed::pixelformat::grayscale8))
 			return dseed::error_not_support;
 
 		std::vector<uint8_t> pixels;
@@ -68,7 +68,7 @@ public:
 		for (int y = 0; y < size.height; ++y)
 			pixelsRows[y] = pixels.data () + y * stride;
 
-		if (format == dseed::pixelformat_bgr888_indexed8)
+		if (format == dseed::pixelformat::bgr888_indexed8)
 		{
 			std::vector<uint8_t> palette;
 			palette.resize (256 * 3);
@@ -99,7 +99,7 @@ public:
 			_alreadyEncoded = true;
 			return dseed::error_good;
 		}
-		else if (format == dseed::pixelformat_bgra8888_indexed8)
+		else if (format == dseed::pixelformat::bgra8888_indexed8)
 		{
 			std::vector<uint8_t> palette;
 			palette.resize (256 * 4);
@@ -138,26 +138,26 @@ public:
 			_alreadyEncoded = true;
 			return dseed::error_good;
 		}
-		else if (format == dseed::pixelformat_rgba8888 || format == dseed::pixelformat_bgra8888
-			|| format == dseed::pixelformat_rgb888 || format == dseed::pixelformat_bgr888
-			|| format == dseed::pixelformat_grayscale8)
+		else if (format == dseed::pixelformat::rgba8888 || format == dseed::pixelformat::bgra8888
+			|| format == dseed::pixelformat::rgb888 || format == dseed::pixelformat::bgr888
+			|| format == dseed::pixelformat::grayscale8)
 		{
 			int colorType = 0;
 			switch (format)
 			{
-			case dseed::pixelformat_bgra8888:
+			case dseed::pixelformat::bgra8888:
 				png_set_bgr (_png);
-			case dseed::pixelformat_rgba8888:
+			case dseed::pixelformat::rgba8888:
 				colorType = PNG_COLOR_TYPE_RGBA;
 				break;
 
-			case dseed::pixelformat_bgr888:
+			case dseed::pixelformat::bgr888:
 				png_set_bgr (_png);
-			case dseed::pixelformat_rgb888:
+			case dseed::pixelformat::rgb888:
 				colorType = PNG_COLOR_TYPE_RGB;
 				break;
 
-			case dseed::pixelformat_grayscale8:
+			case dseed::pixelformat::grayscale8:
 				colorType = PNG_COLOR_TYPE_GRAY;
 				break;
 			}

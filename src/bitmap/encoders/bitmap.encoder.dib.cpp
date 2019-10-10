@@ -27,9 +27,9 @@ public:
 			return dseed::error_not_support;
 
 		auto format = bitmap->format ();
-		if (!(format == dseed::pixelformat_bgra8888 || format == dseed::pixelformat_bgr888
-			|| format == dseed::pixelformat_bgr565 || format == dseed::pixelformat_grayscale8
-			|| format == dseed::pixelformat_bgra8888_indexed8))
+		if (!(format == dseed::pixelformat::bgra8888 || format == dseed::pixelformat::bgr888
+			|| format == dseed::pixelformat::bgr565 || format == dseed::pixelformat::grayscale8
+			|| format == dseed::pixelformat::bgra8888_indexed8))
 			return dseed::error_not_support;
 
 		bitmap_file_header fileHeader = {};
@@ -43,17 +43,17 @@ public:
 		infoHeader.biPlanes = 1;
 		switch (format)
 		{
-		case dseed::pixelformat_bgra8888:
+		case dseed::pixelformat::bgra8888:
 			infoHeader.biBitCount = 32;
 			break;
-		case dseed::pixelformat_bgr888:
+		case dseed::pixelformat::bgr888:
 			infoHeader.biBitCount = 24;
 			break;
-		case dseed::pixelformat_bgr565:
+		case dseed::pixelformat::bgr565:
 			infoHeader.biBitCount = 16;
 			break;
-		case dseed::pixelformat_grayscale8:
-		case dseed::pixelformat_bgra8888_indexed8:
+		case dseed::pixelformat::grayscale8:
+		case dseed::pixelformat::bgra8888_indexed8:
 			infoHeader.biBitCount = 8;
 			break;
 		}
@@ -63,7 +63,7 @@ public:
 		infoHeader.biYPelsPerMeter = 96;
 
 		dseed::auto_object<dseed::palette> palette;
-		if (format == dseed::pixelformat_bgra8888_indexed8)
+		if (format == dseed::pixelformat::bgra8888_indexed8)
 		{
 			bitmap->palette (&palette);
 			infoHeader.biClrUsed = (uint32_t)palette->size ();

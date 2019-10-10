@@ -41,7 +41,7 @@ public:
 		if (_pgif == nullptr) return dseed::error_fail;
 		if (bitmap == nullptr)
 			return dseed::error_invalid_args;
-		if ((!(bitmap->format () == dseed::pixelformat_bgr888_indexed8 || bitmap->format () == dseed::pixelformat_bgra8888_indexed8))
+		if ((!(bitmap->format () == dseed::pixelformat::bgr888_indexed8 || bitmap->format () == dseed::pixelformat::bgra8888_indexed8))
 			|| (bitmap->size ().depth > 1))
 			return dseed::error_not_support;
 
@@ -52,7 +52,7 @@ public:
 		{
 			EGifSetGifVersion (_pgif, true);
 
-			if (bitmap->format () == dseed::pixelformat_bgr888_indexed8)
+			if (bitmap->format () == dseed::pixelformat::bgr888_indexed8)
 			{
 				std::vector<dseed::bgr> tempPalette (256);
 				dseed::auto_object<dseed::palette> paletteObj;
@@ -67,7 +67,7 @@ public:
 					_palette[i].r = tempPalette[i].r;
 				}
 			}
-			else if (bitmap->format () == dseed::pixelformat_bgra8888_indexed8)
+			else if (bitmap->format () == dseed::pixelformat::bgra8888_indexed8)
 			{
 				std::vector<dseed::bgra> tempPalette (256);
 				dseed::auto_object<dseed::palette> paletteObj;
@@ -96,7 +96,7 @@ public:
 		{
 			std::vector<dseed::rgb> tempPalette (256);
 			int transparent = -1;
-			if (bitmap->format () == dseed::pixelformat_bgr888_indexed8)
+			if (bitmap->format () == dseed::pixelformat::bgr888_indexed8)
 			{
 				std::vector<dseed::bgr> tempTempPalette (256);
 				dseed::auto_object<dseed::palette> paletteObj;
@@ -111,7 +111,7 @@ public:
 					tempPalette[i].r = tempTempPalette[i].r;
 				}
 			}
-			else if (bitmap->format () == dseed::pixelformat_bgra8888_indexed8)
+			else if (bitmap->format () == dseed::pixelformat::bgra8888_indexed8)
 			{
 				std::vector<dseed::bgra> tempTempPalette (256);
 				dseed::auto_object<dseed::palette> paletteObj;

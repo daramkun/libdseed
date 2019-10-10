@@ -68,7 +68,7 @@ dseed::error_t dseed::create_palette (const void* pixels, int bpp, size_t pixels
 class __bitmap : public dseed::bitmap
 {
 public:
-	__bitmap (dseed::bitmaptype_t type, dseed::pixelformat_t format, const dseed::size3i& size, dseed::palette* palette)
+	__bitmap (dseed::bitmaptype_t type, dseed::pixelformat format, const dseed::size3i& size, dseed::palette* palette)
 		: _refCount (1)
 		, _type (type), _format (format), _size (size), _palette (palette)
 	{
@@ -93,7 +93,7 @@ public:
 
 public:
 	virtual dseed::bitmaptype_t type () override { return _type; }
-	virtual dseed::pixelformat_t format () override { return _format; }
+	virtual dseed::pixelformat format () override { return _format; }
 	virtual dseed::size3i size () override { return _size; }
 
 public:
@@ -111,7 +111,7 @@ public:
 	{
 		if (_pixels.size () == 0)
 			return dseed::error_not_support;
-		if (_format >= dseed::pixelformat_bc1)
+		if (_format >= dseed::pixelformat::bc1)
 			return dseed::error_not_support;
 		if ((depth >= _size.depth || depth < 0) || (y >= _size.height || y < 0) || dest == nullptr)
 			return dseed::error_invalid_args;
@@ -137,7 +137,7 @@ public:
 public:
 	virtual dseed::error_t pixels_pointer_per_line (void** ptr, size_t y, size_t depth = 0) override
 	{
-		if (_format >= dseed::pixelformat_bc1)
+		if (_format >= dseed::pixelformat::bc1)
 			return dseed::error_not_support;
 		if ((depth >= _size.depth || depth < 0) || (y >= _size.height || y < 0))
 			return dseed::error_invalid_args;
@@ -156,9 +156,9 @@ public:
 public:
 	virtual dseed::error_t read_pixels (void* buffer, const dseed::point2i& pos, const dseed::size2i& size, size_t depth = 0) override
 	{
-		if (_format >= dseed::pixelformat_bc1	//< Compressed Pixel Format
-			|| (_format & 0x00020000) != 0		//< Indexed Pixel Format
-			|| (_format >= dseed::pixelformat_yuyv8888 && _format <= dseed::pixelformat_nv12))
+		if (_format >= dseed::pixelformat::bc1	//< Compressed Pixel Format
+			|| ((int)_format & 0x00020000) != 0		//< Indexed Pixel Format
+			|| (_format >= dseed::pixelformat::yuyv8888 && _format <= dseed::pixelformat::nv12))
 												//< Chroma Subsampled Pixel Format
 			return dseed::error_not_support;
 
@@ -166,9 +166,9 @@ public:
 			return dseed::error_invalid_args;
 		
 		size_t startPoint = dseed::get_bitmap_total_size (_format, _size) * depth;
-		size_t pixelStride = ((((_format >> 16) & 0xffff) != 0x0002)
-			? (_format & 0xf)
-			: (_format >> 8) & 0xff);
+		size_t pixelStride = (((((int)_format >> 16) & 0xffff) != 0x0002)
+			? ((int)_format & 0xf)
+			: ((int)_format >> 8) & 0xff);
 
 		int width = (pos.x + size.width >= _size.width) ? (_size.width - (pos.x + size.width) - 1) : size.width;
 		for (auto y = pos.y; y < pos.y + size.height; ++y)
@@ -187,9 +187,9 @@ public:
 
 	virtual dseed::error_t write_pixels (const void* data, const dseed::point2i& pos, const dseed::size2i& size, size_t depth = 0) override
 	{
-		if (_format >= dseed::pixelformat_bc1	//< Compressed Pixel Format
-			|| (_format & 0x00020000) != 0		//< Indexed Pixel Format
-			|| (_format >= dseed::pixelformat_yuyv8888 && _format <= dseed::pixelformat_nv12))
+		if (_format >= dseed::pixelformat::bc1	//< Compressed Pixel Format
+			|| ((int)_format & 0x00020000) != 0		//< Indexed Pixel Format
+			|| (_format >= dseed::pixelformat::yuyv8888 && _format <= dseed::pixelformat::nv12))
 			//< Chroma Subsampled Pixel Format
 			return dseed::error_not_support;
 
@@ -197,9 +197,9 @@ public:
 			return dseed::error_invalid_args;
 
 		size_t startPoint = dseed::get_bitmap_total_size (_format, _size) * depth;
-		size_t pixelStride = ((((_format >> 16) & 0xffff) != 0x0002)
-			? (_format & 0xf)
-			: (_format >> 8) & 0xff);
+		size_t pixelStride = (((((int)_format >> 16) & 0xffff) != 0x0002)
+			? ((int)_format & 0xf)
+			: ((int)_format >> 8) & 0xff);
 
 		int width = (pos.x + size.width >= _size.width) ? (_size.width - (pos.x + size.width) - 1) : size.width;
 		for (auto y = pos.y; y < pos.y + size.height; ++y)
@@ -229,7 +229,7 @@ private:
 	std::atomic<int32_t> _refCount;
 
 	dseed::bitmaptype_t _type;
-	dseed::pixelformat_t _format;
+	dseed::pixelformat _format;
 	dseed::size3i _size;
 
 	dseed::auto_object<dseed::palette> _palette;
@@ -240,19 +240,19 @@ private:
 	dseed::auto_object<dseed::attributes> _extraInfo;
 };
 
-dseed::error_t dseed::create_bitmap (bitmaptype_t type, const size3i& size, pixelformat_t format, palette* palette, bitmap** bitmap)
+dseed::error_t dseed::create_bitmap (bitmaptype_t type, const size3i& size, pixelformat format, palette* palette, bitmap** bitmap)
 {
 	if (size.width <= 0 || size.height <= 0 || size.depth <= 0 || bitmap == nullptr
 		|| !(type >= bitmaptype_2d && type <= bitmaptype_3d))
 		return dseed::error_invalid_args;
-	if (format == pixelformat_bgra8888_indexed8 || format == pixelformat_bgr888_indexed8)
+	if (format == pixelformat::bgra8888_indexed8 || format == pixelformat::bgr888_indexed8)
 	{
 		if (palette == nullptr)
 			return dseed::error_invalid_args;
 		else
 		{
-			if ((format == pixelformat_bgra8888_indexed8 && palette->bits_per_pixel () == 32)
-				&& (format == pixelformat_bgr888_indexed8 && palette->bits_per_pixel () == 24))
+			if ((format == pixelformat::bgra8888_indexed8 && palette->bits_per_pixel () == 32)
+				&& (format == pixelformat::bgr888_indexed8 && palette->bits_per_pixel () == 24))
 				return dseed::error_invalid_args;
 		}
 	}

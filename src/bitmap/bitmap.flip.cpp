@@ -7,7 +7,7 @@ using namespace dseed;
 enum __HV { __HV_HORIZONTAL, __HV_VERTICAL };
 
 using fpfn = std::function<bool (uint8_t* dest, const uint8_t* src, const dseed::size3i& size)>;
-using fptp = std::tuple<__HV, dseed::pixelformat_t>;
+using fptp = std::tuple<__HV, dseed::pixelformat>;
 
 template<class TPixel>
 inline bool bmpfp_horizontal (uint8_t* dest, const uint8_t* src, const dseed::size3i& size) noexcept
@@ -61,33 +61,33 @@ inline bool bmpfp_vertical (uint8_t* dest, const uint8_t* src, const dseed::size
 }
 
 std::map<fptp, fpfn> g_flips = {
-	{ fptp (__HV_HORIZONTAL, pixelformat_rgba8888), bmpfp_horizontal<rgba> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_rgb888), bmpfp_horizontal<rgb> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_rgbaf), bmpfp_horizontal<rgbaf> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_bgra8888), bmpfp_horizontal<bgra> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_bgr888), bmpfp_horizontal<bgr> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_bgra4444), bmpfp_horizontal<bgra4> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_bgr565), bmpfp_horizontal<bgr565> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_grayscale8), bmpfp_horizontal<grayscale> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_grayscalef), bmpfp_horizontal<grayscalef> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_yuva8888), bmpfp_horizontal<yuva> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_yuv888), bmpfp_horizontal<yuv> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_hsva8888), bmpfp_horizontal<hsva> },
-	{ fptp (__HV_HORIZONTAL, pixelformat_hsv888), bmpfp_horizontal<hsv> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::rgba8888), bmpfp_horizontal<rgba> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::rgb888), bmpfp_horizontal<rgb> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::rgbaf), bmpfp_horizontal<rgbaf> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::bgra8888), bmpfp_horizontal<bgra> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::bgr888), bmpfp_horizontal<bgr> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::bgra4444), bmpfp_horizontal<bgra4> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::bgr565), bmpfp_horizontal<bgr565> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::grayscale8), bmpfp_horizontal<grayscale> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::grayscalef), bmpfp_horizontal<grayscalef> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::yuva8888), bmpfp_horizontal<yuva> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::yuv888), bmpfp_horizontal<yuv> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::hsva8888), bmpfp_horizontal<hsva> },
+	{ fptp (__HV_HORIZONTAL, pixelformat::hsv888), bmpfp_horizontal<hsv> },
 
-	{ fptp (__HV_VERTICAL, pixelformat_rgba8888), bmpfp_vertical<rgba> },
-	{ fptp (__HV_VERTICAL, pixelformat_rgb888), bmpfp_vertical<rgb> },
-	{ fptp (__HV_VERTICAL, pixelformat_rgbaf), bmpfp_vertical<rgbaf> },
-	{ fptp (__HV_VERTICAL, pixelformat_bgra8888), bmpfp_vertical<bgra> },
-	{ fptp (__HV_VERTICAL, pixelformat_bgr888), bmpfp_vertical<bgr> },
-	{ fptp (__HV_VERTICAL, pixelformat_bgra4444), bmpfp_vertical<bgra4> },
-	{ fptp (__HV_VERTICAL, pixelformat_bgr565), bmpfp_vertical<bgr565> },
-	{ fptp (__HV_VERTICAL, pixelformat_grayscale8), bmpfp_vertical<grayscale> },
-	{ fptp (__HV_VERTICAL, pixelformat_grayscalef), bmpfp_vertical<grayscalef> },
-	{ fptp (__HV_VERTICAL, pixelformat_yuva8888), bmpfp_vertical<yuva> },
-	{ fptp (__HV_VERTICAL, pixelformat_yuv888), bmpfp_vertical<yuv> },
-	{ fptp (__HV_VERTICAL, pixelformat_hsva8888), bmpfp_vertical<hsva> },
-	{ fptp (__HV_VERTICAL, pixelformat_hsv888), bmpfp_vertical<hsv> },
+	{ fptp (__HV_VERTICAL, pixelformat::rgba8888), bmpfp_vertical<rgba> },
+	{ fptp (__HV_VERTICAL, pixelformat::rgb888), bmpfp_vertical<rgb> },
+	{ fptp (__HV_VERTICAL, pixelformat::rgbaf), bmpfp_vertical<rgbaf> },
+	{ fptp (__HV_VERTICAL, pixelformat::bgra8888), bmpfp_vertical<bgra> },
+	{ fptp (__HV_VERTICAL, pixelformat::bgr888), bmpfp_vertical<bgr> },
+	{ fptp (__HV_VERTICAL, pixelformat::bgra4444), bmpfp_vertical<bgra4> },
+	{ fptp (__HV_VERTICAL, pixelformat::bgr565), bmpfp_vertical<bgr565> },
+	{ fptp (__HV_VERTICAL, pixelformat::grayscale8), bmpfp_vertical<grayscale> },
+	{ fptp (__HV_VERTICAL, pixelformat::grayscalef), bmpfp_vertical<grayscalef> },
+	{ fptp (__HV_VERTICAL, pixelformat::yuva8888), bmpfp_vertical<yuva> },
+	{ fptp (__HV_VERTICAL, pixelformat::yuv888), bmpfp_vertical<yuv> },
+	{ fptp (__HV_VERTICAL, pixelformat::hsva8888), bmpfp_vertical<hsva> },
+	{ fptp (__HV_VERTICAL, pixelformat::hsv888), bmpfp_vertical<hsv> },
 };
 
 dseed::error_t __internal_flip (dseed::bitmap* original, __HV hv, dseed::bitmap** bitmap)
