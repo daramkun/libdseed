@@ -84,7 +84,7 @@ public:
 				-> FLAC__StreamDecoderSeekStatus
 			{
 				dseed::stream* stream = ((__flac_decoder*)client_data)->_stream;
-				if (!stream->seek (dseed::seekorigin_begin, absolute_byte_offset))
+				if (!stream->seek (dseed::seekorigin::begin, absolute_byte_offset))
 					return FLAC__STREAM_DECODER_SEEK_STATUS_UNSUPPORTED;
 				return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
 			},

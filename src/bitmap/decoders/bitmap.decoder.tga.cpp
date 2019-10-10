@@ -62,7 +62,7 @@ dseed::error_t dseed::create_tga_bitmap_decoder (dseed::stream* stream, dseed::b
 	if (mapSize != 0)
 	{
 		size_t mapOffset = 18 + header.id_len;
-		stream->seek (dseed::seekorigin_begin, mapOffset);
+		stream->seek (dseed::seekorigin::begin, mapOffset);
 
 		map.resize (mapSize);
 		stream->read (map.data (), mapSize);
@@ -96,7 +96,7 @@ dseed::error_t dseed::create_tga_bitmap_decoder (dseed::stream* stream, dseed::b
 	size_t scanlineSize = header.width * header.depth / 8;
 	std::vector<uint8_t> pixels (scanlineSize * header.height);
 	size_t scanlineOffset = 18 + header.id_len + mapSize;
-	stream->seek (dseed::seekorigin_begin, scanlineOffset);
+	stream->seek (dseed::seekorigin::begin, scanlineOffset);
 	if ((header.img_t & 0x8) == 0x8) //< RLE Encoded
 	{
 		for (int y = 0; y < header.height; ++y)

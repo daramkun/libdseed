@@ -233,10 +233,10 @@ namespace dseed
 
 	// Bitmap Binary Operation
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
-	DSEEDEXP error_t bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap* b2, dseed::binary_operator_t op, dseed::bitmap** bitmap);
+	DSEEDEXP error_t bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap* b2, dseed::binary_operator op, dseed::bitmap** bitmap);
 	// Bitmap Unary Operation
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
-	DSEEDEXP error_t bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator_t op, dseed::bitmap** bitmap);
+	DSEEDEXP error_t bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator op, dseed::bitmap** bitmap);
 
 	enum colorcount_t : uint32_t
 	{

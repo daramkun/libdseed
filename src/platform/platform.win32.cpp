@@ -95,21 +95,21 @@ public:
 				_state[i].right_trigger = s.Gamepad.bRightTrigger / 255.0f;
 
 				int32_t buttons = 0;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_A) buttons |= dseed::gamepadbuttons_a;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_B) buttons |= dseed::gamepadbuttons_b;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_X) buttons |= dseed::gamepadbuttons_x;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_Y) buttons |= dseed::gamepadbuttons_y;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) buttons |= dseed::gamepadbuttons_dpad_left;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) buttons |= dseed::gamepadbuttons_dpad_right;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) buttons |= dseed::gamepadbuttons_dpad_up;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) buttons |= dseed::gamepadbuttons_dpad_down;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) buttons |= dseed::gamepadbuttons_left_bumper;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) buttons |= dseed::gamepadbuttons_right_thumbstick;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) buttons |= dseed::gamepadbuttons_left_thumbstick;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) buttons |= dseed::gamepadbuttons_right_thumbstick;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) buttons |= dseed::gamepadbuttons_back;
-				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_START) buttons |= dseed::gamepadbuttons_start;
-				_state[i].buttons = (dseed::gamepadbuttons_t) buttons;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_A) buttons |= (int)dseed::gamepadbuttons::a;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_B) buttons |= (int)dseed::gamepadbuttons::b;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_X) buttons |= (int)dseed::gamepadbuttons::x;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_Y) buttons |= (int)dseed::gamepadbuttons::y;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) buttons |= (int)dseed::gamepadbuttons::dpad_left;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) buttons |= (int)dseed::gamepadbuttons::dpad_right;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) buttons |= (int)dseed::gamepadbuttons::dpad_up;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) buttons |= (int)dseed::gamepadbuttons::dpad_down;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) buttons |= (int)dseed::gamepadbuttons::left_bumper;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) buttons |= (int)dseed::gamepadbuttons::right_thumbstick;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) buttons |= (int)dseed::gamepadbuttons::left_thumbstick;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) buttons |= (int)dseed::gamepadbuttons::right_thumbstick;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) buttons |= (int)dseed::gamepadbuttons::back;
+				if (s.Gamepad.wButtons & XINPUT_GAMEPAD_START) buttons |= (int)dseed::gamepadbuttons::start;
+				_state[i].buttons = (dseed::gamepadbuttons) buttons;
 			}
 		}
 	}
@@ -559,18 +559,18 @@ private:
 					ScreenToClient (hWnd, &p);
 				mouse->_state[0].position = dseed::point2i (p.x, p.y);
 
-				int8_t buttons = mouse->_state[0].buttons;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)	buttons |= dseed::mousebuttons_left;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)	buttons &= ~dseed::mousebuttons_left;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)	buttons |= dseed::mousebuttons_right;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)	buttons &= ~dseed::mousebuttons_right;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)buttons |= dseed::mousebuttons_middle;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)	buttons &= ~dseed::mousebuttons_middle;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN)		buttons |= dseed::mousebuttons_x_button1;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)		buttons &= ~dseed::mousebuttons_x_button1;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN)		buttons |= dseed::mousebuttons_x_button2;
-				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)		buttons &= ~dseed::mousebuttons_x_button2;
-				mouse->_state[0].buttons = (dseed::mousebuttons_t)buttons;
+				int8_t buttons = (int8_t)mouse->_state[0].buttons;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)	buttons |= (int)dseed::mousebuttons::left;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)	buttons &= ~(int)dseed::mousebuttons::left;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)	buttons |= (int)dseed::mousebuttons::right;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)	buttons &= ~(int)dseed::mousebuttons::right;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)buttons |= (int)dseed::mousebuttons::middle;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)	buttons &= ~(int)dseed::mousebuttons::middle;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN)		buttons |= (int)dseed::mousebuttons::x_button1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)		buttons &= ~(int)dseed::mousebuttons::x_button1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN)		buttons |= (int)dseed::mousebuttons::x_button2;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)		buttons &= ~(int)dseed::mousebuttons::x_button2;
+				mouse->_state[0].buttons = (dseed::mousebuttons)buttons;
 
 				if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
 					mouse->_state[0].wheel = dseed::float2 (0, raw->data.mouse.usButtonData / (float)WHEEL_DELTA);
@@ -598,7 +598,7 @@ private:
 					TOUCHINPUT& ti = touchInputs[i];
 					if (ti.dwFlags & TOUCHEVENTF_DOWN)
 					{
-						dseed::touchpointer p = { (int32_t)ti.dwID, dseed::point2i (ti.x, ti.y), dseed::touchstate_pressed };
+						dseed::touchpointer p = { (int32_t)ti.dwID, dseed::point2i (ti.x, ti.y), dseed::touchstate::pressed };
 						touchpanel->_state[0].pointers[touchpanel->_state[0].pointerCount++] = p;
 					}
 					else
@@ -606,7 +606,7 @@ private:
 						auto p = touchpanel->pointer (ti.dwID);
 						if (p)
 						{
-							p->state = (ti.dwFlags & TOUCHEVENTF_UP) ? dseed::touchstate_released : dseed::touchstate_moved;
+							p->state = (ti.dwFlags & TOUCHEVENTF_UP) ? dseed::touchstate::released : dseed::touchstate::moved;
 							p->position = dseed::point2i (ti.x, ti.y);
 						}
 					}

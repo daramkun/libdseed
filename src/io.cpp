@@ -49,13 +49,13 @@ public:
 
 		return length;
 	}
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		switch (origin)
 		{
-		case dseed::seekorigin_begin: break;
-		case dseed::seekorigin_current: offset += _position; break;
-		case dseed::seekorigin_end: offset = _length - offset; break;
+		case dseed::seekorigin::begin: break;
+		case dseed::seekorigin::current: offset += _position; break;
+		case dseed::seekorigin::end: offset = _length - offset; break;
 		default: return false;
 		}
 
@@ -70,7 +70,7 @@ public:
 	virtual void flush () override { }
 	virtual dseed::error_t set_length (size_t length) override
 	{
-		seek (dseed::seekorigin_begin, length);
+		seek (dseed::seekorigin::begin, length);
 		_length = length;
 		return dseed::error_good;
 	}
@@ -144,13 +144,13 @@ public:
 
 		return length;
 	}
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		switch (origin)
 		{
-		case dseed::seekorigin_begin: break;
-		case dseed::seekorigin_current: offset += _position; break;
-		case dseed::seekorigin_end: offset = _buffer.size () - offset; break;
+		case dseed::seekorigin::begin: break;
+		case dseed::seekorigin::current: offset += _position; break;
+		case dseed::seekorigin::end: offset = _buffer.size () - offset; break;
 		default: return false;
 		}
 
@@ -165,7 +165,7 @@ public:
 	virtual void flush () override { }
 	virtual dseed::error_t set_length (size_t length) override
 	{
-		seek (dseed::seekorigin_begin, length);
+		seek (dseed::seekorigin::begin, length);
 		_buffer.resize (length);
 		return dseed::error_good;
 	}
@@ -224,7 +224,7 @@ public:
 		memcpy (_buffer.data () + tempLength, data, (size_t)length);
 		return length;
 	}
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		return false;
 	}
@@ -306,9 +306,9 @@ public:
 			return -1;
 		return written;
 	}
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
-		if (SetFilePointer (_file, (LONG)offset, nullptr, origin) == INVALID_SET_FILE_POINTER)
+		if (SetFilePointer (_file, (LONG)offset, nullptr, (int)origin) == INVALID_SET_FILE_POINTER)
 			return false;
 		return true;
 	}
@@ -399,7 +399,7 @@ public:
 	{
 		return ::write (_fd, data, length);
 	}
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		return !lseek (_fd, offset, origin);
 	}
@@ -589,18 +589,18 @@ std::string ____GetTemporaryDirectory ()
 class __nativefilesystem : public dseed::filesystem
 {
 public:
-	__nativefilesystem (dseed::nativefilesystem_t fst)
+	__nativefilesystem (dseed::nativefilesystem fst)
 		: _refCount (1), _fst (fst)
 	{
 		switch (fst)
 		{
-		case dseed::nativefilesystem_documents:
+		case dseed::nativefilesystem::documents:
 			_baseDir = ____GetDocumentsDirectory ();
 			break;
-		case dseed::nativefilesystem_assets:
+		case dseed::nativefilesystem::assets:
 			_baseDir = ____GetAssetsDirectory ();
 			break;
-		case dseed::nativefilesystem_temporary:
+		case dseed::nativefilesystem::temporary:
 			_baseDir = ____GetTemporaryDirectory ();
 			break;
 		}
@@ -619,7 +619,7 @@ public:
 public:
 	virtual dseed::error_t create_directory (const char* path) override
 	{
-		if (_fst == dseed::nativefilesystem_assets)
+		if (_fst == dseed::nativefilesystem::assets)
 			return dseed::error_invalid_op;
 
 		std::string fullPath = dseed::path_combine (_baseDir, path);
@@ -627,7 +627,7 @@ public:
 	}
 	virtual dseed::error_t create_file (const char* path, bool create, dseed::stream** stream) override
 	{
-		if (_fst == dseed::nativefilesystem_assets && create)
+		if (_fst == dseed::nativefilesystem::assets && create)
 			return dseed::error_invalid_op;
 		if (!create && !file_exists (path))
 			return dseed::error_file_not_found;
@@ -643,7 +643,7 @@ public:
 	}
 	virtual dseed::error_t delete_file (const char* path) override
 	{
-		if (_fst == dseed::nativefilesystem_assets)
+		if (_fst == dseed::nativefilesystem::assets)
 			return dseed::error_invalid_op;
 
 		std::string fullPath = dseed::path_combine (_baseDir, path);
@@ -664,11 +664,11 @@ public:
 
 private:
 	std::atomic<int32_t> _refCount;
-	dseed::nativefilesystem_t _fst;
+	dseed::nativefilesystem _fst;
 	std::string _baseDir;
 };
 
-dseed::error_t dseed::create_native_filesystem (dseed::nativefilesystem_t fst, dseed::filesystem** fileSystem)
+dseed::error_t dseed::create_native_filesystem (dseed::nativefilesystem fst, dseed::filesystem** fileSystem)
 {
 	*fileSystem = new __nativefilesystem (fst);
 	if (*fileSystem == nullptr)

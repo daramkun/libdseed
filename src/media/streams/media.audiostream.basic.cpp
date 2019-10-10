@@ -41,14 +41,14 @@ public:
 		return retValue;
 	}
 	virtual size_t write (const void* data, size_t length) override { return 0; }
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		int64_t unit;
 		switch (origin)
 		{
-		case dseed::seekorigin_begin: unit = offset; break;
-		case dseed::seekorigin_current: unit = _position + offset; break;
-		case dseed::seekorigin_end: unit = length () - offset; break;
+		case dseed::seekorigin::begin: unit = offset; break;
+		case dseed::seekorigin::current: unit = _position + offset; break;
+		case dseed::seekorigin::end: unit = length () - offset; break;
 		default: return false;
 		}
 
@@ -189,21 +189,21 @@ public:
 		return retValue;
 	}
 	virtual size_t write (const void* data, size_t length) override { return 0; }
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		switch (origin)
 		{
-		case dseed::seekorigin_begin:
+		case dseed::seekorigin::begin:
 			if (offset > _bytes.size () || offset < 0) return false;
 			_position = offset;
 			break;
 
-		case dseed::seekorigin_current:
+		case dseed::seekorigin::current:
 			if (_position + offset > _bytes.size () || _position + offset < 0) return false;
 			_position += offset;
 			break;
 
-		case dseed::seekorigin_end:
+		case dseed::seekorigin::end:
 			if (_bytes.size () + offset > _bytes.size () || _bytes.size () + offset < 0) return false;
 			_position = _bytes.size () - offset;
 			break;

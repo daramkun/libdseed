@@ -69,7 +69,7 @@ public:
 
 	virtual size_t write (const void* data, size_t length) override { return 0; }
 
-	virtual bool seek (seekorigin_t origin, size_t offset) override
+	virtual bool seek (seekorigin origin, size_t offset) override
 	{
 		return _stream->seek (origin, offset * _format.samples_per_sec / _samplerate);
 	}

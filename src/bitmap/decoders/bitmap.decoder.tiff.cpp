@@ -27,7 +27,7 @@ dseed::error_t dseed::create_tiff_bitmap_decoder (dseed::stream* stream, dseed::
 			[] (thandle_t handle, toff_t offset, int origin) -> toff_t
 		{
 			auto stream = reinterpret_cast<dseed::stream*>(handle);
-			if (!stream->seek ((dseed::seekorigin_t)origin, offset))
+			if (!stream->seek ((dseed::seekorigin)origin, offset))
 				return -1;
 			return stream->position ();
 		},

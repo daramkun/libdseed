@@ -165,7 +165,7 @@ public:
 		memset (&_cinfo, 0, sizeof (_cinfo));
 
 		if (_stream->seekable ())
-			_stream->seek (dseed::seekorigin_begin, streamOriginPos);
+			_stream->seek (dseed::seekorigin::begin, streamOriginPos);
 
 		_already_encoded = true;
 

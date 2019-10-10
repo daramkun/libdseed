@@ -25,7 +25,7 @@ public:
 		_callbacks.seek = [](void* datasource, int64_t offset, int whence) -> int
 		{
 			dseed::stream* stream = (dseed::stream*)datasource;
-			return (int)stream->seek ((dseed::seekorigin_t)whence, offset);
+			return (int)stream->seek ((dseed::seekorigin)whence, offset);
 		};
 		_callbacks.tell = [](void* datasource) -> int64_t
 		{

@@ -38,7 +38,7 @@ public:
 			[](void* pUserData, int offset, drwav_seek_origin origin) -> drwav_bool32
 			{
 				dseed::stream* stream = (dseed::stream*)pUserData;
-				return stream->seek ((dseed::seekorigin_t)origin, offset);
+				return stream->seek ((dseed::seekorigin)origin, offset);
 			}, stream);
 
 		if (_file == nullptr)

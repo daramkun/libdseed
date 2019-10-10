@@ -49,7 +49,7 @@ public:
 
 	virtual size_t write (const void* data, size_t length) override { return 0; }
 
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		return _base->seek (origin, offset / 4 * (_wf.bits_per_sample / 8));
 	}
@@ -127,7 +127,7 @@ public:
 
 	virtual size_t write (const void* data, size_t length) override { return 0; }
 
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		return _base->seek (origin, offset / (_bps / 8) * 4);
 	}
@@ -236,7 +236,7 @@ public:
 
 	virtual size_t write (const void* data, size_t length) override { return 0; }
 
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override
 	{
 		return _base->seek (origin, offset / (_bps / 8) * (_wf.bits_per_sample / 8));
 	}

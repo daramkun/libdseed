@@ -4,23 +4,23 @@
 
 using namespace dseed;
 
-template<class TPixel> inline TPixel add (const TPixel& p1, const TPixel& p2) noexcept { return p1 + p2; }
-template<class TPixel> inline TPixel subtract (const TPixel& p1, const TPixel& p2) noexcept { return p1 - p2; }
-template<class TPixel> inline TPixel multiply (const TPixel& p1, const TPixel& p2) noexcept { return p1 * p2; }
-template<class TPixel> inline TPixel divide (const TPixel& p1, const TPixel& p2) noexcept { return p1 / p2; }
-template<class TPixel> inline TPixel and (const TPixel& p1, const TPixel& p2) noexcept { return p1 & p2; }
-template<class TPixel> inline TPixel or (const TPixel& p1, const TPixel& p2) noexcept { return p1 | p2; }
-template<class TPixel> inline TPixel xor (const TPixel& p1, const TPixel& p2) noexcept { return p1 ^ p2; }
+template<class TPixel> inline TPixel padd (const TPixel& p1, const TPixel& p2) noexcept { return p1 + p2; }
+template<class TPixel> inline TPixel psubtract (const TPixel& p1, const TPixel& p2) noexcept { return p1 - p2; }
+template<class TPixel> inline TPixel pmultiply (const TPixel& p1, const TPixel& p2) noexcept { return p1 * p2; }
+template<class TPixel> inline TPixel pdivide (const TPixel& p1, const TPixel& p2) noexcept { return p1 / p2; }
+template<class TPixel> inline TPixel pand (const TPixel& p1, const TPixel& p2) noexcept { return p1 & p2; }
+template<class TPixel> inline TPixel por (const TPixel& p1, const TPixel& p2) noexcept { return p1 | p2; }
+template<class TPixel> inline TPixel pxor (const TPixel& p1, const TPixel& p2) noexcept { return p1 ^ p2; }
 template<class TPixel>
 using Operator2 = TPixel (*)(const TPixel&, const TPixel&);
-template<class TPixel> inline TPixel negate (const TPixel& p) noexcept { return -p; }
-template<class TPixel> inline TPixel not (const TPixel& p) noexcept { return ~p; }
-template<class TPixel> inline TPixel invert (const TPixel& p) noexcept { return TPixel::max_color () - p; }
+template<class TPixel> inline TPixel pnegate (const TPixel& p) noexcept { return -p; }
+template<class TPixel> inline TPixel pnot (const TPixel& p) noexcept { return ~p; }
+template<class TPixel> inline TPixel pinvert (const TPixel& p) noexcept { return TPixel::max_color () - p; }
 template<class TPixel>
 using Operator1 = TPixel (*)(const TPixel&);
 
 using binopfn = std::function<bool (uint8_t*, const uint8_t*, const uint8_t*, const dseed::size3i&)>;
-using binoptp = std::tuple<dseed::pixelformat, dseed::binary_operator_t>;
+using binoptp = std::tuple<dseed::pixelformat, dseed::binary_operator>;
 
 template<class TPixel, Operator2<TPixel> op>
 inline bool binary_operation (uint8_t* dest, const uint8_t* src1, const uint8_t* src2, const dseed::size3i& size) noexcept
@@ -54,100 +54,100 @@ inline bool binary_operation (uint8_t* dest, const uint8_t* src1, const uint8_t*
 }
 
 std::map<binoptp, binopfn> g_binops = {
-	{ binoptp (pixelformat::rgba8888, binary_operator_add), binary_operation<rgba, add<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_add), binary_operation<rgb, add<rgb>> },
-	{ binoptp (pixelformat::rgbaf, binary_operator_add), binary_operation<rgbaf, add<rgbaf>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_add), binary_operation<bgra, add<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_add), binary_operation<bgr, add<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_add), binary_operation<bgra4, add<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_add), binary_operation<bgr565, add<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_add), binary_operation<grayscale, add<grayscale>> },
-	{ binoptp (pixelformat::grayscalef, binary_operator_add), binary_operation<grayscalef, add<grayscalef>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_add), binary_operation<yuva, add<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_add), binary_operation<yuv, add<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_add), binary_operation<hsva, add<hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_add), binary_operation<hsv, add<hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::add), binary_operation<rgba, padd<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::add), binary_operation<rgb, padd<rgb>> },
+	{ binoptp (pixelformat::rgbaf, binary_operator::add), binary_operation<rgbaf, padd<rgbaf>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::add), binary_operation<bgra, padd<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::add), binary_operation<bgr, padd<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::add), binary_operation<bgra4, padd<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::add), binary_operation<bgr565, padd<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::add), binary_operation<grayscale, padd<grayscale>> },
+	{ binoptp (pixelformat::grayscalef, binary_operator::add), binary_operation<grayscalef, padd<grayscalef>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::add), binary_operation<yuva, padd<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::add), binary_operation<yuv, padd<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::add), binary_operation<hsva, padd<hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::add), binary_operation<hsv, padd<hsv>> },
 
-	{ binoptp (pixelformat::rgba8888, binary_operator_subtract), binary_operation<rgba, subtract<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_subtract), binary_operation<rgb, subtract<rgb>> },
-	{ binoptp (pixelformat::rgbaf, binary_operator_subtract), binary_operation<rgbaf, subtract<rgbaf>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_subtract), binary_operation<bgra, subtract<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_subtract), binary_operation<bgr, subtract<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_subtract), binary_operation<bgra4, subtract<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_subtract), binary_operation<bgr565, subtract<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_subtract), binary_operation<grayscale, subtract<grayscale>> },
-	{ binoptp (pixelformat::grayscalef, binary_operator_subtract), binary_operation<grayscalef, subtract<grayscalef>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_subtract), binary_operation<yuva, subtract<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_subtract), binary_operation<yuv, subtract<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_subtract), binary_operation<hsva, subtract<hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_subtract), binary_operation<hsv, subtract<hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::subtract), binary_operation<rgba, psubtract<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::subtract), binary_operation<rgb, psubtract<rgb>> },
+	{ binoptp (pixelformat::rgbaf, binary_operator::subtract), binary_operation<rgbaf, psubtract<rgbaf>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::subtract), binary_operation<bgra, psubtract<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::subtract), binary_operation<bgr, psubtract<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::subtract), binary_operation<bgra4, psubtract<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::subtract), binary_operation<bgr565, psubtract<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::subtract), binary_operation<grayscale, psubtract<grayscale>> },
+	{ binoptp (pixelformat::grayscalef, binary_operator::subtract), binary_operation<grayscalef, psubtract<grayscalef>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::subtract), binary_operation<yuva, psubtract<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::subtract), binary_operation<yuv, psubtract<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::subtract), binary_operation<hsva, psubtract<hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::subtract), binary_operation<hsv, psubtract<hsv>> },
 
-	{ binoptp (pixelformat::rgba8888, binary_operator_multiply), binary_operation<rgba, multiply<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_multiply), binary_operation<rgb, multiply<rgb>> },
-	{ binoptp (pixelformat::rgbaf, binary_operator_multiply), binary_operation<rgbaf, multiply<rgbaf>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_multiply), binary_operation<bgra, multiply<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_multiply), binary_operation<bgr, multiply<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_multiply), binary_operation<bgra4, multiply<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_multiply), binary_operation<bgr565, multiply<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_multiply), binary_operation<grayscale, multiply<grayscale>> },
-	{ binoptp (pixelformat::grayscalef, binary_operator_multiply), binary_operation<grayscalef, multiply<grayscalef>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_multiply), binary_operation<yuva, multiply<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_multiply), binary_operation<yuv, multiply<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_multiply), binary_operation<hsva, multiply<hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_multiply), binary_operation<hsv, multiply<hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::multiply), binary_operation<rgba, pmultiply<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::multiply), binary_operation<rgb, pmultiply<rgb>> },
+	{ binoptp (pixelformat::rgbaf, binary_operator::multiply), binary_operation<rgbaf, pmultiply<rgbaf>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::multiply), binary_operation<bgra, pmultiply<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::multiply), binary_operation<bgr, pmultiply<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::multiply), binary_operation<bgra4, pmultiply<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::multiply), binary_operation<bgr565, pmultiply<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::multiply), binary_operation<grayscale, pmultiply<grayscale>> },
+	{ binoptp (pixelformat::grayscalef, binary_operator::multiply), binary_operation<grayscalef, pmultiply<grayscalef>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::multiply), binary_operation<yuva, pmultiply<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::multiply), binary_operation<yuv, pmultiply<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::multiply), binary_operation<hsva, pmultiply<hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::multiply), binary_operation<hsv, pmultiply<hsv>> },
 
-	{ binoptp (pixelformat::rgba8888, binary_operator_divide), binary_operation<rgba, divide<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_divide), binary_operation<rgb, divide<rgb>> },
-	{ binoptp (pixelformat::rgbaf, binary_operator_divide), binary_operation<rgbaf, divide<rgbaf>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_divide), binary_operation<bgra, divide<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_divide), binary_operation<bgr, divide<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_divide), binary_operation<bgra4, divide<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_divide), binary_operation<bgr565, divide<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_divide), binary_operation<grayscale, divide<grayscale>> },
-	{ binoptp (pixelformat::grayscalef, binary_operator_divide), binary_operation<grayscalef, divide<grayscalef>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_divide), binary_operation<yuva, divide<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_divide), binary_operation<yuv, divide<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_divide), binary_operation<hsva, divide<hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_divide), binary_operation<hsv, divide<hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::divide), binary_operation<rgba, pdivide<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::divide), binary_operation<rgb, pdivide<rgb>> },
+	{ binoptp (pixelformat::rgbaf, binary_operator::divide), binary_operation<rgbaf, pdivide<rgbaf>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::divide), binary_operation<bgra, pdivide<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::divide), binary_operation<bgr, pdivide<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::divide), binary_operation<bgra4, pdivide<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::divide), binary_operation<bgr565, pdivide<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::divide), binary_operation<grayscale, pdivide<grayscale>> },
+	{ binoptp (pixelformat::grayscalef, binary_operator::divide), binary_operation<grayscalef, pdivide<grayscalef>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::divide), binary_operation<yuva, pdivide<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::divide), binary_operation<yuv, pdivide<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::divide), binary_operation<hsva, pdivide<hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::divide), binary_operation<hsv, pdivide<hsv>> },
 
-	{ binoptp (pixelformat::rgba8888, binary_operator_and), binary_operation<rgba, and<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_and), binary_operation<rgb, and<rgb>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_and), binary_operation<bgra, and<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_and), binary_operation<bgr, and<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_and), binary_operation<bgra4, and<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_and), binary_operation<bgr565, and<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_and), binary_operation<grayscale, and<grayscale>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_and), binary_operation<yuva, and<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_and), binary_operation<yuv, and<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_and), binary_operation<hsva,and <hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_and), binary_operation<hsv,and <hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::and), binary_operation<rgba, pand<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::and), binary_operation<rgb, pand<rgb>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::and), binary_operation<bgra, pand<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::and), binary_operation<bgr, pand<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::and), binary_operation<bgra4, pand<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::and), binary_operation<bgr565, pand<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::and), binary_operation<grayscale, pand<grayscale>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::and), binary_operation<yuva, pand<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::and), binary_operation<yuv, pand<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::and), binary_operation<hsva, pand<hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::and), binary_operation<hsv, pand<hsv>> },
 
-	{ binoptp (pixelformat::rgba8888, binary_operator_or), binary_operation<rgba, or<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_or), binary_operation<rgb, or<rgb>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_or), binary_operation<bgra, or<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_or), binary_operation<bgr, or<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_or), binary_operation<bgra4, or<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_or), binary_operation<bgr565, or<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_or), binary_operation<grayscale, or<grayscale>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_or), binary_operation<yuva, or<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_or), binary_operation<yuv, or<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_or), binary_operation<hsva, or <hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_or), binary_operation<hsv, or <hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::or), binary_operation<rgba, por<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::or), binary_operation<rgb, por<rgb>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::or), binary_operation<bgra, por<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::or), binary_operation<bgr, por<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::or), binary_operation<bgra4, por<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::or), binary_operation<bgr565, por<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::or), binary_operation<grayscale, por<grayscale>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::or), binary_operation<yuva, por<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::or), binary_operation<yuv, por<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::or), binary_operation<hsva, por <hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::or), binary_operation<hsv, por <hsv>> },
 
-	{ binoptp (pixelformat::rgba8888, binary_operator_xor), binary_operation<rgba, xor<rgba>> },
-	{ binoptp (pixelformat::rgb888, binary_operator_xor), binary_operation<rgb, xor<rgb>> },
-	{ binoptp (pixelformat::bgra8888, binary_operator_xor), binary_operation<bgra, xor<bgra>> },
-	{ binoptp (pixelformat::bgr888, binary_operator_xor), binary_operation<bgr, xor<bgr>> },
-	{ binoptp (pixelformat::bgra4444, binary_operator_xor), binary_operation<bgra4, xor<bgra4>> },
-	{ binoptp (pixelformat::bgr565, binary_operator_xor), binary_operation<bgr565, xor<bgr565>> },
-	{ binoptp (pixelformat::grayscale8, binary_operator_xor), binary_operation<grayscale, xor<grayscale>> },
-	{ binoptp (pixelformat::yuva8888, binary_operator_xor), binary_operation<yuva, xor<yuva>> },
-	{ binoptp (pixelformat::yuv888, binary_operator_xor), binary_operation<yuv, xor<yuv>> },
-	{ binoptp (pixelformat::hsva8888, binary_operator_xor), binary_operation<hsva,xor <hsva>> },
-	{ binoptp (pixelformat::hsv888, binary_operator_xor), binary_operation<hsv,xor <hsv>> },
+	{ binoptp (pixelformat::rgba8888, binary_operator::xor), binary_operation<rgba, pxor<rgba>> },
+	{ binoptp (pixelformat::rgb888, binary_operator::xor), binary_operation<rgb, pxor<rgb>> },
+	{ binoptp (pixelformat::bgra8888, binary_operator::xor), binary_operation<bgra, pxor<bgra>> },
+	{ binoptp (pixelformat::bgr888, binary_operator::xor), binary_operation<bgr, pxor<bgr>> },
+	{ binoptp (pixelformat::bgra4444, binary_operator::xor), binary_operation<bgra4, pxor<bgra4>> },
+	{ binoptp (pixelformat::bgr565, binary_operator::xor), binary_operation<bgr565, pxor<bgr565>> },
+	{ binoptp (pixelformat::grayscale8, binary_operator::xor), binary_operation<grayscale, pxor<grayscale>> },
+	{ binoptp (pixelformat::yuva8888, binary_operator::xor), binary_operation<yuva, pxor<yuva>> },
+	{ binoptp (pixelformat::yuv888, binary_operator::xor), binary_operation<yuv, pxor<yuv>> },
+	{ binoptp (pixelformat::hsva8888, binary_operator::xor), binary_operation<hsva, pxor<hsva>> },
+	{ binoptp (pixelformat::hsv888, binary_operator::xor), binary_operation<hsv, pxor<hsv>> },
 };
 
-dseed::error_t dseed::bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap* b2, dseed::binary_operator_t op, dseed::bitmap** bitmap)
+dseed::error_t dseed::bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap* b2, dseed::binary_operator op, dseed::bitmap** bitmap)
 {
 	if (b1 == nullptr || b2 == nullptr)
 		return dseed::error_invalid_args;
@@ -187,7 +187,7 @@ dseed::error_t dseed::bitmap_binary_operation (dseed::bitmap* b1, dseed::bitmap*
 }
 
 using unopfn = std::function<bool (uint8_t*, const uint8_t*, const dseed::size3i&)>;
-using unoptp = std::tuple<dseed::pixelformat, dseed::unary_operator_t>;
+using unoptp = std::tuple<dseed::pixelformat, dseed::unary_operator>;
 
 template<class TPixel, Operator1<TPixel> op>
 inline bool unary_operation (uint8_t* dest, const uint8_t* src, const dseed::size3i& size) noexcept
@@ -218,37 +218,37 @@ inline bool unary_operation (uint8_t* dest, const uint8_t* src, const dseed::siz
 }
 
 std::map<unoptp, unopfn> g_unops = {
-	{ unoptp (pixelformat::rgbaf, unary_operator_negate), unary_operation<rgbaf, negate<rgbaf>> },
-	{ unoptp (pixelformat::grayscalef, unary_operator_negate), unary_operation<grayscalef, negate<grayscalef>> },
+	{ unoptp (pixelformat::rgbaf, unary_operator::negate), unary_operation<rgbaf, pnegate<rgbaf>> },
+	{ unoptp (pixelformat::grayscalef, unary_operator::negate), unary_operation<grayscalef, pnegate<grayscalef>> },
 
-	{ unoptp (pixelformat::rgba8888, unary_operator_not), unary_operation<rgba, not<rgba>> },
-	{ unoptp (pixelformat::rgb888, unary_operator_not), unary_operation<rgb, not<rgb>> },
-	{ unoptp (pixelformat::bgra8888, unary_operator_not), unary_operation<bgra, not<bgra>> },
-	{ unoptp (pixelformat::bgr888, unary_operator_not), unary_operation<bgr, not<bgr>> },
-	{ unoptp (pixelformat::bgra4444, unary_operator_not), unary_operation<bgra4, not<bgra4>> },
-	{ unoptp (pixelformat::bgr565, unary_operator_not), unary_operation<bgr565, not<bgr565>> },
-	{ unoptp (pixelformat::grayscale8, unary_operator_not), unary_operation<grayscale, not<grayscale>> },
-	{ unoptp (pixelformat::yuva8888, unary_operator_not), unary_operation<yuva, not<yuva>> },
-	{ unoptp (pixelformat::yuv888, unary_operator_not), unary_operation<yuv, not<yuv>> },
-	{ unoptp (pixelformat::hsva8888, unary_operator_not), unary_operation<hsva, not<hsva>> },
-	{ unoptp (pixelformat::hsv888, unary_operator_not), unary_operation<hsv, not<hsv>> },
+	{ unoptp (pixelformat::rgba8888, unary_operator::not), unary_operation<rgba, pnot<rgba>> },
+	{ unoptp (pixelformat::rgb888, unary_operator::not), unary_operation<rgb, pnot<rgb>> },
+	{ unoptp (pixelformat::bgra8888, unary_operator::not), unary_operation<bgra, pnot<bgra>> },
+	{ unoptp (pixelformat::bgr888, unary_operator::not), unary_operation<bgr, pnot<bgr>> },
+	{ unoptp (pixelformat::bgra4444, unary_operator::not), unary_operation<bgra4, pnot<bgra4>> },
+	{ unoptp (pixelformat::bgr565, unary_operator::not), unary_operation<bgr565, pnot<bgr565>> },
+	{ unoptp (pixelformat::grayscale8, unary_operator::not), unary_operation<grayscale, pnot<grayscale>> },
+	{ unoptp (pixelformat::yuva8888, unary_operator::not), unary_operation<yuva, pnot<yuva>> },
+	{ unoptp (pixelformat::yuv888, unary_operator::not), unary_operation<yuv, pnot<yuv>> },
+	{ unoptp (pixelformat::hsva8888, unary_operator::not), unary_operation<hsva, pnot<hsva>> },
+	{ unoptp (pixelformat::hsv888, unary_operator::not), unary_operation<hsv, pnot<hsv>> },
 
-	{ unoptp (pixelformat::rgba8888, unary_operator_invert), unary_operation<rgba, invert<rgba>> },
-	{ unoptp (pixelformat::rgb888, unary_operator_invert), unary_operation<rgb, invert<rgb>> },
-	{ unoptp (pixelformat::rgbaf, unary_operator_invert), unary_operation<rgbaf, invert<rgbaf>> },
-	{ unoptp (pixelformat::bgra8888, unary_operator_invert), unary_operation<bgra, invert<bgra>> },
-	{ unoptp (pixelformat::bgr888, unary_operator_invert), unary_operation<bgr, invert<bgr>> },
-	{ unoptp (pixelformat::bgra4444, unary_operator_invert), unary_operation<bgra4, invert<bgra4>> },
-	{ unoptp (pixelformat::bgr565, unary_operator_invert), unary_operation<bgr565, invert<bgr565>> },
-	{ unoptp (pixelformat::grayscale8, unary_operator_invert), unary_operation<grayscale, invert<grayscale>> },
-	{ unoptp (pixelformat::grayscalef, unary_operator_invert), unary_operation<grayscalef, invert<grayscalef>> },
-	{ unoptp (pixelformat::yuva8888, unary_operator_invert), unary_operation<yuva, invert<yuva>> },
-	{ unoptp (pixelformat::yuv888, unary_operator_invert), unary_operation<yuv, invert<yuv>> },
-	{ unoptp (pixelformat::hsva8888, unary_operator_invert), unary_operation<hsva, invert<hsva>> },
-	{ unoptp (pixelformat::hsv888, unary_operator_invert), unary_operation<hsv, invert<hsv>> },
+	{ unoptp (pixelformat::rgba8888, unary_operator::invert), unary_operation<rgba, pinvert<rgba>> },
+	{ unoptp (pixelformat::rgb888, unary_operator::invert), unary_operation<rgb, pinvert<rgb>> },
+	{ unoptp (pixelformat::rgbaf, unary_operator::invert), unary_operation<rgbaf, pinvert<rgbaf>> },
+	{ unoptp (pixelformat::bgra8888, unary_operator::invert), unary_operation<bgra, pinvert<bgra>> },
+	{ unoptp (pixelformat::bgr888, unary_operator::invert), unary_operation<bgr, pinvert<bgr>> },
+	{ unoptp (pixelformat::bgra4444, unary_operator::invert), unary_operation<bgra4, pinvert<bgra4>> },
+	{ unoptp (pixelformat::bgr565, unary_operator::invert), unary_operation<bgr565, pinvert<bgr565>> },
+	{ unoptp (pixelformat::grayscale8, unary_operator::invert), unary_operation<grayscale, pinvert<grayscale>> },
+	{ unoptp (pixelformat::grayscalef, unary_operator::invert), unary_operation<grayscalef, pinvert<grayscalef>> },
+	{ unoptp (pixelformat::yuva8888, unary_operator::invert), unary_operation<yuva, pinvert<yuva>> },
+	{ unoptp (pixelformat::yuv888, unary_operator::invert), unary_operation<yuv, pinvert<yuv>> },
+	{ unoptp (pixelformat::hsva8888, unary_operator::invert), unary_operation<hsva, pinvert<hsva>> },
+	{ unoptp (pixelformat::hsv888, unary_operator::invert), unary_operation<hsv, pinvert<hsv>> },
 };
 
-dseed::error_t dseed::bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator_t op, dseed::bitmap** bitmap)
+dseed::error_t dseed::bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator op, dseed::bitmap** bitmap)
 {
 	if (b == nullptr)
 		return dseed::error_invalid_args;

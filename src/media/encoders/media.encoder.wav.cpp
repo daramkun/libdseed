@@ -73,14 +73,14 @@ public:
 
 	virtual dseed::error_t commit () override
 	{
-		_stream->seek (dseed::seekorigin_begin, 4);
+		_stream->seek (dseed::seekorigin::begin, 4);
 		uint32_t totalSize = (uint32_t)_stream->length ();
 		_stream->write (&totalSize, 4);
 		uint32_t dataSeek = sizeof (RIFF_HEADER) + sizeof (WAVE_HEADER) + sizeof (fmt_HEADER) + 4;
-		_stream->seek (dseed::seekorigin_begin, dataSeek);
+		_stream->seek (dseed::seekorigin::begin, dataSeek);
 		uint32_t pcmSize = totalSize - dataSeek;
 		_stream->write (&pcmSize, 4);
-		_stream->seek (dseed::seekorigin_end, 0);
+		_stream->seek (dseed::seekorigin::end, 0);
 
 		return dseed::error_good;
 	}

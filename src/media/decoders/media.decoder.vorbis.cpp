@@ -47,7 +47,7 @@ public:
 				[](void* datasource, ogg_int64_t offset, int whence) -> int
 				{
 					dseed::stream* stream = (dseed::stream*)datasource;
-					return (int)stream->seek ((dseed::seekorigin_t)whence, offset);
+					return (int)stream->seek ((dseed::seekorigin)whence, offset);
 				},
 				[](void* datasource) -> int
 				{

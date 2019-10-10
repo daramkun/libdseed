@@ -181,7 +181,7 @@ public:
 #if defined ( USE_ZOPFLI )
 		if (_use_zopfli)
 		{
-			_stream->seek (dseed::seekorigin_begin, 0);
+			_stream->seek (dseed::seekorigin::begin, 0);
 
 			ZopfliPNGOptions options;
 			options.lossy_8bit = png_get_color_type (_png, _info) == PNG_COLOR_TYPE_PALETTE ? true : false;

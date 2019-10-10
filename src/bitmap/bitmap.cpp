@@ -301,7 +301,7 @@ dseed::error_t dseed::detect_bitmap_decoder (dseed::stream* stream, dseed::bitma
 
 	for (int i = 0; i < g_bitmap_decoder_creator_count; ++i)
 	{
-		stream->seek (dseed::seekorigin_begin, 0);
+		stream->seek (dseed::seekorigin::begin, 0);
 		auto err = g_bitmap_decoder_creator[i] (stream, decoder);
 		if (dseed::succeeded (err))
 			return dseed::error_good;

@@ -47,7 +47,7 @@ void jpeg_stream_src (j_decompress_ptr cinfo, dseed::stream* stream)
 
 		if (num_bytes > src->pub.bytes_in_buffer)
 		{
-			src->stream->seek (dseed::seekorigin_current, num_bytes - src->pub.bytes_in_buffer);
+			src->stream->seek (dseed::seekorigin::current, num_bytes - src->pub.bytes_in_buffer);
 			src->pub.next_input_byte = src->buffer;
 			src->pub.bytes_in_buffer = 0;
 		}
@@ -76,7 +76,7 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::stream* stream, boo
 
 	uint8_t sig[3];
 	stream->read (sig, 3);
-	stream->seek (dseed::seekorigin_begin, 0);
+	stream->seek (dseed::seekorigin::begin, 0);
 
 	if (sig[0] != 0xff || sig[1] != 0xd8 || sig[2] != 0xff)
 		return dseed::error_fail;

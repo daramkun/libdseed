@@ -20,7 +20,7 @@ dseed::error_t dseed::create_jpeg2000_bitmap_decoder (dseed::stream* stream, dse
 	uint8_t sig[12];
 	if (12 != stream->read (sig, 12))
 		return dseed::error_fail;
-	stream->seek (dseed::seekorigin_begin, 0);
+	stream->seek (dseed::seekorigin::begin, 0);
 
 	CODEC_FORMAT codecFormat;
 	if (memcmp (sig, JP2_RFC3745_MAGIC, 12) == 0 || memcmp (sig, JP2_MAGIC, 4) == 0)
@@ -61,12 +61,12 @@ dseed::error_t dseed::create_jpeg2000_bitmap_decoder (dseed::stream* stream, dse
 		return totalRead == 0 ? -1 : totalRead;
 		});
 	opj_stream_set_seek_function (opjStream, [](OPJ_OFF_T p_nb_bytes, void* p_user_data) -> OPJ_BOOL {
-		return reinterpret_cast<dseed::stream*>(p_user_data)->seek (dseed::seekorigin_begin, p_nb_bytes);
+		return reinterpret_cast<dseed::stream*>(p_user_data)->seek (dseed::seekorigin::begin, p_nb_bytes);
 		});
 	opj_stream_set_skip_function (opjStream, [](OPJ_OFF_T p_nb_bytes, void* p_user_data) -> OPJ_OFF_T {
 		auto stream = reinterpret_cast<dseed::stream*>(p_user_data);
 		auto lastPos = stream->position ();
-		if (!stream->seek (dseed::seekorigin_current, p_nb_bytes))
+		if (!stream->seek (dseed::seekorigin::current, p_nb_bytes))
 			return -1;
 		return stream->position () - lastPos;
 		});

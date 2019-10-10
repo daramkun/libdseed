@@ -9,7 +9,7 @@
 #	include <atlconv.h>
 #endif
 
-std::string ____assembleLogMessage (dseed::loglevel_t level, const char* tag, const char* message, bool includeCarrageReturn)
+std::string ____assembleLogMessage (dseed::loglevel level, const char* tag, const char* message, bool includeCarrageReturn)
 {
 	auto now = std::chrono::system_clock::to_time_t (std::chrono::system_clock::now ());
 	std::tm localtime = *std::localtime (&now);
@@ -17,11 +17,11 @@ std::string ____assembleLogMessage (dseed::loglevel_t level, const char* tag, co
 	const char* levelStr;
 	switch (level)
 	{
-	case dseed::loglevel_debug_only: levelStr = "DEBUG"; break;
-	case dseed::loglevel_information: levelStr = "INFOR"; break;
-	case dseed::loglevel_warning: levelStr = "WARNN"; break;
-	case dseed::loglevel_error: levelStr = "ERROR"; break;
-	case dseed::loglevel_fatal: levelStr = "FATAL"; break;
+	case dseed::loglevel::debug_only: levelStr = "DEBUG"; break;
+	case dseed::loglevel::information: levelStr = "INFOR"; break;
+	case dseed::loglevel::warning: levelStr = "WARNN"; break;
+	case dseed::loglevel::error: levelStr = "ERROR"; break;
+	case dseed::loglevel::fatal: levelStr = "FATAL"; break;
 	default: levelStr = "UNKNN"; break;
 	}
 
@@ -62,7 +62,7 @@ public:
 	}
 
 public:
-	virtual void write (dseed::loglevel_t level, const char* tag, const char* message) override
+	virtual void write (dseed::loglevel level, const char* tag, const char* message) override
 	{
 		auto log = ____assembleLogMessage (level, tag, message, true);
 #if PLATFORM_MICROSOFT
@@ -115,7 +115,7 @@ public:
 	}
 
 public:
-	virtual void write (dseed::loglevel_t level, const char* tag, const char* message) override
+	virtual void write (dseed::loglevel level, const char* tag, const char* message) override
 	{
 #if _DEBUG || defined ( DEBUG )
 #	if PLATFORM_MICROSOFT || PLATFORM_UNIX
@@ -138,8 +138,8 @@ class internal_logger : public dseed::logger
 {
 public:
 	internal_logger ()
-		: _minPrintLevel (dseed::loglevel_debug_only)
-		, _maxPrintLevel (dseed::loglevel_fatal)
+		: _minPrintLevel (dseed::loglevel::debug_only)
+		, _maxPrintLevel (dseed::loglevel::fatal)
 	{
 		dseed::auto_object<dseed::logwriter> debugLogWriter;
 		*&debugLogWriter = new debug_log_writer ();
@@ -172,25 +172,25 @@ public:
 	}
 
 public:
-	virtual void set_minimum_print_level (dseed::loglevel_t logLevel) override
+	virtual void set_minimum_print_level (dseed::loglevel logLevel) override
 	{
-		if (logLevel > dseed::loglevel_debug_only)
+		if (logLevel > dseed::loglevel::debug_only)
 			return;
 		_minPrintLevel = logLevel;
 	}
-	virtual void set_maximum_print_level (dseed::loglevel_t logLevel) override
+	virtual void set_maximum_print_level (dseed::loglevel logLevel) override
 	{
-		if (logLevel > dseed::loglevel_fatal)
+		if (logLevel > dseed::loglevel::fatal)
 			return;
 		_maxPrintLevel = logLevel;
 	}
 
 public:
-	virtual void write (dseed::loglevel_t level, const char* tag, const char* message) override
+	virtual void write (dseed::loglevel level, const char* tag, const char* message) override
 	{
-		if (level > _maxPrintLevel || level > dseed::loglevel_fatal)
+		if (level > _maxPrintLevel || level > dseed::loglevel::fatal)
 			return;
-		if (level < _minPrintLevel || level < dseed::loglevel_debug_only)
+		if (level < _minPrintLevel || level < dseed::loglevel::debug_only)
 			return;
 
 		for (auto writer : _writers)
@@ -199,7 +199,7 @@ public:
 
 private:
 	std::vector<dseed::logwriter*> _writers;
-	dseed::loglevel_t _minPrintLevel, _maxPrintLevel;
+	dseed::loglevel _minPrintLevel, _maxPrintLevel;
 };
 
 dseed::logger* dseed::logger::shared_logger ()

@@ -41,7 +41,7 @@ dseed::error_t __create_ico_cur_bitmap_decoder (dseed::stream* stream, bool ico,
 		dseed::auto_object<dseed::bitmap_decoder> inner_decoder;
 		if (dseed::failed (dseed::create_dib_bitmap_decoder (bytesStream, &inner_decoder)))
 		{
-			bytesStream->seek (dseed::seekorigin_begin, 0);
+			bytesStream->seek (dseed::seekorigin::begin, 0);
 			if (dseed::failed (dseed::create_png_bitmap_decoder (bytesStream, &inner_decoder)))
 				return dseed::error_not_support_file_format;
 		}

@@ -176,7 +176,7 @@ dseed::error_t dseed::create_ktx_bitmap_decoder (dseed::stream* stream, dseed::b
 	dseed::size3i size (header.pixelWidth, header.pixelHeight, header.numberOfArrayElements * header.numberOfFaces);
 
 	size_t imageOffset = sizeof (header) + header.bytesOfKeyValueData + 4;
-	stream->seek (dseed::seekorigin_begin, imageOffset);
+	stream->seek (dseed::seekorigin::begin, imageOffset);
 
 	std::vector<dseed::bitmap*> bitmaps (header.numberOfMipmapLevels);
 	for (uint32_t mipLevel = 0; mipLevel < header.numberOfMipmapLevels; ++mipLevel)

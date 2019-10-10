@@ -41,7 +41,7 @@ public:
 		return ret;
 	}
 	virtual size_t write (const void* data, size_t length) override { return 0; }
-	virtual bool seek (dseed::seekorigin_t origin, size_t offset) override { return _base->seek (origin, offset); }
+	virtual bool seek (dseed::seekorigin origin, size_t offset) override { return _base->seek (origin, offset); }
 	virtual void flush () override { }
 	virtual dseed::error_t set_length (size_t length) override { return dseed::error_not_impl; }
 	virtual size_t position () override { return size_t (); }

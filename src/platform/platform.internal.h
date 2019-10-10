@@ -133,9 +133,9 @@ public:
 		for (auto i = pointers.begin (); i != pointers.end (); ++i)
 		{
 			dseed::touchpointer& p = *i;
-			if (p.state == dseed::touchstate_pressed)
-				p.state = dseed::touchstate_moved;
-			else if (p.state == dseed::touchstate_released)
+			if (p.state == dseed::touchstate::pressed)
+				p.state = dseed::touchstate::moved;
+			else if (p.state == dseed::touchstate::released)
 				removeList.push_back (i);
 		}
 

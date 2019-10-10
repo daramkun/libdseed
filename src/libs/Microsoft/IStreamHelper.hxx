@@ -59,7 +59,7 @@ public:
 	virtual HRESULT __stdcall Seek (LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER* plibNewPosition) override
 	{
 		if (!_stream->seekable ()) return E_FAIL;
-		if (!_stream->seek ((dseed::seekorigin_t)dwOrigin, dlibMove.QuadPart))
+		if (!_stream->seek ((dseed::seekorigin)dwOrigin, dlibMove.QuadPart))
 			return E_FAIL;
 
 		if (plibNewPosition)

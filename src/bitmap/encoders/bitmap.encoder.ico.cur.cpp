@@ -111,7 +111,7 @@ public:
 			encoder->encode_frame (bitmap, 0);
 			encoder->commit ();
 
-			encodeStream->seek (dseed::seekorigin_begin, 0);
+			encodeStream->seek (dseed::seekorigin::begin, 0);
 
 			std::vector<uint8_t> bytes (encodeStream->length ());
 			encodeStream->read (bytes.data (), bytes.size ());

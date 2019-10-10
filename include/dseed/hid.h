@@ -3,72 +3,72 @@
 
 namespace dseed
 {
-	enum keys_t : uint8_t
+	enum class keys : uint8_t
 	{
-		keys_back = 0x08, keysab = 0x09,
-		keys_clear = 0x0C, keys_return = 0x0D, keys_enter = keys_return,
-		keys_shift = 0x10, keys_ctrl = 0x11, keys_menu = 0x12, keys_pause = 0x13, keys_capslock = 0x14, keys_kana = 0x15, keys_hangul = keys_kana,
-		keys_junja = 0x17, keys_final = 0x18, keys_hanja = 0x19, keys_kanji = keys_hanja,
-		keys_escape = 0x1B, keys_esc = keys_escape, keys_space = 0x20, keys_page_up = 0x21, keys_page_down = 0x22, keys_end = 0x23, keys_home = 0x24,
-		keys_left = 0x25, keys_up = 0x26, keys_right = 0x27, keys_down = 0x28, keys_print_screen = 0x2C, keys_insert = 0x2D, keys_delete = 0x2E,
-		keys_0 = '0', keys_1 = '1', keys_2 = '2', keys_3 = '3', keys_4 = '4', keys_5 = '5', keys_6 = '6', keys_7 = '7', keys_8 = '8', keys_9 = '9',
-		keys_a = 'A', keys_b = 'B', keys_c = 'C', keys_d = 'D', keys_e = 'E', keys_f = 'F', keys_g = 'G', keys_h = 'H', keys_i = 'I', keys_j = 'J',
-		keys_k = 'K', keys_l = 'L', keys_m = 'M', keys_n = 'N', keys_o = 'O', keys_p = 'P', keys_q = 'Q', keys_r = 'R', keys_s = 'S', keys = 'T',
-		keys_u = 'U', keys_v = 'V', keys_w = 'W', keys_x = 'X', keys_y = 'Y', keys_z = 'Z',
-		keys_left_win = 0x5B, keys_left_command = keys_left_win, keys_right_win = 0x5C, keys_right_command = keys_right_win, keys_context_menu = 0x5D, keys_sleep = 0x5F,
-		keys_numpad0 = 0x60, keys_numpad1 = 0x61, keys_numpad2 = 0x62, keys_numpad3 = 0x63, keys_Numpad4 = 0x64, keys_Numpad5 = 0x65,
-		keys_numpad6 = 0x66, keys_numpad7 = 0x67, keys_numpad8 = 0x68, keys_numpad9 = 0x69,
-		keys_multiply = 0x6A, keys_add = 0x6B, keys_separate = 0x6C, keys_subtract = 0x6D, keys_decimal = 0x6E, keys_divide = 0x6F,
-		keys_f1 = 0x70, keys_f2 = 0x71, keys_f3 = 0x72, keys_f4 = 0x73, keys_f5 = 0x74, keys_f6 = 0x75, keys_f7 = 0x76,
-		keys_f8 = 0x77, keys_f9 = 0x78, keys_f10 = 0x79, keys_f11 = 0x7A, keys_f12 = 0x7B,
-		keys_num_lock = 0x90, keys_scroll_lock = 0x91,
-		keys_left_shift = 0xA0, keys_right_shift = 0xA1, keys_left_ctrl = 0xA2, keys_right_ctrl = 0xA3, keys_left_menu = 0xA4, keys_right_menu,
-		keys_browser_back = 0xA6, keys_browser_forward = 0xA7, keys_browser_refresh = 0xA8, keys_browser_stop = 0xA9,
-		keys_volume_mute = 0xAD, keys_volume_down = 0xAE, keys_volume_up = 0xAF,
-		keys_media_next = 0xB0, keys_media_previous = 0xB1, keys_media_stop = 0xB2, keys_media_play_pause = 0xB3,
-		keys_semicolon = 0xBA, keys_plus = 0xBB, keys_comma = 0xBC, keys_minus = 0xBD, keys_period = 0xBE, keys_slash = 0xBF, keys_Apostrophe = 0xC0,
-		keys_left_bracket = 0xDB, keys_backslash = 0xDC, keys_right_bracket = 0xDD, keys_quote = 0xDE,
+		back = 0x08, tab = 0x09,
+		clear = 0x0C, enter = 0x0D,
+		shift = 0x10, ctrl = 0x11, menu = 0x12, pause = 0x13, capslock = 0x14, kana = 0x15, hangul = kana,
+		junja = 0x17, final = 0x18, hanja = 0x19, kanji = hanja,
+		escape = 0x1B, esc = escape, space = 0x20, page_up = 0x21, page_down = 0x22, end = 0x23, home = 0x24,
+		left = 0x25, up = 0x26, right = 0x27, down = 0x28, print_screen = 0x2C, insert = 0x2D, del = 0x2E,
+		n0 = '0', n1 = '1', n2 = '2', n3 = '3', n4 = '4', n5 = '5', n6 = '6', n7 = '7', n8 = '8', n9 = '9',
+		a = 'A', b = 'B', c = 'C', d = 'D', keys_e = 'E', f = 'F', g = 'G', h = 'H', i = 'I', j = 'J',
+		k = 'K', l = 'L', m = 'M', n = 'N', keys_o = 'O', p = 'P', q = 'Q', r = 'R', s = 'S', t = 'T',
+		u = 'U', v = 'V', w = 'W', x = 'X', keys_y = 'Y', z = 'Z',
+		left_win = 0x5B, left_command = left_win, right_win = 0x5C, right_command = right_win, context_menu = 0x5D, sleep = 0x5F,
+		numpad0 = 0x60, numpad1 = 0x61, numpad2 = 0x62, numpad3 = 0x63, numpad4 = 0x64, numpad5 = 0x65,
+		numpad6 = 0x66, numpad7 = 0x67, numpad8 = 0x68, numpad9 = 0x69,
+		multiply = 0x6A, add = 0x6B, separate = 0x6C, subtract = 0x6D, decimal = 0x6E, divide = 0x6F,
+		f1 = 0x70, f2 = 0x71, f3 = 0x72, f4 = 0x73, f5 = 0x74, f6 = 0x75, f7 = 0x76,
+		f8 = 0x77, f9 = 0x78, f10 = 0x79, f11 = 0x7A, f12 = 0x7B,
+		num_lock = 0x90, scroll_lock = 0x91,
+		left_shift = 0xA0, right_shift = 0xA1, left_ctrl = 0xA2, right_ctrl = 0xA3, left_menu = 0xA4, right_menu = 0xA5,
+		browser_back = 0xA6, browser_forward = 0xA7, browser_refresh = 0xA8, browser_stop = 0xA9,
+		volume_mute = 0xAD, volume_down = 0xAE, volume_up = 0xAF,
+		media_next = 0xB0, media_previous = 0xB1, media_stop = 0xB2, media_play_pause = 0xB3,
+		semicolon = 0xBA, plus = 0xBB, comma = 0xBC, minus = 0xBD, period = 0xBE, slash = 0xBF, apostrophe = 0xC0,
+		left_bracket = 0xDB, backslash = 0xDC, right_bracket = 0xDD, quote = 0xDE,
 	};
 
-	enum mousebuttons_t : int8_t
+	enum class mousebuttons : int8_t
 	{
-		mousebuttons_no_button = 0,
-		mousebuttons_left = 1,
-		mousebuttons_right = 2,
-		mousebuttons_middle = 4,
-		mousebuttons_x_button1 = 8,
-		mousebuttons_x_button2 = 16,
+		no_button = 0,
+		left = 1,
+		right = 2,
+		middle = 4,
+		x_button1 = 8,
+		x_button2 = 16,
 	};
 
-	enum gamepadbuttons_t : int32_t
+	enum class gamepadbuttons : int32_t
 	{
-		gamepadbuttons_no_button = 0,
+		no_button = 0,
 
-		gamepadbuttons_a = 1,
-		gamepadbuttons_b = 2,
-		gamepadbuttons_x = 4,
-		gamepadbuttons_y = 8,
+		a = 1,
+		b = 2,
+		x = 4,
+		y = 8,
 
-		gamepadbuttons_dpad_left = 16,
-		gamepadbuttons_dpad_right = 32,
-		gamepadbuttons_dpad_up = 64,
-		gamepadbuttons_dpad_down = 128,
+		dpad_left = 16,
+		dpad_right = 32,
+		dpad_up = 64,
+		dpad_down = 128,
 
-		gamepadbuttons_back = 256,
-		gamepadbuttons_start = 512,
+		back = 256,
+		start = 512,
 
-		gamepadbuttons_left_bumper = 1024,
-		gamepadbuttons_right_bumper = 2048,
+		left_bumper = 1024,
+		right_bumper = 2048,
 
-		gamepadbuttons_left_thumbstick = 4096,
-		gamepadbuttons_right_thumbstick = 8192,
+		left_thumbstick = 4096,
+		right_thumbstick = 8192,
 	};
 
-	enum touchstate_t : int8_t
+	enum class touchstate : int8_t
 	{
-		touchstate_released,
-		touchstate_pressed,
-		touchstate_moved,
+		released,
+		pressed,
+		moved,
 	};
 
 	struct keyboard_state
@@ -77,8 +77,8 @@ namespace dseed
 		bool key_states[256];
 
 	public:
-		inline bool key_down (keys_t key) noexcept { return key_states[(int)key]; }
-		inline bool key_up (keys_t key) noexcept { return !key_states[(int)key]; }
+		inline bool key_down (keys key) noexcept { return key_states[(int)key]; }
+		inline bool key_up (keys key) noexcept { return !key_states[(int)key]; }
 	};
 
 	struct mouse_state
@@ -86,13 +86,13 @@ namespace dseed
 	public:
 		point2i position;
 		float2 wheel;
-		mousebuttons_t buttons;
+		mousebuttons buttons;
 		bool is_relative;
 
 	public:
 		inline mouse_state ()
 			: position (int32_min, int32_min), wheel (0, 0)
-			, buttons (mousebuttons_no_button)
+			, buttons (mousebuttons::no_button)
 			, is_relative (false)
 		{ }
 	};
@@ -111,7 +111,7 @@ namespace dseed
 	public:
 		float2 left_thumbstick, right_thumbstick;
 		float left_trigger, right_trigger;
-		gamepadbuttons_t buttons;
+		gamepadbuttons buttons;
 	};
 
 	struct gamepad_feedback
@@ -124,7 +124,7 @@ namespace dseed
 	{
 		int32_t pointerId;
 		point2i position;
-		touchstate_t state;
+		touchstate state;
 	};
 
 	struct touchpanel_state

@@ -4,14 +4,14 @@
 namespace dseed
 {
 	// Stream Seeking Origin
-	enum seekorigin_t : int32_t
+	enum class seekorigin : int32_t
 	{
 		// Seek from Begin of Stream
-		seekorigin_begin,
+		begin,
 		// Seek from Current of Stream
-		seekorigin_current,
+		current,
 		// Seek from End of Stream
-		seekorigin_end,
+		end,
 	};
 
 	// Stream
@@ -23,7 +23,7 @@ namespace dseed
 		// Write to Stream
 		virtual size_t write (const void* data, size_t length) = 0;
 		// Seeking Position
-		virtual bool seek (seekorigin_t origin, size_t offset) = 0;
+		virtual bool seek (seekorigin origin, size_t offset) = 0;
 		// Flush Stream
 		virtual void flush () = 0;
 		// Set Length
@@ -69,18 +69,18 @@ namespace dseed
 	};
 
 	// Native File System Directories
-	enum nativefilesystem_t : int32_t
+	enum class nativefilesystem : int32_t
 	{
 		// Document Directory
-		nativefilesystem_documents,
+		documents,
 		// Assets Directory
-		nativefilesystem_assets,
+		assets,
 		// Temporary Directory
-		nativefilesystem_temporary,
+		temporary,
 	};
 
 	// Create Native File System
-	DSEEDEXP error_t create_native_filesystem (dseed::nativefilesystem_t fst, dseed::filesystem** fileSystem);
+	DSEEDEXP error_t create_native_filesystem (dseed::nativefilesystem fst, dseed::filesystem** fileSystem);
 }
 
 #endif
