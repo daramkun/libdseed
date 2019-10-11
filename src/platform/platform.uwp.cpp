@@ -77,7 +77,7 @@ public:
 	}
 
 public:
-	virtual dseed::error_t window_mode (dseed::windowmode_t* mode) override
+	virtual dseed::error_t window_mode (dseed::windowmode* mode) override
 	{
 		if (_window == nullptr)
 			return dseed::error_invalid_op;
@@ -89,7 +89,7 @@ public:
 
 		return dseed::error_good;
 	}
-	virtual dseed::error_t set_window_mode (dseed::windowmode_t mode) override
+	virtual dseed::error_t set_window_mode (dseed::windowmode mode) override
 	{
 		if (_window == nullptr)
 			return dseed::error_invalid_op;

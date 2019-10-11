@@ -19,11 +19,11 @@ bool update_rawinput (HWND hWnd, bool no_legacy)
 	return (bool)RegisterRawInputDevices (rawInput, 2, sizeof (RAWINPUTDEVICE));
 }
 
-#		include <XInput.h>
-#		include <initguid.h>
-#		include <SensorsApi.h>
-#		include <Sensors.h>
-#		include <atlbase.h>
+#	include <XInput.h>
+#	include <initguid.h>
+#	include <SensorsApi.h>
+#	include <Sensors.h>
+#	include <atlbase.h>
 
 class mouse_win32 : public mouse_common
 {
@@ -225,39 +225,30 @@ public:
 
 			if (SUCCEEDED (sensorManager->GetSensorsByType (SENSOR_TYPE_LOCATION_GPS, &sensors)))
 			{
-				if (SUCCEEDED (sensors->GetCount (&count)))
+				if (SUCCEEDED (sensors->GetCount (&count)) && count > 0)
 				{
-					if (count > 0)
-					{
-						sensors->GetAt (0, &gpsSensor);
-						gpsSensor->SetEventSink (nullptr);
-					}
+					sensors->GetAt (0, &gpsSensor);
+					gpsSensor->SetEventSink (nullptr);
 				}
 				sensors = nullptr;
 			}
 
 			if (SUCCEEDED (sensorManager->GetSensorsByType (SENSOR_TYPE_ACCELEROMETER_3D, &sensors)))
 			{
-				if (SUCCEEDED (sensors->GetCount (&count)))
+				if (SUCCEEDED (sensors->GetCount (&count)) && count > 0)
 				{
-					if (count > 0)
-					{
-						sensors->GetAt (0, &accelerometerSensor);
-						accelerometerSensor->SetEventSink (nullptr);
-					}
+					sensors->GetAt (0, &accelerometerSensor);
+					accelerometerSensor->SetEventSink (nullptr);
 				}
 				sensors = nullptr;
 			}
 
 			if (SUCCEEDED (sensorManager->GetSensorsByType (SENSOR_TYPE_GYROMETER_3D, &sensors)))
 			{
-				if (SUCCEEDED (sensors->GetCount (&count)))
+				if (SUCCEEDED (sensors->GetCount (&count)) && count > 0)
 				{
-					if (count > 0)
-					{
-						sensors->GetAt (0, &gyroSensor);
-						gyroSensor->SetEventSink (nullptr);
-					}
+					sensors->GetAt (0, &gyroSensor);
+					gyroSensor->SetEventSink (nullptr);
 				}
 				sensors = nullptr;
 			}
