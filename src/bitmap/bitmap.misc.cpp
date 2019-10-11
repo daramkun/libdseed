@@ -11,13 +11,13 @@
 using dbpfn = std::function<void (const uint8_t * src, const dseed::size3i & size, int threshold, dseed::bitmap_properties * prop)>;
 using dbptp = dseed::pixelformat;
 
-constexpr dseed::colorcount_t get_colorcount_t (size_t i)
+constexpr dseed::colorcount get_colorcount_t (size_t i)
 {
-	if (i <= 2) return dseed::colorcount_1bpp_palettable;
-	else if (i <= 4) return dseed::colorcount_2bpp_palettable;
-	else if (i <= 16) return dseed::colorcount_4bpp_palettable;
-	else if (i <= 256) return dseed::colorcount_8bpp_palettable;
-	else return dseed::colorcount_cannot_palettable;
+	if (i <= 2) return dseed::colorcount::color_1bpp_palettable;
+	else if (i <= 4) return dseed::colorcount::color_2bpp_palettable;
+	else if (i <= 16) return dseed::colorcount::color_4bpp_palettable;
+	else if (i <= 256) return dseed::colorcount::color_8bpp_palettable;
+	else return dseed::colorcount::color_cannot_palettable;
 }
 
 template<class TPixel>
@@ -64,7 +64,7 @@ inline void determine_props (const uint8_t* src, const dseed::size3i& size, int 
 
 				if ((prop->transparent || !dseed::hasalpha<TPixel> ()) && !prop->grayscale&& pixelStore.size () > 256)
 				{
-					prop->colours = dseed::colorcount_cannot_palettable;
+					prop->colours = dseed::colorcount::color_cannot_palettable;
 					return;
 				}
 			}
@@ -130,9 +130,9 @@ dseed::error_t dseed::bitmap_determine_bitmap_properties (dseed::bitmap* bitmap,
 			return dseed::error_fail;
 
 		if (format == dseed::pixelformat::bgra8888_indexed8)
-			determine_props_indexed<dseed::bgra> (pixels, 4, palette->size (), threshold, prop);
+			determine_props_indexed<dseed::bgra> (pixels, 4, (int)palette->size (), threshold, prop);
 		else
-			determine_props_indexed<dseed::bgr> (pixels, 3, palette->size (), threshold, prop);
+			determine_props_indexed<dseed::bgr> (pixels, 3, (int)palette->size (), threshold, prop);
 	}
 	else
 	{
@@ -192,7 +192,7 @@ dseed::error_t dseed::bitmap_detect_grayscale_bitmap (dseed::bitmap* bitmap, boo
 // Get Total Colours Count
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-dseed::error_t dseed::bitmap_get_total_colours (dseed::bitmap* bitmap, colorcount_t* colours)
+dseed::error_t dseed::bitmap_get_total_colours (dseed::bitmap* bitmap, colorcount* colours)
 {
 	if (bitmap == nullptr || colours == nullptr)
 		return dseed::error_invalid_args;

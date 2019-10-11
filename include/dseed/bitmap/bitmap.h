@@ -238,14 +238,14 @@ namespace dseed
 	//  : RGBA, RGB, BGRA, BGR, Grayscale, YCbCr(YUV, 4:4:4) only support.
 	DSEEDEXP error_t bitmap_unary_operation (dseed::bitmap* b, dseed::unary_operator op, dseed::bitmap** bitmap);
 
-	enum colorcount_t : uint32_t
+	enum class colorcount : uint32_t
 	{
-		colorcount_unknown = 0,
-		colorcount_1bpp_palettable = 2,
-		colorcount_2bpp_palettable = 4,
-		colorcount_4bpp_palettable = 16,
-		colorcount_8bpp_palettable = 256,
-		colorcount_cannot_palettable = 0xffffffff
+		unknown = 0,
+		color_1bpp_palettable = 2,
+		color_2bpp_palettable = 4,
+		color_4bpp_palettable = 16,
+		color_8bpp_palettable = 256,
+		color_cannot_palettable = 0xffffffff
 	};
 
 #	if COMPILER_MSVC
@@ -257,7 +257,7 @@ namespace dseed
 	{
 		bool transparent;
 		bool grayscale;
-		colorcount_t colours;
+		colorcount colours;
 	};
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -272,7 +272,7 @@ namespace dseed
 	// Check Is Bitmap Grayscale?
 	DSEEDEXP error_t bitmap_detect_grayscale_bitmap (dseed::bitmap* bitmap, bool* grayscale, int threshold = 10);
 	// Get Total Colours Count
-	DSEEDEXP error_t bitmap_get_total_colours (dseed::bitmap* bitmap, colorcount_t* colours);
+	DSEEDEXP error_t bitmap_get_total_colours (dseed::bitmap* bitmap, colorcount* colours);
 }
 
 #include <dseed/bitmap/bitmap.decoders.h>

@@ -33,7 +33,7 @@ int main (int argc, char* argv[])
 
 			dseed::timespan_t start = dseed::timespan_t::current_ticks ();
 
-			dseed::colorcount_t colours;
+			dseed::colorcount colours;
 			if (dseed::succeeded (dseed::bitmap_get_total_colours (bitmap, &colours)))
 			{
 				printf ("Colours: %d\n", colours);
@@ -72,7 +72,7 @@ int main (int argc, char* argv[])
 			}
 			else
 			{
-				reformated7.store (reformated6);
+				reformated7 = reformated6;
 			}
 			
 			dseed::timespan_t end = dseed::timespan_t::current_ticks ();

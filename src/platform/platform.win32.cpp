@@ -363,39 +363,39 @@ public:
 	}
 
 public:
-	virtual dseed::error_t window_mode (dseed::windowmode_t* mode) override
+	virtual dseed::error_t window_mode (dseed::windowmode* mode) override
 	{
 		if (_hWnd == nullptr) return dseed::error_invalid_op;
 
 		DWORD style = ::GetWindowLong (_hWnd, GWL_STYLE);
 
 		if ((style & WINDOW_STYLE_WINDOWED) == WINDOW_STYLE_WINDOWED)
-			* mode = dseed::windowmode_windowed;
+			* mode = dseed::windowmode::windowed;
 		else if ((style & WINDOW_STYLE_SIZABLE_WINDOWED) == WINDOW_STYLE_SIZABLE_WINDOWED)
-			* mode = dseed::windowmode_sizable_windowed;
+			* mode = dseed::windowmode::sizable_windowed;
 		else if ((style & WINDOW_STYLE_FRAMELESS_FULLSCREEN) == WINDOW_STYLE_FRAMELESS_FULLSCREEN)
-			* mode = dseed::windowmode_borderless_fullscreen;
+			* mode = dseed::windowmode::borderless_fullscreen;
 		else
-			*mode = dseed::windowmode_unknown;
+			*mode = dseed::windowmode::unknown;
 
 		return dseed::error_good;
 	}
 
-	virtual dseed::error_t set_window_mode (dseed::windowmode_t mode) override
+	virtual dseed::error_t set_window_mode (dseed::windowmode mode) override
 	{
 		if (_hWnd == nullptr) return dseed::error_invalid_op;
 
 		switch (mode)
 		{
-		case dseed::windowmode_windowed:
+		case dseed::windowmode::windowed:
 			::SetWindowLong (_hWnd, GWL_STYLE, WINDOW_STYLE_WINDOWED);
 			break;
 
-		case dseed::windowmode_sizable_windowed:
+		case dseed::windowmode::sizable_windowed:
 			::SetWindowLong (_hWnd, GWL_STYLE, WINDOW_STYLE_SIZABLE_WINDOWED);
 			break;
 
-		case dseed::windowmode_borderless_fullscreen:
+		case dseed::windowmode::borderless_fullscreen:
 			::SetWindowLong (_hWnd, GWL_STYLE, WINDOW_STYLE_FRAMELESS_FULLSCREEN);
 			break;
 

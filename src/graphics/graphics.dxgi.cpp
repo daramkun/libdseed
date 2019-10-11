@@ -162,7 +162,7 @@ public:
 		for (size_t i = 0; ; ++i)
 		{
 			CComPtr<IDXGIOutput> output;
-			if (FAILED (_dxgiAdapter->EnumOutputs (i, &output)))
+			if (FAILED (_dxgiAdapter->EnumOutputs ((UINT)i, &output)))
 				break;
 
 			_displays.push_back (new __dxgi_display (output));
@@ -220,12 +220,12 @@ public:
 			if (IsWindows8OrGreater ())
 			{
 				CComQIPtr<IDXGIFactory1> factory1 = _dxgiFactory;
-				if (FAILED (factory1->EnumAdapters1 (i, (IDXGIAdapter1 * *)& adapter)))
+				if (FAILED (factory1->EnumAdapters1 ((UINT)i, (IDXGIAdapter1 * *)& adapter)))
 					break;
 			}
 			else
 			{
-				if (FAILED (_dxgiFactory->EnumAdapters (i, &adapter)))
+				if (FAILED (_dxgiFactory->EnumAdapters ((UINT)i, &adapter)))
 					break;
 			}
 

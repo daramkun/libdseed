@@ -25,12 +25,12 @@ namespace dseed
 		virtual void next_frame (timespan_t delta) = 0;
 	};
 
-	enum DSEEDEXP windowmode_t : int32_t
+	enum class DSEEDEXP windowmode : int32_t
 	{
-		windowmode_unknown,
-		windowmode_windowed,
-		windowmode_sizable_windowed,
-		windowmode_borderless_fullscreen,
+		unknown,
+		windowed,
+		sizable_windowed,
+		borderless_fullscreen,
 	};
 
 	class DSEEDEXP application : public object, public wrapped
@@ -46,8 +46,8 @@ namespace dseed
 		virtual error_t set_client_size (const size2i& size) = 0;
 
 	public:
-		virtual error_t window_mode (windowmode_t* mode) = 0;
-		virtual error_t set_window_mode (windowmode_t mode) = 0;
+		virtual error_t window_mode (windowmode* mode) = 0;
+		virtual error_t set_window_mode (windowmode mode) = 0;
 
 	public:
 		virtual error_t event_handler (dseed::event_handler** handler) = 0;

@@ -5,27 +5,6 @@
 
 namespace dseed
 {
-	// Singleton Template Object
-	template<typename T>
-	class DSEEDEXP singleton
-	{
-	protected:
-		singleton () { }
-		virtual ~singleton () { }
-
-	public:
-		static T* instance () noexcept
-		{
-			if (_instance == nullptr)
-				_instance = new T;
-			return _instance;
-		}
-
-	private:
-		static std::shared_ptr<T> _instance;
-	};
-	template<typename T> std::shared_ptr<T> singleton<T>::_instance = nullptr;
-
 	// Native Object Wrapped Object
 	class DSEEDEXP wrapped
 	{
@@ -68,9 +47,8 @@ namespace dseed
 				_ptr->retain ();
 		}
 		inline auto_object (const auto_object<T>& obj)
-			: auto_object (obj.get ())
 		{
-
+			store (obj.get ());
 		}
 		inline ~auto_object () { release (); }
 
@@ -83,7 +61,15 @@ namespace dseed
 		}
 		inline void release ()
 		{
-			if (_ptr)
+			if (_ptr
+#if PLATFORM_MICROSOFT
+#	if ARCH_IA32 || ARCH_ARM
+				&& (_ptr != (void*)0xcccccccc && _ptr != (void*)0xcdcdcdcd)
+#	else
+				&& (_ptr != (void*)0xcccccccccccccccc && _ptr != (void*)0xcdcdcdcdcdcdcdcd)
+#	endif
+#endif
+				)
 			{
 				_ptr->release ();
 				_ptr = nullptr;
@@ -107,10 +93,14 @@ namespace dseed
 		inline T** operator & () { return reinterpret_cast<T * *> (&_ptr); }
 		inline T* operator -> () const { return dynamic_cast<T*> (_ptr); }
 		inline operator T* () const { return dynamic_cast<T*> (_ptr); }
-		//inline explicit operator object* () const { return _ptr; }
 		inline auto_object<T>& operator = (T* obj)
 		{
 			store (obj);
+			return *this;
+		}
+		inline auto_object<T>& operator = (const auto_object<T>& obj)
+		{
+			store (obj.get ());
 			return *this;
 		}
 
