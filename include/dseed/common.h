@@ -85,6 +85,18 @@ constexpr char PATH_SEPARATOR = '/';
 #	define ALIGN(x)											__attribute__ ((aligned (x)))
 #endif
 
+#if COMPILER_MSVC && PLATFORM_MICROSOFT
+#	define READS(x)											_In_reads_(x)
+#	define READSBYTES(x)									_In_reads_bytes_(x)
+#	define WRITES(x)										_Out_writes_(x)
+#	define WRITESBYTES(x)									_Out_writes_bytes_(x)
+#else
+#	define READS(x)
+#	define READSBYTES(x)
+#	define WRITES(x)
+#	define WRITESBYTES(x)
+#endif
+
 namespace dseed
 {
 	using error_t = int32_t;

@@ -46,66 +46,6 @@ namespace dseed
 		virtual error_t refresh () = 0;
 	};
 
-	class texture;
-	class texture1d;
-	class texture2d;
-	class texture3d;
-	class texturecube;
-
-	class rendertarget;
-	class rendertarget2d;
-
-	class buffer;
-	class vertexbuffer;
-	class indexbuffer;
-	class constantbuffer;
-	class unorderedbuffer;
-
-	class shader;
-	class vertexshader;
-	class pixelshader;
-	class geometryshader;
-	class hullshader;
-	class domainshader;
-	class computeshader;
-	class program;
-
-	class pipeline;
-
-	enum clearflag_t
-	{
-		clearflag_none = 0,
-
-		clearflag_color = 1,
-		clearflag_depth = 2,
-		clearflag_stencil = 4,
-
-		clearflag_all = clearflag_color | clearflag_depth | clearflag_stencil
-	};
-
-	struct DSEEDEXP viewport
-	{
-		rectanglef viewport;
-		float znear, zfar;
-	};
-
-	class DSEEDEXP vga_commandbuffer : public object, public wrapped
-	{
-	public:
-		virtual error_t set_rendertarget (clearflag_t cf, rendertarget** rendertargets, size_t rendertargetCount, rendertarget* depthstencil) = 0;
-		virtual error_t clear_rendertargets (const rgba& color, float depth, float stencil) = 0;
-
-	public:
-		virtual error_t set_viewport (viewport* viewports, size_t viewportCount) = 0;
-
-	public:
-		virtual error_t draw (int vertexCount, int startIndex) = 0;
-		virtual error_t drawIndexed (int indexCount, int startIndex) = 0;
-
-		virtual error_t drawInstanced (int vertexCountPerInstance, int instanceCount, int startIndex) = 0;
-		virtual error_t drawIndexedInstanced (int indexCountPerInstance, int instanceCount, int startIndex) = 0;
-	};
-
 	class DSEEDEXP vga_device : public object, public wrapped
 	{
 	public:
@@ -114,42 +54,10 @@ namespace dseed
 	public:
 		virtual bool is_support_format (pixelformat pf) = 0;
 		virtual bool is_support_parallel_render () = 0;
-
-	public:
-		virtual error_t create_texture1d (int32_t size, pixelformat pf, texture1d** texture) = 0;
-		virtual error_t create_texture2d (const size2i& size, pixelformat pf, texture2d** texture) = 0;
-		virtual error_t create_texture3d (const size3i& size, pixelformat pf, texture3d** texture) = 0;
-		virtual error_t create_texturecube (const size2i& size, pixelformat pf, texturecube** texture) = 0;
-
-	public:
-		virtual error_t create_rendertarget2d (texture2d* texture, rendertarget2d** rendertarget) = 0;
-
-	public:
-		virtual error_t create_vertexbuffer (size_t stride, size_t length, vertexbuffer** buffer) = 0;
-		virtual error_t create_indexbuffer (size_t length, int bpp, vertexbuffer** buffer) = 0;
-		virtual error_t create_constantbuffer (size_t size, vertexbuffer** buffer) = 0;
-
-	public:
-		virtual error_t create_vertexshader (blob* shaderData, vertexshader** shader) = 0;
-		virtual error_t create_pixelshader (blob* shaderData, pixelshader** shader) = 0;
-		virtual error_t create_geometryshader (blob* shaderData, geometryshader** shader) = 0;
-		virtual error_t create_hullshader (blob* shaderData, hullshader** shader) = 0;
-		virtual error_t create_domainshader (blob* shaderData, domainshader** shader) = 0;
-		virtual error_t create_computeshader (blob* shaderData, computeshader** shader) = 0;
-
-	public:
-		virtual error_t create_program (vertexshader* vs, pixelshader* ps, geometryshader* gs, hullshader* hs, domainshader* ds, program** program) = 0;
-		virtual error_t create_program (computeshader* cs, program** program) = 0;
-
-	public:
-		virtual error_t create_context (vga_commandbuffer** contex) = 0;
 	};
 
 	class DSEEDEXP vga_swapchain : public object, public wrapped
 	{
-	public:
-		virtual error_t backbuffer (texture2d** buf) = 0;
-
 	public:
 		virtual error_t present () = 0;
 	};
