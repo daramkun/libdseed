@@ -5,6 +5,8 @@
 #	include <dxgi.h>
 #	include <atlbase.h>
 
+#	include "graphics.dxgi.common.h"
+
 class __dxgi_display : public dseed::display
 {
 public:

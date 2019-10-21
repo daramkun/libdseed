@@ -1,19 +1,24 @@
 #include <dseed.h>
 
-#if NTDDI_VERSION >= NTDDI_WIN10
-#	include <d3d11_4.h>
-#	include <dxgi1_4.h>
-#else
-#	include <d3d11.h>
-#	include <dxgi.h>
-#endif
-#include <atlbase.h>
+#if PLATFORM_MICROSOFT
 
-class __d3d11_vga_device : public dseed::vga_device
+#	if NTDDI_VERSION >= NTDDI_WIN10
+#		include <d3d11_4.h>
+#		include <dxgi1_4.h>
+#	else
+#		include <d3d11.h>
+#		include <dxgi.h>
+#	endif
+#	include <atlbase.h>
+#	include <VersionHelpers.h>
+
+#	include "graphics.dxgi.common.h"
+
+class __d3d11_texture2d : public dseed::texture2d
 {
 public:
-	__d3d11_vga_device ()
-		: _refCount (1)
+	__d3d11_texture2d (ID3D11Texture2D* texture)
+		: _refCount (1), _texture (texture)
 	{
 
 	}
@@ -31,32 +36,383 @@ public:
 public:
 	virtual dseed::error_t native_object (void** nativeObject) override
 	{
-		return dseed::error_not_impl;
+		if (nativeObject == nullptr)
+			return dseed::error_invalid_args;
+		reinterpret_cast<ID3D11Texture2D*>(*nativeObject = _texture)->AddRef ();
+		return dseed::error_good;
+	}
+	virtual dseed::pixelformat format () override
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		_texture->GetDesc (&desc);
+		return DXGIPF_TO_DSEEDPF (desc.Format);
+	}
+	virtual dseed::size2i size () override
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		_texture->GetDesc (&desc);
+		return dseed::size2i (desc.Width, desc.Height);
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	CComPtr<ID3D11Texture2D> _texture;
+};
+
+class __d3d11_vga_device : public dseed::vga_device
+{
+public:
+	__d3d11_vga_device (dseed::vga_adapter* adapter, ID3D11Device* d3dDevice, ID3D11DeviceContext* immediateContext)
+		: _refCount (1)
+	{
+		_vgaAdapter = adapter;
+		_d3dDevice = d3dDevice;
+		_immediateContext = immediateContext;
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t native_object (void** nativeObject) override
+	{
+		if (nativeObject == nullptr) return dseed::error_invalid_args;
+		if (FAILED (_d3dDevice->QueryInterface (__uuidof(ID3D11Device), nativeObject)))
+			return dseed::error_fail;
+		return dseed::error_good;
 	}
 
 public:
 	virtual dseed::error_t adapter (dseed::vga_adapter** adapter) override
 	{
-		return dseed::error_not_impl;
+		if (adapter == nullptr)
+			return dseed::error_invalid_args;
+		*adapter = _vgaAdapter.get ();
+		(*adapter)->retain ();
+		return dseed::error_good;
 	}
 
 public:
 	virtual bool is_support_format (dseed::pixelformat pf) override
 	{
-		return false;
+		UINT formatSupport;
+		if (FAILED (_d3dDevice->CheckFormatSupport (DSEEDPF_TO_DXGIPF (pf), &formatSupport)))
+			return false;
+		return formatSupport & D3D11_FORMAT_SUPPORT_TEXTURE2D;
 	}
-	virtual bool is_support_parallel_render () override
+	virtual bool is_support_parallel_render () override { return true; }
+
+public:
+	virtual dseed::error_t create_graphicsqueue (dseed::vga_graphicsqueue** graphicsqueue) override
 	{
-		return false;
+
+	}
+	virtual dseed::error_t do_graphicsqueue (dseed::vga_graphicsqueue* graphicsqueue) override
+	{
+
+	}
+
+public:
+	virtual dseed::error_t create_texture2d (dseed::size2i size, dseed::pixelformat pf, int mipLevel, dseed::texture2d** texture) override
+	{
+		if (texture == nullptr)
+			return dseed::error_invalid_args;
+
+		D3D11_TEXTURE2D_DESC desc = {};
+		desc.Width = size.width;
+		desc.Height = size.height;
+		desc.Format = DSEEDPF_TO_DXGIPF (pf);
+		desc.ArraySize = 1;
+		desc.MipLevels = mipLevel;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		if (pf == dseed::pixelformat::depth16 || pf == dseed::pixelformat::depth24_stencil8 || pf == dseed::pixelformat::depth32)
+			desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+		else
+			desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+		
+		CComPtr<ID3D11Texture2D> d3dTexture;
+		if (FAILED (_d3dDevice->CreateTexture2D (&desc, nullptr, &d3dTexture)))
+			return dseed::error_fail;
+
+		*texture = new __d3d11_texture2d (d3dTexture);
+		if (*texture == nullptr)
+			return dseed::error_out_of_memory;
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t create_texture2d (dseed::bitmap* bitmap, dseed::texture2d** texture) override
+	{
+		if (bitmap == nullptr || texture == nullptr)
+			return dseed::error_invalid_args;
+
+		dseed::size3i size = bitmap->size ();
+		if (bitmap->type () != dseed::bitmaptype_2d)
+			return dseed::error_invalid_args;
+
+		D3D11_TEXTURE2D_DESC desc = {};
+		desc.Width = size.width;
+		desc.Height = size.height;
+		desc.Format = DSEEDPF_TO_DXGIPF (bitmap->format ());
+		desc.ArraySize = 1;
+		desc.MipLevels = 1;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+		D3D11_SUBRESOURCE_DATA initialData = {};
+		bitmap->pixels_pointer ((void**)&initialData.pSysMem);
+		initialData.SysMemSlicePitch = dseed::get_bitmap_plane_size (bitmap->format (), size.width, size.height);
+
+		CComPtr<ID3D11Texture2D> d3dTexture;
+		if (FAILED (_d3dDevice->CreateTexture2D (&desc, &initialData, &d3dTexture)))
+			return dseed::error_fail;
+
+		*texture = new __d3d11_texture2d (d3dTexture);
+		if (*texture == nullptr)
+			return dseed::error_out_of_memory;
+
+		return dseed::error_good;
 	}
 
 private:
 	std::atomic<int32_t> _refCount;
 
+	dseed::auto_object<dseed::vga_adapter> _vgaAdapter;
 	CComPtr<ID3D11Device> _d3dDevice;
+	CComPtr<ID3D11DeviceContext> _immediateContext;
 };
+
+#endif
 
 dseed::error_t dseed::create_d3d11_vga_device (vga_adapter* adapter, vga_device** device)
 {
-	return error_t ();
+#if PLATFORM_MICROSOFT
+	CComPtr<IDXGIAdapter> dxgiAdapter = nullptr;
+	if (adapter != nullptr)
+	{
+		if (dseed::failed (adapter->native_object ((void**)&dxgiAdapter)))
+			return dseed::error_fail;
+	}
+
+	DWORD flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#	if _DEBUG
+	flags |= D3D11_CREATE_DEVICE_DEBUG;
+#	endif
+
+	CComPtr<ID3D11Device> d3dDevice;
+	CComPtr<ID3D11DeviceContext> immediateContext;
+	if (FAILED (D3D11CreateDevice (dxgiAdapter, D3D_DRIVER_TYPE_HARDWARE, nullptr,
+		flags, nullptr, 0, D3D11_SDK_VERSION, &d3dDevice, nullptr, &immediateContext)))
+		return dseed::error_not_support;
+
+	*device = new __d3d11_vga_device (adapter, d3dDevice, immediateContext);
+	if (*device == nullptr)
+		return dseed::error_out_of_memory;
+
+#else
+	* device = nullptr;
+	return dseed::error_not_support;
+#endif
+
+	return dseed::error_good;
+}
+
+#if PLATFORM_MICROSOFT
+class __d3d11_vga_swapchain : public dseed::vga_swapchain
+{
+public:
+	__d3d11_vga_swapchain (dseed::vga_device* device, IDXGISwapChain* swapChain)
+		: _refCount (1), _sync (false)
+	{
+		_device = device;
+		_dxgiSwapChain = swapChain;
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+	virtual dseed::error_t native_object (void** nativeObject) override
+	{
+		if (nativeObject == nullptr) return dseed::error_invalid_args;
+		reinterpret_cast<IDXGISwapChain*>(*nativeObject = _dxgiSwapChain)->AddRef ();
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t backbuffer (dseed::texture2d** texture) override
+	{
+		CComPtr<ID3D11Texture2D> backBuffer;
+		if (FAILED (_dxgiSwapChain->GetBuffer (0, __uuidof(ID3D11Texture2D), (void**)&backBuffer)))
+			return dseed::error_fail;
+		*texture = new __d3d11_texture2d (backBuffer);
+		if (*texture)
+			return dseed::error_out_of_memory;
+		return dseed::error_good;
+	}
+
+public:
+	virtual bool sync () override { return _sync; }
+	virtual dseed::error_t set_sync (bool sync) override
+	{
+		_sync = sync;
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t present () override
+	{
+		if (FAILED (_dxgiSwapChain->Present (_sync ? 1 : 0, 0)))
+			return dseed::error_fail;
+		return dseed::error_good;
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	dseed::auto_object<dseed::vga_device> _device;
+	CComPtr<IDXGISwapChain> _dxgiSwapChain;
+	bool _sync;
+};
+#endif
+
+dseed::error_t dseed::create_d3d11_vga_swapchain (dseed::application* app, dseed::vga_device* device, dseed::vga_swapchain** swapchain)
+{
+	if (app == nullptr || device == nullptr || swapchain == nullptr)
+		return dseed::error_invalid_args;
+
+#if PLATFORM_MICROSOFT
+	dseed::size2i clientSize;
+	app->client_size (&clientSize);
+
+	CComPtr<ID3D11Device> d3dDevice;
+	device->native_object ((void**)&d3dDevice);
+
+	CComPtr<IDXGIFactory1> dxgiFactory;
+	if (FAILED (CreateDXGIFactory1 (__uuidof(IDXGIFactory1), (void**)&dxgiFactory)))
+		return dseed::error_not_support;
+
+	CComQIPtr<IDXGISwapChain> dxgiSwapChain;
+	if (IsWindows8OrGreater ())
+	{
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+		if (IsWindows10OrGreater ())
+		{
+			swapChainDesc.BufferCount = 2;
+			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		}
+		else
+		{
+#	if PLATFORM_WINDOWS
+			swapChainDesc.BufferCount = 1;
+			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+#	else
+			swapChainDesc.BufferCount = 2;
+			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+#	endif
+		}
+		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+		swapChainDesc.Width = clientSize.width;
+		swapChainDesc.Height = clientSize.height;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.SampleDesc.Quality = 0;
+		swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+		swapChainDesc.Stereo = FALSE;
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+		if (IsWindows8Point1OrGreater ())
+		{
+			swapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+			if (IsWindows10OrGreater ())
+			{
+				swapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+			}
+		}
+
+		CComQIPtr<IDXGIFactory2> dxgiFactory2 = dxgiFactory;
+		if (dxgiFactory2 == nullptr)
+			return dseed::error_fail;
+
+		CComPtr<IDXGISwapChain1> dxgiSwapChain1;
+#	if PLATFORM_WINDOWS
+		HWND hWnd;
+		app->native_object ((void**)&hWnd);
+
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC fullscreenDesc = {};
+		fullscreenDesc.RefreshRate.Numerator = 0;
+		fullscreenDesc.RefreshRate.Denominator = 1;
+		fullscreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		fullscreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		fullscreenDesc.Windowed = true;
+
+		if (FAILED (dxgiFactory2->CreateSwapChainForHwnd (d3dDevice, hWnd,
+			&swapChainDesc, &fullscreenDesc, nullptr, &dxgiSwapChain1)))
+			return dseed::error_fail;
+#	elif PLATFORM_UWP
+		Windows::UI::Core::CoreWindow^ window;
+		app->native_object ((void**)&window);
+
+		if (FAILED (dxgiFactory2->CreateSwapChainForCoreWindow (d3dDevice, window, &swapChainDesc, nullptr, &dxgiSwapChain1)))
+			return dseed::error_fail;
+#	else
+#		error "Not support this platform."
+#	endif
+
+		if (IsWindows8Point1OrGreater ())
+		{
+			CComQIPtr<IDXGISwapChain2> dxgiSwapChain2 = dxgiSwapChain1;
+			if (dxgiSwapChain2 != nullptr)
+				dxgiSwapChain2->SetMaximumFrameLatency (0);
+		}
+
+		dxgiSwapChain = dxgiSwapChain1;
+	}
+#	if PLATFORM_WINDOWS
+	else
+	{
+		HWND hWnd;
+		app->native_object ((void**)&hWnd);
+
+		DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
+		swapChainDesc.BufferDesc.Width = clientSize.width;
+		swapChainDesc.BufferDesc.Height = clientSize.height;
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+		swapChainDesc.Windowed = true;
+		swapChainDesc.BufferCount = 1;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.SampleDesc.Quality = 0;
+		swapChainDesc.OutputWindow = hWnd;
+
+		if (FAILED (dxgiFactory->CreateSwapChain (d3dDevice, &swapChainDesc, &dxgiSwapChain)))
+			return dseed::error_fail;
+	}
+#	endif
+
+	* swapchain = new __d3d11_vga_swapchain (device, dxgiSwapChain);
+	if (*swapchain == nullptr)
+		return dseed::error_out_of_memory;
+#else
+	* swapchain = nullptr;
+	return dseed::error_not_impl;
+#endif
+
+	return dseed::error_good;
 }

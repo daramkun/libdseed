@@ -90,12 +90,12 @@ inline bool bmprsz_bilinear (uint8_t* dest, const uint8_t* src, const dseed::siz
 	return true;
 }
 
-color_processor cubic_hermite (const color_processor& a, const color_processor& b, const color_processor& c, const color_processor& d, double factor) noexcept
+color4f cubic_hermite (const color4f& a, const color4f& b, const color4f& c, const color4f& d, double factor) noexcept
 {
-	color_processor _a = (-a / 2.0f) + ((b * 3.0f) / 2.0f) - (c * 3.0f) / 2.0f + (d / 2.0f);
-	color_processor _b = a - ((b * 5.0f) / 2.0f) + (c * 2.0f) - (d / 2.0f);
-	color_processor _c = (-a / 2.0f) + (c / 2.0f);
-	color_processor _d = b;
+	color4f _a = (-a / 2.0f) + ((b * 3.0f) / 2.0f) - (c * 3.0f) / 2.0f + (d / 2.0f);
+	color4f _b = a - ((b * 5.0f) / 2.0f) + (c * 2.0f) - (d / 2.0f);
+	color4f _c = (-a / 2.0f) + (c / 2.0f);
+	color4f _d = b;
 
 	return (_a * factor * factor * factor) + (_b * factor * factor) + (_c * factor) + d;
 }
@@ -143,13 +143,13 @@ inline bool bmprsz_bicubic (uint8_t* dest, const uint8_t* src, const dseed::size
 					, * srcPtrY3 = (const TPixel*)(srcPtr + (srcY3 * srcStride))
 					, * srcPtrY4 = (const TPixel*)(srcPtr + (srcY4 * srcStride));
 
-				color_processor
+				color4f
 					p11 = *(srcPtrY1 + srcX1), p12 = *(srcPtrY1 + srcX2), p13 = *(srcPtrY1 + srcX3), p14 = *(srcPtrY1 + srcX4),
 					p21 = *(srcPtrY2 + srcX1), p22 = *(srcPtrY2 + srcX2), p23 = *(srcPtrY2 + srcX3), p24 = *(srcPtrY2 + srcX4),
 					p31 = *(srcPtrY3 + srcX1), p32 = *(srcPtrY3 + srcX2), p33 = *(srcPtrY3 + srcX3), p34 = *(srcPtrY3 + srcX4),
 					p41 = *(srcPtrY4 + srcX1), p42 = *(srcPtrY4 + srcX2), p43 = *(srcPtrY4 + srcX3), p44 = *(srcPtrY4 + srcX4);
 
-				color_processor p1, p2, p3, p4;
+				color4f p1, p2, p3, p4;
 				p1 = cubic_hermite (p11, p12, p13, p14, xDiff1);
 				p2 = cubic_hermite (p21, p22, p23, p24, xDiff1);
 				p3 = cubic_hermite (p31, p32, p33, p34, xDiff1);
@@ -209,7 +209,7 @@ inline bool bmprsz_lanczos (uint8_t* dest, const uint8_t* src, const dseed::size
 
 			for (size_t x = 0; x < destSize.width; ++x)
 			{
-				color_processor sum;
+				color4f sum;
 				float samples = 0;
 
 				int cx = (int)(x * xRatio);
@@ -230,7 +230,7 @@ inline bool bmprsz_lanczos (uint8_t* dest, const uint8_t* src, const dseed::size
 						float weight = lanczos_weight ((float)window, (float)lx)
 							* lanczos_weight ((float)window, (float)ly);
 
-						color_processor srcPixel = *((const TPixel*)(srcPtr + (srcStride * iy)) + ix);
+						color4f srcPixel = *((const TPixel*)(srcPtr + (srcStride * iy)) + ix);
 						srcPixel = srcPixel * weight;
 						sum += srcPixel;
 

@@ -115,7 +115,7 @@ inline bool filter_bitmap (uint8_t* dest, const uint8_t* src, const dseed::size3
 
 			for (size_t x = 0; x < size.width; ++x)
 			{
-				dseed::color_processor sum;
+				dseed::color4f sum;
 				for (int fy = 0; fy < (int)mask.height; ++fy)
 				{
 					for (int fx = 0; fx < (int)mask.width; ++fx)
@@ -123,7 +123,7 @@ inline bool filter_bitmap (uint8_t* dest, const uint8_t* src, const dseed::size3
 						size_t cx = dseed::clamp<int> ((int)x + (fx - (int)mask.width / 2), size.width - 1);
 						size_t cy = dseed::clamp<int> ((int)y + (fy - (int)mask.height / 2), size.height - 1);
 
-						dseed::color_processor color = *((TPixel*)(src + depthZ + (stride * cy)) + cx);
+						dseed::color4f color = *((TPixel*)(src + depthZ + (stride * cy)) + cx);
 						color = color * mask.get_mask (fx, fy);
 						sum += color;
 					}

@@ -4,6 +4,7 @@
 namespace dseed
 {
 	DSEEDEXP error_t create_d3d11_vga_device (vga_adapter* adapter, vga_device** device);
+	DSEEDEXP error_t create_d3d11_vga_swapchain (dseed::application* app, vga_device* device, vga_swapchain** swapchain);
 }
 
 #endif
