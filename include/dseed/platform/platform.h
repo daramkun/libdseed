@@ -57,6 +57,9 @@ namespace dseed
 		virtual error_t run (dseed::event_handler* handler) = 0;
 
 	public:
+		virtual error_t exit () = 0;
+
+	public:
 		static error_t shared_app (dseed::application** app);
 	};
 

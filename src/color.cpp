@@ -33,6 +33,13 @@ size_t dseed::get_bitmap_stride (dseed::pixelformat format, int32_t width) noexc
 	case pixelformat::yuyv8888:
 		return (((width + 2) / 4) * 4) * 2;
 
+	case pixelformat::depth16:
+		return width * 2;
+
+	case pixelformat::depth24_stencil8:
+	case pixelformat::depth32:
+		return width * 4;
+
 	default: return 0;
 	}
 }
@@ -56,6 +63,9 @@ size_t dseed::get_bitmap_plane_size (dseed::pixelformat format, int32_t width, i
 	case pixelformat::yuva8888:
 	case pixelformat::hsv888:
 	case pixelformat::hsva8888:
+	case pixelformat::depth16:
+	case pixelformat::depth24_stencil8:
+	case pixelformat::depth32:
 		return get_bitmap_stride (format, width) * height;
 
 	case pixelformat::yuyv8888:

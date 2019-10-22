@@ -7,9 +7,9 @@
 namespace dseed
 {
 	// Convert UTF-8 String to UTF-16
-	DSEEDEXP void utf8_to_utf16 (const char* u8, char16_t* u16, size_t u16size);
+	DSEEDEXP void utf8_to_utf16 (const char* u8, char16_t* u16, size_t u16size) noexcept;
 	// Convert UTF-16 String to UTF-8
-	DSEEDEXP void utf16_to_utf8 (const char16_t* u16, char* u8, size_t u8size);
+	DSEEDEXP void utf16_to_utf8 (const char16_t* u16, char* u8, size_t u8size) noexcept;
 
 	// Convert UTF-8 String to UTF-16 for Standard String Object
 	inline std::u16string utf8_to_utf16 (const std::string& u8) noexcept
@@ -27,9 +27,9 @@ namespace dseed
 	}
 
 	// UTF-8 Path String Combine
-	DSEEDEXP void path_combine (const char* path1, const char* path2, char* ret, size_t retsize);
+	DSEEDEXP void path_combine (const char* path1, const char* path2, char* ret, size_t retsize) noexcept;
 	// UTF-8 Path String Combine for Standard String Object
-	inline std::string path_combine (const std::string& path1, const std::string& path2)
+	inline std::string path_combine (const std::string& path1, const std::string& path2) noexcept
 	{
 		char temp[512];
 		path_combine (path1.c_str (), path2.c_str (), temp, 512);
@@ -37,9 +37,9 @@ namespace dseed
 	}
 
 	// UTF-16 Path String Combine
-	DSEEDEXP void path_combine (const char16_t* path1, const char16_t* path2, char16_t* ret, size_t retsize);
+	DSEEDEXP void path_combine (const char16_t* path1, const char16_t* path2, char16_t* ret, size_t retsize) noexcept;
 	// UTF-16 Path String Combine for Standard String Object
-	inline std::u16string path_combine (const std::u16string& path1, const std::u16string& path2)
+	inline std::u16string path_combine (const std::u16string& path1, const std::u16string& path2) noexcept
 	{
 		char16_t temp[512];
 		path_combine (path1.c_str (), path2.c_str (), temp, 512);

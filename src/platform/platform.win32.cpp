@@ -415,6 +415,9 @@ public:
 public:
 	virtual dseed::error_t run (dseed::event_handler* handler) override
 	{
+		if (_hWnd != NULL)
+			return dseed::error_invalid_op;
+
 		WNDCLASSW wndClass =
 		{
 			NULL, __win32_application::WndProc, 0, 0, GetModuleHandle (nullptr),
@@ -477,6 +480,16 @@ public:
 			::Sleep (0);
 		} while (running);
 
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t exit () override
+	{
+		if (_hWnd == NULL)
+			return dseed::error_invalid_op;
+
+		SendMessage (_hWnd, WM_CLOSE, 0, 0);
 		return dseed::error_good;
 	}
 

@@ -41,12 +41,23 @@ public:
 		reinterpret_cast<ID3D11Texture2D*>(*nativeObject = _texture)->AddRef ();
 		return dseed::error_good;
 	}
+
+public:
 	virtual dseed::pixelformat format () override
 	{
 		D3D11_TEXTURE2D_DESC desc;
 		_texture->GetDesc (&desc);
 		return DXGIPF_TO_DSEEDPF (desc.Format);
 	}
+
+	virtual size_t mip_level () override
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		_texture->GetDesc (&desc);
+		return desc.MipLevels;
+	}
+
+public:
 	virtual dseed::size2i size () override
 	{
 		D3D11_TEXTURE2D_DESC desc;
@@ -57,6 +68,144 @@ public:
 private:
 	std::atomic<int32_t> _refCount;
 	CComPtr<ID3D11Texture2D> _texture;
+};
+
+class __d3d11_rendertarget2d : public dseed::rendertarget2d
+{
+public:
+	__d3d11_rendertarget2d (dseed::texture2d* texture, ID3D11RenderTargetView* rtv)
+		: _refCount (1), _texture (texture), _renderTargetView (rtv)
+	{
+
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t native_object (void** nativeObject) override
+	{
+		if (nativeObject == nullptr)
+			return dseed::error_invalid_args;
+
+		reinterpret_cast<ID3D11RenderTargetView*>(*nativeObject = _renderTargetView)->AddRef ();
+
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t texture (dseed::texture2d** texture) override
+	{
+		if (texture == nullptr)
+			return dseed::error_invalid_args;
+
+		(*texture = _texture)->retain ();
+
+		return dseed::error_good;
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	dseed::auto_object<dseed::texture2d> _texture;
+	CComPtr<ID3D11RenderTargetView> _renderTargetView;
+};
+
+class __d3d11_commandlist : public dseed::vga_commandlist
+{
+public:
+	__d3d11_commandlist (ID3D11CommandList* commandList)
+		: _refCount (1), _commandList (commandList)
+	{
+
+	}
+
+public:
+	virtual int32_t retain () override { ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t native_object (void** nativeObject) override
+	{
+		if (nativeObject == nullptr)
+			return dseed::error_invalid_args;
+
+		reinterpret_cast<ID3D11CommandList*>(*nativeObject = _commandList)->AddRef ();
+
+		return dseed::error_good;
+	}
+
+public:
+	virtual void set_new_commandlist (ID3D11CommandList* commandList)
+	{
+		_commandList.Release ();
+		_commandList = commandList;
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	CComPtr<ID3D11CommandList> _commandList;
+};
+
+class __d3d11_commandqueue : public dseed::vga_commandqueue
+{
+public:
+	__d3d11_commandqueue (ID3D11DeviceContext* deferredContext)
+		: _refCount (1), _deferredContext (deferredContext)
+	{
+		_commandList = new __d3d11_commandlist (nullptr);
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t native_object (void** nativeObject) override
+	{
+		if (nativeObject == nullptr)
+			return dseed::error_invalid_args;
+
+		reinterpret_cast<ID3D11DeviceContext*>(*nativeObject = _deferredContext)->AddRef ();
+
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t make_commandlist (dseed::vga_commandlist** list) override
+	{
+		CComPtr<ID3D11CommandList> commandList;
+		if (FAILED (_deferredContext->FinishCommandList (TRUE, &commandList)))
+			return dseed::error_fail;
+
+		_commandList->set_new_commandlist (commandList);
+		*list = _commandList;
+
+		return dseed::error_good;
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	CComPtr<ID3D11DeviceContext> _deferredContext;
+	dseed::auto_object<__d3d11_commandlist> _commandList;
 };
 
 class __d3d11_vga_device : public dseed::vga_device
@@ -110,13 +259,23 @@ public:
 	virtual bool is_support_parallel_render () override { return true; }
 
 public:
-	virtual dseed::error_t create_graphicsqueue (dseed::vga_graphicsqueue** graphicsqueue) override
+	virtual dseed::error_t create_commandqueue (dseed::vga_commandqueue** commandqueue) override
 	{
-
+		return dseed::error_not_impl;
 	}
-	virtual dseed::error_t do_graphicsqueue (dseed::vga_graphicsqueue* graphicsqueue) override
-	{
 
+public:
+	virtual dseed::error_t do_commandlist (dseed::vga_commandlist* commandlist) override
+	{
+		if (commandlist == nullptr)
+			return dseed::error_invalid_args;
+
+		CComPtr<ID3D11CommandList> d3d11CommandList;
+		commandlist->native_object ((void**)&d3d11CommandList);
+
+		_immediateContext->ExecuteCommandList (d3d11CommandList, TRUE);
+
+		return dseed::error_good;
 	}
 
 public:
@@ -177,6 +336,180 @@ public:
 		*texture = new __d3d11_texture2d (d3dTexture);
 		if (*texture == nullptr)
 			return dseed::error_out_of_memory;
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t create_texture2d (dseed::bitmap_decoder* decoder, dseed::texture2d** texture)
+	{
+		if (decoder == nullptr || texture == nullptr)
+			return dseed::error_invalid_args;
+
+		if (decoder->frame_type () != dseed::frametype_mipmap)
+		{
+			if (decoder->frame_count () != 1)
+				return dseed::error_fail;
+		}
+
+		if (decoder->frame_count () == 1)
+		{
+			dseed::auto_object<dseed::bitmap> bitmap;
+			if (dseed::failed (decoder->decode_frame (0, &bitmap, nullptr)))
+				return dseed::error_fail;
+
+			return create_texture2d (bitmap, texture);
+		}
+		else
+		{
+			dseed::auto_object<dseed::bitmap> first_bitmap;
+			if (dseed::failed (decoder->decode_frame (0, &first_bitmap, nullptr)))
+				return dseed::error_fail;
+
+			dseed::size3i size = first_bitmap->size ();
+			if (first_bitmap->type () != dseed::bitmaptype_2d)
+				return dseed::error_invalid_args;
+
+			D3D11_TEXTURE2D_DESC desc = {};
+			desc.Width = size.width;
+			desc.Height = size.height;
+			desc.Format = DSEEDPF_TO_DXGIPF (first_bitmap->format ());
+			desc.ArraySize = 1;
+			desc.MipLevels = 1;
+			desc.Usage = D3D11_USAGE_DEFAULT;
+			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+			std::vector<uint8_t> data;
+			for (int i = 0; i < decoder->frame_count (); ++i)
+			{
+				dseed::auto_object<dseed::bitmap> bitmap;
+				if (dseed::failed (decoder->decode_frame (i, &bitmap, nullptr)))
+					return dseed::error_fail;
+
+				dseed::size3i size = bitmap->size ();
+				size_t plane = dseed::get_bitmap_plane_size (bitmap->format (), size.width, size.height);
+
+				void* ptr;
+				bitmap->pixels_pointer (&ptr);
+
+				auto position = data.size ();
+				data.resize (data.size () + plane);
+
+				memcpy (data.data () + position, ptr, plane);
+			}
+
+			D3D11_SUBRESOURCE_DATA initialData = {};
+			initialData.pSysMem = data.data ();
+			initialData.SysMemSlicePitch = data.size ();
+
+			CComPtr<ID3D11Texture2D> d3dTexture;
+			if (FAILED (_d3dDevice->CreateTexture2D (&desc, &initialData, &d3dTexture)))
+				return dseed::error_fail;
+
+			*texture = new __d3d11_texture2d (d3dTexture);
+			if (*texture == nullptr)
+				return dseed::error_out_of_memory;
+
+			return dseed::error_good;
+		}
+	}
+
+public:
+	virtual dseed::error_t create_rendertarget (dseed::texture2d* texture, dseed::rendertarget2d** rt) override
+	{
+		return dseed::error_not_impl;
+	}
+	virtual dseed::error_t create_depthstencil (dseed::texture2d* texture, dseed::depthstencil** ds) override
+	{
+		return dseed::error_not_impl;
+	}
+
+public:
+	virtual dseed::error_t copy_resource (dseed::texture2d* texture, dseed::bitmap* copy_to, int mipLevel = 0)
+	{
+		if (texture == nullptr || copy_to == nullptr)
+			return dseed::error_invalid_args;
+
+		if (copy_to->type () != dseed::bitmaptype_2d)
+			return dseed::error_invalid_args;
+
+		auto texSize = texture->size ();
+		auto bmpSize = copy_to->size ();
+		auto texSize1 = dseed::get_mipmap_size (mipLevel, dseed::size3i (texSize.width, texSize.height, 1), false);
+
+		if (texSize1.width != bmpSize.width || texSize1.height != bmpSize.height || texture->format () != copy_to->format ())
+			return dseed::error_invalid_args;
+
+		if (mipLevel < 0 || mipLevel >= texture->mip_level ())
+			return dseed::error_invalid_args;
+
+		CComPtr<ID3D11Texture2D> d3dTexture;
+		if (dseed::failed (texture->native_object ((void**)&d3dTexture)))
+			return dseed::error_fail;
+
+		CComPtr<ID3D11Texture2D> staging;
+		D3D11_TEXTURE2D_DESC desc = {};
+		d3dTexture->GetDesc (&desc);
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		if (FAILED (_d3dDevice->CreateTexture2D (&desc, nullptr, &staging)))
+			return dseed::error_fail;
+
+		_immediateContext->CopyResource (staging, d3dTexture);
+
+		D3D11_MAPPED_SUBRESOURCE mapped;
+		if (FAILED (_immediateContext->Map (staging, mipLevel, D3D11_MAP_READ, 0, &mapped)))
+			return dseed::error_fail;
+
+		void* bitmapData;
+		copy_to->pixels_pointer (&bitmapData);
+
+		memcpy (bitmapData, mapped.pData, dseed::get_bitmap_plane_size (texture->format (), texSize1.width, texSize1.height));
+
+		_immediateContext->Unmap (staging, mipLevel);
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t copy_resource (dseed::bitmap* bmp, dseed::texture2d* copy_to, int mipLevel = 0) override
+	{
+		if (bmp == nullptr || copy_to == nullptr)
+			return dseed::error_invalid_args;
+
+		if (bmp->type () != dseed::bitmaptype_2d)
+			return dseed::error_invalid_args;
+
+		auto bmpSize = bmp->size ();
+		auto texSize = copy_to->size ();
+		auto texSize1 = dseed::get_mipmap_size (mipLevel, dseed::size3i (texSize.width, texSize.height, 1), false);
+
+		if (texSize1.width != bmpSize.width || texSize1.height != bmpSize.height || bmp->format () != copy_to->format ())
+			return dseed::error_invalid_args;
+
+		if (mipLevel < 0 || mipLevel >= copy_to->mip_level ())
+			return dseed::error_invalid_args;
+
+		CComPtr<ID3D11Texture2D> d3dTexture;
+		if (dseed::failed (copy_to->native_object ((void**)&d3dTexture)))
+			return dseed::error_fail;
+
+		CComPtr<ID3D11Texture2D> staging;
+		D3D11_TEXTURE2D_DESC desc = {};
+		d3dTexture->GetDesc (&desc);
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		if (FAILED (_d3dDevice->CreateTexture2D (&desc, nullptr, &staging)))
+			return dseed::error_fail;
+
+		_immediateContext->CopyResource (staging, d3dTexture);
+
+		D3D11_MAPPED_SUBRESOURCE mapped;
+		if (FAILED (_immediateContext->Map (staging, mipLevel, D3D11_MAP_WRITE, 0, &mapped)))
+			return dseed::error_fail;
+
+		void* bitmapData;
+		bmp->pixels_pointer (&bitmapData);
+
+		memcpy (mapped.pData, bitmapData, dseed::get_bitmap_plane_size (copy_to->format (), texSize1.width, texSize1.height));
+
+		_immediateContext->Unmap (staging, mipLevel);
 
 		return dseed::error_good;
 	}
@@ -264,10 +597,10 @@ public:
 	}
 
 public:
-	virtual bool sync () override { return _sync; }
-	virtual dseed::error_t set_sync (bool sync) override
+	virtual bool vsync () override { return _sync; }
+	virtual dseed::error_t set_vsync (bool vsync) override
 	{
-		_sync = sync;
+		_sync = vsync;
 		return dseed::error_good;
 	}
 

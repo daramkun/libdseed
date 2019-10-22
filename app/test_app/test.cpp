@@ -44,7 +44,12 @@ public:
 		dseed::auto_object<dseed::application> app;
 		dseed::application::shared_app (&app);
 
-		app->set_title (u8"¾ÖÇÃ¸®ÄÉÀÌ¼Ç");
+		app->set_title (u8"ì• í”Œë¦¬ì¼€ì´ì…˜");
+
+		if(dseed::failed(dseed::create_d3d11_vga_device (nullptr, &_vgaDevice)))
+			app->exit ();
+		if (dseed::failed (dseed::create_d3d11_vga_swapchain (app, _vgaDevice, &_vgaSwapChain)))
+			app->exit ();
 	}
 
 	virtual void closing (bool& cancel) override
@@ -59,10 +64,16 @@ public:
 public:
 	virtual void next_frame (dseed::timespan_t delta) override
 	{
+
+
+		_vgaSwapChain->present ();
 	}
 
 private:
 	std::atomic<int32_t> _refCount;
+
+	dseed::auto_object<dseed::vga_device> _vgaDevice;
+	dseed::auto_object<dseed::vga_swapchain> _vgaSwapChain;
 };
 
 ENTRYPOINT_ATTRIBUTE
