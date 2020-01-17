@@ -1,21 +1,8 @@
 #ifndef __DSEED_OBJECT_H__
 #define __DSEED_OBJECT_H__
 
-#include <memory>
-
 namespace dseed
 {
-	// Native Object Wrapped Object
-	class DSEEDEXP wrapped
-	{
-	public:
-		virtual ~wrapped ();
-
-	public:
-		virtual error_t native_object (void** nativeObject) = 0;
-	};
-
-	// DSeed Base Reference Counting Object
 	class DSEEDEXP object
 	{
 	protected:
@@ -32,13 +19,21 @@ namespace dseed
 		char _signature[8];
 	};
 
-	// Auto Reference Counting Container Object
-	template<typename T>
-	struct auto_object
+	class DSEEDEXP wrapped
 	{
 	public:
-		inline auto_object () : auto_object (nullptr) { }
-		inline auto_object (T* obj)
+		virtual ~wrapped ();
+
+	public:
+		virtual error_t native_object (void** nativeObject) = 0;
+	};
+
+	template<typename T>
+	struct autoref
+	{
+	public:
+		inline autoref () : autoref (nullptr) { }
+		inline autoref (T* obj)
 			: _ptr (obj)
 		{
 			static_assert (std::is_base_of<dseed::object, T>::value, "Not supported type.");
@@ -46,11 +41,11 @@ namespace dseed
 			if (_ptr)
 				_ptr->retain ();
 		}
-		inline auto_object (const auto_object<T>& obj)
+		inline autoref (const autoref<T>& obj)
 		{
 			store (obj.get ());
 		}
-		inline ~auto_object () { release (); }
+		inline ~autoref () { release (); }
 
 	public:
 		inline void store (T* obj)
@@ -90,15 +85,15 @@ namespace dseed
 		inline T* get () const { return dynamic_cast<T*> (_ptr); }
 
 	public:
-		inline T** operator & () { return reinterpret_cast<T * *> (&_ptr); }
+		inline T** operator & () { return reinterpret_cast<T**> (&_ptr); }
 		inline T* operator -> () const { return dynamic_cast<T*> (_ptr); }
 		inline operator T* () const { return dynamic_cast<T*> (_ptr); }
-		inline auto_object<T>& operator = (T* obj)
+		inline autoref<T>& operator = (T* obj)
 		{
 			store (obj);
 			return *this;
 		}
-		inline auto_object<T>& operator = (const auto_object<T>& obj)
+		inline autoref<T>& operator = (const autoref<T>& obj)
 		{
 			store (obj.get ());
 			return *this;
@@ -107,6 +102,60 @@ namespace dseed
 	private:
 		dseed::object* _ptr;
 	};
+
+	class DSEEDEXP blob : public object
+	{
+	public:
+		virtual const void* ptr () noexcept = 0;
+		virtual size_t size () noexcept = 0;
+	};
+
+	DSEEDEXP error_t create_buffered_blob (const void* data, size_t length, dseed::blob** blob) noexcept;
+	DSEEDEXP error_t create_empty_blob (size_t length, dseed::blob** blob) noexcept;
+	DSEEDEXP error_t create_wrapped_blob (void* data, size_t length, dseed::blob** blob) noexcept;
+
+	class DSEEDEXP attributes : public object
+	{
+	public:
+		virtual error_t get_int32 (attrkey_t key, int32_t* value) = 0;
+		virtual error_t get_uint32 (attrkey_t key, uint32_t* value) = 0;
+		virtual error_t get_int64 (attrkey_t key, int64_t* value) = 0;
+		virtual error_t get_uint64 (attrkey_t key, uint64_t* value) = 0;
+		virtual error_t get_single (attrkey_t key, float* value) = 0;
+		virtual error_t get_double (attrkey_t key, double* value) = 0;
+		virtual error_t get_object (attrkey_t key, object** value) = 0;
+
+	public:
+		virtual error_t set_int32 (attrkey_t key, int32_t value) = 0;
+		virtual error_t set_uint32 (attrkey_t key, uint32_t value) = 0;
+		virtual error_t set_int64 (attrkey_t key, int64_t value) = 0;
+		virtual error_t set_uint64 (attrkey_t key, uint64_t value) = 0;
+		virtual error_t set_single (attrkey_t key, float value) = 0;
+		virtual error_t set_double (attrkey_t key, double value) = 0;
+		virtual error_t set_object (attrkey_t key, object* value) = 0;
+
+	public:
+		virtual error_t get_size (attrkey_t key, uint32_t* width, uint32_t* height);
+		virtual error_t set_size (attrkey_t key, uint32_t width, uint32_t height);
+
+	public:
+		virtual error_t get_fraction (attrkey_t key, int32_t* numerator, int32_t* denominator);
+		virtual error_t set_fraction (attrkey_t key, int32_t numerator, int32_t denominator);
+
+	public:
+		virtual error_t get_string (attrkey_t key, char* strBuffer, size_t strBufferMaxSize);
+		virtual error_t set_string (attrkey_t key, const char* str);
+
+	public:
+		virtual error_t get_u16string (attrkey_t key, char16_t* strBuffer, size_t strBufferMaxSize);
+		virtual error_t set_u16string (attrkey_t key, const char16_t* str);
+
+	public:
+		virtual error_t get_struct (attrkey_t key, void* buffer, size_t bufferSize);
+		virtual error_t set_struct (attrkey_t key, const void* data, size_t dataSize);
+	};
+
+	DSEEDEXP error_t create_attributes (attributes** attr) noexcept;
 }
 
 #endif

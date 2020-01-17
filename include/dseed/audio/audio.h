@@ -1,13 +1,13 @@
 #ifndef __DSEED_AUDIO_H__
 #define __DSEED_AUDIO_H__
 
-namespace dseed
+namespace dseed::audio
 {
 	class DSEEDEXP audio_adapter : public object
 	{
 	public:
 		virtual error_t name (char* name, size_t maxNameCount) = 0;
-		virtual error_t info (audioformat* info) = 0;
+		virtual error_t info (dseed::media::audioformat* info) = 0;
 	};
 
 	class DSEEDEXP audio_adapter_enumerator : public object
@@ -16,7 +16,10 @@ namespace dseed
 		virtual error_t audio_adapter (int index, audio_adapter** adapter) = 0;
 		virtual size_t audio_adapter_count () = 0;
 	};
+}
 
+namespace dseed::audio
+{
 	enum audiobufferstate_t
 	{
 		audiobufferstate_stopped,
@@ -25,18 +28,18 @@ namespace dseed
 
 	struct audiolistener
 	{
-		float3 forward;
-		float3 position;
-		float3 up;
-		float3 velocity;
+		f32x4 forward;
+		f32x4 position;
+		f32x4 up;
+		f32x4 velocity;
 	};
 
 	struct audioemitter
 	{
-		float3 forward;
-		float3 position;
-		float3 up;
-		float3 velocity;
+		f32x4 forward;
+		f32x4 position;
+		f32x4 up;
+		f32x4 velocity;
 		float dopplerScale;
 	};
 
@@ -66,13 +69,13 @@ namespace dseed
 		virtual error_t set_volume (float vol) = 0;
 
 	public:
-		virtual error_t create_buffer (const audioformat* format, audioplaybuffer** buffer) = 0;
+		virtual error_t create_buffer (const dseed::media::audioformat* format, audioplaybuffer** buffer) = 0;
 	};
 
 	class DSEEDEXP audiorequester : public object
 	{
 	public:
-		virtual error_t format (audioformat* format) = 0;
+		virtual error_t format (dseed::media::audioformat* format) = 0;
 
 	public:
 		virtual error_t start () = 0;

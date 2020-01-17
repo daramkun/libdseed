@@ -1,7 +1,7 @@
 #ifndef __DSEED_PLATFORM_H__
 #define __DSEED_PLATFORM_H__
 
-namespace dseed
+namespace dseed::platform
 {
 	class DSEEDEXP event_handler : public object
 	{
@@ -22,7 +22,7 @@ namespace dseed
 		virtual void closed () = 0;
 
 	public:
-		virtual void next_frame (timespan_t delta) = 0;
+		virtual void next_frame (timespan delta) = 0;
 	};
 
 	enum class DSEEDEXP windowmode : int32_t
@@ -36,7 +36,7 @@ namespace dseed
 	class DSEEDEXP application : public object, public wrapped
 	{
 	public:
-		virtual error_t input_device (inputdevice_t type, inputdevice** device) = 0;
+		virtual error_t input_device (dseed::io::inputdevicetype type, dseed::io::inputdevice** device) = 0;
 
 	public:
 		virtual error_t set_title (const char* title) = 0;
@@ -50,17 +50,17 @@ namespace dseed
 		virtual error_t set_window_mode (windowmode mode) = 0;
 
 	public:
-		virtual error_t event_handler (dseed::event_handler** handler) = 0;
-		virtual error_t set_event_handler (dseed::event_handler* handler) = 0;
+		virtual error_t event_handler (dseed::platform::event_handler** handler) = 0;
+		virtual error_t set_event_handler (dseed::platform::event_handler* handler) = 0;
 
 	public:
-		virtual error_t run (dseed::event_handler* handler) = 0;
+		virtual error_t run (dseed::platform::event_handler* handler) = 0;
 
 	public:
 		virtual error_t exit () = 0;
 
 	public:
-		static error_t shared_app (dseed::application** app);
+		static error_t shared_app (application** app);
 	};
 
 	DSEEDEXP error_t create_application (application** app);

@@ -1,12 +1,13 @@
 #include <dseed.h>
 
-class own_handler : public dseed::event_handler
+class own_handler : public dseed::platform::event_handler
 {
 public:
 	own_handler () : _refCount (1) { }
 
 public:
 	virtual int32_t retain () override { return ++_refCount; }
+
 	virtual int32_t release () override
 	{
 		auto ret = --_refCount;
@@ -24,7 +25,6 @@ public:
 	{
 	}
 
-public:
 	virtual void paused () override
 	{
 	}
@@ -33,7 +33,6 @@ public:
 	{
 	}
 
-public:
 	virtual void resized () override
 	{
 	}
@@ -41,20 +40,15 @@ public:
 public:
 	virtual void shown () override
 	{
-		dseed::auto_object<dseed::application> app;
-		dseed::application::shared_app (&app);
+		dseed::autoref<dseed::platform::application> app;
+		dseed::platform::application::shared_app (&app);
 
-		app->set_title (u8"애플리케이션");
-
-		if(dseed::failed(dseed::create_d3d11_vga_device (nullptr, &_vgaDevice)))
-			app->exit ();
-		if (dseed::failed (dseed::create_d3d11_vga_swapchain (app, _vgaDevice, &_vgaSwapChain)))
+		if (dseed::failed (dseed::graphics::create_d3d11_vgadevice (app, nullptr, &vgaDevice)))
 			app->exit ();
 	}
 
 	virtual void closing (bool& cancel) override
 	{
-
 	}
 
 	virtual void closed () override
@@ -62,32 +56,40 @@ public:
 	}
 
 public:
-	virtual void next_frame (dseed::timespan_t delta) override
+	virtual void next_frame (dseed::timespan delta) override
 	{
+		if (vgaDevice == nullptr)
+			return;
+
+		dseed::autoref<dseed::graphics::sprite_render> spriteRender;
+		vgaDevice->sprite_render ((dseed::graphics::vgarender**) & spriteRender);
 
 
-		_vgaSwapChain->present ();
+
+		vgaDevice->present ();
 	}
 
 private:
 	std::atomic<int32_t> _refCount;
 
-	dseed::auto_object<dseed::vga_device> _vgaDevice;
-	dseed::auto_object<dseed::vga_swapchain> _vgaSwapChain;
+	dseed::autoref<dseed::graphics::vgadevice> vgaDevice;
 };
+
+#include <d3d11.h>
 
 ENTRYPOINT_ATTRIBUTE
 ENTRYPOINT_RETURNTYPE ENTRYPOINT_CALLTYPE ENTRYPOINT_NAME (ENTRYPOINT_ARGUMENTS)
 {
-	dseed::auto_object<dseed::application> app;
-	if (dseed::failed (dseed::create_application (&app)))
-		return -1;
+	{
+		dseed::autoref<dseed::platform::application> app;
+		if (dseed::failed (dseed::platform::create_application (&app)))
+			return -1;
 
-	dseed::auto_object<dseed::event_handler> handler;
-	*&handler = new own_handler ();
+		dseed::autoref<dseed::platform::event_handler> handler;
+		*&handler = new own_handler ();
 
-	if (dseed::failed (app->run (handler)))
-		return -2;
+		app->run (handler);
+	}
 
-	return 0;
+	ENTRYPOINT_RETURN (0);
 }

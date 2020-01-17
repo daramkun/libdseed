@@ -1,4 +1,4 @@
-cmake_minimum_required ( VERSION 3.10 )
+﻿cmake_minimum_required ( VERSION 3.10 )
 
 INCLUDE ( GenerateExportHeader )
 INCLUDE ( CMakePackageConfigHelpers )
@@ -49,7 +49,6 @@ OPTION ( DSEED_USE_WEBP				"libdseed use Webp Decode/Encode."		ON  )
 OPTION ( DSEED_USE_TIFF				"libdseed use TIFF Decode/Encode."		ON  )
 OPTION ( DSEED_USE_GIF				"libdseed use GIF Decode/Encode."		ON  )
 OPTION ( DSEED_USE_SQUISH			"libdseed use BC1~5 Decode/Encode."		ON  )
-OPTION ( DSEED_USE_ZOPFLI			"libdseed use PNG Zopfli Optimization."	ON  )
 
 OPTION ( DSEED_USE_VORBIS			"libdseed use Vorbis Decode/Encode."	ON  )
 OPTION ( DSEED_USE_OPUS				"libdseed use Opus Decode/Encode."		ON  )
@@ -66,74 +65,79 @@ SET_PROPERTY ( GLOBAL PROPERTY USE_FOLDERS ON )
 #
 ############################################################################################
 IF ( ${DSEED_USE_PNG} )
-	FIND_PACKAGE ( zlib COMPONENTS zlibstatic )
-	FIND_PACKAGE ( png COMPONENTS png_static )
-	IF ( ( NOT DEFINED ZLIB_FOUND ) OR ( NOT DEFINED PNG_FOUND ) )
-		FIND_PATH ( ZLIB_INCLUDE_DIRS zlib.h )
-		FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic )
+	FIND_PACKAGE ( zlib )
+	FIND_PACKAGE ( png )
 
-		FIND_PATH ( PNG_INCLUDE_DIRS png.h )
-		FIND_LIBRARY ( PNG_LIBRARY NAMES libpng16_static )
+	IF ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( "${ZLIB_LIBRARY}" STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
+		FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic zlibstatic.lib )
+	ENDIF ()
+	
+	IF ( ( NOT DEFINED PNG_LIBRARY ) OR ( "${PNG_LIBRARY}" STREQUAL "PNG_LIBRARY-NOTFOUND") )
+		FIND_LIBRARY ( PNG_LIBRARY NAMES png16_static png_static libpng16_static libpng16_static.lib png16_static.lib libpng16_static.a png16_static.a )
+		MESSAGE ( "PNG_LIBRARY: ${PNG_LIBRARY}" )
+	ENDIF ()
 
-		IF ( ( NOT DEFINED ZLIB_INCLUDE_DIRS ) AND ( NOT DEFINED ZLIB_LIBRARY ) AND ( NOT DEFINED PNG_INCLUDE_DIRS ) AND ( NOT DEFINED PNG_LIBRARY ) )
-			MESSAGE ( "-- Not found zlib or libpng" )
-			SET ( DSEED_USE_PNG OFF )
-		ENDIF ()
+	IF ( ( ( NOT DEFINED ZLIB_INCLUDE_DIRS ) OR ( ${ZLIB_INCLUDE_DIRS} STREQUAL "ZLIB_INCLUDE_DIRS-NOTFOUND" ) )
+		OR ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( ${ZLIB_LIBRARY} STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
+		OR ( ( NOT DEFINED PNG_INCLUDE_DIRS ) OR ( ${PNG_INCLUDE_DIRS} STREQUAL "PNG_INCLUDE_DIRS-NOTFOUND" ) )
+		OR ( ( NOT DEFINED PNG_LIBRARY ) OR ( ${PNG_LIBRARY} STREQUAL "PNG_LIBRARY-NOTFOUND" ) ) )
+		MESSAGE ( "-- Not found zlib or libpng" )
+		SET ( DSEED_USE_PNG OFF )
 	ENDIF ()
 ENDIF ()
 IF ( ${DSEED_USE_JPEG} )
-	FIND_PACKAGE ( jpeg )
+	FIND_PACKAGE ( jpeg QUIET )
 	IF ( NOT DEFINED JPEG_FOUND )
 		SET ( DSEED_USE_JPEG OFF )
 		MESSAGE ( "-- Not found libjpeg-turbo or mozjpeg" )
 	ENDIF ()
 ENDIF ()
 IF ( ${DSEED_USE_JPEG2000} )
-	FIND_PACKAGE ( openjpeg )
+	FIND_PACKAGE ( openjpeg QUIET )
 	IF ( NOT DEFINED OPENGJPEG_FOUND )
-		FIND_PATH ( OPENJPEG_INCLUDE_DIRS openjpeg.h )
+		FIND_PATH ( OPENJPEG_INCLUDE_DIRS NAMES openjpeg.h )
 		FIND_LIBRARY ( OPENJPEG_LIBRARY NAMES openjp2 )
 		
-		IF ( ( NOT DEFINED OPENJPEG_INCLUDE_DIRS ) AND ( NOT DEFINED OPENJPEG_LIBRARY ) )
+		IF ( ( ( NOT DEFINED OPENJPEG_INCLUDE_DIRS ) OR ( NOT DEFINED OPENJPEG_LIBRARY ) ) OR ( "${OPENJPEG_LIBRARY}" STREQUAL "OPENJPEG_LIBRARY-NOTFOUND" ) )
 			SET ( DSEED_USE_JPEG2000 OFF )
 			MESSAGE ( "-- Not found openjpeg" )
 		ENDIF ()
 	ENDIF ()
 ENDIF ()
 IF ( ${DSEED_USE_WEBP} )
-	FIND_PACKAGE ( webp )
-	IF ( NOT DEFINED WEBP_FOUND )
-		FIND_PATH ( WEBP_INCLUDE_DIRS webp/decode.h webp/encode.h webp/demux.h )
-		FIND_LIBRARY ( WEBP_LIBRARY NAMES webp webpdecoder webpmux webpdemux )
-		
-		IF ( ( NOT DEFINED WEBP_INCLUDE_DIRS ) AND ( NOT DEFINED WEBP_LIBRARY ) )
-			MESSAGE ( "-- Not found libwebp" )
-			SET ( DSEED_USE_WEBP OFF )
-		ENDIF ()
+	FIND_PACKAGE ( webp QUIET )
+	FIND_LIBRARY ( WEBP_LIBRARY NAMES webp )
+	FIND_LIBRARY ( WEBP_DECODER_LIBRARY NAMES webpdecoder )
+	FIND_LIBRARY ( WEBP_MUXER_LIBRARY NAMES webpmux )
+	FIND_LIBRARY ( WEBP_DEMUXER_LIBRARY NAMES webpdemux )
+	IF( ( NOT ( "${WEBP_LIBRARY}" STREQUAL "WEBP_LIBRARY-NOTFOUND" ) ) AND
+		( NOT ( "${WEBP_DECODER_LIBRARY}" STREQUAL "WEBP_DECODER_LIBRARY-NOTFOUND" ) ) AND
+		( NOT ( "${WEBP_MUXER_LIBRARY}" STREQUAL "WEBP_MUXER_LIBRARY-NOTFOUND" ) ) AND
+		( NOT ( "${WEBP_DEMUXER_LIBRARY}" STREQUAL "WEBP_DEMUXER_LIBRARY-NOTFOUND" ) ) )
+		SET ( WEBP_LIBRARIES ${WEBP_LIBRARY} ${WEBP_DECODER_LIBRARY} ${WEBP_MUXER_LIBRARY} ${WEBP_DEMUXER_LIBRARY} )
+	ENDIF ()
+
+	IF ( ( NOT DEFINED WEBP_INCLUDE_DIRS ) OR ( NOT DEFINED WEBP_LIBRARIES ) )
+		MESSAGE ( "-- Not found libwebp" )
+		SET ( DSEED_USE_WEBP OFF )
 	ENDIF ()
 ENDIF ()
 IF ( ${DSEED_USE_TIFF} )
 	FIND_PACKAGE ( liblzma )
-	IF ( NOT DEFINED ZLIB_FOUND )
-		FIND_PACKAGE ( zlib COMPONENTS zlibstatic )
+	IF ( ( NOT DEFINED LZMA_LIBRARY ) OR ( "${LZMA_LIBRARY}" STREQUAL "LZMA_LIBRARY-NOTFOUND" ) )
+		FIND_LIBRARY ( LZMA_LIBRARY NAMES lzma liblzma lzma.lib liblzma.lib lzma.a liblzma.a )
+	ENDIF ()
+	FIND_PACKAGE ( zlib )
+	IF ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( "${ZLIB_LIBRARY}" STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
+		FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic zlibstatic.lib )
 	ENDIF ()
 	FIND_PACKAGE ( tiff )
-	IF ( ( NOT DEFINED LZMA_FOUND ) OR ( NOT DEFINED ZLIB_FOUND ) OR ( NOT DEFINED TIFF_FOUND ) )
-		FIND_PATH ( LZMA_INCLUDE_DIRS lzma/lzma12.h )
-		FIND_LIBRARY ( LZMA_LIBRARY NAMES liblzma )
-		
-		FIND_PATH ( ZLIB_INCLUDE_DIRS zlib.h )
-		FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic )
-
-		FIND_PATH ( TIFF_INCLUDE_DIRS tiff.h tiffio.h )
-		FIND_LIBRARY ( TIFF_LIBRARY NAMES tiff )
-
-		IF ( ( NOT DEFINED ZLIB_INCLUDE_DIRS ) AND ( NOT DEFINED ZLIB_LIBRARY )
-			AND ( NOT DEFINED LZMA_INCLUDE_DIRS ) AND ( NOT DEFINED LZMA_LIBRARY )
-			AND ( NOT DEFINED TIFF_INCLUDE_DIRS ) AND ( NOT DEFINED TIFF_LIBRARY ) )
-			MESSAGE ( "-- Not found xz or zlib or libtiff" )
-			SET ( DSEED_USE_TIFF OFF )
-		ENDIF ()
+	
+	IF ( ( NOT DEFINED ZLIB_INCLUDE_DIRS ) OR ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( "${ZLIB_LIBRARY}" STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
+		AND ( NOT DEFINED LZMA_INCLUDE_DIRS ) OR ( ( NOT DEFINED LZMA_LIBRARY ) OR ( "${LZMA_LIBRARY}" STREQUAL "LZMA_LIBRARY-NOTFOUND" ) )
+		AND ( NOT DEFINED TIFF_INCLUDE_DIRS ) OR ( ( NOT DEFINED TIFF_LIBRARY ) OR ( "${TIFF_LIBRARY}" STREQUAL "TIFF_LIBRARY-NOTFOUND" ) ) )
+		MESSAGE ( "-- Not found xz or zlib or libtiff" )
+		SET ( DSEED_USE_TIFF OFF )
 	ENDIF ()
 ENDIF ()
 IF ( ${DSEED_USE_GIF} )
@@ -144,34 +148,33 @@ IF ( ${DSEED_USE_GIF} )
 	ENDIF ()
 ENDIF ()
 IF ( ${DSEED_USE_SQUISH} )
-	FIND_LIBRARY ( SQUISH_LIBRARY NAMES squish squishd )
-	IF ( ( NOT DEFINED SQUISH_INCLUDE_DIRS ) AND ( NOT DEFINED SQUISH_LIBRARY ) )
+	FIND_LIBRARY ( SQUISH_LIBRARY NAMES squish squishd squish.lib squishd.lib QUIET )
+	IF ( ( NOT DEFINED SQUISH_LIBRARY ) OR ( "${SQUISH_LIBRARY}" STREQUAL "SQUISH_LIBRARY-NOTFOUND" ) )
 		MESSAGE ( "-- Not found squish" )
 		SET ( DSEED_USE_SQUISH OFF )
-	ENDIF ()
-ENDIF ()
-IF ( ${DSEED_USE_ZOPFLI} )
-	FIND_PACKAGE ( Zopfli )
-	IF ( NOT DEFINED ZOPFLI_FOUND )
-	
-		FIND_PATH ( ZOPFLI_INCLUDE_DIRS zopfli.h zopflipng.h )
-		FIND_LIBRARY ( ZOPFLI_LIBRARY NAMES zopfli zopflipng )
-		
-		IF ( ( NOT DEFINED ZOPFLI_INCLUDE_DIRS ) AND ( NOT DEFINED ZOPFLI_LIBRARY ) )
-			MESSAGE ( "-- Not found zopfli" )
-			SET ( DSEED_USE_ZOPFLI OFF )
-		ENDIF ()
 	ENDIF ()
 ENDIF ()
 
 IF ( ${DSEED_USE_VORBIS} )
 	FIND_PACKAGE ( ogg )
 	IF ( NOT DEFINED OGG_FOUND )
+		MESSAGE ( "-- Not found ogg or vorbis" )
 		SET ( DSEED_USE_VORBIS OFF )
 	ELSE ()
 		FIND_PATH ( VORBIS_INCLUDE_DIRS vorbis/vorbisfile.h )
-		FIND_LIBRARY ( VORBIS_LIBRARY NAMES vorbis vorbisenc vorbisfile )
-		IF ( ( NOT DEFINED VORBIS_INCLUDE_DIRS ) AND ( NOT DEFINED VORBIS_LIBRARY ) )
+		FIND_LIBRARY ( VORBIS_LIBRARY NAMES vorbis vorbis.lib )
+		FIND_LIBRARY ( VORBIS_ENCODER_LIBRARY NAMES vorbisenc vorbisenc.lib )
+		FIND_LIBRARY ( VORBIS_FILE_LIBRARY NAMES vorbisfile vorbisfile.lib )
+		IF( ( NOT ( "${VORBIS_LIBRARY}" STREQUAL "VORBIS_LIBRARY-NOTFOUND" ) ) OR
+			( NOT ( "${VORBIS_ENCODER_LIBRARY}" STREQUAL "VORBIS_ENCODER_LIBRARY-NOTFOUND" ) ) OR
+			( NOT ( "${VORBIS_FILE_LIBRARY}" STREQUAL "VORBIS_FILE_LIBRARY-NOTFOUND" ) ) )
+			SET ( VORBIS_LIBRARIES ${VORBIS_LIBRARY} ${VORBIS_ENCODER_LIBRARY} ${VORBIS_FILE_LIBRARY} )
+		ELSE ()
+			SET ( VORBIS_LIBRARIES "VORBIS_LIBRARIES-NOTFOUND" )
+		ENDIF ()
+
+		IF ( ( ( NOT DEFINED VORBIS_INCLUDE_DIRS ) OR ( "${VORBIS_INCLUDE_DIRS}" STREQUAL "VORBIS_INCLUDE_DIRS-NOTFOUND" ) )
+			OR ( ( NOT DEFINED VORBIS_LIBRARIES ) OR ( "${VORBIS_LIBRARIES}" STREQUAL "VORBIS_LIBRARIES-NOTFOUND" ) ) )
 			MESSAGE ( "-- Not found ogg or vorbis" )
 			SET ( DSEED_USE_VORBIS OFF )
 		ENDIF ()
@@ -188,7 +191,7 @@ ENDIF ()
 IF ( ${DSEED_USE_FLAC} )
 	FIND_PACKAGE ( ogg )
 	IF ( NOT DEFINED OGG_FOUND )
-		SET ( DSEED_USE_FLACK OFF )
+		SET ( DSEED_USE_FLAC OFF )
 	ELSE ()
 		FIND_PATH ( FLAC_INCLUDE_DIRS FLAC/stream_decoder.h )
 		FIND_LIBRARY ( FLAC_LIBRARY NAMES FLAC )
@@ -205,112 +208,95 @@ ENDIF ()
 #
 ############################################################################################
 SET ( DSEED_BUILD_FILES 
-	# Library Core
-    src/dseed.cpp
-	src/common.cpp
+	# Processor Instructions
+    src/instructions/instruction_info.cpp
+	src/instructions/utility_instructions.cpp
 
-	# Reference Counting Object
-	src/object.cpp
-
-	# Scalar objects
-	src/math/math.cpp
-	src/math/math.simd.cpp
-	src/geometry.cpp
-	src/color.cpp
+	# Static Components
 	src/time.cpp
-	src/string.cpp
+	src/strings.cpp
+	src/math/half.cpp
+	src/math/int24.cpp
+	src/math/fraction.cpp
+	src/color.cpp
 
-	# I/O Objects
-	src/io.cpp
-	src/hid.cpp
-
-	# Debugging Objects
-	src/diagnostics.cpp
+	# Reference Count Object
+	src/object.cpp
 	
-	# Concurrency
-	src/parallel.cpp
+	# Stream
+	src/io/stream.cpp
 
-	# Extra
-	src/extra.cpp
+	# Diagnostics
+	src/diagnostics/diagnostics.cpp
 
 	# Bitmap
 	src/bitmap/bitmap.cpp
-	src/bitmap/bitmap.reformat.cpp
-	src/bitmap/bitmap.resize.cpp
-	src/bitmap/bitmap.filter.cpp
-	src/bitmap/bitmap.flip.cpp
-	src/bitmap/bitmap.operation.cpp
-	src/bitmap/bitmap.histogram.cpp
-	src/bitmap/bitmap.misc.cpp
+	src/bitmap/bitmap_determine.cpp
+	src/bitmap/bitmap_reformat.cpp
+	src/bitmap/bitmap_operation.cpp
+	src/bitmap/bitmap_resize.cpp
+	src/bitmap/bitmap_filter.cpp
+	src/bitmap/bitmap_histogram.cpp
+	src/bitmap/bitmap_flip.cpp
+	
+	# Bitmap Decoders
+	src/bitmap/decoders/wic_decoder.cpp
+	src/bitmap/decoders/dib_decoder.cpp
+	src/bitmap/decoders/tga_decoder.cpp
+	src/bitmap/decoders/ico_decoder.cpp
+	src/bitmap/decoders/dds_decoder.cpp
+	src/bitmap/decoders/ktx_decoder.cpp
+	src/bitmap/decoders/pkm_decoder.cpp
+	src/bitmap/decoders/astc_decoder.cpp
+	src/bitmap/decoders/png_decoder.cpp
+	src/bitmap/decoders/jpeg_decoder.cpp
+	src/bitmap/decoders/jp2_decoder.cpp
+	src/bitmap/decoders/webp_decoder.cpp
+	src/bitmap/decoders/tiff_decoder.cpp
+	src/bitmap/decoders/gif_decoder.cpp
 
-	# Bitmap Decoders with Non-external Library
-	src/bitmap/decoders/bitmap.decoder.wic.cpp
-	src/bitmap/decoders/bitmap.decoder.dib.cpp
-	src/bitmap/decoders/bitmap.decoder.tga.cpp
-	src/bitmap/decoders/bitmap.decoder.dds.cpp
-	src/bitmap/decoders/bitmap.decoder.pkm.cpp
-	src/bitmap/decoders/bitmap.decoder.ktx.cpp
-	src/bitmap/decoders/bitmap.decoder.ico.cur.cpp
-	src/bitmap/decoders/bitmap.decoder.astc.cpp
+	# Bitmap Encoders
+	src/bitmap/encoders/dib_encoder.cpp
+	src/bitmap/encoders/png_encoder.cpp
+	src/bitmap/encoders/gif_encoder.cpp
+	src/bitmap/encoders/webp_encoder.cpp
+	src/bitmap/encoders/dds_encoder.cpp
+	src/bitmap/encoders/ico_encoder.cpp
+	src/bitmap/encoders/jpeg_encoder.cpp
 
-	# Bitmap Decoders with External Libraries
-	src/bitmap/decoders/bitmap.decoder.png.cpp
-	src/bitmap/decoders/bitmap.decoder.jpeg.cpp
-	src/bitmap/decoders/bitmap.decoder.jp2.cpp
-	src/bitmap/decoders/bitmap.decoder.webp.cpp
-	src/bitmap/decoders/bitmap.decoder.tiff.cpp
-	src/bitmap/decoders/bitmap.decoder.gif.cpp
-
-	# Bitmap Encoders with Non-external Library
-	src/bitmap/encoders/bitmap.encoder.dib.cpp
-	src/bitmap/encoders/bitmap.encoder.dds.cpp
-	src/bitmap/encoders/bitmap.encoder.ico.cur.cpp
-
-	# Bitmap Encoders with External Libraries
-	src/bitmap/encoders/bitmap.encoder.png.cpp
-	src/bitmap/encoders/bitmap.encoder.jpeg.cpp
-	src/bitmap/encoders/bitmap.encoder.webp.cpp
-	src/bitmap/encoders/bitmap.encoder.gif.cpp
-
-	# Video and Audio
-	src/media/media.cpp
+	# Media (Audio)
 	src/media/audio.cpp
-	src/media/audio.filter.cpp
-	src/media/audio.spectrum.cpp
-	src/media/audio.reformat.cpp
-	src/media/audio.resample.cpp
-	src/media/audio.rechannel.cpp
+	src/media/audio_stream.cpp
+	src/media/audio_filter.cpp
+	src/media/audio_reformat.cpp
+	src/media/audio_resample.cpp
+	src/media/audio_rechannel.cpp
+	src/media/audio_spectrum.cpp
+	src/media/media.cpp
+	
+	# Media Decoders
+	src/media/decoders/mf_decoder.cpp
+	src/media/decoders/wav_decoder.cpp
+	src/media/decoders/mp3_decoder.cpp
+	src/media/decoders/vorbis_decoder.cpp
+	src/media/decoders/opus_decoder.cpp
+	src/media/decoders/flac_decoder.cpp
 
-	# Media Decoders with Non-external Library
-	src/media/decoders/media.decoder.mf.cpp
-	src/media/decoders/media.decoder.wav.cpp
-	src/media/decoders/media.decoder.mp3.cpp
+	# Media Encoders
+	src/media/encoders/wav_encoder.cpp
 
-	# Media Decoders with External Libraries
-	src/media/decoders/media.decoder.vorbis.cpp
-	src/media/decoders/media.decoder.opus.cpp
-	src/media/decoders/media.decoder.flac.cpp
-
-	# Media Encoders with Non-external Library
-	src/media/encoders/media.encoder.wav.cpp
-
-	# Media Encoders with External Libraries
-
-	# Audio Streams
-	src/media/streams/media.audiostream.basic.cpp
-	src/media/streams/media.audiostream.filter.cpp
-
-	# Platform Dependencies
+	# Platform
 	src/platform/platform.cpp
-	src/platform/platform.win32.cpp
-	src/platform/platform.uwp.cpp
-	src/platform/platform.macos.mm
-	src/platform/platform.ios.mm
-	src/platform/platform.android.cpp
+	src/platform/platform_windows.cpp
+	src/platform/platform_uwp.cpp
+	src/platform/platform_macos.mm
+	src/platform/platform_ios.mm
+	src/platform/platform_linux.cpp
+	src/platform/platform_android.cpp
 
 	# Graphics
-	src/graphics/graphics.dxgi.cpp
-	src/graphics/graphics.d3d11.cpp
+	src/graphics/graphics_dxgi.cpp
+	src/graphics/graphics_d3d11.cpp
 )
 
 ############################################################################################
@@ -331,7 +317,7 @@ IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" OR ${CMAKE_SYSTEM_NAME} STREQUAL "M
 	SET ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	SET ( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	SET ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
-	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib dxgi.lib d3d11.lib )
+	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib dxgi.lib d3d11.lib d3dcompiler.lib )
 ELSEIF ( ${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore" )
 	SET ( PLATFORM STORE )
 	LIST ( APPEND DSEED_DEFINITIONS -DUNICODE )
@@ -352,58 +338,44 @@ ENDIF ()
 IF ( ${DSEED_USE_PNG} )
 	MESSAGE ( "-- Use libpng" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_PNG )
-	LIST ( APPEND DSEED_PRIVATE_INCS ${PNG_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS zlibstatic libpng16_static )
+	LIST ( APPEND DSEED_PRIVATE_INCS ${ZLIB_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS} )
+	LIST ( APPEND DSEED_LINK_LIBS ${ZLIB_LIBRARY} ${PNG_LIBRARY} )
 ENDIF ()
 IF ( ${DSEED_USE_JPEG} )
 	MESSAGE ( "-- Use libjpeg-turbo or mozjpeg" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_JPEG )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${JPEG_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS jpeg-static )
+	LIST ( APPEND DSEED_LINK_LIBS ${JPEG_LIBRARY} )
 ENDIF ()
 IF ( ${DSEED_USE_JPEG2000} )
 	MESSAGE ( "-- Use openjpeg" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_JPEG2000 )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${OPENJPEG_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS openjp2 )
+	LIST ( APPEND DSEED_LINK_LIBS ${OPENJPEG_LIBRARY} )
 ENDIF ()
 IF ( ${DSEED_USE_WEBP} )
 	MESSAGE ( "-- Use libwebp" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_WEBP )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${WEBP_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS webp webpmux webpdemux webpdecoder )
+	LIST ( APPEND DSEED_LINK_LIBS ${WEBP_LIBRARIES} )
 ENDIF ()
 IF ( ${DSEED_USE_TIFF} )
 	MESSAGE ( "-- Use libtiff" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_TIFF )
-	LIST ( APPEND DSEED_PRIVATE_INCS ${TIFF_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS liblzma zlibstatic tiff )
+	LIST ( APPEND DSEED_PRIVATE_INCS ${LZMA_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS} )
+	LIST ( APPEND DSEED_LINK_LIBS ${LZMA_LIBRARY} ${ZLIB_LIBRARY} ${TIFF_LIBRARY} )
 ENDIF ()
 IF ( ${DSEED_USE_GIF} )
 	MESSAGE ( "-- Use giflib" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_GIF )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${GIF_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS giflib )
+	LIST ( APPEND DSEED_LINK_LIBS ${GIF_LIBRARY} )
 ENDIF ()
 IF ( ${DSEED_USE_SQUISH} )
 	MESSAGE ( "-- Use Squish" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_SQUISH )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${SQUISH_INCLUDE_DIRS} )
-	IF ( ( ${CMAKE_BUILD_TYPE} STREQUAL "DEBUG" ) OR ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" ) )
-		LIST ( APPEND DSEED_LINK_LIBS squishd )
-	ELSE ()
-		LIST ( APPEND DSEED_LINK_LIBS squish )
-	ENDIF ()
-ENDIF ()
-IF ( ${DSEED_USE_ZOPFLI} )
-	MESSAGE ( "-- Use zopfli" )
-	LIST ( APPEND DSEED_DEFINITIONS -DUSE_ZOPFLI )
-	LIST ( APPEND DSEED_PRIVATE_INCS ${ZOPFLI_INCLUDE_DIRS} )
-	IF ( ( ${CMAKE_BUILD_TYPE} STREQUAL "DEBUG" ) OR ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" ) )
-		LIST ( APPEND DSEED_LINK_LIBS zopflid zopflipngd )
-	ELSE ()
-		LIST ( APPEND DSEED_LINK_LIBS zopfli zopflipng )
-	ENDIF ()
+	LIST ( APPEND DSEED_LINK_LIBS ${SQUISH_LIBRARY} )
 ENDIF ()
 
 IF ( ${DSEED_USE_MEDIA_ENCODERS} )
@@ -413,19 +385,19 @@ IF ( ${DSEED_USE_VORBIS} )
 	MESSAGE ( "-- Use vorbis" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_VORBIS )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${VORBIS_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS ogg vorbis vorbisenc vorbisfile )
+	LIST ( APPEND DSEED_LINK_LIBS ${OGG_LIBRARY} ${VORBIS_LIBRARIES} )
 ENDIF ()
 IF ( ${DSEED_USE_OPUS} )
 	MESSAGE ( "-- Use opus" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_OPUS )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${OPUS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/opusfile )
-	LIST ( APPEND DSEED_LINK_LIBS ogg opus )
+	LIST ( APPEND DSEED_LINK_LIBS ${OGG_LIBRARY} ${OPUS_LIBRARY} )
 ENDIF ()
 IF ( ${DSEED_USE_FLAC} )
 	MESSAGE ( "-- Use flac" )
 	LIST ( APPEND DSEED_DEFINITIONS -DUSE_FLAC )
 	LIST ( APPEND DSEED_PRIVATE_INCS ${FLAC_INCLUDE_DIRS} )
-	LIST ( APPEND DSEED_LINK_LIBS ogg FLAC )
+	LIST ( APPEND DSEED_LINK_LIBS ${OGG_LIBRARY} ${FLAC_LIBRARY} )
 ENDIF ()
 
 SET ( DSEED_BUILD_TYPE SHARED )
@@ -469,46 +441,35 @@ SET_TARGET_PROPERTIES ( dseed PROPERTIES CXX_STANDARD 17 )
 #
 ############################################################################################
 IF ( NOT ${DSEED_SKIP_BUILD_APP} )
-	ADD_EXECUTABLE ( dseed_test_bitmap app/test_bitmap/test.cpp )
-	TARGET_INCLUDE_DIRECTORIES ( dseed_test_bitmap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-	TARGET_LINK_LIBRARIES ( dseed_test_bitmap dseed )
-	
-	ADD_EXECUTABLE ( dseed_test_audio app/test_audio/test.cpp )
-	TARGET_INCLUDE_DIRECTORIES ( dseed_test_audio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-	TARGET_LINK_LIBRARIES ( dseed_test_audio dseed )
-	
-	ADD_EXECUTABLE ( dseed_test_simd app/test_simd/test.cpp )
-	TARGET_INCLUDE_DIRECTORIES ( dseed_test_simd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
-	TARGET_LINK_LIBRARIES ( dseed_test_simd dseed )
-	
 	IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" OR ${CMAKE_SYSTEM_NAME} STREQUAL "MSYS" )
 		SET ( TARGET_TO  "WIN32" )
 	ENDIF ()
-	
+
 	SET ( TEST_APP_NAME dseed_test_app )
 	SET ( TEST_APP_PACKAGE_GUID "6514377e-dfd4-4cdb-80df-4e0366346eff" )
 	ADD_EXECUTABLE ( ${TEST_APP_NAME} ${TARGET_TO} app/test_app/test.cpp app/test_app/app.manifest )
 	TARGET_INCLUDE_DIRECTORIES ( ${TEST_APP_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/ )
 	TARGET_LINK_LIBRARIES ( ${TEST_APP_NAME} dseed )
-	IF ( CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
-		MESSAGE ( "Enable add manifest to test_app." )
-		#ADD_CUSTOM_COMMAND (
-		#	TARGET dseed_test_app
-		#	POST_BUILD
-		#	COMMAND "mt.exe" -nologo -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.manifest\" -outputresource:\"$<TARGET_FILE:${TEST_APP_NAME}>\"\;\#1
-		#	COMMENT "Adding Win32 manifest resource..." 
-		#)
-	ENDIF ()
+	SET_TARGET_PROPERTIES ( ${TEST_APP_NAME} PROPERTIES CXX_STANDARD 17 )
+	#IF ( CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
+	#	MESSAGE ( "Enable add manifest to test_app." )
+	#	ADD_CUSTOM_COMMAND (
+	#		TARGET ${TEST_APP_NAME}
+	#		POST_BUILD
+	#		COMMAND "mt.exe" -nologo -manifest \"${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.manifest\" -outputresource:\"$<TARGET_FILE:${TEST_APP_NAME}>\"\;\#1
+	#		COMMENT "Adding Win32 manifest resource..." 
+	#	)
+	#ENDIF ()
 
-	IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore" )
-		SET_PROPERTY ( TARGET ${TEST_APP_NAME} PROPERTY VS_WINRT_COMPONENT TRUE )
-		CONFIGURE_FILE (
-			${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.appxmanifest.in
-			${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest
-			@ONLY
-		)
-		SET_PROPERTY ( SOURCE ${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest PROPERTY VS_DEPLOYMENT_CONTENT 1 )
-	ENDIF ()
+	#IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore" )
+	#	SET_PROPERTY ( TARGET ${TEST_APP_NAME} PROPERTY VS_WINRT_COMPONENT TRUE )
+	#	CONFIGURE_FILE (
+	#		${CMAKE_CURRENT_SOURCE_DIR}/app/test_app/app.appxmanifest.in
+	#		${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest
+	#		@ONLY
+	#	)
+	#	SET_PROPERTY ( SOURCE ${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest PROPERTY VS_DEPLOYMENT_CONTENT 1 )
+	#ENDIF ()
 ENDIF ()
 
 ############################################################################################
@@ -535,12 +496,6 @@ IF ( NOT ${DSEED_SKIP_INSTALL} )
 		PUBLIC_HEADER DESTINATION ${INSTALL_INC_DIR}
 		INCLUDES DESTINATION ${INSTALL_INC_DIR}
 	)
-	IF ( NOT ${DSEED_SKIP_BUILD_APP} )
-		INSTALL (
-			TARGETS dseed_test_bitmap dseed_test_audio
-			RUNTIME DESTINATION ${INSTALL_BIN_DIR}
-		)
-	ENDIF ()
 	INSTALL (
 		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 		DESTINATION ${INSTALL_INC_DIR}

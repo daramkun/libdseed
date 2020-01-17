@@ -97,6 +97,8 @@ constexpr char PATH_SEPARATOR = '/';
 #	define WRITESBYTES(x)
 #endif
 
+#define CODE(x)												#x
+
 namespace dseed
 {
 	using error_t = int32_t;
@@ -114,6 +116,7 @@ namespace dseed
 	constexpr error_t error_out_of_memory = 0x80010004;
 	constexpr error_t error_not_contained = 0x80010005;
 	constexpr error_t error_type_incorrect = 0x80010006;
+	constexpr error_t error_resource_locked = 0x80010007;
 
 	constexpr error_t error_io = 0x80020001;
 	constexpr error_t error_file_not_found = 0x80020002;
@@ -125,28 +128,30 @@ namespace dseed
 	constexpr error_t error_not_impl = 0x80030001;
 	constexpr error_t error_not_support = 0x80030002;
 	constexpr error_t error_platform_not_support = 0x80030003;
-	constexpr error_t error_feature_not_support = 0x80030004;
 
 	constexpr error_t error_device_not_conn = 0x80040001;
 	constexpr error_t error_device_disconn = 0x80040002;
 	constexpr error_t error_device_reset = 0x80040003;
 
 	constexpr error_t error_network_not_conn = 0x80050001;
-	constexpr error_t error_network_disconn = 0x80060002;
-	constexpr error_t error_network_sync_fail = 0x80060003;
+	constexpr error_t error_network_disconn = 0x80050002;
+	constexpr error_t error_network_sync_fail = 0x80050003;
+
+	using attrkey_t = uint64_t;
+
+	constexpr attrkey_t attrkey_cursor_hotspot = 0x0001000100010001;
+	constexpr attrkey_t attrkey_duration = 0x0001000100010002;
 }
 
-namespace dseed
+namespace dseed::instructions
 {
 #	if COMPILER_MSVC
 #		pragma pack (push, 1)
 #	else
 #		pragma pack (1)
 #	endif
-#	if ARCH_X86SET
 	struct DSEEDEXP x86_instruction_info
 	{
-	public:
 		char cpu_vender[64];								//< CPU Vender(Intel, AMD, ...)
 		char cpu_brand[64];									//< CPU Brand(i5-4790K, Ryzen 5 2600X, ...)
 
@@ -155,8 +160,7 @@ namespace dseed
 			sse3 : 1,										//< SSE 3
 			ssse3 : 1,										//< SSSE 3
 			sse4_1 : 1,										//< SSE 4.1
-			sse4_2 : 1,										//< SSE 4.2
-			sse4a : 1;										//< SSE 4a
+			sse4_2 : 1;										//< SSE 4.2
 		bool avx : 1,										//< AVX (Fp 256-bit operators)
 			avx2 : 1,										//< AVX 2 (Integer 256-bit operators)
 			fma3 : 1;										//< FMA3 (Fused Multiply-Add)
@@ -175,13 +179,9 @@ namespace dseed
 	private:
 		x86_instruction_info ();
 	};
-#	endif
 
-#	if ARCH_ARMSET
 	struct DSEEDEXP arm_instruction_info
 	{
-	public:
-
 		bool neon : 1,										//< ARM Neon SIMD operators
 			crc32 : 1;										//< CRC32
 
@@ -190,66 +190,23 @@ namespace dseed
 	private:
 		arm_instruction_info ();
 	};
-#	endif
 #	if COMPILER_MSVC
 #		pragma pack (pop)
 #	else
 #		pragma pack ()
 #	endif
+}
 
-	inline uint16_t hwrand16_def () noexcept
-	{
-		static std::random_device rd;
-		static std::mt19937 rnd (rd ());
-		static std::uniform_int_distribution<uint16_t> range;
-		return range (rnd);
-	}
-	inline uint32_t hwrand32_def () noexcept
-	{
-		static std::random_device rd;
-		static std::mt19937 rnd (rd ());
-		static std::uniform_int_distribution<uint32_t> range;
-		return range (rnd);
-	}
-	inline uint64_t hwrand64_def () noexcept
-	{
-		static std::random_device rd;
-		static std::mt19937_64 rnd (rd ());
-		static std::uniform_int_distribution<uint64_t> range;
-		return range (rnd);
-	}
-
-#if ARCH_X86SET
-	inline uint16_t hwrand16_x86 () noexcept
-	{
-		uint16_t ret;
-		_rdrand16_step (&ret);
-		return ret;
-	}
-	inline uint32_t hwrand32_x86 () noexcept
-	{
-		uint32_t ret;
-		_rdrand32_step (&ret);
-		return ret;
-	}
-	inline uint64_t hwrand64_x86 () noexcept
-	{
-		uint64_t ret;
-		_rdrand64_step (&ret);
-		return ret;
-	}
-
-	inline uint16_t hwrand16 () noexcept { return hwrand16_x86 (); }
-	inline uint32_t hwrand32 () noexcept { return hwrand32_x86 (); }
-	inline uint64_t hwrand64 () noexcept { return hwrand64_x86 (); }
-#else
-	inline uint16_t hwrand16 () noexcept { return hwrand16_def (); }
-	inline uint32_t hwrand32 () noexcept { return hwrand32_def (); }
-	inline uint64_t hwrand64 () noexcept { return hwrand64_def (); }
-#endif
+namespace dseed::instructions
+{
+	extern uint16_t (*hwrand16)();
+	extern uint32_t (*hwrand32)();
+	extern uint64_t (*hwrand64)();
 
 	DSEEDEXP uint32_t crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept;
 }
+
+#endif
 
 #if PLATFORM_WINDOWS
 #	define ENTRYPOINT_ATTRIBUTE								
@@ -257,24 +214,26 @@ namespace dseed
 #	define ENTRYPOINT_CALLTYPE								__stdcall
 #	define ENTRYPOINT_NAME									WinMain
 #	define ENTRYPOINT_ARGUMENTS								HINSTANCE, HINSTANCE, LPSTR, int
+#	define ENTRYPOINT_RETURN(x)								return x
 #elif PLATFORM_UWP
 #	define ENTRYPOINT_ATTRIBUTE								[Platform::MTAThread]
 #	define ENTRYPOINT_RETURNTYPE							int
 #	define ENTRYPOINT_CALLTYPE								__cdecl
 #	define ENTRYPOINT_NAME									main
 #	define ENTRYPOINT_ARGUMENTS								Platform::Array<Platform::String^>^
+#	define ENTRYPOINT_RETURN(x)								return x
 #elif PLATFORM_ANDROID
 #	define ENTRYPOINT_ATTRIBUTE								
 #	define ENTRYPOINT_RETURNTYPE							void
 #	define ENTRYPOINT_CALLTYPE								
 #	define ENTRYPOINT_NAME									android_main
 #	define ENTRYPOINT_ARGUMENTS								struct android_app* app
+#	define ENTRYPOINT_RETURN(x)								return
 #else
 #	define ENTRYPOINT_ATTRIBUTE								
 #	define ENTRYPOINT_RETURNTYPE							int
 #	define ENTRYPOINT_CALLTYPE								
 #	define ENTRYPOINT_NAME									main
 #	define ENTRYPOINT_ARGUMENTS								int, char*[]
-#endif
-
+#	define ENTRYPOINT_RETURN(x)								return x
 #endif

@@ -1,8 +1,8 @@
 #include <dseed.h>
 
-dseed::application* g_sharedApp;
+dseed::platform::application* g_sharedApp;
 
-dseed::error_t dseed::application::shared_app (dseed::application** app)
+dseed::error_t dseed::platform::application::shared_app (dseed::platform::application** app)
 {
 	if (app == nullptr) return dseed::error_invalid_args;
 	*app = g_sharedApp;
