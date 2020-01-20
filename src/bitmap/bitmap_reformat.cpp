@@ -785,9 +785,9 @@ dseed::error_t dseed::bitmaps::reformat_bitmap (dseed::bitmaps::bitmap* original
 	temp->lock ((void**)&destPtr);
 
 	dseed::autoref<dseed::bitmaps::palette> destPalette, srcPalette;
-	if (dseed::succeeded (original->palette (&srcPalette)))
+	if (dseed::succeeded (original->palette (&srcPalette)) && srcPalette != nullptr)
 		srcPalette->lock ((void**)&srcPalettePtr);
-	if (dseed::succeeded (temp->palette (&destPalette)))
+	if (dseed::succeeded (temp->palette (&destPalette)) && destPalette != nullptr)
 		destPalette->lock ((void**)&destPalettePtr);
 
 	auto found = g_pixelconvs.find (pctp (reformat, originalFormat));

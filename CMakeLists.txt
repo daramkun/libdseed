@@ -297,6 +297,9 @@ SET ( DSEED_BUILD_FILES
 	# Graphics
 	src/graphics/graphics_dxgi.cpp
 	src/graphics/graphics_d3d11.cpp
+	src/graphics/common_dxgi.hxx
+	src/graphics/common_d3d11.hxx
+	src/graphics/d3d11_sprite.hxx
 )
 
 ############################################################################################
@@ -423,6 +426,8 @@ TARGET_INCLUDE_DIRECTORIES (
 	PRIVATE
 
 	${DSEED_PRIVATE_INCS}
+	${CMAKE_CURRENT_SOURCE_DIR}/src/graphics/
+	${CMAKE_CURRENT_SOURCE_DIR}/src/platform/
 )
 TARGET_COMPILE_DEFINITIONS ( dseed PRIVATE ${DSEED_DEFINITIONS} )
 TARGET_LINK_LIBRARIES ( dseed ${DSEED_LINK_LIBS} )

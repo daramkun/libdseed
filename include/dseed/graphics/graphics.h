@@ -233,7 +233,7 @@ namespace dseed::graphics
 
 namespace dseed::graphics
 {
-	class DSEEDEXP pipeline : public object
+	class DSEEDEXP pipeline : public object, public wrapped
 	{
 	public:
 
@@ -282,7 +282,13 @@ namespace dseed::graphics
 
 namespace dseed::graphics
 {
-	class DSEEDEXP sprite_atlas : public object
+	enum class sprite_texfilter
+	{
+		nearest,
+		linear,
+	};
+
+	class DSEEDEXP sprite_atlas : public object, public wrapped
 	{
 	public:
 		virtual size2i size () noexcept = 0;
@@ -293,7 +299,7 @@ namespace dseed::graphics
 		virtual size_t atlas_count () noexcept = 0;
 	};
 
-	class DSEEDEXP sprite_rendertarget : public object
+	class DSEEDEXP sprite_rendertarget : public object, public wrapped
 	{
 	public:
 		virtual size2i size () noexcept = 0;
@@ -301,27 +307,30 @@ namespace dseed::graphics
 
 	public:
 		virtual error_t atlas (sprite_atlas** atlas) noexcept = 0;
-		virtual error_t depth_atlas (sprite_atlas** atlas) noexcept = 0;
 	};
 
 	class DSEEDEXP sprite_render : public vgarender
 	{
 	public:
-		virtual error_t begin (rendermethod method, const f32x4x4& transform, sprite_rendertarget* rendertarget, pipeline* pipeline, vgabuffer** constbufs, size_t constbufcount) noexcept = 0;
-		virtual error_t end () noexcept = 0;
-
-	public:
-		virtual error_t create_pipeline (shaderpack* pixelshader, const blendparams* blendparams, pipeline** pipeline) noexcept = 0;
+		virtual error_t create_pipeline (shaderpack* pixelshader, const blendparams* blendparams, sprite_texfilter texfilter, pipeline** pipeline) noexcept = 0;
 		virtual error_t create_atlas (bitmaps::bitmap* bitmap, const rect2i* atlases, size_t atlas_count, sprite_atlas** atlas) noexcept = 0;
 		virtual error_t create_rendertarget (const size2i& size, color::pixelformat format, sprite_rendertarget** target) noexcept = 0;
 		virtual error_t create_constant (size_t size, vgabuffer** constbuf, const void* dat = nullptr) noexcept = 0;
 
 	public:
-		virtual error_t set_atlas (sprite_atlas* atlas) noexcept = 0;
-		virtual error_t set_constant (vgabuffer* constbuf, size_t i) noexcept = 0;
+		virtual error_t set_pipeline (pipeline* pipeline) noexcept = 0;
+		virtual error_t set_rendertarget (sprite_rendertarget** rendertargets, size_t size) noexcept = 0;
+		virtual error_t set_atlas (sprite_atlas** atlas, size_t size) noexcept = 0;
+		virtual error_t set_constant (vgabuffer** constbuf, size_t size) noexcept = 0;
 
 	public:
+		virtual error_t clear_rendertarget (sprite_rendertarget* rendertarget, const dseed::f32x4& color) noexcept = 0;
 		virtual error_t update_constant (vgabuffer* constbuf, const void* buf, size_t offset, size_t length) noexcept = 0;
+		virtual error_t update_atlas (sprite_atlas* atlas, dseed::bitmaps::bitmap* data) noexcept = 0;
+
+	public:
+		virtual error_t begin (rendermethod method, const f32x4x4& transform) noexcept = 0;
+		virtual error_t end () noexcept = 0;
 
 	public:
 		virtual error_t draw (size_t atlas_index, const f32x4x4& transform, const f32x4& color) noexcept = 0;
@@ -339,6 +348,29 @@ namespace dseed::graphics
 	{
 		Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
 		Microsoft::WRL::ComPtr<IDXGISwapChain> dxgiSwapChain;
+	};
+
+	struct d3d11_sprite_vgabuffer_nativeobject
+	{
+		Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
+	};
+
+	struct d3d11_sprite_atlas_nativeobject
+	{
+		Microsoft::WRL::ComPtr<ID3D11Resource> texture;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+	};
+
+	struct d3d11_sprite_rendertarget_nativeobject
+	{
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+	};
+
+	struct d3d11_sprite_pipeline_nativeobject
+	{
+		Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+		Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	};
 }
 #	endif
