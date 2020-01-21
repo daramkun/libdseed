@@ -907,11 +907,11 @@ public:
 				auto instanceCount = command.instances.size ();
 				auto loopCount = (size_t)ceil (instanceCount / 512.0f);
 				command.instances.resize (loopCount * 512);
-				for (size_t i = 0; i < instanceCount / 512; ++i)
+				for (size_t i = 0; i < loopCount; ++i)
 				{
 					size_t drawCount = dseed::minimum<size_t> (512, instanceCount - (i * 512));
 					immediateContext->UpdateSubresource (instanceConstantBuffer.Get (), 0, nullptr,
-						command.instances.data () + (i * 512), sizeof (SPRITE_INSTANCE_DATA) * drawCount, 0);
+						command.instances.data () + (i * 512), sizeof (SPRITE_INSTANCE_DATA) * 512, 0);
 					immediateContext->DrawInstanced (4, drawCount, 0, 0);
 				}
 
@@ -1068,6 +1068,18 @@ private:
 				constantBuffers.push_back (d3d11Buffer.Get ());
 			}
 			deviceContext->PSSetConstantBuffers (0, (UINT)constantBuffers.size (), constantBuffers.data ());
+		}
+
+		// Set Atlases
+		{
+			std::vector<ID3D11ShaderResourceView*> srv;
+			for (size_t i = 0; i < command.atlases.size (); ++i)
+			{
+				dseed::graphics::d3d11_sprite_atlas_nativeobject nativeObject;
+				command.atlases[i]->native_object ((void**)&nativeObject);
+				srv.push_back (nativeObject.shaderResourceView.Get ());
+			}
+			immediateContext->PSSetShaderResources (0, srv.size (), srv.data ());
 		}
 	}
 

@@ -56,7 +56,7 @@ public:
 		}
 
 		dseed::autoref<dseed::io::stream> stream;
-		if (dseed::failed (dseed::io::create_native_filestream (u8"../../../sample/bitmaps/sample5.gif", false, &stream)))
+		if (dseed::failed (dseed::io::create_native_filestream (u8"../../../sample/bitmaps/sample3.png", false, &stream)))
 		{
 			app->exit ();
 			return;
@@ -108,15 +108,21 @@ public:
 		spriteRender->clear_rendertarget (nullptr, clearColor);
 
 		dseed::float4x4 transform = dseed::float4x4::identity ();
-		spriteRender->begin (dseed::graphics::rendermethod::forward, transform);
+		spriteRender->begin (dseed::graphics::rendermethod::deferred, transform);
 
 		dseed::graphics::sprite_rendertarget* renderTarget = nullptr;
 		spriteRender->set_rendertarget (&renderTarget, 1);
 		spriteRender->set_atlas (&spriteAtlas, 1);
 		spriteRender->set_pipeline (spritePipeline);
 		
-		transform = dseed::float4x4::translate (800 / 2, 450 / 2, 0);
-		spriteRender->draw (0, transform, color);
+		for (int y = -1; y <= 1; ++y)
+		{
+			for (int x = -1; x <= 1; ++x)
+			{
+				transform = dseed::multiply ((dseed::f32x4x4)dseed::float4x4::scale (0.25f, 0.25f, 1), (dseed::f32x4x4)dseed::float4x4::translate (800 / 2 + (x * 150), 450 / 2 + (y * 150), 0));
+				spriteRender->draw (0, transform, color);
+			}
+		}
 
 		spriteRender->end ();
 
