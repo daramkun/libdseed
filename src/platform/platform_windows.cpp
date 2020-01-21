@@ -345,9 +345,11 @@ public:
 		if (!::AdjustWindowRect (&rect, style, FALSE))
 			return dseed::error_fail;
 
-		if (!::SetWindowPos (_hWnd, NULL, 0, 0,
-			rect.right - rect.left, rect.bottom - rect.top,
-			SWP_NOMOVE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER | SWP_NOZORDER))
+		UINT width = rect.right - rect.left, height = rect.bottom - rect.top;
+		UINT x = GetSystemMetrics (SM_CXSCREEN) / 2 - width / 2,
+			y = GetSystemMetrics (SM_CYSCREEN) / 2 - height / 2;
+		if (!::SetWindowPos (_hWnd, NULL, x, y, width, height,
+			SWP_SHOWWINDOW | SWP_NOOWNERZORDER | SWP_NOZORDER))
 			return dseed::error_fail;
 
 		return dseed::error_good;

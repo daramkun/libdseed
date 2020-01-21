@@ -381,6 +381,7 @@ class __d3d11_sprite_render : public dseed::graphics::sprite_render
 public:
 	__d3d11_sprite_render (dseed::graphics::vgadevice* device)
 		: _refCount (1), vgadevice (device), session (false)
+		, renderMethod (dseed::graphics::rendermethod::deferred), renderTargetSize (0, 0)
 	{
 
 	}
@@ -416,11 +417,12 @@ public:
 			return dseed::error_fail;
 
 		D3D11_SAMPLER_DESC samplerDesc = {};
-		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		samplerDesc.MaxAnisotropy = 1;
 		samplerDesc.MinLOD = -FLT_MIN;
 		samplerDesc.MaxLOD = FLT_MAX;
 
@@ -431,10 +433,16 @@ public:
 		if (FAILED (d3dDevice->CreateSamplerState (&samplerDesc, &samplerState[1])))
 			return dseed::error_fail;
 
+		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		samplerDesc.MaxAnisotropy = 16;
+		if (FAILED (d3dDevice->CreateSamplerState (&samplerDesc, &samplerState[2])))
+			return dseed::error_fail;
+
 		D3D11_RASTERIZER_DESC rasterizerDesc = {};
 		rasterizerDesc.CullMode = D3D11_CULL_NONE;
 		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 		rasterizerDesc.FrontCounterClockwise = TRUE;
+		rasterizerDesc.AntialiasedLineEnable = TRUE;
 
 		if (FAILED (d3dDevice->CreateRasterizerState (&rasterizerDesc, &rasterizerState)))
 			return dseed::error_fail;
@@ -1094,7 +1102,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> transformConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> instanceConstantBuffer;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState [2];
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState [3];
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
 	dseed::size2i renderTargetSize;

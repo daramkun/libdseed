@@ -81,6 +81,23 @@ namespace dseed
 		timespan _startedFrom;
 		bool _isStarted;
 	};
+
+	struct DSEEDEXP framemeasurer
+	{
+	public:
+		framemeasurer ();
+
+	public:
+		void update (timespan delta) noexcept;
+
+	public:
+		double fps () const noexcept;
+
+	public:
+		timespan _elapsed;
+		size_t _count;
+		double _fps;
+	};
 }
 
 #endif

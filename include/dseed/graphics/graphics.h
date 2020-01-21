@@ -284,8 +284,9 @@ namespace dseed::graphics
 {
 	enum class sprite_texfilter
 	{
-		nearest,
-		linear,
+		nearest = 0,
+		linear = 1,
+		anisotropy = 2,
 	};
 
 	class DSEEDEXP sprite_atlas : public object, public wrapped

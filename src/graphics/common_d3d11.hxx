@@ -73,6 +73,9 @@ HRESULT CompileHLSL (const char* profile, const char* code, ID3DBlob** blob)
 HRESULT CreateTexture2D (ID3D11Device* d3dDevice, const dseed::size2i& size, dseed::color::pixelformat format, ID3D11Texture2D** texture,
 	ID3D11ShaderResourceView** srv, ID3D11DepthStencilView** dsv, ID3D11RenderTargetView** rtv)
 {
+	if (d3dDevice == nullptr || texture == nullptr)
+		return E_FAIL;
+
 	DWORD flags = 0;
 	if (srv != nullptr) flags |= D3D11_BIND_SHADER_RESOURCE;
 	if (dsv != nullptr) flags |= D3D11_BIND_DEPTH_STENCIL;
@@ -125,6 +128,9 @@ HRESULT CreateTexture2D (ID3D11Device* d3dDevice, const dseed::size2i& size, dse
 HRESULT CreateTextureFromBitmap (ID3D11Device* d3dDevice, dseed::bitmaps::bitmap* bitmap, ID3D11Resource** texture,
 	ID3D11ShaderResourceView** srv, ID3D11RenderTargetView** rtv)
 {
+	if (d3dDevice == nullptr || bitmap == nullptr || texture == nullptr)
+		return E_FAIL;
+
 	DWORD flags = 0;
 	if (srv != nullptr) flags |= D3D11_BIND_SHADER_RESOURCE;
 	if (rtv != nullptr) flags |= D3D11_BIND_RENDER_TARGET;

@@ -99,3 +99,20 @@ void dseed::stopwatch::start () noexcept { if (_isStarted) return; _startedFrom 
 void dseed::stopwatch::stop () noexcept { _isStarted = false; }
 bool dseed::stopwatch::is_started () const noexcept { return _isStarted; }
 dseed::timespan dseed::stopwatch::elapsed () const noexcept { return timespan::current_ticks () - _startedFrom; }
+
+dseed::framemeasurer::framemeasurer () : _elapsed (0), _count (0), _fps (0) { }
+void dseed::framemeasurer::update (timespan delta) noexcept
+{
+	static timespan onesec = timespan::from_seconds (1);
+
+	_elapsed += delta;
+	++_count;
+
+	if (_elapsed >= onesec)
+	{
+		_elapsed -= onesec;
+		_fps = _count -(_count * _elapsed.total_seconds ());
+		_count = 0;
+	}
+}
+double dseed::framemeasurer::fps () const noexcept { return _fps; }
