@@ -106,8 +106,9 @@ namespace dseed
 	class DSEEDEXP blob : public object
 	{
 	public:
-		virtual const void* ptr () noexcept = 0;
-		virtual size_t size () noexcept = 0;
+		virtual void* ptr () noexcept = 0;
+		virtual const void* ptr () const noexcept = 0;
+		virtual size_t size () const noexcept = 0;
 	};
 
 	DSEEDEXP error_t create_buffered_blob (const void* data, size_t length, dseed::blob** blob) noexcept;
@@ -156,6 +157,55 @@ namespace dseed
 	};
 
 	DSEEDEXP error_t create_attributes (attributes** attr) noexcept;
+}
+
+#include <queue>
+namespace dseed
+{
+	class DSEEDEXP blobpool : public object
+	{
+	public:
+		virtual error_t get_blob (size_t size, blob** b) = 0;
+		virtual error_t return_blob (blob* b) = 0;
+		virtual void clear_blobs () = 0;
+	};
+
+	DSEEDEXP error_t create_blobpool (blobpool** pool) noexcept;
+
+	template<class T>
+	class DSEEDEXP memorypool
+	{
+	public:
+		~memorypool () { clear_memories (); }
+
+	public:
+		T* get_memory ()
+		{
+			if (pool.empty ())
+				return new T ();
+			else
+			{
+				T* mem = pool.front ();
+				pool.pop ();
+				return mem;
+			}
+		}
+		void return_memory (T* mem)
+		{
+			pool.push (mem);
+		}
+		void clear_memories ()
+		{
+			while (!pool.empty ())
+			{
+				delete pool.front ();
+				pool.pop ();
+			}
+		}
+
+	private:
+		std::queue<T*> pool;
+	};
 }
 
 #endif

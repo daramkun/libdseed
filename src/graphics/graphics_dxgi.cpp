@@ -153,7 +153,7 @@ __dxgi_vga_adapter_enumerator::__dxgi_vga_adapter_enumerator (IDXGIFactory* fact
 	refresh ();
 }
 
-dseed::error_t __dxgi_vga_adapter_enumerator::vgaadapter (int index, dseed::graphics::vgaadapter** adapter)
+dseed::error_t __dxgi_vga_adapter_enumerator::adapter (int index, dseed::graphics::vgaadapter** adapter)
 {
 	if (adapter == nullptr || index >= _adapters.size () || index < 0)
 		return dseed::error_invalid_args;
@@ -163,7 +163,7 @@ dseed::error_t __dxgi_vga_adapter_enumerator::vgaadapter (int index, dseed::grap
 	return dseed::error_good;
 }
 
-size_t __dxgi_vga_adapter_enumerator::vgaadapter_count () { return _adapters.size (); }
+size_t __dxgi_vga_adapter_enumerator::adapter_count () { return _adapters.size (); }
 
 dseed::error_t __dxgi_vga_adapter_enumerator::refresh ()
 {

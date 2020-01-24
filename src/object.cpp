@@ -1,6 +1,8 @@
 #include <dseed.h>
 
 #include <string.h>
+#include <queue>
+#include <shared_mutex>
 
 dseed::object::object () { memcpy (_signature, "DSEEDOBJ", 8); }
 dseed::object::~object () { }
@@ -29,8 +31,9 @@ public:
 	}
 
 public:
-	virtual const void* ptr () noexcept { return _data.data (); }
-	virtual size_t size () noexcept { return _data.size (); }
+	virtual void* ptr () noexcept { return _data.data (); }
+	virtual const void* ptr () const noexcept { return _data.data (); }
+	virtual size_t size () const noexcept { return _data.size (); }
 
 private:
 	std::atomic<int32_t> _refCount;
@@ -68,8 +71,9 @@ public:
 	}
 
 public:
-	virtual const void* ptr () noexcept { return _ptr; }
-	virtual size_t size () noexcept { return _size; }
+	virtual void* ptr () noexcept { return _ptr; }
+	virtual const void* ptr () const noexcept { return _ptr; }
+	virtual size_t size () const noexcept { return _size; }
 
 private:
 	std::atomic<int32_t> _refCount;
@@ -481,5 +485,94 @@ dseed::error_t dseed::create_attributes (attributes** attr) noexcept
 	if (*attr == nullptr)
 		return dseed::error_out_of_memory;
 
+	return dseed::error_good;
+}
+
+class __memorypool : public dseed::blobpool
+{
+public:
+	__memorypool () : _refCount (1) { }
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t get_blob (size_t size, dseed::blob** b) override
+	{
+		if (size == 0 || b == nullptr) return dseed::error_invalid_args;
+
+		std::lock_guard lock (mutex);
+
+		dseed::autoref<dseed::blob> first = queue.front ();
+		queue.pop ();
+
+		if (first->size () == size)
+		{
+			(*b = first)->retain ();
+			return dseed::error_good;
+		}
+		else
+			queue.push (first);
+
+		while (queue.front () != first)
+		{
+			dseed::autoref<dseed::blob> blob = queue.front ();
+			queue.pop ();
+
+			if (blob->size () == size)
+			{
+				(*b = blob)->retain ();
+				return dseed::error_good;
+			}
+			else
+				queue.push (first);
+		}
+
+		return dseed::create_buffered_blob (nullptr, size, b);
+	}
+
+	virtual dseed::error_t return_blob (dseed::blob* b) override
+	{
+		if (b == nullptr)
+			return dseed::error_invalid_args;
+		
+		std::lock_guard lock (mutex);
+		queue.push (b);
+
+		return dseed::error_good;
+	}
+
+	virtual void clear_blobs () override
+	{
+		std::lock_guard lock (mutex);
+		while (!queue.empty ())
+		{
+			queue.pop ();
+		}
+	}
+
+private:
+	std::atomic<int32_t> _refCount;
+	std::queue<dseed::autoref<dseed::blob>> queue;
+	std::shared_mutex mutex;
+};
+
+dseed::error_t dseed::create_blobpool (dseed::blobpool** pool) noexcept
+{
+	if (pool == nullptr)
+		return dseed::error_invalid_args;
+	
+	*pool = new __memorypool ();
+	
+	if (*pool == nullptr)
+		return dseed::error_out_of_memory;
+	
 	return dseed::error_good;
 }

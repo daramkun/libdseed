@@ -297,9 +297,12 @@ SET ( DSEED_BUILD_FILES
 	# Graphics
 	src/graphics/graphics_dxgi.cpp
 	src/graphics/graphics_d3d11.cpp
-	src/graphics/common_dxgi.hxx
-	src/graphics/common_d3d11.hxx
-	src/graphics/d3d11_sprite.hxx
+	src/graphics/graphics_d3d11_sprite.cpp
+
+	# Audio
+	src/audio/audio_wasapi_adapter.cpp
+	src/audio/audio_xaudio2_player.cpp
+	src/audio/audio_wasapi_requester.cpp
 )
 
 ############################################################################################
@@ -320,7 +323,7 @@ IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" OR ${CMAKE_SYSTEM_NAME} STREQUAL "M
 	SET ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	SET ( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
 	SET ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO" )
-	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib dxgi.lib d3d11.lib d3dcompiler.lib )
+	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib PortableDeviceGUIDs.lib sensorsapi.lib dxgi.lib d3d11.lib d3dcompiler.lib XAudio2.lib winmm.lib )
 ELSEIF ( ${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore" )
 	SET ( PLATFORM STORE )
 	LIST ( APPEND DSEED_DEFINITIONS -DUNICODE )
@@ -332,7 +335,7 @@ ELSEIF ( ${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore" )
 	SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AI\"C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/VC/vcpackages\"")
 	# Find Platform.winmd for VS2019
 	SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AI\"C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/VC/vcpackages\"")
-	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib )
+	LIST ( APPEND DSEED_LINK_LIBS windowscodecs.lib mf.lib mfplat.lib mfuuid.lib mfreadwrite.lib XInput.lib XAudio2.lib winmm.lib )
 ENDIF ()
 
 IF ( ${DSEED_USE_BITMAP_ENCODERS} )

@@ -113,8 +113,8 @@ public:
 	}
 
 public:
-	virtual dseed::error_t vgaadapter (int index, dseed::graphics::vgaadapter** adapter) override;
-	virtual size_t vgaadapter_count () override;
+	virtual dseed::error_t adapter (int index, dseed::graphics::vgaadapter** adapter) override;
+	virtual size_t adapter_count () override;
 
 public:
 	virtual dseed::error_t refresh () override;

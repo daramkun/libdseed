@@ -47,8 +47,8 @@ namespace dseed::graphics
 	class DSEEDEXP vgaadapter_enumerator : public object
 	{
 	public:
-		virtual error_t vgaadapter (int index, vgaadapter** adapter) = 0;
-		virtual size_t vgaadapter_count () = 0;
+		virtual error_t adapter (int index, vgaadapter** adapter) = 0;
+		virtual size_t adapter_count () = 0;
 
 	public:
 		virtual error_t refresh () = 0;
@@ -343,8 +343,11 @@ namespace dseed::graphics
 #		include <d3d11.h>
 #		include <dxgi.h>
 #		include <wrl.h>
+#	endif
+#endif
 namespace dseed::graphics
 {
+#if PLATFORM_MICROSOFT && defined ( USE_D3D11_NATIVE_OBJECT )
 	struct d3d11_vgadevice_nativeobject
 	{
 		Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
@@ -373,9 +376,20 @@ namespace dseed::graphics
 		Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	};
-}
-#	endif
 #endif
+#if PLATFORM_MICROSOFT && defined ( USE_D3D12_NATIVE_OBJECT )
+
+#endif
+#if defined ( USE_OPENGL_NATIVE_OBJECT )
+
+#endif
+#if defined ( USE_VULKAN_NATIVE_OBJECT )
+
+#endif
+#if defined ( USE_METAL_NATIVE_OBJECT )
+
+#endif
+}
 
 namespace dseed::graphics
 {
@@ -395,7 +409,7 @@ namespace dseed::graphics
 	DSEEDEXP error_t create_vulkan_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 #endif
 #if PLATFORM_MACOS || PLATFORM_IOS
-	DSEEDEXP error_t create_metal_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
+	DSEEDEXP error_t create_metal_vgadevice (platform::application* app, adapter* adapter, vgadevice** device) noexcept;
 #endif
 }
 

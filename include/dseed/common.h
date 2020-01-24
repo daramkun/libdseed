@@ -32,11 +32,10 @@ using namespace std::string_literals;
 #if ( defined ( _WINDOWS ) || defined ( _WIN32 ) || defined ( _WIN64 ) ) \
 	&& !( PLATFORM_APPLE || PLATFORM_GOOGLE || PLATFORM_UNIX || PLATFORM_WEBASSEMBLY )
 #	include <Windows.h>
+#	include <initguid.h>
+#	include <wrl.h>
 #	define PLATFORM_UWP										( defined ( WINAPI_FAMILY ) && ( WINAPI_FAMILY == WINAPI_FAMILY_APP ) )
 #	define PLATFORM_WINDOWS									( !defined ( WINAPI_FAMILY ) || ( WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP ) )
-#	if PLATFORM_UWP
-#		include <wrl.h>
-#	endif
 #else
 #	define PLATFORM_WINDOWS									0
 #	define PLATFORM_UWP										0

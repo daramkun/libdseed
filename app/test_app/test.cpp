@@ -118,7 +118,7 @@ public:
 		spriteRender->clear_rendertarget (nullptr, clearColor);
 
 		dseed::float4x4 transform = dseed::float4x4::identity ();
-		spriteRender->begin (dseed::graphics::rendermethod::forward, transform);
+		spriteRender->begin (dseed::graphics::rendermethod::deferred, transform);
 
 		dseed::graphics::sprite_rendertarget* renderTarget = nullptr;
 		spriteRender->set_rendertarget (&renderTarget, 1);

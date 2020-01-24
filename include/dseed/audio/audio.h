@@ -3,27 +3,34 @@
 
 namespace dseed::audio
 {
-	class DSEEDEXP audio_adapter : public object
+	enum class audioadapter_type
 	{
-	public:
-		virtual error_t name (char* name, size_t maxNameCount) = 0;
-		virtual error_t info (dseed::media::audioformat* info) = 0;
+		speaker,
+		listener,
 	};
 
-	class DSEEDEXP audio_adapter_enumerator : public object
+	class DSEEDEXP audioadapter : public object, public wrapped
 	{
 	public:
-		virtual error_t audio_adapter (int index, audio_adapter** adapter) = 0;
-		virtual size_t audio_adapter_count () = 0;
+		virtual error_t name (char* name, size_t maxNameCount) noexcept = 0;
+		virtual error_t info (dseed::media::audioformat* info) noexcept = 0;
+		virtual audioadapter_type type () noexcept = 0;
+	};
+
+	class DSEEDEXP audioadapter_enumerator : public object
+	{
+	public:
+		virtual error_t audioadapter (size_t index, audioadapter** adapter) noexcept = 0;
+		virtual size_t audioadapter_count () noexcept = 0;
 	};
 }
 
 namespace dseed::audio
 {
-	enum audiobufferstate_t
+	enum class audiobufferstate
 	{
-		audiobufferstate_stopped,
-		audiobufferstate_playing,
+		stopped,
+		playing,
 	};
 
 	struct audiolistener
@@ -43,36 +50,39 @@ namespace dseed::audio
 		float dopplerScale;
 	};
 
-	class DSEEDEXP audioplaybuffer : public object
+	class DSEEDEXP audioplaybuffer : public object, public wrapped
 	{
 	public:
-		virtual float volume () = 0;
-		virtual error_t set_volume (float vol) = 0;
+		virtual audiobufferstate state () noexcept = 0;
 
 	public:
-		virtual error_t play () = 0;
-		virtual error_t stop () = 0;
+		virtual float volume () noexcept = 0;
+		virtual error_t set_volume (float vol) noexcept = 0;
 
 	public:
-		virtual error_t buffering (void* buffer, size_t bufferSize) = 0;
-		virtual error_t wait_to_buffer_end () = 0;
+		virtual error_t play () noexcept = 0;
+		virtual error_t stop () noexcept = 0;
 
 	public:
-		virtual error_t set_listener (const audiolistener* emitter) = 0;
-		virtual error_t set_emitter (const audioemitter* emitter) = 0;
+		virtual error_t buffering (const void* buffer, size_t bufferSize) noexcept = 0;
+		virtual error_t wait_to_buffer_end () noexcept = 0;
+
+	public:
+		virtual error_t set_listener (const audiolistener* emitter) noexcept = 0;
+		virtual error_t set_emitter (const audioemitter* emitter) noexcept = 0;
 	};
 
-	class DSEEDEXP audioplayer : public object
+	class DSEEDEXP audioplayer : public object, public wrapped
 	{
 	public:
-		virtual float volume () = 0;
-		virtual error_t set_volume (float vol) = 0;
+		virtual float volume () noexcept = 0;
+		virtual error_t set_volume (float vol) noexcept = 0;
 
 	public:
-		virtual error_t create_buffer (const dseed::media::audioformat* format, audioplaybuffer** buffer) = 0;
+		virtual error_t create_buffer (const dseed::media::audioformat* format, audioplaybuffer** buffer) noexcept = 0;
 	};
 
-	class DSEEDEXP audiorequester : public object
+	class DSEEDEXP audiorequester : public object, public wrapped
 	{
 	public:
 		virtual error_t format (dseed::media::audioformat* format) = 0;
@@ -84,6 +94,57 @@ namespace dseed::audio
 	public:
 		virtual error_t request (void* buffer, size_t bufferMaxSize) = 0;
 	};
+}
+
+#if defined ( USE_XAUDIO2_NATIVE_OBJECT )
+#	include <wrl.h>
+#	include <xaudio2.h>
+#endif
+#if defined ( USE_WASAPI_NATIVE_OBJECT )
+#	include <wrl.h>
+#	include <mmdeviceapi.h>
+#endif
+
+namespace dseed::audio
+{
+#if defined ( USE_XAUDIO2_NATIVE_OBJECT )
+	struct xaudio2_audioplayer_nativeobject
+	{
+		Microsoft::WRL::ComPtr<IXAudio2> xaudio2;
+		IXAudio2MasteringVoice* masteringVoice;
+	};
+
+	struct xaudio2_audioplaybuffer_nativeobject
+	{
+		IXAudio2SourceVoice* sourceVoice;
+	};
+#endif
+#if defined ( USE_WASAPI_NATIVE_OBJECT )
+	struct wasapi_audioadapter_nativeobject
+	{
+		Microsoft::WRL::ComPtr<IMMDevice> mmDevice;
+	};
+#endif
+#if defined ( USE_OPENAL_NATIVE_OBJECT )
+
+#endif
+}
+
+namespace dseed::audio
+{
+#if PLATFORM_MICROSOFT
+	DSEEDEXP error_t create_wasapi_audiooadapter_enumerator (audioadapter_type type, audioadapter_enumerator** enumerator) noexcept;
+	DSEEDEXP error_t create_xaudio2_audioplayer (audioadapter* adapter, audioplayer** player) noexcept;
+	DSEEDEXP error_t create_wasapi_audiorequester (audioadapter* adapter, audiorequester** requester) noexcept;
+#	if NTDDI_VERSION >= NTDDI_WIN10
+	DSEEDEXP error_t create_wasapi_audioplayer (audioadapter* adapter, audioplayer** player) noexcept;
+#	endif
+#endif
+#if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID || PLATFORM_MACOS || PLATFORM_IOS || PLATFORM_WEBASSEMBLY
+	DSEEDEXP error_t create_openal_audioadapter_enumerator (audioadapter_type type, audioadapter_enumerator** enumerator) noexcept;
+	DSEEDEXP error_t create_openal_audioplayer (audioadapter* adapter, audioplayer** player) noexcept;
+	DSEEDEXP error_t create_openal_audiorequester (audioadapter* adapter, audiorequester** requester) noexcept;
+#endif
 }
 
 #endif

@@ -42,7 +42,7 @@ constexpr D3D11_BLEND DSEEDBLENDVALUE_TO_D3D11_BLENDVALUE (dseed::graphics::blen
 	}
 }
 
-HRESULT CreateBlendStateFromBlendParams (ID3D11Device* d3dDevice, const dseed::graphics::blendparams& params, ID3D11BlendState** blendState)
+inline HRESULT CreateBlendStateFromBlendParams (ID3D11Device* d3dDevice, const dseed::graphics::blendparams& params, ID3D11BlendState** blendState)
 {
 	D3D11_BLEND_DESC blendDesc = {};
 	blendDesc.RenderTarget[0].BlendEnable = params.blend_enable;
@@ -57,7 +57,7 @@ HRESULT CreateBlendStateFromBlendParams (ID3D11Device* d3dDevice, const dseed::g
 	return d3dDevice->CreateBlendState (&blendDesc, blendState);
 }
 
-HRESULT CompileHLSL (const char* profile, const char* code, ID3DBlob** blob)
+inline HRESULT CompileHLSL (const char* profile, const char* code, ID3DBlob** blob)
 {
 	HRESULT hr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorMsgBlob;
@@ -70,7 +70,7 @@ HRESULT CompileHLSL (const char* profile, const char* code, ID3DBlob** blob)
 	return hr;
 }
 
-HRESULT CreateTexture2D (ID3D11Device* d3dDevice, const dseed::size2i& size, dseed::color::pixelformat format, ID3D11Texture2D** texture,
+inline HRESULT CreateTexture2D (ID3D11Device* d3dDevice, const dseed::size2i& size, dseed::color::pixelformat format, ID3D11Texture2D** texture,
 	ID3D11ShaderResourceView** srv, ID3D11DepthStencilView** dsv, ID3D11RenderTargetView** rtv)
 {
 	if (d3dDevice == nullptr || texture == nullptr)
@@ -125,7 +125,7 @@ HRESULT CreateTexture2D (ID3D11Device* d3dDevice, const dseed::size2i& size, dse
 	return hr;
 }
 
-HRESULT CreateTextureFromBitmap (ID3D11Device* d3dDevice, dseed::bitmaps::bitmap* bitmap, ID3D11Resource** texture,
+inline HRESULT CreateTextureFromBitmap (ID3D11Device* d3dDevice, dseed::bitmaps::bitmap* bitmap, ID3D11Resource** texture,
 	ID3D11ShaderResourceView** srv, ID3D11RenderTargetView** rtv)
 {
 	if (d3dDevice == nullptr || bitmap == nullptr || texture == nullptr)
@@ -262,7 +262,7 @@ HRESULT CreateTextureFromBitmap (ID3D11Device* d3dDevice, dseed::bitmaps::bitmap
 	return S_OK;
 }
 
-HRESULT CreateConstantBuffer (ID3D11Device* d3dDevice, UINT size, ID3D11Buffer** buffer, const void* buf)
+inline HRESULT CreateConstantBuffer (ID3D11Device* d3dDevice, UINT size, ID3D11Buffer** buffer, const void* buf)
 {
 	D3D11_BUFFER_DESC constantBufferDesc = {};
 	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;

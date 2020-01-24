@@ -50,4 +50,35 @@ struct data_HEADER
 #define WAVE_FORMAT_IEEE_FLOAT								3
 #endif
 
+#if PLATFORM_MICROSOFT
+#	include <mmreg.h>
+inline void convert_to_waveformatex (const WAVEFORMATEX* wf, dseed::media::audioformat* format)
+{
+	format->channels = wf->nChannels;
+	format->bits_per_sample = wf->wBitsPerSample;
+	format->samples_per_sec = wf->nSamplesPerSec;
+	format->block_align = wf->nBlockAlign;
+	format->bytes_per_sec = wf->nAvgBytesPerSec;
+	if (wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+	{
+		auto wfex = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(wf);
+		if (wfex->SubFormat == KSDATAFORMAT_SUBTYPE_PCM)
+			format->pulse_format = dseed::media::pulseformat::pcm;
+		else if (wfex->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
+			format->pulse_format = dseed::media::pulseformat::ieee_float;
+		else
+			format->pulse_format = dseed::media::pulseformat::unknown;
+	}
+	else
+	{
+		switch (wf->wFormatTag)
+		{
+			case WAVE_FORMAT_PCM: format->pulse_format = dseed::media::pulseformat::pcm;
+			case WAVE_FORMAT_IEEE_FLOAT: format->pulse_format = dseed::media::pulseformat::ieee_float;
+			default: format->pulse_format = dseed::media::pulseformat::unknown;
+		}
+	}
+}
+#endif
+
 #endif
