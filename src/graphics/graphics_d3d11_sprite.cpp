@@ -782,6 +782,63 @@ dseed::error_t __d3d11_sprite_render::update_constant (dseed::graphics::vgabuffe
 }
 dseed::error_t __d3d11_sprite_render::update_atlas (dseed::graphics::sprite_atlas* atlas, dseed::bitmaps::bitmap* data) noexcept
 {
+	if (session && renderMethod == dseed::graphics::rendermethod::deferred)
+		return dseed::error_invalid_op;
+	if (atlas == nullptr || data == nullptr)
+		return dseed::error_invalid_args;
+
+	dseed::graphics::d3d11_sprite_atlas_nativeobject no;
+	atlas->native_object ((void**)&no);
+
+	if (data->type () == dseed::bitmaps::bitmaptype::bitmap2d || data->type () == dseed::bitmaps::bitmaptype::bitmap2dcube)
+	{
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2d;
+		if (FAILED (no.texture.As<ID3D11Texture2D> (&tex2d)))
+			return dseed::error_fail;
+
+		D3D11_TEXTURE2D_DESC texDesc;
+		tex2d->GetDesc (&texDesc);
+		texDesc.Usage = D3D11_USAGE_STAGING;
+		texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+
+		D3D11_SUBRESOURCE_DATA initialData;
+		data->lock ((void**)&initialData.pSysMem);
+		initialData.SysMemPitch = dseed::color::calc_bitmap_stride (data->format (), data->size ().width);
+		initialData.SysMemSlicePitch = dseed::color::calc_bitmap_total_size (data->format (), data->size ());
+
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> cpuTex;
+		if (FAILED (d3dDevice->CreateTexture2D (&texDesc, &initialData, &cpuTex)))
+			return dseed::error_fail;
+
+		data->unlock ();
+
+		immediateContext->CopyResource (tex2d.Get (), cpuTex.Get ());
+	}
+	else if (data->type () == dseed::bitmaps::bitmaptype::bitmap3d)
+	{
+		Microsoft::WRL::ComPtr<ID3D11Texture3D> tex3d;
+		if (FAILED (no.texture.As<ID3D11Texture3D> (&tex3d)))
+			return dseed::error_fail;
+
+		D3D11_TEXTURE3D_DESC texDesc;
+		tex3d->GetDesc (&texDesc);
+		texDesc.Usage = D3D11_USAGE_STAGING;
+		texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+
+		D3D11_SUBRESOURCE_DATA initialData;
+		data->lock ((void**)&initialData.pSysMem);
+		initialData.SysMemPitch = dseed::color::calc_bitmap_stride (data->format (), data->size ().width);
+		initialData.SysMemSlicePitch = dseed::color::calc_bitmap_total_size (data->format (), data->size ());
+
+		Microsoft::WRL::ComPtr<ID3D11Texture3D> cpuTex;
+		if (FAILED (d3dDevice->CreateTexture3D (&texDesc, &initialData, &cpuTex)))
+			return dseed::error_fail;
+
+		data->unlock ();
+
+		immediateContext->CopyResource (tex3d.Get (), cpuTex.Get ());
+	}
+
 	return dseed::error_not_impl;
 }
 

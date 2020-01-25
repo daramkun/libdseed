@@ -52,7 +52,10 @@ public:
 		XAUDIO2_VOICE_STATE voiceState;
 		sourceVoice->GetState (&voiceState);
 
+		if (voiceState.BuffersQueued == 0)
+			return dseed::audio::audiobufferstate::stopped;
 
+		return dseed::audio::audiobufferstate::playing;
 	}
 
 public:
