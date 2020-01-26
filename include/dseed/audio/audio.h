@@ -92,7 +92,11 @@ namespace dseed::audio
 		virtual error_t stop () = 0;
 
 	public:
-		virtual error_t request (void* buffer, size_t bufferMaxSize) = 0;
+		virtual bool silent_null () = 0;
+		virtual void set_silent_null (bool sn) = 0;
+
+	public:
+		virtual error_t request (void* buffer, size_t bufferMaxSize, size_t* dataSize) = 0;
 	};
 }
 
@@ -103,6 +107,7 @@ namespace dseed::audio
 #if defined ( USE_WASAPI_NATIVE_OBJECT )
 #	include <wrl.h>
 #	include <mmdeviceapi.h>
+#	include <Audioclient.h>
 #endif
 
 namespace dseed::audio
@@ -123,6 +128,12 @@ namespace dseed::audio
 	struct wasapi_audioadapter_nativeobject
 	{
 		Microsoft::WRL::ComPtr<IMMDevice> mmDevice;
+	};
+
+	struct wasapi_audiorequester_nativeobject
+	{
+		Microsoft::WRL::ComPtr<IAudioClient> audioClient;
+		Microsoft::WRL::ComPtr<IAudioCaptureClient> audioCaptureClient;
 	};
 #endif
 #if defined ( USE_OPENAL_NATIVE_OBJECT )

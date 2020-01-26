@@ -100,8 +100,8 @@ private:
 class __wasapi_audioadapter_enumerator : public dseed::audio::audioadapter_enumerator
 {
 public:
-	__wasapi_audioadapter_enumerator (IMMDeviceEnumerator* devEnum, dseed::audio::audioadapter_type type)
-		: _refCount (1), devEnum (devEnum),  type (type)
+	__wasapi_audioadapter_enumerator (IMMDeviceEnumerator* deviceEnumerator, dseed::audio::audioadapter_type type)
+		: _refCount (1), deviceEnumerator (deviceEnumerator),  type (type)
 	{
 
 	}
@@ -122,7 +122,7 @@ public:
 		if (index >= audioadapter_count ()) return dseed::error_out_of_range;
 
 		Microsoft::WRL::ComPtr<IMMDevice> device;
-		if (FAILED (pCollection->Item ((UINT)index, &device)))
+		if (FAILED (deviceCollection->Item ((UINT)index, &device)))
 			return dseed::error_fail;
 
 		*adapter = new __wasapi_audioadapter (device.Get (), type);
@@ -135,7 +135,7 @@ public:
 	virtual size_t audioadapter_count () noexcept override
 	{
 		UINT count;
-		pCollection->GetCount (&count);
+		deviceCollection->GetCount (&count);
 		return count;
 	}
 
@@ -144,38 +144,43 @@ public:
 	{
 		HRESULT hr;
 
-		pCollection.ReleaseAndGetAddressOf ();
-		if (FAILED (hr = devEnum->EnumAudioEndpoints (
+		deviceCollection.ReleaseAndGetAddressOf ();
+		if (FAILED (hr = deviceEnumerator->EnumAudioEndpoints (
 			(type == dseed::audio::audioadapter_type::speaker) ? eRender : eCapture
-			, DEVICE_STATE_ACTIVE, &pCollection)))
+			, DEVICE_STATE_ACTIVE, &deviceCollection)))
 			return hr;
+
+		return S_OK;
 	}
 
 private:
 	std::atomic<int32_t> _refCount;
-	Microsoft::WRL::ComPtr<IMMDeviceEnumerator> devEnum;
+	Microsoft::WRL::ComPtr<IMMDeviceEnumerator> deviceEnumerator;
 	dseed::audio::audioadapter_type type;
-	Microsoft::WRL::ComPtr<IMMDeviceCollection> pCollection;
+	Microsoft::WRL::ComPtr<IMMDeviceCollection> deviceCollection;
 };
 
-HRESULT GetDefaultEndPoint (dseed::audio::audioadapter_type type, IMMDeviceEnumerator* devEnum, IMMDevice** device) noexcept
+HRESULT GetDefaultEndPoint (dseed::audio::audioadapter_type type, IMMDeviceEnumerator* deviceEnumerator, IMMDevice** device) noexcept
 {
-	return devEnum->GetDefaultAudioEndpoint (
+	return deviceEnumerator->GetDefaultAudioEndpoint (
 		(type == dseed::audio::audioadapter_type::speaker) ? eRender : eCapture
 		, eConsole, device);
 }
 
+#endif
+
 dseed::error_t dseed::audio::create_wasapi_audiooadapter_enumerator (dseed::audio::audioadapter_type type,
 	dseed::audio::audioadapter_enumerator** enumerator) noexcept
 {
+#if PLATFORM_MICROSOFT
 	HRESULT hr;
-	Microsoft::WRL::ComPtr<IMMDeviceEnumerator> devEnum;
+	Microsoft::WRL::ComPtr<IMMDeviceEnumerator> deviceEnumerator;
 	if (FAILED (hr = CoCreateInstance (__uuidof (MMDeviceEnumerator), nullptr, CLSCTX_ALL,
-		__uuidof(IMMDeviceEnumerator), (void**)&devEnum)))
+		__uuidof(IMMDeviceEnumerator), (void**)&deviceEnumerator)))
 		return dseed::error_fail;
-	
+
 	dseed::autoref<__wasapi_audioadapter_enumerator> wasapiAudioAdapterEnumerator;
-	*&wasapiAudioAdapterEnumerator = new __wasapi_audioadapter_enumerator (devEnum.Get (), type);
+	*&wasapiAudioAdapterEnumerator = new __wasapi_audioadapter_enumerator (deviceEnumerator.Get (), type);
 	if (wasapiAudioAdapterEnumerator == nullptr)
 		return dseed::error_out_of_memory;
 
@@ -187,9 +192,8 @@ dseed::error_t dseed::audio::create_wasapi_audiooadapter_enumerator (dseed::audi
 
 	(*enumerator = wasapiAudioAdapterEnumerator)->retain ();
 
-	return error_t ();
-}
-
-
-
+	return dseed::error_good;
+#else
+	return dseed::error_not_support;
 #endif
+}
