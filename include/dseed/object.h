@@ -176,10 +176,10 @@ namespace dseed
 	class DSEEDEXP memorypool
 	{
 	public:
-		~memorypool () { clear_memories (); }
+		inline ~memorypool () { clear_memories (); }
 
 	public:
-		T* get_memory ()
+		inline T* get_memory ()
 		{
 			if (pool.empty ())
 				return new T ();
@@ -190,11 +190,11 @@ namespace dseed
 				return mem;
 			}
 		}
-		void return_memory (T* mem)
+		inline void return_memory (T* mem)
 		{
 			pool.push (mem);
 		}
-		void clear_memories ()
+		inline void clear_memories ()
 		{
 			while (!pool.empty ())
 			{
