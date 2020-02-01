@@ -141,6 +141,14 @@ struct SPRITE_RENDER_COMMAND
 	std::vector<dseed::autoref<dseed::graphics::sprite_atlas>> atlases;
 	std::vector<dseed::autoref<dseed::graphics::vgabuffer>> constbufs;
 	std::vector<SPRITE_INSTANCE_DATA> instances;
+
+	SPRITE_RENDER_COMMAND ()
+	{
+		renderTargets.reserve (8);
+		atlases.reserve (16);
+		constbufs.reserve (16);
+		instances.reserve (1024);
+	}
 };
 
 struct SPRITE_TRANSFORM

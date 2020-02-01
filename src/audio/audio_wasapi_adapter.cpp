@@ -160,13 +160,6 @@ private:
 	Microsoft::WRL::ComPtr<IMMDeviceCollection> deviceCollection;
 };
 
-HRESULT GetDefaultEndPoint (dseed::audio::audioadapter_type type, IMMDeviceEnumerator* deviceEnumerator, IMMDevice** device) noexcept
-{
-	return deviceEnumerator->GetDefaultAudioEndpoint (
-		(type == dseed::audio::audioadapter_type::speaker) ? eRender : eCapture
-		, eConsole, device);
-}
-
 #endif
 
 dseed::error_t dseed::audio::create_wasapi_audiooadapter_enumerator (dseed::audio::audioadapter_type type,

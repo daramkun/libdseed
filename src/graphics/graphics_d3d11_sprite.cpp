@@ -8,6 +8,8 @@
 
 #	include <queue>
 
+#	define SPRITE_INSTANCE_COUNT							682//(64 * 1024) / sizeof (SPRITE_INSTANCE_DATA)
+
 constexpr char vertexShaderCode[] = CODE (
 	struct VERTEXSHADER_OUT
 	{
@@ -31,7 +33,7 @@ constexpr char vertexShaderCode[] = CODE (
 
 	cbuffer SPRITE_INSTANCE_DATA : register (b1)
 	{
-		SPRITE_INSTANCE_DATA_RECORD records[512];
+		SPRITE_INSTANCE_DATA_RECORD records[682];
 	};
 
 	VERTEXSHADER_OUT main (uint vertexId : SV_VertexID, uint instanceId : SV_InstanceID)
@@ -165,7 +167,7 @@ __d3d11_sprite_atlas::__d3d11_sprite_atlas (ID3D11Resource* texture, ID3D11Shade
 	for (size_t i = 0; i < atlas_count; ++i)
 	{
 		auto& atlas = atlases[i];
-		this->atlases.push_back (atlas);
+		this->atlases.emplace_back (atlas);
 	}
 }
 
@@ -298,7 +300,7 @@ dseed::error_t __d3d11_sprite_rendertarget::atlas (dseed::graphics::sprite_atlas
 ////////////////////////////////////////////////////////////////////////////////////////////
 __d3d11_sprite_render::__d3d11_sprite_render (dseed::graphics::vgadevice* device)
 	: _refCount (1), vgadevice (device), session (false)
-	, renderMethod (dseed::graphics::rendermethod::deferred), renderTargetSize (0, 0)
+	, renderMethod (dseed::graphics::rendermethod::deferred), renderTargetSize (0, 0), transformBuffer ({ dseed::float4x4::identity (), dseed::float4x4::identity () })
 {
 
 }
@@ -329,7 +331,7 @@ dseed::error_t __d3d11_sprite_render::initialize ()
 	if (FAILED (CreateConstantBuffer (d3dDevice.Get (), sizeof (SPRITE_TRANSFORM), &transformConstantBuffer, nullptr)))
 		return dseed::error_fail;
 
-	if (FAILED (CreateConstantBuffer (d3dDevice.Get (), sizeof (SPRITE_INSTANCE_DATA) * 512, &instanceConstantBuffer, nullptr)))
+	if (FAILED (CreateConstantBuffer (d3dDevice.Get (), sizeof (SPRITE_INSTANCE_DATA) * SPRITE_INSTANCE_COUNT, &instanceConstantBuffer, nullptr)))
 		return dseed::error_fail;
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
@@ -520,6 +522,35 @@ dseed::error_t __d3d11_sprite_render::create_constant (size_t size, dseed::graph
 	return dseed::error_good;
 }
 
+inline SPRITE_RENDER_COMMAND* add_command (std::queue<SPRITE_RENDER_COMMAND*>& commands, dseed::memorypool<SPRITE_RENDER_COMMAND>& commandPool)
+{
+	SPRITE_RENDER_COMMAND* command;
+	if (commands.empty ())
+	{
+		command = commandPool.get_memory ();
+		commands.push (command);
+	}
+	else if (commands.back ()->instances.size () == 0)
+	{
+		command = commands.back ();
+	}
+	else
+	{
+		SPRITE_RENDER_COMMAND* baseCommand = commands.back ();
+		command = commandPool.get_memory ();
+		for (auto& rt : baseCommand->renderTargets)
+			command->renderTargets.emplace_back (rt);
+		command->pipeline = baseCommand->pipeline;
+		for (auto& a : baseCommand->atlases)
+			command->atlases.emplace_back (a);
+		for (auto& cb : baseCommand->constbufs)
+			command->constbufs.emplace_back (cb);
+		commands.push (command);
+	}
+
+	return command;
+}
+
 dseed::error_t __d3d11_sprite_render::set_pipeline (dseed::graphics::pipeline* pipeline) noexcept
 {
 	if (!session)
@@ -529,25 +560,8 @@ dseed::error_t __d3d11_sprite_render::set_pipeline (dseed::graphics::pipeline* p
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		// Insert first command
-		if (commands.empty ())
-		{
-			SPRITE_RENDER_COMMAND* command = commandPool.get_memory ();
-			command->pipeline = pipeline;
-			commands.push (command);
-		}
-		// Command no have instance: Change Atlases
-		else if (commands.back ()->instances.size () == 0)
-		{
-			commands.back ()->pipeline = pipeline;
-		}
-		// Insert command based last command
-		else
-		{
-			SPRITE_RENDER_COMMAND* command = commands.back ();
-			command->pipeline = pipeline;
-			commands.push (command);
-		}
+		SPRITE_RENDER_COMMAND* command = add_command (commands, commandPool);
+		command->pipeline = pipeline;
 	}
 	else if (renderMethod == dseed::graphics::rendermethod::forward)
 	{
@@ -573,30 +587,10 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget (dseed::graphics::sprite_
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		// Insert first command
-		if (commands.empty ())
-		{
-			SPRITE_RENDER_COMMAND* command = commandPool.get_memory ();
-			for (size_t i = 0; i < size; ++i)
-				command->renderTargets.push_back (rendertargets[i]);
-			commands.push (command);
-		}
-		// Command no have instance: Change Atlases
-		else if (commands.back ()->instances.size () == 0)
-		{
-			commands.back ()->renderTargets.clear ();
-			for (size_t i = 0; i < size; ++i)
-				commands.back ()->renderTargets.push_back (rendertargets[i]);
-		}
-		// Insert command based last command
-		else
-		{
-			SPRITE_RENDER_COMMAND* command = commands.back ();
-			command->renderTargets.clear ();
-			for (size_t i = 0; i < size; ++i)
-				command->renderTargets.push_back (rendertargets[i]);
-			commands.push (command);
-		}
+		SPRITE_RENDER_COMMAND* command = add_command (commands, commandPool);
+		command->renderTargets.clear ();
+		for (size_t i = 0; i < size; ++i)
+			command->renderTargets.emplace_back (rendertargets[i]);
 	}
 	else if (renderMethod == dseed::graphics::rendermethod::forward)
 	{
@@ -606,23 +600,23 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget (dseed::graphics::sprite_
 		std::vector<D3D11_VIEWPORT> viewports;
 		for (size_t i = 0; i < size; ++i)
 		{
-			commands.front ()->renderTargets.push_back (rendertargets[i]);
+			commands.front ()->renderTargets.emplace_back (rendertargets[i]);
 
 			if (rendertargets[i] == nullptr)
 			{
-				rtv.push_back (renderTargetView.Get ());
+				rtv.emplace_back (renderTargetView.Get ());
 
 				D3D11_VIEWPORT viewport = {};
 				viewport.Width = renderTargetSize.width;
 				viewport.Height = renderTargetSize.height;
 				viewport.MaxDepth = 1.0f;
-				viewports.push_back (viewport);
+				viewports.emplace_back (viewport);
 			}
 			else
 			{
 				dseed::graphics::d3d11_sprite_rendertarget_nativeobject nativeObject;
 				rendertargets[i]->native_object ((void**)&nativeObject);
-				rtv.push_back (nativeObject.renderTargetView.Get ());
+				rtv.emplace_back (nativeObject.renderTargetView.Get ());
 
 				dseed::autoref<dseed::graphics::sprite_atlas> atlas;
 				rendertargets[i]->atlas (&atlas);
@@ -631,7 +625,7 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget (dseed::graphics::sprite_
 				viewport.Width = atlas->size ().width;
 				viewport.Height = atlas->size ().height;
 				viewport.MaxDepth = 1.0f;
-				viewports.push_back (viewport);
+				viewports.emplace_back (viewport);
 			}
 		}
 		immediateContext->OMSetRenderTargets (rtv.size (), rtv.data (), nullptr);
@@ -652,30 +646,10 @@ dseed::error_t __d3d11_sprite_render::set_atlas (dseed::graphics::sprite_atlas**
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		// Insert first command
-		if (commands.empty ())
-		{
-			SPRITE_RENDER_COMMAND* command = commandPool.get_memory ();
-			for (size_t i = 0; i < size; ++i)
-				command->atlases.push_back (atlas[i]);
-			commands.push (command);
-		}
-		// Command no have instance: Change Atlases
-		else if (commands.back ()->instances.size () == 0)
-		{
-			commands.back ()->atlases.clear ();
-			for (size_t i = 0; i < size; ++i)
-				commands.back ()->atlases.push_back (atlas[i]);
-		}
-		// Insert command based last command
-		else
-		{
-			SPRITE_RENDER_COMMAND* command = commands.back ();
-			command->atlases.clear ();
-			for (size_t i = 0; i < size; ++i)
-				command->atlases.push_back (atlas[i]);
-			commands.push (command);
-		}
+		SPRITE_RENDER_COMMAND* command = add_command (commands, commandPool);
+		command->atlases.clear ();
+		for (size_t i = 0; i < size; ++i)
+			command->atlases.emplace_back (atlas[i]);
 	}
 	else if (renderMethod == dseed::graphics::rendermethod::forward)
 	{
@@ -684,11 +658,11 @@ dseed::error_t __d3d11_sprite_render::set_atlas (dseed::graphics::sprite_atlas**
 		std::vector<ID3D11ShaderResourceView*> srv;
 		for (size_t i = 0; i < size; ++i)
 		{
-			commands.front ()->atlases.push_back (atlas[i]);
+			commands.front ()->atlases.emplace_back (atlas[i]);
 
 			dseed::graphics::d3d11_sprite_atlas_nativeobject nativeObject;
 			atlas[i]->native_object ((void**)&nativeObject);
-			srv.push_back (nativeObject.shaderResourceView.Get ());
+			srv.emplace_back (nativeObject.shaderResourceView.Get ());
 		}
 		immediateContext->PSSetShaderResources (0, srv.size (), srv.data ());
 	}
@@ -704,30 +678,10 @@ dseed::error_t __d3d11_sprite_render::set_constant (dseed::graphics::vgabuffer**
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		// Insert first command
-		if (commands.empty ())
-		{
-			SPRITE_RENDER_COMMAND* command = commandPool.get_memory ();
-			for (size_t i = 0; i < size; ++i)
-				command->constbufs.push_back (constbuf[i]);
-			commands.push (command);
-		}
-		// Command no have instance: Change Atlases
-		else if (commands.back ()->instances.size () == 0)
-		{
-			commands.back ()->constbufs.clear ();
-			for (size_t i = 0; i < size; ++i)
-				commands.back ()->constbufs.push_back (constbuf[i]);
-		}
-		// Insert command based last command
-		else
-		{
-			SPRITE_RENDER_COMMAND* command = commands.back ();
-			command->atlases.clear ();
-			for (size_t i = 0; i < size; ++i)
-				command->constbufs.push_back (constbuf[i]);
-			commands.push (command);
-		}
+		SPRITE_RENDER_COMMAND* command = add_command (commands, commandPool);
+		command->atlases.clear ();
+		for (size_t i = 0; i < size; ++i)
+			command->constbufs.emplace_back (constbuf[i]);
 	}
 	else if (renderMethod == dseed::graphics::rendermethod::forward)
 	{
@@ -736,10 +690,10 @@ dseed::error_t __d3d11_sprite_render::set_constant (dseed::graphics::vgabuffer**
 		std::vector<ID3D11Buffer*> buf;
 		for (size_t i = 0; i < size; ++i)
 		{
-			commands.front ()->constbufs.push_back (constbuf[i]);
+			commands.front ()->constbufs.emplace_back (constbuf[i]);
 			dseed::graphics::d3d11_sprite_vgabuffer_nativeobject nativeObject;
 			constbuf[i]->native_object ((void**)&nativeObject);
-			buf.push_back (nativeObject.buffer.Get ());
+			buf.emplace_back (nativeObject.buffer.Get ());
 		}
 		immediateContext->PSSetConstantBuffers (0, buf.size (), buf.data ());
 	}
@@ -879,13 +833,13 @@ dseed::error_t __d3d11_sprite_render::end () noexcept
 			render_ready_command (immediateContext.Get (), command);
 
 			auto instanceCount = command->instances.size ();
-			auto loopCount = (size_t)ceil (instanceCount / 512.0f);
-			command->instances.resize (loopCount * 512);
+			auto loopCount = (size_t)ceil (instanceCount / (double)SPRITE_INSTANCE_COUNT);
+			command->instances.resize (loopCount * SPRITE_INSTANCE_COUNT);
 			for (size_t i = 0; i < loopCount; ++i)
 			{
-				size_t drawCount = dseed::minimum<size_t> (512, instanceCount - (i * 512));
+				size_t drawCount = dseed::minimum<size_t> (SPRITE_INSTANCE_COUNT, instanceCount - (i * SPRITE_INSTANCE_COUNT));
 				immediateContext->UpdateSubresource (instanceConstantBuffer.Get (), 0, nullptr,
-					command->instances.data () + (i * 512), sizeof (SPRITE_INSTANCE_DATA) * 512, 0);
+					command->instances.data () + (i * SPRITE_INSTANCE_COUNT), sizeof (SPRITE_INSTANCE_DATA) * SPRITE_INSTANCE_COUNT, 0);
 				immediateContext->DrawInstanced (4, drawCount, 0, 0);
 			}
 
@@ -943,15 +897,15 @@ dseed::error_t __d3d11_sprite_render::draw (size_t atlas_index, const dseed::f32
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		command->instances.push_back (record);
+		command->instances.emplace_back (record);
 	}
 	else if (renderMethod == dseed::graphics::rendermethod::forward)
 	{
-		static SPRITE_INSTANCE_DATA records[512];
+		static SPRITE_INSTANCE_DATA records[SPRITE_INSTANCE_COUNT];
 
 		records[0] = record;
 
-		immediateContext->UpdateSubresource (instanceConstantBuffer.Get (), 0, nullptr, records, sizeof (SPRITE_INSTANCE_DATA) * 512, 0);
+		immediateContext->UpdateSubresource (instanceConstantBuffer.Get (), 0, nullptr, records, sizeof (SPRITE_INSTANCE_DATA) * SPRITE_INSTANCE_COUNT, 0);
 		immediateContext->DrawInstanced (4, 1, 0, 0);
 	}
 
@@ -980,19 +934,19 @@ void __d3d11_sprite_render::render_ready_command (ID3D11DeviceContext* deviceCon
 		{
 			if (command->renderTargets[i] == nullptr)
 			{
-				rtv.push_back (renderTargetView.Get ());
+				rtv.emplace_back (renderTargetView.Get ());
 
 				D3D11_VIEWPORT viewport = {};
 				viewport.Width = renderTargetSize.width;
 				viewport.Height = renderTargetSize.height;
 				viewport.MaxDepth = 1.0f;
-				viewports.push_back (viewport);
+				viewports.emplace_back (viewport);
 			}
 			else
 			{
 				dseed::graphics::d3d11_sprite_rendertarget_nativeobject nativeObject;
 				command->renderTargets[i]->native_object ((void**)&nativeObject);
-				rtv.push_back (nativeObject.renderTargetView.Get ());
+				rtv.emplace_back (nativeObject.renderTargetView.Get ());
 
 				dseed::autoref<dseed::graphics::sprite_atlas> atlas;
 				command->renderTargets[i]->atlas (&atlas);
@@ -1001,7 +955,7 @@ void __d3d11_sprite_render::render_ready_command (ID3D11DeviceContext* deviceCon
 				viewport.Width = atlas->size ().width;
 				viewport.Height = atlas->size ().height;
 				viewport.MaxDepth = 1.0f;
-				viewports.push_back (viewport);
+				viewports.emplace_back (viewport);
 			}
 		}
 		immediateContext->OMSetRenderTargets (rtv.size (), rtv.data (), nullptr);
@@ -1030,7 +984,7 @@ void __d3d11_sprite_render::render_ready_command (ID3D11DeviceContext* deviceCon
 		{
 			Microsoft::WRL::ComPtr<ID3D11Buffer> d3d11Buffer;
 			cb->native_object (&d3d11Buffer);
-			constantBuffers.push_back (d3d11Buffer.Get ());
+			constantBuffers.emplace_back (d3d11Buffer.Get ());
 		}
 		deviceContext->PSSetConstantBuffers (0, (UINT)constantBuffers.size (), constantBuffers.data ());
 	}
@@ -1042,7 +996,7 @@ void __d3d11_sprite_render::render_ready_command (ID3D11DeviceContext* deviceCon
 		{
 			dseed::graphics::d3d11_sprite_atlas_nativeobject nativeObject;
 			command->atlases[i]->native_object ((void**)&nativeObject);
-			srv.push_back (nativeObject.shaderResourceView.Get ());
+			srv.emplace_back (nativeObject.shaderResourceView.Get ());
 		}
 		immediateContext->PSSetShaderResources (0, srv.size (), srv.data ());
 	}
