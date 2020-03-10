@@ -9,6 +9,7 @@
 #	include <queue>
 
 #	define SPRITE_INSTANCE_COUNT							682//(64 * 1024) / sizeof (SPRITE_INSTANCE_DATA)
+#	define SPRITE_INSTANCE_TOTAL_SIZE						SPRITE_INSTANCE_COUNT * sizeof (SPRITE_INSTANCE_DATA)
 
 constexpr char vertexShaderCode[] = CODE (
 	struct VERTEXSHADER_OUT
@@ -835,11 +836,13 @@ dseed::error_t __d3d11_sprite_render::end () noexcept
 			auto instanceCount = command->instances.size ();
 			auto loopCount = (size_t)ceil (instanceCount / (double)SPRITE_INSTANCE_COUNT);
 			command->instances.resize (loopCount * SPRITE_INSTANCE_COUNT);
+
+			const auto currentInstances = command->instances.data ();
 			for (size_t i = 0; i < loopCount; ++i)
 			{
 				size_t drawCount = dseed::minimum<size_t> (SPRITE_INSTANCE_COUNT, instanceCount - (i * SPRITE_INSTANCE_COUNT));
 				immediateContext->UpdateSubresource (instanceConstantBuffer.Get (), 0, nullptr,
-					command->instances.data () + (i * SPRITE_INSTANCE_COUNT), sizeof (SPRITE_INSTANCE_DATA) * SPRITE_INSTANCE_COUNT, 0);
+					currentInstances + (i * SPRITE_INSTANCE_COUNT), SPRITE_INSTANCE_TOTAL_SIZE, 0);
 				immediateContext->DrawInstanced (4, drawCount, 0, 0);
 			}
 
@@ -885,13 +888,14 @@ dseed::error_t __d3d11_sprite_render::draw (size_t atlas_index, const dseed::f32
 
 	const dseed::rect2i atlas = command->atlases[0]->atlas_element (atlas_index);
 	auto size = command->atlases[0]->size ();
+	auto rcp = dseed::rcp (dseed::f32x4 (size.width, size.height, 0, 0));
 
 	SPRITE_INSTANCE_DATA record = {};
 	record.area = dseed::f32x4 (
-		atlas.x / (float)size.width,
-		atlas.y / (float)size.height,
-		atlas.width / (float)size.width,
-		atlas.height / (float)size.height);
+		atlas.x * rcp.x (),
+		atlas.y * rcp.y (),
+		atlas.width * rcp.x (),
+		atlas.height * rcp.y ());
 	record.transform = dseed::float4x4::scale (size.width, size.height, 1) * transform;
 	record.color = color;
 
@@ -930,6 +934,8 @@ void __d3d11_sprite_render::render_ready_command (ID3D11DeviceContext* deviceCon
 	{
 		std::vector<ID3D11RenderTargetView*> rtv;
 		std::vector<D3D11_VIEWPORT> viewports;
+		rtv.reserve (command->renderTargets.size ());
+		viewports.reserve (command->renderTargets.size ());
 		for (size_t i = 0; i < command->renderTargets.size (); ++i)
 		{
 			if (command->renderTargets[i] == nullptr)
@@ -980,6 +986,7 @@ void __d3d11_sprite_render::render_ready_command (ID3D11DeviceContext* deviceCon
 	if (command->constbufs.size () > 0)
 	{
 		std::vector<ID3D11Buffer*> constantBuffers;
+		constantBuffers.reserve (command->constbufs.size ());
 		for (auto& cb : command->constbufs)
 		{
 			Microsoft::WRL::ComPtr<ID3D11Buffer> d3d11Buffer;

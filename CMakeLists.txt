@@ -24,6 +24,19 @@ PROJECT ( dseed
 	DESCRIPTION "This is Core library for personal."
 )
 
+MESSAGE ( STATUS "==============================================================" )
+MESSAGE ( STATUS "   _ _ _         _                   _ " )
+MESSAGE ( STATUS "  | (_) |__   __| |___  ___  ___  __| |" )
+MESSAGE ( STATUS "  | | | '_ \\ / _` / __|/ _ \\/ _ \\/ _` |" )
+MESSAGE ( STATUS "  | | | |_) | (_| \\__ \\  __/  __/ (_| |" )
+MESSAGE ( STATUS "  |_|_|_.__/ \\__,_|___/\\___|\\___|\\__,_|" )
+MESSAGE ( STATUS "" )
+MESSAGE ( STATUS "==============================================================" )
+
+MESSAGE ( STATUS "dseed Source code version:     ${DSEED_VERSION_MAJOR}.${DSEED_VERSION_MINOR}.${DSEED_VERSION_REVISION}" )
+MESSAGE ( STATUS "dseed Build CMake Version:     ${CMAKE_VERSION}" )
+MESSAGE ( STATUS "dseed Build Target Platform:   ${CMAKE_SYSTEM_NAME}" )
+
 ############################################################################################
 #
 # Setting Install Pathes
@@ -66,11 +79,9 @@ SET_PROPERTY ( GLOBAL PROPERTY USE_FOLDERS ON )
 ############################################################################################
 IF ( ${DSEED_USE_PNG} )
 	FIND_PACKAGE ( zlib )
-	FIND_PACKAGE ( png )
+	FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic zlibstatic.lib )
 
-	IF ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( "${ZLIB_LIBRARY}" STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
-		FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic zlibstatic.lib )
-	ENDIF ()
+	FIND_PACKAGE ( png )
 	
 	IF ( ( NOT DEFINED PNG_LIBRARY ) OR ( "${PNG_LIBRARY}" STREQUAL "PNG_LIBRARY-NOTFOUND") )
 		FIND_LIBRARY ( PNG_LIBRARY NAMES png16_static png_static libpng16_static libpng16_static.lib png16_static.lib libpng16_static.a png16_static.a )
@@ -128,9 +139,7 @@ IF ( ${DSEED_USE_TIFF} )
 		FIND_LIBRARY ( LZMA_LIBRARY NAMES lzma liblzma lzma.lib liblzma.lib lzma.a liblzma.a )
 	ENDIF ()
 	FIND_PACKAGE ( zlib )
-	IF ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( "${ZLIB_LIBRARY}" STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
-		FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic zlibstatic.lib )
-	ENDIF ()
+	FIND_LIBRARY ( ZLIB_LIBRARY NAMES zlibstatic zlibstatic.lib )
 	FIND_PACKAGE ( tiff )
 	
 	IF ( ( NOT DEFINED ZLIB_INCLUDE_DIRS ) OR ( ( NOT DEFINED ZLIB_LIBRARY ) OR ( "${ZLIB_LIBRARY}" STREQUAL "ZLIB_LIBRARY-NOTFOUND" ) )
@@ -315,7 +324,6 @@ link_directories ( ${INSTALL_LIB_DIR} )
 SET ( DSEED_DEFINITIONS  )
 SET ( DSEED_LINK_LIBS  )
 
-MESSAGE ( "CMake System Name is ${CMAKE_SYSTEM_NAME}" )
 IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" OR ${CMAKE_SYSTEM_NAME} STREQUAL "MSYS" )
 	LIST ( APPEND DSEED_DEFINITIONS -DWINDOWS )
 	LIST ( APPEND DSEED_DEFINITIONS -DUNICODE )
@@ -429,8 +437,6 @@ TARGET_INCLUDE_DIRECTORIES (
 	PRIVATE
 
 	${DSEED_PRIVATE_INCS}
-	${CMAKE_CURRENT_SOURCE_DIR}/src/graphics/
-	${CMAKE_CURRENT_SOURCE_DIR}/src/platform/
 )
 TARGET_COMPILE_DEFINITIONS ( dseed PRIVATE ${DSEED_DEFINITIONS} )
 TARGET_LINK_LIBRARIES ( dseed ${DSEED_LINK_LIBS} )

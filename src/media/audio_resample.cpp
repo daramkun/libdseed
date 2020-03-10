@@ -8,7 +8,7 @@ using rsfn = std::function<bool (uint8_t * dest, const uint8_t * src, size_t src
 using rstp = std::tuple<dseed::media::resample, dseed::media::pulseformat, int8_t>;
 
 template<typename TSample>
-inline bool resampl_nearest (uint8_t* dest, const uint8_t* src, size_t srcLength, int ch, int sr, int nsr) noexcept
+inline bool resample_nearest (uint8_t* dest, const uint8_t* src, size_t srcLength, int ch, int sr, int nsr) noexcept
 {
 	TSample* destPtr = (TSample*)dest;
 	const TSample* srcPtr = (const TSample*)src;
@@ -18,7 +18,7 @@ inline bool resampl_nearest (uint8_t* dest, const uint8_t* src, size_t srcLength
 
 	for (size_t i = 0; i < destCount; i += ch)
 	{
-		size_t srcI = destCount * sr / nsr;
+		size_t srcI = i * sr / nsr;
 
 		for (size_t c = 0; c < ch; ++c)
 		{
@@ -30,11 +30,11 @@ inline bool resampl_nearest (uint8_t* dest, const uint8_t* src, size_t srcLength
 }
 
 std::map<rstp, rsfn> g_resamples = {
-	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 8), resampl_nearest<int8_t> },
-	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 16), resampl_nearest<int16_t> },
-	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 24), resampl_nearest<int24_t> },
-	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 32), resampl_nearest<int32_t> },
-	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::ieee_float, 32), resampl_nearest<float> },
+	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 8), resample_nearest<int8_t> },
+	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 16), resample_nearest<int16_t> },
+	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 24), resample_nearest<int24_t> },
+	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::pcm, 32), resample_nearest<int32_t> },
+	{ rstp (dseed::media::resample::nearest, dseed::media::pulseformat::ieee_float, 32), resample_nearest<float> },
 };
 
 class __resample_stream : public dseed::media::audio_stream
@@ -43,7 +43,7 @@ public:
 	__resample_stream (audio_stream* stream, int32_t samplerate, rsfn fn)
 		: _refCount (1), _stream (stream), _samplerate (samplerate), _fn (fn)
 	{
-		_stream->audioformat (&_format);
+		_stream->format (&_format);
 	}
 
 public:
@@ -62,6 +62,8 @@ public:
 		size_t readLength = length * _format.samples_per_sec / _samplerate;
 		std::vector<int8_t> buf (readLength);
 		size_t ret = _stream->read (buf.data (), readLength);
+		if (ret <= 0)
+			return ret;
 		if (!_fn ((uint8_t*)buffer, (const uint8_t*)buf.data (), buf.size (), _format.channels, _format.samples_per_sec, _samplerate))
 			return 0;
 		return ret * _samplerate / _format.samples_per_sec;
@@ -85,7 +87,7 @@ public:
 	virtual bool writable () noexcept override { return false; }
 	virtual bool seekable () noexcept override { return _stream->seekable (); }
 
-	virtual error_t audioformat (dseed::media::audioformat* wf) override
+	virtual error_t format (dseed::media::audioformat* wf) override
 	{
 		*wf = _format;
 		wf->samples_per_sec = _samplerate;
@@ -107,7 +109,7 @@ dseed::error_t dseed::media::resample_audio (audio_stream* original, int32_t sam
 		return dseed::error_invalid_args;
 
 	audioformat format;
-	if (dseed::failed (original->audioformat (&format)))
+	if (dseed::failed (original->format (&format)))
 		return dseed::error_fail;
 
 	if (format.samples_per_sec == samplerate)

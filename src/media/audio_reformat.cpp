@@ -11,7 +11,7 @@ public:
 	__pcm_to_float_stream (dseed::media::audio_stream* base)
 		: _refCount (1), _base (base)
 	{
-		_base->audioformat (&_wf);
+		_base->format (&_wf);
 
 		switch (_wf.bits_per_sample)
 		{
@@ -64,7 +64,7 @@ public:
 	virtual bool writable () noexcept override { return _base->writable (); }
 	virtual bool seekable () noexcept override { return _base->seekable (); }
 
-	virtual dseed::error_t audioformat (dseed::media::audioformat* wf) override
+	virtual dseed::error_t format (dseed::media::audioformat* wf) override
 	{
 		wf->channels = _wf.channels;
 		wf->bits_per_sample = 32;
@@ -89,7 +89,7 @@ public:
 	__float_to_pcm_stream (dseed::media::audio_stream* base, int bitsPerSample)
 		: _refCount (1), _base (base), _bps (bitsPerSample)
 	{
-		_base->audioformat (&_wf);
+		_base->format (&_wf);
 
 		switch (bitsPerSample)
 		{
@@ -142,7 +142,7 @@ public:
 	virtual bool writable () noexcept override { return _base->writable (); }
 	virtual bool seekable () noexcept override { return _base->seekable (); }
 
-	virtual dseed::error_t audioformat (dseed::media::audioformat* wf) override
+	virtual dseed::error_t format (dseed::media::audioformat* wf) override
 	{
 		wf->channels = _wf.channels;
 		wf->bits_per_sample = _bps;
@@ -168,7 +168,7 @@ public:
 	__pcm_to_pcm_stream (dseed::media::audio_stream* base, int bitsPerSample)
 		: _refCount (1), _base (base), _bps (bitsPerSample)
 	{
-		_base->audioformat (&_wf);
+		_base->format (&_wf);
 
 		switch (_wf.bits_per_sample)
 		{
@@ -251,7 +251,7 @@ public:
 	virtual bool writable () noexcept override { return _base->writable (); }
 	virtual bool seekable () noexcept override { return _base->seekable (); }
 
-	virtual dseed::error_t audioformat (dseed::media::audioformat* wf) override
+	virtual dseed::error_t format (dseed::media::audioformat* wf) override
 	{
 		wf->channels = _wf.channels;
 		wf->bits_per_sample = _bps;
@@ -280,7 +280,7 @@ dseed::error_t dseed::media::reformat_audio (audio_stream* original, pulseformat
 		return dseed::error_invalid_args;
 
 	audioformat original_format;
-	original->audioformat (&original_format);
+	original->format (&original_format);
 
 	if (fmt == original_format.pulse_format && bits_per_sample == original_format.bits_per_sample)
 	{

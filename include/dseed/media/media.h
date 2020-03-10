@@ -142,7 +142,7 @@ namespace dseed::media
 	class DSEEDEXP audio_stream : public dseed::io::stream
 	{
 	public:
-		virtual error_t audioformat (audioformat* wf) = 0;
+		virtual error_t format (audioformat* wf) = 0;
 	};
 
 	// Create Buffered Audio Stream

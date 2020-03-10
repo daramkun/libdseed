@@ -262,13 +262,17 @@ inline HRESULT CreateTextureFromBitmap (ID3D11Device* d3dDevice, dseed::bitmaps:
 	return S_OK;
 }
 
-inline HRESULT CreateConstantBuffer (ID3D11Device* d3dDevice, UINT size, ID3D11Buffer** buffer, const void* buf)
+inline HRESULT CreateConstantBuffer (ID3D11Device* d3dDevice, UINT size, ID3D11Buffer** buffer, const void* buf, D3D11_USAGE usage = D3D11_USAGE_DEFAULT)
 {
 	D3D11_BUFFER_DESC constantBufferDesc = {};
 	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constantBufferDesc.StructureByteStride = 0;
 	constantBufferDesc.ByteWidth = size;
-	constantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	constantBufferDesc.Usage = usage;
+	if (usage == D3D11_USAGE_DYNAMIC || usage == D3D11_USAGE_STAGING)
+		constantBufferDesc.CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
+	if (usage == D3D11_USAGE_STAGING)
+		constantBufferDesc.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
 
 	D3D11_SUBRESOURCE_DATA subResourceData = { };
 	subResourceData.pSysMem = buf;

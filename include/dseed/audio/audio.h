@@ -27,10 +27,11 @@ namespace dseed::audio
 
 namespace dseed::audio
 {
-	enum class audiobufferstate
+	enum class audiostate
 	{
 		stopped,
 		playing,
+		paused,
 	};
 
 	struct audiolistener
@@ -50,38 +51,6 @@ namespace dseed::audio
 		float dopplerScale;
 	};
 
-	class DSEEDEXP audioplaybuffer : public object, public wrapped
-	{
-	public:
-		virtual audiobufferstate state () noexcept = 0;
-
-	public:
-		virtual float volume () noexcept = 0;
-		virtual error_t set_volume (float vol) noexcept = 0;
-
-	public:
-		virtual error_t play () noexcept = 0;
-		virtual error_t stop () noexcept = 0;
-
-	public:
-		virtual error_t buffering (const void* buffer, size_t bufferSize) noexcept = 0;
-		virtual error_t wait_to_buffer_end () noexcept = 0;
-
-	public:
-		virtual error_t set_listener (const audiolistener* emitter) noexcept = 0;
-		virtual error_t set_emitter (const audioemitter* emitter) noexcept = 0;
-	};
-
-	class DSEEDEXP audioplayer : public object, public wrapped
-	{
-	public:
-		virtual float volume () noexcept = 0;
-		virtual error_t set_volume (float vol) noexcept = 0;
-
-	public:
-		virtual error_t create_buffer (const dseed::media::audioformat* format, audioplaybuffer** buffer) noexcept = 0;
-	};
-
 	class DSEEDEXP audiorequester : public object, public wrapped
 	{
 	public:
@@ -97,6 +66,74 @@ namespace dseed::audio
 
 	public:
 		virtual error_t request (void* buffer, size_t bufferMaxSize, size_t* dataSize) = 0;
+	};
+
+	class DSEEDEXP backgroundaudio : public object
+	{
+	public:
+		virtual error_t format (dseed::media::audioformat* fmt) noexcept = 0;
+		virtual audiostate state () noexcept = 0;
+
+	public:
+		virtual error_t play () noexcept = 0;
+		virtual error_t stop () noexcept = 0;
+		virtual error_t pause () noexcept = 0;
+
+	public:
+		virtual timespan position () noexcept = 0;
+		virtual timespan duration () noexcept = 0;
+
+	public:
+		virtual float volume () noexcept = 0;
+		virtual error_t set_volume (float vol) noexcept = 0;
+	};
+
+	using effectid_t = uint32_t;
+	using instanceid_t = uint64_t;
+
+	constexpr effectid_t invalid_effectid = 0xffffffff;
+	constexpr instanceid_t invalid_instanceid = 0xffffffffffffffff;
+
+	class DSEEDEXP effectaudio : public object
+	{
+	public:
+		virtual error_t format (dseed::media::audioformat* fmt) noexcept = 0;
+
+	public:
+		virtual error_t load_effectid (dseed::media::audio_stream* stream, effectid_t* eid) noexcept = 0;
+		virtual error_t unload_effectid (effectid_t eid) noexcept = 0;
+		virtual error_t unload_all_effects () noexcept = 0;
+
+	public:
+		virtual error_t create_instance (effectid_t eid, instanceid_t* iid) noexcept = 0;
+		virtual error_t release_instance (instanceid_t iid) noexcept = 0;
+		virtual error_t release_all_instances () noexcept = 0;
+
+	public:
+		virtual error_t set_listener (instanceid_t iid, const audiolistener* listener) noexcept = 0;
+		virtual error_t set_emitter (instanceid_t iid, const audioemitter* emitter) noexcept = 0;
+
+	public:
+		virtual error_t play (instanceid_t iid) noexcept = 0;
+		virtual error_t stop (instanceid_t iid) noexcept = 0;
+
+	public:
+		virtual audiostate state (instanceid_t iid) noexcept = 0;
+
+	public:
+		virtual float volume () noexcept = 0;
+		virtual error_t set_volume (float vol) noexcept = 0;
+	};
+
+	class DSEEDEXP audioplayer : public object, public wrapped
+	{
+	public:
+		virtual float volume () noexcept = 0;
+		virtual error_t set_volume (float vol) noexcept = 0;
+
+	public:
+		virtual error_t create_backgroundaudio (dseed::media::audio_stream* stream, backgroundaudio** audio) noexcept = 0;
+		virtual error_t create_effectaudio (dseed::media::audioformat* format, effectaudio** audio) noexcept = 0;
 	};
 }
 
@@ -147,9 +184,6 @@ namespace dseed::audio
 	DSEEDEXP error_t create_wasapi_audiooadapter_enumerator (audioadapter_type type, audioadapter_enumerator** enumerator) noexcept;
 	DSEEDEXP error_t create_xaudio2_audioplayer (audioadapter* adapter, audioplayer** player) noexcept;
 	DSEEDEXP error_t create_wasapi_audiorequester (audioadapter* adapter, audiorequester** requester) noexcept;
-#	if NTDDI_VERSION >= NTDDI_WIN10
-	DSEEDEXP error_t create_wasapi_audioplayer (audioadapter* adapter, audioplayer** player) noexcept;
-#	endif
 #endif
 #if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID || PLATFORM_MACOS || PLATFORM_IOS || PLATFORM_WEBASSEMBLY
 	DSEEDEXP error_t create_openal_audioadapter_enumerator (audioadapter_type type, audioadapter_enumerator** enumerator) noexcept;

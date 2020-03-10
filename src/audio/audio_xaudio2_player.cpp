@@ -10,17 +10,24 @@ DEFINE_PROPERTYKEY (PKEY_AudioEndpoint_Path, 0x9c119480, 0xddc2, 0x4954, 0xa1, 0
 #	include <xaudio2.h>
 #	include <x3daudio.h>
 
-class __xaudio2_audioplaybuffer : public dseed::audio::audioplaybuffer, public IXAudio2VoiceCallback
+#	include "../libs/WAVHelper.hxx"
+
+class __xaudio2_backgroundaudio : public dseed::audio::backgroundaudio, public IXAudio2VoiceCallback
 {
 public:
-	__xaudio2_audioplaybuffer (IXAudio2SourceVoice* sourceVoice)
-		: _refCount (1), sourceVoice (sourceVoice)
+	__xaudio2_backgroundaudio (IXAudio2SourceVoice* voice, dseed::media::audio_stream* stream)
+		: _refCount (1), sourceVoice (voice), sourceStream (stream), isPlaying (false), isPaused (false), currentBuffer (0)
 	{
-		bufferEndEvent = CreateEvent (nullptr, FALSE, FALSE, nullptr);
+		dseed::media::audioformat af;
+		sourceStream->format (&af);
+
+		bytesPerSec = af.bytes_per_sec;
+		buffers[0].resize (bytesPerSec / 100);
+		buffers[1].resize (bytesPerSec / 100);
+		buffers[2].resize (bytesPerSec / 100);
 	}
-	~__xaudio2_audioplaybuffer ()
+	~__xaudio2_backgroundaudio ()
 	{
-		CloseHandle (bufferEndEvent);
 		sourceVoice->DestroyVoice ();
 	}
 
@@ -35,27 +42,73 @@ public:
 	}
 
 public:
-	virtual dseed::error_t native_object (void** nativeObject) override
+	virtual dseed::error_t format (dseed::media::audioformat* fmt) noexcept override
 	{
-		if (nativeObject == nullptr)
-			return dseed::error_invalid_args;
+		return sourceStream->format (fmt);
+	}
+	virtual dseed::audio::audiostate state () noexcept override
+	{
+		if (!isPlaying && !isPaused) return dseed::audio::audiostate::stopped;
+		if (isPlaying && isPaused) return dseed::audio::audiostate::paused;
+		
+		XAUDIO2_VOICE_STATE state;
+		sourceVoice->GetState (&state);
 
-		auto& no = *reinterpret_cast<dseed::audio::xaudio2_audioplaybuffer_nativeobject*>(nativeObject);
-		no.sourceVoice = sourceVoice;
+		if (state.BuffersQueued == 0)
+			return dseed::audio::audiostate::stopped;
 
+		return dseed::audio::audiostate::playing;
+	}
+
+public:
+	virtual dseed::error_t play () noexcept override
+	{
+		if (state () != dseed::audio::audiostate::playing)
+		{
+			Buffering ();
+			if (FAILED (sourceVoice->Start ()))
+				return dseed::error_fail;
+
+			isPlaying = true;
+			isPaused = false;
+		}
+		return dseed::error_good;
+	}
+	virtual dseed::error_t stop () noexcept override
+	{
+		if (!isPlaying)
+			return dseed::error_good;
+
+		if (dseed::failed (sourceStream->seek (dseed::io::seekorigin::begin, 0)))
+			return dseed::error_fail;
+
+		sourceVoice->Stop ();
+		sourceVoice->FlushSourceBuffers ();
+
+		isPlaying = false;
+		isPaused = false;
+		return dseed::error_good;
+	}
+	virtual dseed::error_t pause () noexcept override
+	{
+		if (!isPlaying)
+			return dseed::error_good;
+
+		sourceVoice->Stop ();
+		sourceVoice->FlushSourceBuffers ();
+
+		isPaused = true;
 		return dseed::error_good;
 	}
 
 public:
-	virtual dseed::audio::audiobufferstate state () noexcept override
+	virtual dseed::timespan position () noexcept override
 	{
-		XAUDIO2_VOICE_STATE voiceState;
-		sourceVoice->GetState (&voiceState);
-
-		if (voiceState.BuffersQueued == 0)
-			return dseed::audio::audiobufferstate::stopped;
-
-		return dseed::audio::audiobufferstate::playing;
+		return dseed::timespan::from_seconds (sourceStream->position () / (float)bytesPerSec);
+	}
+	virtual dseed::timespan duration () noexcept override
+	{
+		return dseed::timespan::from_seconds (sourceStream->length () / (float)bytesPerSec);
 	}
 
 public:
@@ -65,7 +118,6 @@ public:
 		sourceVoice->GetVolume (&vol);
 		return vol;
 	}
-
 	virtual dseed::error_t set_volume (float vol) noexcept override
 	{
 		if (FAILED (sourceVoice->SetVolume (vol)))
@@ -74,68 +126,342 @@ public:
 	}
 
 public:
-	virtual dseed::error_t play () noexcept override
-	{
-		if (FAILED (sourceVoice->Start ()))
-			return dseed::error_fail;
-		return dseed::error_good;
-	}
-
-	virtual dseed::error_t stop () noexcept override
-	{
-		if (FAILED (sourceVoice->Stop ()))
-			return dseed::error_fail;
-		return dseed::error_good;
-	}
-
-public:
-	virtual dseed::error_t buffering (const void* buffer, size_t bufferSize) noexcept override
-	{
-		if ((buffer == nullptr && bufferSize != 0) || (buffer != nullptr && bufferSize == 0))
-			return dseed::error_invalid_args;
-
-		XAUDIO2_BUFFER xaudioBuffer = {};
-		xaudioBuffer.pAudioData = (const BYTE*)buffer;
-		xaudioBuffer.AudioBytes = bufferSize;
-		xaudioBuffer.Flags = (buffer == nullptr) ? XAUDIO2_END_OF_STREAM : 0;
-		if (FAILED (sourceVoice->SubmitSourceBuffer (&xaudioBuffer)))
-			return dseed::error_fail;
-
-		return dseed::error_good;
-	}
-
-	virtual dseed::error_t wait_to_buffer_end () noexcept override
-	{
-		XAUDIO2_VOICE_STATE voiceState;
-		if (sourceVoice->GetState (&voiceState), voiceState.BuffersQueued > 0)
-			WaitForSingleObjectEx (bufferEndEvent, INFINITE, TRUE);
-		return dseed::error_good;
-	}
-
-public:
-	virtual dseed::error_t set_listener (const dseed::audio::audiolistener* emitter) noexcept override
-	{
-		return dseed::error_not_impl;
-	}
-
-	virtual dseed::error_t set_emitter (const dseed::audio::audioemitter* emitter) noexcept override
-	{
-		return dseed::error_not_impl;
-	}
-
-public:
 	virtual void __stdcall OnVoiceProcessingPassStart (UINT32 BytesRequired) override { }
 	virtual void __stdcall OnVoiceProcessingPassEnd (void) override { }
 	virtual void __stdcall OnStreamEnd (void) override { }
 	virtual void __stdcall OnBufferStart (void* pBufferContext) override { }
-	virtual void __stdcall OnBufferEnd (void* pBufferContext) override { SetEvent (bufferEndEvent); }
+	virtual void __stdcall OnBufferEnd (void* pBufferContext) override
+	{
+		if (!Buffering ())
+		{
+			sourceStream->seek (dseed::io::seekorigin::begin, 0);
+			isPlaying = false;
+			isPaused = false;
+		}
+	}
 	virtual void __stdcall OnLoopEnd (void* pBufferContext) override { }
 	virtual void __stdcall OnVoiceError (void* pBufferContext, HRESULT Error) override { }
 
 private:
+	bool Buffering ()
+	{
+		size_t read = sourceStream->read (buffers[currentBuffer].data (), buffers[currentBuffer].size ());
+		if (read == 0)
+		{
+			XAUDIO2_BUFFER buffer = {};
+			buffer.Flags = XAUDIO2_END_OF_STREAM;
+			sourceVoice->SubmitSourceBuffer (&buffer);
+
+			return false;
+		}
+
+		XAUDIO2_BUFFER buffer = {};
+		buffer.pAudioData = buffers[currentBuffer].data ();
+		buffer.AudioBytes = (UINT32)read;
+		if (FAILED (sourceVoice->SubmitSourceBuffer (&buffer)))
+			return false;;
+
+		if (++currentBuffer >= 3)
+			currentBuffer = 0;
+
+		return true;
+	}
+
+private:
 	std::atomic<int32_t> _refCount;
+
 	IXAudio2SourceVoice* sourceVoice;
-	HANDLE bufferEndEvent;
+	dseed::autoref<dseed::media::audio_stream> sourceStream;
+
+	bool isPlaying;
+	bool isPaused;
+
+	std::vector<uint8_t> buffers[3];
+	uint32_t currentBuffer, bytesPerSec;
+};
+
+class __xaudio2_effectaudio : public dseed::audio::effectaudio
+{
+public:
+	__xaudio2_effectaudio (IXAudio2* xaudio, const dseed::media::audioformat* fmt)
+		: _refCount (1), xaudio2 (xaudio), sourceFormat (*fmt), effects (32), frontEmptyEffect (0), frontEmptyInstance (0), effectVolumes (1)
+	{
+
+	}
+	~__xaudio2_effectaudio ()
+	{
+
+	}
+
+public:
+	dseed::error_t initialize (uint8_t destChannels)
+	{
+		if (sourceFormat.channels == 1)
+		{
+			if (FAILED (X3DAudioInitialize (destChannels, 1, x3dAudioHandle)))
+				return dseed::error_fail;
+		}
+
+	}
+
+public:
+	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t release () override
+	{
+		auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t format (dseed::media::audioformat* fmt) noexcept override
+	{
+		*fmt = sourceFormat;
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t load_effectid (dseed::media::audio_stream* stream, dseed::audio::effectid_t* eid) noexcept override
+	{
+		dseed::media::audioformat af;
+		stream->format (&af);
+
+		if (sourceFormat.channels != af.channels || sourceFormat.bits_per_sample != af.bits_per_sample ||
+			sourceFormat.samples_per_sec != af.samples_per_sec)
+			return dseed::error_invalid_args;
+
+		if (effects[frontEmptyEffect] != nullptr)
+		{
+			bool found = false;
+			for (size_t i = frontEmptyEffect; i < effects.size (); ++i)
+			{
+				if (effects[frontEmptyEffect] == nullptr)
+				{
+					frontEmptyEffect = i;
+					found = true;
+					break;
+				}
+			}
+
+			if (found == false)
+			{
+				frontEmptyEffect = effects.size ();
+				effects.resize (effects.size () * 2);
+			}
+		}
+
+		std::vector<int8_t> buf (stream->length ());
+		stream->seek (dseed::io::seekorigin::begin, 0);
+		stream->read (buf.data (), buf.size ());
+
+		dseed::autoref<dseed::blob> blob;
+		if (dseed::failed (dseed::create_buffered_blob (buf.data (), buf.size (), &blob)))
+			return dseed::error_fail;
+
+		effects[*eid = (dseed::audio::effectid_t)frontEmptyEffect] = blob;
+		++frontEmptyEffect;
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t unload_effectid (dseed::audio::effectid_t eid) noexcept override
+	{
+		if (effects[eid] != nullptr)
+		{
+			effects[eid].release ();
+			if (frontEmptyEffect < eid)
+				frontEmptyEffect = eid;
+		}
+		return dseed::error_good;
+	}
+	virtual dseed::error_t unload_all_effects () noexcept override
+	{
+		for (size_t i = 0; i < effects.size (); ++i)
+			effects[i].release ();
+		frontEmptyEffect = 0;
+		
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t create_instance (dseed::audio::effectid_t eid, dseed::audio::instanceid_t* iid) noexcept override
+	{
+		IXAudio2SourceVoice* sourceVoice;
+		if (!instanceQueue.empty ())
+		{
+			sourceVoice = instanceQueue.front ();
+			instanceQueue.pop ();
+		}
+		else
+		{
+			WAVEFORMATEX wfex;
+			convert_to_waveformatex (&sourceFormat, &wfex);
+
+			if (FAILED (xaudio2->CreateSourceVoice (&sourceVoice, &wfex)))
+				return dseed::error_fail;
+		}
+
+		if (std::get<IXAudio2SourceVoice*> (instances[frontEmptyInstance]) != nullptr)
+		{
+			bool found = false;
+			for (size_t i = frontEmptyInstance; i < instances.size (); ++i)
+			{
+				if (std::get<IXAudio2SourceVoice*> (instances[frontEmptyInstance]) == nullptr)
+				{
+					frontEmptyInstance = i;
+					found = true;
+					break;
+				}
+			}
+
+			if (found == false)
+			{
+				frontEmptyInstance = instances.size ();
+				instances.resize (instances.size () * 2);
+			}
+		}
+
+		sourceVoice->SetVolume (effectVolumes);
+		instances[*iid = frontEmptyInstance] = std::tuple<IXAudio2SourceVoice*, dseed::audio::effectid_t> (sourceVoice, eid);
+		++frontEmptyInstance;
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t release_instance (dseed::audio::instanceid_t iid) noexcept override
+	{
+		auto voice = std::get<IXAudio2SourceVoice*> (instances[iid]);
+		if (voice == nullptr)
+		{
+			voice->DestroyVoice ();
+			instances[iid] = std::tuple<IXAudio2SourceVoice*, dseed::audio::effectid_t> (nullptr, dseed::audio::invalid_effectid);
+			if (frontEmptyInstance < iid)
+				frontEmptyInstance = iid;
+		}
+		return dseed::error_good;
+	}
+	virtual dseed::error_t release_all_instances () noexcept override
+	{
+		for (size_t i = 0; i < instances.size (); ++i)
+		{
+			auto voice = std::get<IXAudio2SourceVoice*> (instances[i]);
+			if (voice == nullptr)
+			{
+				voice->DestroyVoice ();
+				instances[i] = std::tuple<IXAudio2SourceVoice*, dseed::audio::effectid_t> (nullptr, dseed::audio::invalid_effectid);
+			}
+		}
+		frontEmptyInstance = 0;
+
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t set_listener (dseed::audio::instanceid_t iid, const dseed::audio::audiolistener* listener) noexcept override
+	{
+		if (sourceFormat.channels > 1)
+			return dseed::error_invalid_op;
+
+		if (std::get<IXAudio2SourceVoice*> (instances[iid]) == nullptr)
+			return dseed::error_invalid_args;
+
+		X3DAUDIO_LISTENER x3dListener = { };
+		// TODO
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t set_emitter (dseed::audio::instanceid_t iid, const dseed::audio::audioemitter* emitter) noexcept override
+	{
+		if (sourceFormat.channels > 1)
+			return dseed::error_invalid_op;
+
+		if (std::get<IXAudio2SourceVoice*> (instances[iid]) == nullptr)
+			return dseed::error_invalid_args;
+
+		X3DAUDIO_EMITTER x3dEmitter = { };
+		// TODO
+
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t play (dseed::audio::instanceid_t iid) noexcept override
+	{
+		if (std::get<IXAudio2SourceVoice*> (instances[iid]) == nullptr)
+			return dseed::error_invalid_args;
+		std::get<IXAudio2SourceVoice*> (instances[iid])->Stop ();
+		Buffering (instances[iid]);
+		std::get<IXAudio2SourceVoice*> (instances[iid])->Start ();
+		return dseed::error_good;
+	}
+	virtual dseed::error_t stop (dseed::audio::instanceid_t iid) noexcept override
+	{
+		if (std::get<IXAudio2SourceVoice*> (instances[iid]) == nullptr)
+			return dseed::error_invalid_args;
+		std::get<IXAudio2SourceVoice*> (instances[iid])->Stop ();
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::audio::audiostate state (dseed::audio::instanceid_t iid) noexcept override
+	{
+		auto voice = std::get<IXAudio2SourceVoice*> (instances[iid]);
+		if (voice == nullptr)
+			return dseed::audio::audiostate::stopped;
+		
+		XAUDIO2_VOICE_STATE state;
+		voice->GetState (&state);
+
+		if (state.BuffersQueued == 0)
+			return dseed::audio::audiostate::stopped;
+		return dseed::audio::audiostate::playing;
+	}
+
+public:
+	virtual float volume () noexcept override { return effectVolumes; }
+	virtual dseed::error_t set_volume (float vol) noexcept override
+	{
+		effectVolumes = vol;
+
+		for (auto& i = instances.begin (); i != instances.end (); ++i)
+		{
+			auto voice = std::get<IXAudio2SourceVoice*> (*i);
+			if (voice == nullptr)
+				continue;
+			voice->SetVolume (vol);
+		}
+		
+		return dseed::error_good;
+	}
+
+private:
+	void Buffering (std::tuple<IXAudio2SourceVoice*, dseed::audio::effectid_t>& instance) noexcept
+	{
+		auto voice = std::get<IXAudio2SourceVoice*> (instance);
+		auto effectid = std::get<dseed::audio::effectid_t> (instance);
+
+		XAUDIO2_BUFFER buf = { };
+		buf.pAudioData = (const BYTE*)effects[effectid]->ptr ();
+		buf.AudioBytes = (UINT32)effects[effectid]->size ();
+
+		voice->FlushSourceBuffers ();
+		voice->SubmitSourceBuffer (&buf);
+	}
+	
+private:
+	std::atomic<int32_t> _refCount;
+
+	Microsoft::WRL::ComPtr<IXAudio2> xaudio2;
+	X3DAUDIO_HANDLE x3dAudioHandle;
+
+	dseed::media::audioformat sourceFormat;
+	float effectVolumes;
+
+	std::vector<dseed::autoref<dseed::blob>> effects;
+	size_t frontEmptyEffect;
+
+	std::vector<std::tuple<IXAudio2SourceVoice*, dseed::audio::effectid_t>> instances;
+	size_t frontEmptyInstance;
+	std::queue<IXAudio2SourceVoice*> instanceQueue;
 };
 
 class __xaudio2_audioplayer : public dseed::audio::audioplayer
@@ -144,7 +470,10 @@ public:
 	__xaudio2_audioplayer (IXAudio2* xaudio2, IXAudio2MasteringVoice* masteringVoice)
 		: _refCount (1), xaudio2 (xaudio2), masteringVoice (masteringVoice)
 	{
+		XAUDIO2_VOICE_DETAILS details;
+		masteringVoice->GetVoiceDetails (&details);
 
+		masterChannels = details.InputChannels;
 	}
 	~__xaudio2_audioplayer ()
 	{
@@ -190,8 +519,43 @@ public:
 	}
 
 public:
-	virtual dseed::error_t create_buffer (const dseed::media::audioformat* format, dseed::audio::audioplaybuffer** buffer) noexcept override
+	virtual dseed::error_t create_backgroundaudio (dseed::media::audio_stream* stream, dseed::audio::backgroundaudio** audio) noexcept
 	{
+		if (stream == nullptr || audio == nullptr)
+			return dseed::error_invalid_args;
+
+		dseed::media::audioformat af;
+		stream->format (&af);
+
+		WAVEFORMATEX wf;
+		convert_to_waveformatex (&af, &wf);
+
+		IXAudio2SourceVoice* voice;
+		if (FAILED (xaudio2->CreateSourceVoice (&voice, &wf)))
+			return dseed::error_fail;
+
+		*audio = new __xaudio2_backgroundaudio (voice, stream);
+		if (*audio == nullptr)
+			return dseed::error_out_of_memory;
+
+		return dseed::error_good;
+	}
+	virtual dseed::error_t create_effectaudio (dseed::media::audioformat* format, dseed::audio::effectaudio** audio) noexcept
+	{
+		if (format == nullptr || audio == nullptr)
+			return dseed::error_invalid_args;
+
+		*audio = new __xaudio2_effectaudio (xaudio2.Get (), format);
+		if (*audio == nullptr)
+			return dseed::error_out_of_memory;
+
+		if (dseed::failed (dynamic_cast<__xaudio2_effectaudio*>(*audio)->initialize (masterChannels)))
+		{
+			(*audio)->release ();
+			*audio = nullptr;
+			return dseed::error_fail;
+		}
+
 		return dseed::error_good;
 	}
 
@@ -200,7 +564,7 @@ private:
 	Microsoft::WRL::ComPtr<IXAudio2> xaudio2;
 	IXAudio2MasteringVoice* masteringVoice;
 
-	X3DAUDIO_HANDLE x3dAudioHandle;
+	uint8_t masterChannels;
 };
 
 dseed::error_t dseed::audio::create_xaudio2_audioplayer (dseed::audio::audioadapter* adapter, dseed::audio::audioplayer** player) noexcept

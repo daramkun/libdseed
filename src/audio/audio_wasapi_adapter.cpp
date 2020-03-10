@@ -83,7 +83,7 @@ public:
 		}
 
 		auto wf = reinterpret_cast<WAVEFORMATEX*>(pv.blob.pBlobData);
-		convert_to_waveformatex (wf, info);
+		convert_from_waveformatex (wf, info);
 
 		PropVariantClear (&pv);
 

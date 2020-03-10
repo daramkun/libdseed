@@ -80,7 +80,7 @@ public:
 	virtual bool seekable () noexcept override { return true; }
 
 public:
-	virtual dseed::error_t audioformat (dseed::media::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
+	virtual dseed::error_t format (dseed::media::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
 
 private:
 	dseed::error_t buffering () noexcept
@@ -221,7 +221,7 @@ public:
 	virtual bool seekable () noexcept override { return true; }
 
 public:
-	virtual dseed::error_t audioformat (dseed::media::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
+	virtual dseed::error_t format (dseed::media::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
 
 private:
 	std::atomic<int32_t> _refCount;
@@ -268,7 +268,7 @@ public:
 	__filter_stream (dseed::media::audio_stream* base, dseed::media::quadfilter* filters, size_t filtersCount)
 		: _refCount (1), _base (base), _filters (filters, filters + filtersCount)
 	{
-		base->audioformat (&_wf);
+		base->format (&_wf);
 	}
 
 public:
@@ -309,7 +309,7 @@ public:
 	virtual bool readable () noexcept override { return true; }
 	virtual bool writable () noexcept override { return false; }
 	virtual bool seekable () noexcept override { return false; }
-	virtual dseed::error_t audioformat (dseed::media::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
+	virtual dseed::error_t format (dseed::media::audioformat* wf) override { *wf = _wf; return dseed::error_good; }
 
 private:
 	std::atomic<int32_t> _refCount;
@@ -325,7 +325,7 @@ dseed::error_t dseed::media::create_audio_filter_stream (dseed::media::audio_str
 		return dseed::error_invalid_args;
 
 	dseed::media::audioformat wf;
-	if (dseed::failed (original->audioformat (&wf)))
+	if (dseed::failed (original->format (&wf)))
 		return dseed::error_fail;
 
 	if (wf.pulse_format != dseed::media::pulseformat::ieee_float)

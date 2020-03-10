@@ -89,6 +89,12 @@ public:
 			app->exit ();
 			return;
 		}
+
+		if (dseed::failed (dseed::audio::create_xaudio2_audioplayer (nullptr, &audioPlayer)))
+		{
+			app->exit ();
+			return;
+		}
 	}
 
 	virtual void closing (bool& cancel) override
@@ -148,6 +154,8 @@ private:
 	dseed::autoref<dseed::graphics::sprite_render> spriteRender;
 	dseed::autoref<dseed::graphics::sprite_atlas> spriteAtlas;
 	dseed::autoref<dseed::graphics::pipeline> spritePipeline;
+
+	dseed::autoref<dseed::audio::audioplayer> audioPlayer;
 };
 
 #include <d3d11.h>

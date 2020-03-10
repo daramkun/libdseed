@@ -54,7 +54,7 @@ public:
 		if (FAILED (audioClient->GetMixFormat (&wf)))
 			return dseed::error_fail;
 
-		convert_to_waveformatex (wf, format);
+		convert_from_waveformatex (wf, format);
 
 		CoTaskMemFree (wf);
 
@@ -245,6 +245,11 @@ dseed::error_t dseed::audio::create_wasapi_audiorequester (dseed::audio::audioad
 	}
 
 	HANDLE hWakeUp = CreateWaitableTimer (nullptr, FALSE, nullptr);
+	if (hWakeUp == INVALID_HANDLE_VALUE || hWakeUp == 0)
+	{
+		CoTaskMemFree (wf);
+		return dseed::error_fail;
+	}
 
 	LARGE_INTEGER liFirstFire;
 	liFirstFire.QuadPart = -hnsDefaultDevicePeriod / 2;

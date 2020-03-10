@@ -173,7 +173,7 @@ namespace dseed
 	DSEEDEXP error_t create_blobpool (blobpool** pool) noexcept;
 
 	template<class T>
-	class DSEEDEXP memorypool
+	class memorypool
 	{
 	public:
 		inline ~memorypool () { clear_memories (); }

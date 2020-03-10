@@ -52,10 +52,10 @@ struct data_HEADER
 
 #if PLATFORM_MICROSOFT
 #	include <mmreg.h>
-inline void convert_to_waveformatex (const WAVEFORMATEX* wf, dseed::media::audioformat* format)
+inline void convert_from_waveformatex (const WAVEFORMATEX* wf, dseed::media::audioformat* format)
 {
-	format->channels = wf->nChannels;
-	format->bits_per_sample = wf->wBitsPerSample;
+	format->channels = (uint8_t)wf->nChannels;
+	format->bits_per_sample = (uint8_t)wf->wBitsPerSample;
 	format->samples_per_sec = wf->nSamplesPerSec;
 	format->block_align = wf->nBlockAlign;
 	format->bytes_per_sec = wf->nAvgBytesPerSec;
@@ -77,6 +77,20 @@ inline void convert_to_waveformatex (const WAVEFORMATEX* wf, dseed::media::audio
 			case WAVE_FORMAT_IEEE_FLOAT: format->pulse_format = dseed::media::pulseformat::ieee_float;
 			default: format->pulse_format = dseed::media::pulseformat::unknown;
 		}
+	}
+}
+inline void convert_to_waveformatex (const dseed::media::audioformat* format, WAVEFORMATEX* wf)
+{
+	wf->cbSize = sizeof (WAVEFORMATEX);
+	wf->nChannels = format->channels;
+	wf->wBitsPerSample = format->bits_per_sample;
+	wf->nSamplesPerSec = format->samples_per_sec;
+	wf->nBlockAlign = format->block_align;
+	wf->nAvgBytesPerSec = format->bytes_per_sec;
+	switch (format->pulse_format)
+	{
+		case dseed::media::pulseformat::pcm: wf->wFormatTag = WAVE_FORMAT_PCM; break;
+		case dseed::media::pulseformat::ieee_float: wf->wFormatTag = WAVE_FORMAT_IEEE_FLOAT; break;
 	}
 }
 #endif
