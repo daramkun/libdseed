@@ -90,7 +90,34 @@ public:
 			return;
 		}
 
+		dseed::autoref<dseed::io::stream> fileStream;
+		if (dseed::failed (dseed::io::create_native_filestream (u8"../../../sample/audios/sample1.mp3", false, &fileStream)))
+		{
+			app->exit ();
+			return;
+		}
+
+		dseed::autoref<dseed::media::media_decoder> audioDecoder;
+		if (dseed::failed (dseed::media::detect_media_decoder (fileStream, &audioDecoder)))
+		{
+			app->exit ();
+			return;
+		}
+
+		dseed::autoref<dseed::media::audio_stream> audioStream;
+		if (dseed::failed (dseed::media::create_audio_buffered_stream (audioDecoder, &audioStream)))
+		{
+			app->exit ();
+			return;
+		}
+
 		if (dseed::failed (dseed::audio::create_xaudio2_audioplayer (nullptr, &audioPlayer)))
+		{
+			app->exit ();
+			return;
+		}
+
+		if (dseed::failed (audioPlayer->create_backgroundaudio (audioStream, &bgm)))
 		{
 			app->exit ();
 			return;
@@ -156,6 +183,7 @@ private:
 	dseed::autoref<dseed::graphics::pipeline> spritePipeline;
 
 	dseed::autoref<dseed::audio::audioplayer> audioPlayer;
+	dseed::autoref<dseed::audio::backgroundaudio> bgm;
 };
 
 #include <d3d11.h>
