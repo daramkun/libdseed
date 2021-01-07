@@ -63,48 +63,31 @@ namespace dseed
 
 namespace dseed
 {
-	constexpr bool equals (single s1, single s2) noexcept { return (s1 - s2) < single_epsilon; }
-	constexpr bool equals (double d1, double d2) noexcept { return (d1 - d2) < double_epsilon; }
+	constexpr bool equals(single s1, single s2) noexcept { return (s1 - s2) < single_epsilon; }
+	constexpr bool equals(double d1, double d2) noexcept { return (d1 - d2) < double_epsilon; }
 	template<typename T>
-	constexpr T minimum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v1 : v2; }
+	constexpr T minimum(const T& v1, const T& v2) noexcept { return (v1 < v2) ? v1 : v2; }
 	template<typename T>
-	constexpr T maximum (const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
+	constexpr T maximum(const T& v1, const T& v2) noexcept { return (v1 < v2) ? v2 : v1; }
 
 	template<class T>
-	constexpr T clamp (T v, T max) noexcept { return minimum (max, maximum ((T)0, v)); }
+	constexpr T clamp(T v, T max) noexcept { return minimum(max, maximum((T)0, v)); }
 	template<class T>
-	constexpr T wrap (T v, T max) noexcept { return v % max; }
+	constexpr T wrap(T v, T max) noexcept { return v % max; }
 	template<class T>
-	constexpr T mirror (T v, T max) noexcept { while (v < max || v > 0) { v = max - v; if (v < 0) v *= -1; } return v; }
+	constexpr T mirror(T v, T max) noexcept { while (v < max || v > 0) { v = max - v; if (v < 0) v *= -1; } return v; }
 
-	constexpr int gcd (int a, int b) { return (b == 0) ? a : gcd (b, a % b); }
+	constexpr int gcd(int a, int b) { return (b == 0) ? a : gcd(b, a % b); }
 
-	constexpr single to_degree (single radian) noexcept { return radian * 180 / pi; }
-	constexpr single to_radian (single degree) noexcept { return degree * pi / 180; }
+	constexpr single to_degree(single radian) noexcept { return radian * 180 / pi; }
+	constexpr single to_radian(single degree) noexcept { return degree * pi / 180; }
 }
 
 #include "half.h"
 #include "int24.h"
 #include "fraction.h"
 
-#include "vectors/simd.def.h"
-#include "vectors/simd.x86.h"
-#include "vectors/simd.arm.h"
-
-namespace dseed
-{
-#	if ARCH_X86SET
-	using f32x4 = f32x4_x86;
-	using i32x4 = i32x4_x86;
-	using f32x4x4 = f32x4x4_x86;
-//#elif ARCH_ARMSET
-
-#	else
-	using f32x4 = f32x4_arith;
-	using i32x4 = i32x4_arith;
-	using f32x4x4 = f32x4x4_arith;
-#	endif
-}
+#include "vectors/simd.h"
 
 #include "vectors/wrapped.h"
 
@@ -134,10 +117,10 @@ namespace dseed
 	{
 		equal,
 		not_equal,
-		
+
 		less,
 		less_equal,
-		
+
 		greater,
 		greater_equal,
 

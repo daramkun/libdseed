@@ -14,18 +14,18 @@
 class __d3d11_vgadevice : public dseed::graphics::vgadevice
 {
 public:
-	__d3d11_vgadevice (dseed::graphics::vgaadapter* adapter, ID3D11Device* d3dDevice, ID3D11DeviceContext* immediateContext, IDXGISwapChain* dxgiSwapChain)
-		: _refCount (1), vgaadapter (adapter), d3dDevice (d3dDevice), immediateContext (immediateContext), dxgiSwapChain (dxgiSwapChain), vsync_enable (false)
+	__d3d11_vgadevice(dseed::graphics::vgaadapter* adapter, ID3D11Device* d3dDevice, ID3D11DeviceContext* immediateContext, IDXGISwapChain* dxgiSwapChain)
+		: _refCount(1), vgaadapter(adapter), d3dDevice(d3dDevice), immediateContext(immediateContext), dxgiSwapChain(dxgiSwapChain), vsync_enable(false)
 	{
 
 	}
 
-	dseed::error_t initialize ()
+	dseed::error_t initialize()
 	{
-		*&spriterender = new __d3d11_sprite_render (this);
-		if (dseed::failed (spriterender->initialize ()))
+		*&spriterender = new __d3d11_sprite_render(this);
+		if (dseed::failed(spriterender->initialize()))
 		{
-			spriterender.release ();
+			spriterender.release();
 			return dseed::error_fail;
 		}
 
@@ -33,75 +33,75 @@ public:
 	}
 
 public:
-	virtual int32_t retain () override { return ++_refCount; }
-	virtual int32_t release () override
+	virtual int32_t retain() override { return ++_refCount; }
+	virtual int32_t release() override
 	{
 		auto ret = --_refCount;
 		if (ret == 0)
 			delete this;
 		return ret;
 	}
-	
+
 public:
-	virtual dseed::error_t native_object (void** nativeObject) override
+	virtual dseed::error_t native_object(void** nativeObject) override
 	{
 		if (nativeObject == nullptr)
 			return dseed::error_invalid_args;
 
 		auto& no = *reinterpret_cast<dseed::graphics::d3d11_vgadevice_nativeobject*>(nativeObject);
-		no.d3dDevice = d3dDevice.Get ();
-		no.dxgiSwapChain = dxgiSwapChain.Get ();
+		no.d3dDevice = d3dDevice.Get();
+		no.dxgiSwapChain = dxgiSwapChain.Get();
 
 		return dseed::error_good;
 	}
 
 public:
-	virtual dseed::error_t adapter (dseed::graphics::vgaadapter** adapter) noexcept
+	virtual dseed::error_t adapter(dseed::graphics::vgaadapter** adapter) noexcept
 	{
 		if (adapter == nullptr)
 			return dseed::error_invalid_args;
-		(*adapter = vgaadapter)->retain ();
+		(*adapter = vgaadapter)->retain();
 		return dseed::error_good;
 	}
 
 public:
-	virtual bool is_support_format (dseed::color::pixelformat pf) noexcept
+	virtual bool is_support_format(dseed::color::pixelformat pf) noexcept
 	{
 		UINT support;
-		d3dDevice->CheckFormatSupport (DSEEDPF_TO_DXGIPF (pf), &support);
+		d3dDevice->CheckFormatSupport(DSEEDPF_TO_DXGIPF(pf), &support);
 		return (support & D3D11_FORMAT_SUPPORT_TEXTURE2D) ? true : false;
 	}
 
 public:
-	virtual dseed::error_t sprite_render (dseed::graphics::vgarender** render) noexcept
+	virtual dseed::error_t sprite_render(dseed::graphics::vgarender** render) noexcept
 	{
 		if (render == nullptr)
 			return dseed::error_invalid_args;
-		(*render = spriterender)->retain ();
+		(*render = spriterender)->retain();
 		return dseed::error_good;
 	}
 
 public:
-	virtual bool vsync () noexcept { return vsync_enable; }
-	virtual dseed::error_t set_vsync (bool vsync) noexcept { vsync_enable = vsync; return dseed::error_good; }
+	virtual bool vsync() noexcept { return vsync_enable; }
+	virtual dseed::error_t set_vsync(bool vsync) noexcept { vsync_enable = vsync; return dseed::error_good; }
 
 public:
-	virtual void displaymode (dseed::graphics::displaymode* dm, bool* fullscreen) noexcept
+	virtual void displaymode(dseed::graphics::displaymode* dm, bool* fullscreen) noexcept
 	{
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> dxgiSwapChain1;
-		if (SUCCEEDED (dxgiSwapChain.As<IDXGISwapChain1> (&dxgiSwapChain1)))
+		if (SUCCEEDED(dxgiSwapChain.As<IDXGISwapChain1>(&dxgiSwapChain1)))
 		{
 			DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainDesc;
 			DXGI_SWAP_CHAIN_FULLSCREEN_DESC dxgiSwapChainFullscreenDesc;
 
-			dxgiSwapChain1->GetDesc1 (&dxgiSwapChainDesc);
-			dxgiSwapChain1->GetFullscreenDesc (&dxgiSwapChainFullscreenDesc);
+			dxgiSwapChain1->GetDesc1(&dxgiSwapChainDesc);
+			dxgiSwapChain1->GetFullscreenDesc(&dxgiSwapChainFullscreenDesc);
 
 			if (dm != nullptr)
 			{
-				dm->resolution = dseed::size2i (dxgiSwapChainDesc.Width, dxgiSwapChainDesc.Height);
-				dm->format = DXGIPF_TO_DSEEDPF (dxgiSwapChainDesc.Format);
-				dm->refresh_rate = dseed::fraction (
+				dm->resolution = dseed::size2i(dxgiSwapChainDesc.Width, dxgiSwapChainDesc.Height);
+				dm->format = DXGIPF_TO_DSEEDPF(dxgiSwapChainDesc.Format);
+				dm->refresh_rate = dseed::fraction(
 					dxgiSwapChainFullscreenDesc.RefreshRate.Numerator,
 					dxgiSwapChainFullscreenDesc.RefreshRate.Denominator);
 			}
@@ -111,13 +111,13 @@ public:
 		else
 		{
 			DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
-			dxgiSwapChain->GetDesc (&dxgiSwapChainDesc);
+			dxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
 
 			if (dm != nullptr)
 			{
-				dm->resolution = dseed::size2i (dxgiSwapChainDesc.BufferDesc.Width, dxgiSwapChainDesc.BufferDesc.Height);
-				dm->format = DXGIPF_TO_DSEEDPF (dxgiSwapChainDesc.BufferDesc.Format);
-				dm->refresh_rate = dseed::fraction (
+				dm->resolution = dseed::size2i(dxgiSwapChainDesc.BufferDesc.Width, dxgiSwapChainDesc.BufferDesc.Height);
+				dm->format = DXGIPF_TO_DSEEDPF(dxgiSwapChainDesc.BufferDesc.Format);
+				dm->refresh_rate = dseed::fraction(
 					dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator,
 					dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator);
 			}
@@ -125,7 +125,7 @@ public:
 				*fullscreen = !dxgiSwapChainDesc.Windowed;
 		}
 	}
-	virtual bool set_displaymode (const dseed::graphics::displaymode* dm, bool fullscreen) noexcept
+	virtual bool set_displaymode(const dseed::graphics::displaymode* dm, bool fullscreen) noexcept
 	{
 		if (dm == nullptr) return false;
 		if (fullscreen)
@@ -138,7 +138,7 @@ public:
 		DXGI_MODE_DESC dxgiModeDesc = {};
 		dxgiModeDesc.Width = dm->resolution.width;
 		dxgiModeDesc.Height = dm->resolution.height;
-		dxgiModeDesc.Format = DSEEDPF_TO_DXGIPF (dm->format);
+		dxgiModeDesc.Format = DSEEDPF_TO_DXGIPF(dm->format);
 		dxgiModeDesc.RefreshRate.Denominator = dm->refresh_rate.denominator;
 		dxgiModeDesc.RefreshRate.Numerator = dm->refresh_rate.numerator;
 
@@ -148,19 +148,19 @@ public:
 			dxgiModeDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
 		}
 
-		if (FAILED (dxgiSwapChain->ResizeTarget (&dxgiModeDesc)) ||
-			FAILED (dxgiSwapChain->SetFullscreenState (fullscreen, nullptr)))
+		if (FAILED(dxgiSwapChain->ResizeTarget(&dxgiModeDesc)) ||
+			FAILED(dxgiSwapChain->SetFullscreenState(fullscreen, nullptr)))
 			return false;
 
-		spriterender->update_backbuffer ();
+		spriterender->update_backbuffer();
 
 		return true;
 	}
 
 public:
-	virtual dseed::error_t present () noexcept
+	virtual dseed::error_t present() noexcept
 	{
-		HRESULT hr = dxgiSwapChain->Present ((int)vsync_enable, 0);
+		HRESULT hr = dxgiSwapChain->Present((int)vsync_enable, 0);
 
 		if (hr == DXGI_ERROR_DEVICE_RESET)
 			return dseed::error_device_reset;
@@ -189,7 +189,7 @@ private:
 // Create VGA Logical Device
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept
+dseed::error_t dseed::graphics::create_d3d11_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept
 {
 #if PLATFORM_MICROSOFT
 	if (app == nullptr || device == nullptr)
@@ -199,7 +199,7 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* a
 	D3D_DRIVER_TYPE d3dDriverType;
 	if (adapter != nullptr)
 	{
-		adapter->native_object (&dxgiAdapter);
+		adapter->native_object(&dxgiAdapter);
 		d3dDriverType = D3D_DRIVER_TYPE_UNKNOWN;
 	}
 	else
@@ -230,36 +230,36 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* a
 
 	Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
-	if (FAILED (D3D11CreateDevice (dxgiAdapter.Get (), d3dDriverType, nullptr, d3dDeviceFlags,
-		featureLevels, _countof (featureLevels), D3D11_SDK_VERSION, &d3dDevice, &currentFeatureLevel, &immediateContext)))
+	if (FAILED(D3D11CreateDevice(dxgiAdapter.Get(), d3dDriverType, nullptr, d3dDeviceFlags,
+		featureLevels, _countof(featureLevels), D3D11_SDK_VERSION, &d3dDevice, &currentFeatureLevel, &immediateContext)))
 		return dseed::error_fail;
 
 	UINT majorVersion = (currentFeatureLevel >> 12) & 0xf, minorVersion = (currentFeatureLevel >> 8) & 0xf;
 	char versionMessage[256];
-	sprintf (versionMessage, "Direct3D 11 Feature Level: %d.%d", majorVersion, minorVersion);
-	dseed::diagnostics::logger::shared_logger ()->write (dseed::diagnostics::loglevel::information, "Direct3D 11 VGA Device Creation", versionMessage);
+	sprintf(versionMessage, "Direct3D 11 Feature Level: %d.%d", majorVersion, minorVersion);
+	dseed::diagnostics::logger::shared_logger()->write(dseed::diagnostics::loglevel::information, "Direct3D 11 VGA Device Creation", versionMessage);
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain> dxgiSwapChain;
 #if PLATFORM_WINDOWS
 	HWND hWnd;
-	app->native_object ((void**)&hWnd);
+	app->native_object((void**)&hWnd);
 #elif PLATFORM_UWP
 	CoreWindow^ coreWindow;
-	app->native_object ((void**)&coreWindow);
+	app->native_object((void**)&coreWindow);
 #endif
 	dseed::size2i clientSize;
-	app->client_size (&clientSize);
+	app->client_size(&clientSize);
 
 #if NTDDI_VERSION >= NTDDI_WIN8
-	if (IsWindows8OrGreater ())
+	if (IsWindows8OrGreater())
 	{
 		Microsoft::WRL::ComPtr<IDXGIFactory2> dxgiFactory;
-		if (FAILED (CreateDXGIFactory2 (0, __uuidof(IDXGIFactory2), (void**)&dxgiFactory)))
+		if (FAILED(CreateDXGIFactory2(0, __uuidof(IDXGIFactory2), (void**)&dxgiFactory)))
 			return dseed::error_fail;
 
 		DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainDesc = {};
 #	if NTDDI_VERSION >= NTDDI_WIN10
-		if (IsWindows10OrGreater ())
+		if (IsWindows10OrGreater())
 		{
 			dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			dxgiSwapChainDesc.BufferCount = 2;
@@ -287,10 +287,10 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* a
 		dxgiSwapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 #		if NTDDI_VERSION >= NTDDI_WIN10
 		Microsoft::WRL::ComPtr<IDXGIFactory5> dxgiFactory5;
-		dxgiFactory.As<IDXGIFactory5> (&dxgiFactory5);
+		dxgiFactory.As<IDXGIFactory5>(&dxgiFactory5);
 
 		BOOL checkAllowTearing = FALSE;
-		if (SUCCEEDED (dxgiFactory5->CheckFeatureSupport (DXGI_FEATURE_PRESENT_ALLOW_TEARING, &checkAllowTearing, sizeof (checkAllowTearing))) && checkAllowTearing)
+		if (SUCCEEDED(dxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &checkAllowTearing, sizeof(checkAllowTearing))) && checkAllowTearing)
 			dxgiSwapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 #		endif
 #	endif
@@ -300,14 +300,14 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* a
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC dxgiSwapChainFullscreenDesc = {};
 		dxgiSwapChainFullscreenDesc.Windowed = TRUE;
 
-		if (FAILED (dxgiFactory->CreateSwapChainForHwnd (d3dDevice.Get (), hWnd, &dxgiSwapChainDesc, &dxgiSwapChainFullscreenDesc, nullptr, &dxgiSwapChain1)))
+		if (FAILED(dxgiFactory->CreateSwapChainForHwnd(d3dDevice.Get(), hWnd, &dxgiSwapChainDesc, &dxgiSwapChainFullscreenDesc, nullptr, &dxgiSwapChain1)))
 			return dseed::error_fail;
 #	elif PLATFORM_UWP
-		if (FAILED (dxgiFactory->CreateSwapChainForCoreWindow (d3dDevice.Get (), coreWindow, &dxgiSwapChainDesc, nullptr, &dxgiSwapChain1)))
+		if (FAILED(dxgiFactory->CreateSwapChainForCoreWindow(d3dDevice.Get(), coreWindow, &dxgiSwapChainDesc, nullptr, &dxgiSwapChain1)))
 			return dseed::error_fail;
 #	endif
 
-		dxgiSwapChain1.As<IDXGISwapChain> (&dxgiSwapChain);
+		dxgiSwapChain1.As<IDXGISwapChain>(&dxgiSwapChain);
 	}
 #	if PLATFORM_WINDOWS
 	else
@@ -316,7 +316,7 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* a
 #if PLATFORM_WINDOWS
 	{
 		Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory;
-		if (FAILED (CreateDXGIFactory (__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
+		if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
 			return dseed::error_fail;
 
 		DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc = {};
@@ -331,16 +331,16 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice (platform::application* a
 		dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		dxgiSwapChainDesc.Windowed = true;
 
-		if (FAILED (dxgiFactory->CreateSwapChain (d3dDevice.Get (), &dxgiSwapChainDesc, &dxgiSwapChain)))
+		if (FAILED(dxgiFactory->CreateSwapChain(d3dDevice.Get(), &dxgiSwapChainDesc, &dxgiSwapChain)))
 			return dseed::error_fail;
 	}
 #endif
 
-	*device = new __d3d11_vgadevice (adapter, d3dDevice.Get (), immediateContext.Get (), dxgiSwapChain.Get ());
+	* device = new __d3d11_vgadevice(adapter, d3dDevice.Get(), immediateContext.Get(), dxgiSwapChain.Get());
 	if (*device == nullptr)
 		return  dseed::error_out_of_memory;
-	
-	if (dseed::failed (reinterpret_cast<__d3d11_vgadevice*>(*device)->initialize ()))
+
+	if (dseed::failed(reinterpret_cast<__d3d11_vgadevice*>(*device)->initialize()))
 	{
 		delete* device;
 		*device = nullptr;

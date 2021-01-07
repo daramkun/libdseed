@@ -10,7 +10,16 @@
 			"cmakeCommandArgs": "",
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "win32-x64-Release",
@@ -22,7 +31,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_x64_x64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "win32-arm64-Debug",
@@ -34,7 +52,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_arm64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "win32-arm64-Release",
@@ -46,7 +73,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_arm64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "uwp-x64-Debug",
@@ -58,7 +94,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_x64_x64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "uwp-x64-Release",
@@ -70,7 +115,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_x64_x64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "uwp-arm64-Debug",
@@ -82,7 +136,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_arm64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		},
 		{
 			"name": "uwp-arm64-Release",
@@ -94,7 +157,16 @@
 			"buildCommandArgs": "-v",
 			"ctestCommandArgs": "",
 			"inheritEnvironments": [ "msvc_arm64" ],
-			"variables": []
+			"variables": [
+				{
+					"name": "CMAKE_TOOLCHAIN_FILE",
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+				},
+				{
+					"name": "VCPKG_TARGET_TRIPLET",
+					"value": "x64-windows-static"
+				}
+			]
 		}
 	]
 }

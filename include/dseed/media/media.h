@@ -24,9 +24,9 @@ namespace dseed::media
 		color::pixelformat image_format;
 		fraction frame_rate;
 
-		imageformat () = default;
-		imageformat (const size2i& size, color::pixelformat format, fraction framerate)
-			: size (size), image_format (format), frame_rate (framerate)
+		imageformat() = default;
+		imageformat(const size2i& size, color::pixelformat format, fraction framerate)
+			: size(size), image_format(format), frame_rate(framerate)
 		{ }
 	};
 
@@ -58,38 +58,38 @@ namespace dseed::media
 		// Audio Pulse Sample Format
 		pulseformat pulse_format;
 
-		audioformat () = default;
-		audioformat (int channels, int bits_per_sample, int samples_per_sec, pulseformat format)
-			: channels (channels), bits_per_sample (bits_per_sample), samples_per_sec (samples_per_sec)
-			, pulse_format (format)
-			, block_align (channels* (bits_per_sample / 8)), bytes_per_sec (block_align* samples_per_sec)
+		audioformat() = default;
+		audioformat(int channels, int bits_per_sample, int samples_per_sec, pulseformat format)
+			: channels(channels), bits_per_sample(bits_per_sample), samples_per_sec(samples_per_sec)
+			, pulse_format(format)
+			, block_align(channels* (bits_per_sample / 8)), bytes_per_sec(block_align* samples_per_sec)
 		{ }
 	};
 
 	// Get Audio Duration from Bytes
-	DSEEDEXP timespan get_audio_duration (const audioformat& wf, size_t bytes);
+	DSEEDEXP timespan get_audio_duration(const audioformat& wf, size_t bytes);
 	// Get Bytes Count from Duration
-	DSEEDEXP size_t get_audio_bytes_count (const audioformat& wf, timespan duration);
+	DSEEDEXP size_t get_audio_bytes_count(const audioformat& wf, timespan duration);
 	// Get Bytes Count from Duration
-	DSEEDEXP size_t get_audio_bytes_count (uint32_t bytes_per_sec, timespan duration);
+	DSEEDEXP size_t get_audio_bytes_count(uint32_t bytes_per_sec, timespan duration);
 
 	// Media Sample
 	class DSEEDEXP media_sample : public dseed::object
 	{
 	public:
-		virtual sampletype type () = 0;
+		virtual sampletype type() = 0;
 
 	public:
 		// Get Sample Position
-		virtual timespan position () = 0;
+		virtual timespan position() = 0;
 		// Get Sample Length
-		virtual timespan duration () = 0;
+		virtual timespan duration() = 0;
 
 	public:
 		// Copy Sample Data to buffer
-		virtual dseed::error_t copy_sample (void* buffer) = 0;
+		virtual dseed::error_t copy_sample(void* buffer) = 0;
 		// Get Sample BUffer Size
-		virtual size_t sample_size () = 0;
+		virtual size_t sample_size() = 0;
 	};
 
 	// Media Decoder
@@ -97,35 +97,35 @@ namespace dseed::media
 	{
 	public:
 		// Get Total Duration
-		virtual timespan duration () = 0;
+		virtual timespan duration() = 0;
 
 	public:
-		virtual sampletype type (size_t streamIndex) = 0;
+		virtual sampletype type(size_t streamIndex) = 0;
 
 	public:
-		virtual error_t format (size_t streamIndex, void* buffer, size_t bufferSize) = 0;
+		virtual error_t format(size_t streamIndex, void* buffer, size_t bufferSize) = 0;
 
 	public:
 		// Get Reading Position
-		virtual timespan reading_position () = 0;
+		virtual timespan reading_position() = 0;
 		// Set Reading Position
-		virtual error_t set_reading_position (timespan pos) = 0;
+		virtual error_t set_reading_position(timespan pos) = 0;
 
 	public:
-		virtual error_t decode (size_t streamIndex, media_sample** sample) = 0;
+		virtual error_t decode(size_t streamIndex, media_sample** sample) = 0;
 	};
 
 	// Media Encoder
 	class DSEEDEXP media_encoder : public dseed::object
 	{
 	public:
-		virtual error_t set_sample_format (size_t streamIndex, sampletype type, void* format, size_t formatSize) = 0;
+		virtual error_t set_sample_format(size_t streamIndex, sampletype type, void* format, size_t formatSize) = 0;
 
 	public:
-		virtual error_t encode (size_t streamIndex, media_sample* sample) = 0;
+		virtual error_t encode(size_t streamIndex, media_sample* sample) = 0;
 
 	public:
-		virtual error_t commit () = 0;
+		virtual error_t commit() = 0;
 	};
 
 	// Media Encoder Options
@@ -133,22 +133,22 @@ namespace dseed::media
 	{
 		size_t options_size;
 	protected:
-		media_encoder_options (size_t options_size) : options_size (options_size) { }
+		media_encoder_options(size_t options_size) : options_size(options_size) { }
 	};
 
-	using createmediaencoder_fn = error_t (*) (dseed::io::stream*, const media_encoder_options*, media_encoder**);
+	using createmediaencoder_fn = error_t(*) (dseed::io::stream*, const media_encoder_options*, media_encoder**);
 
 	// Audio Stream
 	class DSEEDEXP audio_stream : public dseed::io::stream
 	{
 	public:
-		virtual error_t format (audioformat* wf) = 0;
+		virtual error_t format(audioformat* wf) = 0;
 	};
 
 	// Create Buffered Audio Stream
-	DSEEDEXP error_t create_audio_buffered_stream (media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
+	DSEEDEXP error_t create_audio_buffered_stream(media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
 	// Create Whole-Stored Audio Stream
-	DSEEDEXP error_t create_audio_wholestored_stream (media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
+	DSEEDEXP error_t create_audio_wholestored_stream(media_decoder* decoder, audio_stream** stream, int32_t streamIndex = -1);
 
 	// Quad-Filter
 	struct DSEEDEXP quadfilter
@@ -156,17 +156,17 @@ namespace dseed::media
 		double a0, a1, a2, a3, a4;
 		double x1[12], x2[12], y1[12], y2[12];
 
-		float process (float input, int ch);
+		float process(float input, int ch);
 
-		static quadfilter high_pass_filter (int samplerate, double freq, double q);
-		static quadfilter high_shelf_filter (int samplerate, double freq, float shelfSlope, double gaindb);
-		static quadfilter low_pass_filter (int samplerate, double freq, double q);
-		static quadfilter low_shelf_filter (int samplerate, double freq, float shelfSlope, double gaindb);
-		static quadfilter all_pass_filter (int samplerate, double freq, double q);
-		static quadfilter notch_filter (int samplerate, double freq, double q);
-		static quadfilter peak_eq_filter (int samplerate, double freq, double bandwidth, double peakGainDB);
-		static quadfilter band_pass_filter_csg (int samplerate, double freq, double q);
-		static quadfilter band_pass_filter_cpg (int samplerate, double freq, double q);
+		static quadfilter high_pass_filter(int samplerate, double freq, double q);
+		static quadfilter high_shelf_filter(int samplerate, double freq, float shelfSlope, double gaindb);
+		static quadfilter low_pass_filter(int samplerate, double freq, double q);
+		static quadfilter low_shelf_filter(int samplerate, double freq, float shelfSlope, double gaindb);
+		static quadfilter all_pass_filter(int samplerate, double freq, double q);
+		static quadfilter notch_filter(int samplerate, double freq, double q);
+		static quadfilter peak_eq_filter(int samplerate, double freq, double bandwidth, double peakGainDB);
+		static quadfilter band_pass_filter_csg(int samplerate, double freq, double q);
+		static quadfilter band_pass_filter_cpg(int samplerate, double freq, double q);
 	};
 
 	// Equalizer Presets
@@ -184,11 +184,11 @@ namespace dseed::media
 		piano,
 	};
 
-	DSEEDEXP error_t initialize_equalizer_filter (uint32_t samplerate, double bandwidth, eqpreset preset, quadfilter* filters, size_t filtersCount);
-	DSEEDEXP error_t initialize_equalizer_filter_with_gaindbs (uint32_t samplerate, double bandwidth,
+	DSEEDEXP error_t initialize_equalizer_filter(uint32_t samplerate, double bandwidth, eqpreset preset, quadfilter* filters, size_t filtersCount);
+	DSEEDEXP error_t initialize_equalizer_filter_with_gaindbs(uint32_t samplerate, double bandwidth,
 		quadfilter* filters, double* gainDbs, size_t filtersAndGainDbsCount);
 
-	DSEEDEXP error_t create_audio_filter_stream (audio_stream* original, quadfilter* filters, size_t filtersCount, audio_stream** stream);
+	DSEEDEXP error_t create_audio_filter_stream(audio_stream* original, quadfilter* filters, size_t filtersCount, audio_stream** stream);
 
 	// Spectrum Processing Channels
 	enum DSEEDEXP spectrumchannels : uint32_t
@@ -207,10 +207,10 @@ namespace dseed::media
 		spectrumchannels_average_all = 0xffffffff,
 	};
 
-	DSEEDEXP error_t convert_pcm_to_frequency (const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels ch, float* out);
-	DSEEDEXP error_t convert_pcm_to_decibel (const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels ch, float* out);
+	DSEEDEXP error_t convert_pcm_to_frequency(const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels ch, float* out);
+	DSEEDEXP error_t convert_pcm_to_decibel(const float* pcm, size_t pcmSize, int16_t channels, spectrumchannels ch, float* out);
 
-	DSEEDEXP error_t reformat_audio (audio_stream* original, pulseformat fmt, int bits_per_sample, audio_stream** stream);
+	DSEEDEXP error_t reformat_audio(audio_stream* original, pulseformat fmt, int bits_per_sample, audio_stream** stream);
 
 	enum class resample
 	{
@@ -224,7 +224,7 @@ namespace dseed::media
 		lanczos5,
 	};
 
-	DSEEDEXP error_t resample_audio (audio_stream* original, int32_t samplerate, resample interpolation, audio_stream** stream);
+	DSEEDEXP error_t resample_audio(audio_stream* original, int32_t samplerate, resample interpolation, audio_stream** stream);
 
 	//DSEEDEXP error_t rechannel_audio (audio_stream* original, int16_t channels, audio_stream** stream);
 }
@@ -234,9 +234,9 @@ namespace dseed::media
 
 namespace dseed::media
 {
-	using createmediadecoder_fn = error_t (*) (dseed::io::stream*, media_decoder**);
-	DSEEDEXP error_t add_media_decoder (createmediadecoder_fn fn);
-	DSEEDEXP error_t detect_media_decoder (dseed::io::stream* stream, dseed::media::media_decoder** decoder);
+	using createmediadecoder_fn = error_t(*) (dseed::io::stream*, media_decoder**);
+	DSEEDEXP error_t add_media_decoder(createmediadecoder_fn fn);
+	DSEEDEXP error_t detect_media_decoder(dseed::io::stream* stream, dseed::media::media_decoder** decoder);
 }
 
 #endif

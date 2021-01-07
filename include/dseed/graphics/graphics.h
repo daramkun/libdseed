@@ -9,49 +9,49 @@ namespace dseed::graphics
 		color::pixelformat format;
 		fraction refresh_rate;
 
-		inline displaymode () noexcept = default;
-		inline displaymode (const size2i& res, color::pixelformat fmt, fraction rr) noexcept
-			: resolution (res), format (fmt), refresh_rate (rr)
+		inline displaymode() noexcept = default;
+		inline displaymode(const size2i& res, color::pixelformat fmt, fraction rr) noexcept
+			: resolution(res), format(fmt), refresh_rate(rr)
 		{ }
 	};
 
 	class DSEEDEXP display : public object, public wrapped
 	{
 	public:
-		virtual error_t name (char* name, size_t maxNameCount) = 0;
+		virtual error_t name(char* name, size_t maxNameCount) = 0;
 
 	public:
-		virtual error_t displaymode (int index, displaymode* mode) = 0;
-		virtual size_t displaymode_count () = 0;
+		virtual error_t displaymode(int index, displaymode* mode) = 0;
+		virtual size_t displaymode_count() = 0;
 
 	public:
-		virtual error_t area (rect2i* area) = 0;
+		virtual error_t area(rect2i* area) = 0;
 
 	public:
-		virtual error_t refresh () = 0;
+		virtual error_t refresh() = 0;
 	};
 
 	class DSEEDEXP vgaadapter : public object, public wrapped
 	{
 	public:
-		virtual error_t name (char* name, size_t maxNameCount) = 0;
+		virtual error_t name(char* name, size_t maxNameCount) = 0;
 
 	public:
-		virtual error_t display (int index, display** display) = 0;
-		virtual size_t display_count () = 0;
+		virtual error_t display(int index, display** display) = 0;
+		virtual size_t display_count() = 0;
 
 	public:
-		virtual error_t refresh () = 0;
+		virtual error_t refresh() = 0;
 	};
 
 	class DSEEDEXP vgaadapter_enumerator : public object
 	{
 	public:
-		virtual error_t adapter (int index, vgaadapter** adapter) = 0;
-		virtual size_t adapter_count () = 0;
+		virtual error_t adapter(int index, vgaadapter** adapter) = 0;
+		virtual size_t adapter_count() = 0;
 
 	public:
-		virtual error_t refresh () = 0;
+		virtual error_t refresh() = 0;
 	};
 }
 
@@ -60,31 +60,31 @@ namespace dseed::graphics
 	class DSEEDEXP texture : public object, public wrapped
 	{
 	public:
-		virtual color::pixelformat format () noexcept = 0;
-		virtual size_t mip_level () noexcept = 0;
+		virtual color::pixelformat format() noexcept = 0;
+		virtual size_t mip_level() noexcept = 0;
 	};
 
 	class DSEEDEXP texture1d : public texture
 	{
 	public:
-		virtual int32_t size () noexcept = 0;
+		virtual int32_t size() noexcept = 0;
 	};
 
 	class DSEEDEXP texture2d : public texture
 	{
 	public:
-		virtual dseed::size2i size () noexcept = 0;
+		virtual dseed::size2i size() noexcept = 0;
 	};
 
 	class DSEEDEXP texture3d : public texture
 	{
 	public:
-		virtual dseed::size3i size () noexcept = 0;
+		virtual dseed::size3i size() noexcept = 0;
 	};
 
 	class DSEEDEXP texturecube : public texture
 	{
-		virtual dseed::size2i size () noexcept = 0;
+		virtual dseed::size2i size() noexcept = 0;
 	};
 }
 
@@ -100,11 +100,11 @@ namespace dseed::graphics
 	class DSEEDEXP vgabuffer : public object, public wrapped
 	{
 	public:
-		virtual error_t stride () noexcept = 0;
-		virtual error_t length () noexcept = 0;
+		virtual error_t stride() noexcept = 0;
+		virtual error_t length() noexcept = 0;
 
 	public:
-		virtual vgabuffertype type () noexcept = 0;
+		virtual vgabuffertype type() noexcept = 0;
 	};
 }
 
@@ -154,11 +154,11 @@ namespace dseed::graphics
 	class DSEEDEXP shaderpack : public object
 	{
 	public:
-		virtual shadertype type () noexcept = 0;
-		virtual bool contains (shaderlang lang) noexcept = 0;
+		virtual shadertype type() noexcept = 0;
+		virtual bool contains(shaderlang lang) noexcept = 0;
 
 	public:
-		virtual error_t at (shaderlang lang, blob** blob) noexcept = 0;
+		virtual error_t at(shaderlang lang, blob** blob) noexcept = 0;
 	};
 }
 
@@ -194,16 +194,16 @@ namespace dseed::graphics
 		blendvalue dest;
 		blendop blend_op;
 
-		inline blendparams () noexcept = default;
-		inline blendparams (bool blendenable, blendvalue src, blendvalue dest, blendop blendop) noexcept
-			: blend_enable (blendenable), src (src), dest (dest), blend_op (blendop)
+		inline blendparams() noexcept = default;
+		inline blendparams(bool blendenable, blendvalue src, blendvalue dest, blendop blendop) noexcept
+			: blend_enable(blendenable), src(src), dest(dest), blend_op(blendop)
 		{ }
 
-		static inline blendparams noblend () noexcept { return blendparams (false, blendvalue::one, blendvalue::zero, blendop::add); }
-		static inline blendparams alphablend () noexcept { return blendparams (true, blendvalue::src_alpha, blendvalue::inverted_src_alpha, blendop::add); }
-		static inline blendparams additiveblend () noexcept { return blendparams (true, blendvalue::src_alpha, blendvalue::one, blendop::add); }
-		static inline blendparams subtractblend () noexcept { return blendparams (true, blendvalue::src_alpha, blendvalue::one, blendop::reversed_subtract); }
-		static inline blendparams multiplyblend () noexcept { return blendparams (true, blendvalue::dest_color, blendvalue::zero, blendop::add); }
+		static inline blendparams noblend() noexcept { return blendparams(false, blendvalue::one, blendvalue::zero, blendop::add); }
+		static inline blendparams alphablend() noexcept { return blendparams(true, blendvalue::src_alpha, blendvalue::inverted_src_alpha, blendop::add); }
+		static inline blendparams additiveblend() noexcept { return blendparams(true, blendvalue::src_alpha, blendvalue::one, blendop::add); }
+		static inline blendparams subtractblend() noexcept { return blendparams(true, blendvalue::src_alpha, blendvalue::one, blendop::reversed_subtract); }
+		static inline blendparams multiplyblend() noexcept { return blendparams(true, blendvalue::dest_color, blendvalue::zero, blendop::add); }
 	};
 
 	enum class stencilop
@@ -259,24 +259,24 @@ namespace dseed::graphics
 	class DSEEDEXP vgadevice : public object, public wrapped
 	{
 	public:
-		virtual error_t adapter (vgaadapter** adapter) noexcept = 0;
+		virtual error_t adapter(vgaadapter** adapter) noexcept = 0;
 
 	public:
-		virtual bool is_support_format (color::pixelformat pf) noexcept = 0;
+		virtual bool is_support_format(color::pixelformat pf) noexcept = 0;
 
 	public:
-		virtual error_t sprite_render (vgarender** render) noexcept = 0;
+		virtual error_t sprite_render(vgarender** render) noexcept = 0;
 
 	public:
-		virtual bool vsync () noexcept = 0;
-		virtual error_t set_vsync (bool vsync) noexcept = 0;
+		virtual bool vsync() noexcept = 0;
+		virtual error_t set_vsync(bool vsync) noexcept = 0;
 
 	public:
-		virtual void displaymode (displaymode* dm, bool* fullscreen) noexcept = 0;
-		virtual bool set_displaymode (const graphics::displaymode* dm, bool fullscreen) noexcept = 0;
+		virtual void displaymode(displaymode* dm, bool* fullscreen) noexcept = 0;
+		virtual bool set_displaymode(const graphics::displaymode* dm, bool fullscreen) noexcept = 0;
 
 	public:
-		virtual error_t present () noexcept = 0;
+		virtual error_t present() noexcept = 0;
 	};
 }
 
@@ -292,49 +292,49 @@ namespace dseed::graphics
 	class DSEEDEXP sprite_atlas : public object, public wrapped
 	{
 	public:
-		virtual size2i size () noexcept = 0;
-		virtual color::pixelformat format () noexcept = 0;
+		virtual size2i size() noexcept = 0;
+		virtual color::pixelformat format() noexcept = 0;
 
 	public:
-		virtual rect2i atlas_element (size_t index) noexcept = 0;
-		virtual size_t atlas_count () noexcept = 0;
+		virtual rect2i atlas_element(size_t index) noexcept = 0;
+		virtual size_t atlas_count() noexcept = 0;
 	};
 
 	class DSEEDEXP sprite_rendertarget : public object, public wrapped
 	{
 	public:
-		virtual size2i size () noexcept = 0;
-		virtual color::pixelformat format () noexcept = 0;
+		virtual size2i size() noexcept = 0;
+		virtual color::pixelformat format() noexcept = 0;
 
 	public:
-		virtual error_t atlas (sprite_atlas** atlas) noexcept = 0;
+		virtual error_t atlas(sprite_atlas** atlas) noexcept = 0;
 	};
 
 	class DSEEDEXP sprite_render : public vgarender
 	{
 	public:
-		virtual error_t create_pipeline (shaderpack* pixelshader, const blendparams* blendparams, sprite_texfilter texfilter, pipeline** pipeline) noexcept = 0;
-		virtual error_t create_atlas (bitmaps::bitmap* bitmap, const rect2i* atlases, size_t atlas_count, sprite_atlas** atlas) noexcept = 0;
-		virtual error_t create_rendertarget (const size2i& size, color::pixelformat format, sprite_rendertarget** target) noexcept = 0;
-		virtual error_t create_constant (size_t size, vgabuffer** constbuf, const void* dat = nullptr) noexcept = 0;
+		virtual error_t create_pipeline(shaderpack* pixelshader, const blendparams* blendparams, sprite_texfilter texfilter, pipeline** pipeline) noexcept = 0;
+		virtual error_t create_atlas(bitmaps::bitmap* bitmap, const rect2i* atlases, size_t atlas_count, sprite_atlas** atlas) noexcept = 0;
+		virtual error_t create_rendertarget(const size2i& size, color::pixelformat format, sprite_rendertarget** target) noexcept = 0;
+		virtual error_t create_constant(size_t size, vgabuffer** constbuf, const void* dat = nullptr) noexcept = 0;
 
 	public:
-		virtual error_t set_pipeline (pipeline* pipeline) noexcept = 0;
-		virtual error_t set_rendertarget (sprite_rendertarget** rendertargets, size_t size) noexcept = 0;
-		virtual error_t set_atlas (sprite_atlas** atlas, size_t size) noexcept = 0;
-		virtual error_t set_constant (vgabuffer** constbuf, size_t size) noexcept = 0;
+		virtual error_t set_pipeline(pipeline* pipeline) noexcept = 0;
+		virtual error_t set_rendertarget(sprite_rendertarget** rendertargets, size_t size) noexcept = 0;
+		virtual error_t set_atlas(sprite_atlas** atlas, size_t size) noexcept = 0;
+		virtual error_t set_constant(vgabuffer** constbuf, size_t size) noexcept = 0;
 
 	public:
-		virtual error_t clear_rendertarget (sprite_rendertarget* rendertarget, const dseed::f32x4& color) noexcept = 0;
-		virtual error_t update_constant (vgabuffer* constbuf, const void* buf, size_t offset, size_t length) noexcept = 0;
-		virtual error_t update_atlas (sprite_atlas* atlas, dseed::bitmaps::bitmap* data) noexcept = 0;
+		virtual error_t clear_rendertarget(sprite_rendertarget* rendertarget, const dseed::f32x4_t& color) noexcept = 0;
+		virtual error_t update_constant(vgabuffer* constbuf, const void* buf, size_t offset, size_t length) noexcept = 0;
+		virtual error_t update_atlas(sprite_atlas* atlas, dseed::bitmaps::bitmap* data) noexcept = 0;
 
 	public:
-		virtual error_t begin (rendermethod method, const f32x4x4& transform) noexcept = 0;
-		virtual error_t end () noexcept = 0;
+		virtual error_t begin(rendermethod method, const f32x4x4_t& transform) noexcept = 0;
+		virtual error_t end() noexcept = 0;
 
 	public:
-		virtual error_t draw (size_t atlas_index, const f32x4x4& transform, const f32x4& color) noexcept = 0;
+		virtual error_t draw(size_t atlas_index, const f32x4x4_t& transform, const f32x4_t& color) noexcept = 0;
 	};
 }
 
@@ -394,22 +394,22 @@ namespace dseed::graphics
 namespace dseed::graphics
 {
 #if PLATFORM_MICROSOFT
-	DSEEDEXP error_t create_dxgi_vgaadapter_enumerator (vgaadapter_enumerator** enumerator) noexcept;
-	DSEEDEXP error_t create_d3d11_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
+	DSEEDEXP error_t create_dxgi_vgaadapter_enumerator(vgaadapter_enumerator** enumerator) noexcept;
+	DSEEDEXP error_t create_d3d11_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 
 #	if NTDDI_WIN10
-	DSEEDEXP error_t create_d3d12_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
+	DSEEDEXP error_t create_d3d12_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 #	endif
 #endif
 #if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID || PLATFORM_MACOS || PLATFORM_IOS || PLATFORM_WEBASSEMBLY
-	DSEEDEXP error_t create_opengl_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
+	DSEEDEXP error_t create_opengl_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 #endif
 #if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID
-	DSEEDEXP error_t create_vulkan_vgaadapter_enumerator (vgaadapter_enumerator** enumerator) noexcept;
-	DSEEDEXP error_t create_vulkan_vgadevice (platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
+	DSEEDEXP error_t create_vulkan_vgaadapter_enumerator(vgaadapter_enumerator** enumerator) noexcept;
+	DSEEDEXP error_t create_vulkan_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 #endif
 #if PLATFORM_MACOS || PLATFORM_IOS
-	DSEEDEXP error_t create_metal_vgadevice (platform::application* app, adapter* adapter, vgadevice** device) noexcept;
+	DSEEDEXP error_t create_metal_vgadevice(platform::application* app, adapter* adapter, vgadevice** device) noexcept;
 #endif
 }
 

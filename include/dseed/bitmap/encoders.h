@@ -10,17 +10,17 @@ namespace dseed::bitmaps
 #endif
 	struct DSEEDEXP png_encoder_options : public bitmap_encoder_options
 	{
-		png_encoder_options ()
-			: bitmap_encoder_options (sizeof (png_encoder_options), bitmap_encoder_options_for_png)
+		png_encoder_options()
+			: bitmap_encoder_options(sizeof(png_encoder_options), bitmap_encoder_options_for_png)
 		{ }
 	};
 
 	struct DSEEDEXP jpeg_encoder_options : public bitmap_encoder_options
 	{
 		int quality;
-		jpeg_encoder_options (int quality = 80)
-			: bitmap_encoder_options (sizeof (jpeg_encoder_options), bitmap_encoder_options_for_jpeg)
-			, quality (quality)
+		jpeg_encoder_options(int quality = 80)
+			: bitmap_encoder_options(sizeof(jpeg_encoder_options), bitmap_encoder_options_for_jpeg)
+			, quality(quality)
 		{ }
 	};
 
@@ -28,9 +28,32 @@ namespace dseed::bitmaps
 	{
 		int quality;
 		bool lossless;
-		webp_encoder_options (int quality = 75, bool lossless = false)
-			: bitmap_encoder_options (sizeof (webp_encoder_options), bitmap_encoder_options_for_webp)
-			, quality (quality), lossless (lossless)
+		webp_encoder_options(int quality = 75, bool lossless = false)
+			: bitmap_encoder_options(sizeof(webp_encoder_options), bitmap_encoder_options_for_webp)
+			, quality(quality), lossless(lossless)
+		{ }
+	};
+
+	enum class wic_encoder_format
+	{
+		bmp,
+		gif,
+		heif,
+		jpeg,
+		png,
+		tiff,
+		wmp,
+	};
+
+	struct DSEEDEXP wic_encoder_options : public bitmap_encoder_options
+	{
+		wic_encoder_format format;
+		int quality;
+		int compressionQuality;
+		bool lossless;
+		wic_encoder_options(wic_encoder_format format = wic_encoder_format::png, int quality = 80, int compressionQuality = 100, bool lossless = false)
+			: bitmap_encoder_options(sizeof(wic_encoder_options), bitmap_encoder_options_for_wic)
+			, format(format), quality(quality), compressionQuality(compressionQuality), lossless(lossless)
 		{ }
 	};
 #if COMPILER_MSVC
@@ -39,18 +62,20 @@ namespace dseed::bitmaps
 #	pragma pack ()
 #endif
 
-	using encoder_creator_func = error_t (*)(dseed::io::stream * stream, const dseed::bitmaps::bitmap_encoder_options * options, dseed::bitmaps::bitmap_encoder * *encoder);
+	using encoder_creator_func = error_t(*)(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
 
-	DSEEDEXP error_t create_dib_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
-	DSEEDEXP error_t create_dds_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_dib_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_dds_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
 
-	DSEEDEXP error_t create_ico_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
-	DSEEDEXP error_t create_cur_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_ico_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_cur_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
 
-	DSEEDEXP error_t create_png_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
-	DSEEDEXP error_t create_jpeg_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
-	DSEEDEXP error_t create_webp_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
-	DSEEDEXP error_t create_gif_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_png_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_jpeg_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_webp_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+	DSEEDEXP error_t create_gif_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
+
+	DSEEDEXP error_t create_wic_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder);
 }
 
 #endif

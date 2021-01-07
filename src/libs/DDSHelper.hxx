@@ -256,6 +256,6 @@ struct DDS_HEADER_DXT10
 };
 
 constexpr uint32_t DDS_MAGIC = 0x20534444;
-constexpr uint32_t make_fourcc (uint8_t ch0, uint8_t ch1, uint8_t ch2, uint8_t ch3) { return ((uint32_t)ch0 | ((uint32_t)ch1 << 8) | ((uint32_t)ch2 << 16) | ((uint32_t)ch3 << 24)); }
+constexpr uint32_t make_fourcc(uint8_t ch0, uint8_t ch1, uint8_t ch2, uint8_t ch3) { return ((uint32_t)ch0 | ((uint32_t)ch1 << 8) | ((uint32_t)ch2 << 16) | ((uint32_t)ch3 << 24)); }
 
 #endif

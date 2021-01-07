@@ -11,56 +11,72 @@
 #include <random>
 using namespace std::string_literals;
 
-#define COMPILER_MSVC										defined ( _MSC_VER )
-#define COMPILER_GCC										defined ( __GNUC__ ) && !defined ( __clang__ )
-#define COMPILER_CLANG										defined ( __clang__ )
+#define COMPILER_MSVC										(defined(_MSC_VER) || _MSC_VER)
+#define COMPILER_GCC										(defined(__GNUC__) && !defined(__clang__) || __GNUC__ || __clang__)
+#define COMPILER_CLANG										(defined(__clang__) || __clang__)
 
-#define PLATFORM_ANDROID									( defined ( __ANDROID__ ) )
-#define PLATFORM_FUCHSIA									( defined ( __Fuchsia__ ) )
-#define PLATFORM_GOOGLE										( PLATFORM_ANDROID || PLATFORM_FUCHSIA )
-#define PLATFORM_UNIX										( defined ( __unix__ ) || defined ( __linux__ ) ) && !defined ( __ANDROID__ )
-#define PLATFORM_WEBASSEMBLY								( defined ( __EMSCRIPTEN__ ) || defined ( __asmjs__ ) )
-#if defined ( __APPLE__ )
+#define PLATFORM_ANDROID									(defined(__ANDROID__) || __ANDROID__)
+#define PLATFORM_FUCHSIA									(defined(__Fuchsia__) || __Fuchsia__)
+#define PLATFORM_GOOGLE										(PLATFORM_ANDROID || PLATFORM_FUCHSIA)
+#define PLATFORM_UNIX										((defined(__unix__) || defined(__linux__) || __unix__ || __linux__) && !(defined(__ANDROID__) || __ANDROID__))
+#define PLATFORM_WEBASSEMBLY								(defined(__EMSCRIPTEN__) || defined(__asmjs__) || __EMSCRIPTEN__ || __asmjs__)
+#if defined (__APPLE__)
 #	include <TargetConditionals.h>
-#	define PLATFORM_IOS										( TARGET_OS_IOS || TARGET_OS_SIMULATOR )
-#	define PLATFORM_MACOS									( TARGET_OS_MAC && !PLATFORM_IOS )
+#	define PLATFORM_IOS										(TARGET_OS_IOS || TARGET_OS_SIMULATOR)
+#	define PLATFORM_MACOS									(TARGET_OS_MAC && !PLATFORM_IOS)
 #else
 #	define PLATFORM_IOS										0
 #	define PLATFORM_MACOS									0
 #endif
-#define PLATFORM_APPLE										( PLATFORM_IOS || PLATFORM_MACOS )
-#if ( defined ( _WINDOWS ) || defined ( _WIN32 ) || defined ( _WIN64 ) ) \
-	&& !( PLATFORM_APPLE || PLATFORM_GOOGLE || PLATFORM_UNIX || PLATFORM_WEBASSEMBLY )
+#define PLATFORM_APPLE										(PLATFORM_IOS || PLATFORM_MACOS)
+#if (defined(_WINDOWS) || defined(_WIN32) || defined(_WIN64)) \
+	&& !(PLATFORM_APPLE || PLATFORM_GOOGLE || PLATFORM_UNIX || PLATFORM_WEBASSEMBLY)
 #	include <Windows.h>
 #	include <initguid.h>
 #	include <wrl.h>
-#	define PLATFORM_UWP										( defined ( WINAPI_FAMILY ) && ( WINAPI_FAMILY == WINAPI_FAMILY_APP ) )
-#	define PLATFORM_WINDOWS									( !defined ( WINAPI_FAMILY ) || ( WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP ) )
+#	define PLATFORM_UWP										(defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP))
+#	define PLATFORM_WINDOWS									(!defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP))
 #else
 #	define PLATFORM_WINDOWS									0
 #	define PLATFORM_UWP										0
 #endif
-#define PLATFORM_MICROSOFT									( PLATFORM_WINDOWS || PLATFORM_UWP )
+#define PLATFORM_MICROSOFT									(PLATFORM_WINDOWS || PLATFORM_UWP)
 
-#define PLATFORM_DESKTOP									( PLATFORM_WINDOWS || PLATFORM_MACOS || PLATFORM_UNIX )
-#define PLATFORM_HANDHELD									( PLATFORM_IOS || PLATFORM_ANDROID )
-#define PLATFORM_UNIVERSAL									( PLATFORM_UWP || PLATFORM_FUCHSIA )
+#define PLATFORM_DESKTOP									(PLATFORM_WINDOWS || PLATFORM_MACOS || PLATFORM_UNIX)
+#define PLATFORM_HANDHELD									(PLATFORM_IOS || PLATFORM_ANDROID)
+#define PLATFORM_UNIVERSAL									(PLATFORM_UWP || PLATFORM_FUCHSIA)
 
 #if PLATFORM_MICROSOFT
-constexpr char PATH_SEPARATOR = '\\';
+#	define PATH_SEPARATOR									'\\'
 #else
-constexpr char PATH_SEPARATOR = '/';
+#	define PATH_SEPARATOR									'/'
 #endif
 
-#define ARCH_IA32											( defined ( _M_IX86 ) || defined ( __i386__ ) )
-#define ARCH_AMD64											( defined ( _M_AMD64 ) || defined ( __amd64__ ) )
-#define ARCH_X86SET											( ARCH_IA32 || ARCH_AMD64 )
-#define ARCH_ARM											( defined ( _M_ARM ) || defined ( __arm__ ) )
-#define ARCH_ARM64											( defined ( _M_ARM64 ) || defined ( __aarch64__ ) )
-#define ARCH_ARMSET											( ARCH_ARM || ARCH_ARM64 )
-#define ARCH_RISCV32										( ( defined ( __riscv ) || defined ( __riscv__ ) ) && ( __riscv_xlen == 32 ) )
-#define ARCH_RISCV64										( ( defined ( __riscv ) || defined ( __riscv__ ) ) && ( __riscv_xlen == 64 ) )
-#define ARCH_RISCVSET										( ARCH_RISCV32 || ARCH_RISCV64 )
+#define ARCH_IA32											(defined(_M_IX86) || _M_IX86 || defined(__i386__) || __i386__)
+#define ARCH_AMD64											(defined(_M_AMD64) || _M_AMD64 || defined(__amd64__) || __amd64__)
+#define ARCH_X86SET											(ARCH_IA32 || ARCH_AMD64)
+#define ARCH_ARM											(defined(_M_ARM) || _M_ARM || defined(__arm__) || __arm__)
+#define ARCH_ARM64											(defined(_M_ARM64) || _M_ARM64 || defined(__aarch64__) || __aarch64__)
+#define ARCH_ARMSET											(ARCH_ARM || ARCH_ARM64)
+
+#if !defined(DONT_USE_SSE)
+#	define DONT_USE_SSE										(!ARCH_X86SET)
+#elif defined(DONT_USE_SSE) && DONT_USE_SSE
+#	if !ARCH_X86SET
+#		undef DONT_USE_SSE
+#		define DONT_USE_SSE									0
+#	endif
+#endif
+#if !defined(DONT_USE_NEON)
+#	define DONT_USE_NEON									(!ARCH_ARMSET)
+#elif defined(DONT_USE_NEON) && DONT_USE_NEON
+#	if !ARCH_ARMSET
+#		undef DONT_USE_NEON
+#		define DONT_USE_NEON								0
+#	endif
+#endif
+
+#define DONT_USE_SIMD										((ARCH_X86SET && DONT_USE_SSE) || (ARCH_ARMSET && DONT_USE_NEON))
 
 #if ARCH_X86SET
 #	include <immintrin.h>
@@ -72,6 +88,26 @@ constexpr char PATH_SEPARATOR = '/';
 #   define DSEEDEXP											__declspec ( dllimport )
 #else
 #   define DSEEDEXP
+#endif
+
+#define CODE(x)												#x
+
+#if COMPILER_MSVC && PLATFORM_MICROSOFT
+#	define READS(x)											_In_reads_(x)
+#	define READSBYTES(x)									_In_reads_bytes_(x)
+#	define WRITES(x)										_Out_writes_(x)
+#	define WRITESBYTES(x)									_Out_writes_bytes_(x)
+#	define ALIGNPACK(x)										__declspec(align(x))
+#else
+#	define READS(x)
+#	define READSBYTES(x)
+#	define WRITES(x)
+#	define WRITESBYTES(x)
+#	define ALIGNPACK(x)										__attribute__((aligned(x), packed))
+#endif
+
+#if ARCH_X86SET
+#	include <immintrin.h>
 #endif
 
 #ifndef PURE
@@ -89,11 +125,13 @@ constexpr char PATH_SEPARATOR = '/';
 #	define READSBYTES(x)									_In_reads_bytes_(x)
 #	define WRITES(x)										_Out_writes_(x)
 #	define WRITESBYTES(x)									_Out_writes_bytes_(x)
+#	define ALIGNPACK(x)										__declspec(align(x))
 #else
 #	define READS(x)
 #	define READSBYTES(x)
 #	define WRITES(x)
 #	define WRITESBYTES(x)
+#	define ALIGNPACK(x)										__attribute__((aligned(x), packed))
 #endif
 
 #define CODE(x)												#x
@@ -101,8 +139,8 @@ constexpr char PATH_SEPARATOR = '/';
 namespace dseed
 {
 	using error_t = int32_t;
-	constexpr bool succeeded (error_t err) { return err >= 0; }
-	constexpr bool failed (error_t err) { return err < 0; }
+	constexpr bool succeeded(error_t err) { return err >= 0; }
+	constexpr bool failed(error_t err) { return err < 0; }
 
 	constexpr error_t error_good = 0;
 
@@ -173,10 +211,10 @@ namespace dseed::instructions
 		bool tsx : 1,										//< Transactional Synchronization Extensions(for Intel)
 			asf : 1;										//< Advanced Synchronization Facility(for AMD)
 
-		static const x86_instruction_info& instance ();
+		static const x86_instruction_info& instance();
 
 	private:
-		x86_instruction_info ();
+		x86_instruction_info();
 	};
 
 	struct DSEEDEXP arm_instruction_info
@@ -184,10 +222,10 @@ namespace dseed::instructions
 		bool neon : 1,										//< ARM Neon SIMD operators
 			crc32 : 1;										//< CRC32
 
-		static const arm_instruction_info& instance ();
+		static const arm_instruction_info& instance();
 
 	private:
-		arm_instruction_info ();
+		arm_instruction_info();
 	};
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -198,11 +236,11 @@ namespace dseed::instructions
 
 namespace dseed::instructions
 {
-	extern uint16_t (*hwrand16)();
-	extern uint32_t (*hwrand32)();
-	extern uint64_t (*hwrand64)();
+	extern uint16_t(*hwrand16)();
+	extern uint32_t(*hwrand32)();
+	extern uint64_t(*hwrand64)();
 
-	DSEEDEXP uint32_t crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept;
+	DSEEDEXP uint32_t crc32(uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept;
 }
 
 #endif

@@ -11,22 +11,22 @@
 class __wasapi_audiorequester : public dseed::audio::audiorequester
 {
 public:
-	__wasapi_audiorequester (IAudioClient* audioClient, IAudioCaptureClient* audioCaptureClient, HANDLE hWakeUp, WAVEFORMATEX* wf)
-		: _refCount (1), audioClient (audioClient), audioCaptureClient (audioCaptureClient), hWakeUp (hWakeUp), wf (wf)
-		, silentNull (true)
+	__wasapi_audiorequester(IAudioClient* audioClient, IAudioCaptureClient* audioCaptureClient, HANDLE hWakeUp, WAVEFORMATEX* wf)
+		: _refCount(1), audioClient(audioClient), audioCaptureClient(audioCaptureClient), hWakeUp(hWakeUp), wf(wf)
+		, silentNull(true)
 	{
-		audioClient->GetBufferSize (&bufferFrameSize);
-		byteArray.resize (bufferFrameSize * wf->nAvgBytesPerSec);
+		audioClient->GetBufferSize(&bufferFrameSize);
+		byteArray.resize(bufferFrameSize * wf->nAvgBytesPerSec);
 	}
-	~__wasapi_audiorequester ()
+	~__wasapi_audiorequester()
 	{
-		CoTaskMemFree (wf);
-		CloseHandle (hWakeUp);
+		CoTaskMemFree(wf);
+		CloseHandle(hWakeUp);
 	}
 
 public:
-	virtual int32_t retain () override { return ++_refCount; }
-	virtual int32_t release () override
+	virtual int32_t retain() override { return ++_refCount; }
+	virtual int32_t release() override
 	{
 		auto ret = --_refCount;
 		if (ret == 0)
@@ -35,70 +35,70 @@ public:
 	}
 
 public:
-	virtual dseed::error_t native_object (void** nativeObject) override
+	virtual dseed::error_t native_object(void** nativeObject) override
 	{
 		if (nativeObject == nullptr)
 			return dseed::error_invalid_args;
 
 		auto no = reinterpret_cast<dseed::audio::wasapi_audiorequester_nativeobject*>(nativeObject);
-		audioClient.As<IAudioClient> (&no->audioClient);
-		audioCaptureClient.As<IAudioCaptureClient> (&no->audioCaptureClient);
+		audioClient.As<IAudioClient>(&no->audioClient);
+		audioCaptureClient.As<IAudioCaptureClient>(&no->audioCaptureClient);
 
 		return dseed::error_good;
 	}
 
 public:
-	virtual dseed::error_t format (dseed::media::audioformat* format) override
+	virtual dseed::error_t format(dseed::media::audioformat* format) override
 	{
 		WAVEFORMATEX* wf;
-		if (FAILED (audioClient->GetMixFormat (&wf)))
+		if (FAILED(audioClient->GetMixFormat(&wf)))
 			return dseed::error_fail;
 
-		convert_from_waveformatex (wf, format);
+		convert_from_waveformatex(wf, format);
 
-		CoTaskMemFree (wf);
+		CoTaskMemFree(wf);
 
 		return dseed::error_good;
 	}
 
 public:
-	virtual dseed::error_t start () override
+	virtual dseed::error_t start() override
 	{
-		if (FAILED (audioClient->Start ()))
+		if (FAILED(audioClient->Start()))
 			return dseed::error_fail;
 		return dseed::error_good;
 	}
-	virtual dseed::error_t stop () override
+	virtual dseed::error_t stop() override
 	{
-		if (FAILED (audioClient->Stop ()))
+		if (FAILED(audioClient->Stop()))
 			return dseed::error_fail;
 		return dseed::error_good;
 	}
 
 public:
-	virtual bool silent_null () override { return silentNull; }
-	virtual void set_silent_null (bool sn) override { silentNull = sn; }
+	virtual bool silent_null() override { return silentNull; }
+	virtual void set_silent_null(bool sn) override { silentNull = sn; }
 
 public:
-	virtual dseed::error_t request (void* buffer, size_t bufferMaxSize, size_t* dataSize) override
+	virtual dseed::error_t request(void* buffer, size_t bufferMaxSize, size_t* dataSize) override
 	{
 		UINT32 packetLength = 0;
 		DWORD totalLength = 0;
 
 		HRESULT hr;
-		hr = audioCaptureClient->GetNextPacketSize (&packetLength);
+		hr = audioCaptureClient->GetNextPacketSize(&packetLength);
 
-		if (byteArray.size () < bufferMaxSize)
-			byteArray.resize (bufferMaxSize);
+		if (byteArray.size() < bufferMaxSize)
+			byteArray.resize(bufferMaxSize);
 
-		void* retBuffer = byteArray.data ();
-		while (SUCCEEDED (hr) && packetLength > 0)
+		void* retBuffer = byteArray.data();
+		while (SUCCEEDED(hr) && packetLength > 0)
 		{
 			BYTE* pData;
 			UINT32 nNumFramesToRead;
 			DWORD dwFlags;
 
-			if (FAILED (hr = audioCaptureClient->GetBuffer (&pData, &nNumFramesToRead, &dwFlags, NULL, NULL)))
+			if (FAILED(hr = audioCaptureClient->GetBuffer(&pData, &nNumFramesToRead, &dwFlags, NULL, NULL)))
 			{
 				*dataSize = -1;
 				return dseed::error_fail;
@@ -106,25 +106,25 @@ public:
 
 			if (AUDCLNT_BUFFERFLAGS_SILENT == dwFlags)
 			{
-				fprintf (stderr, "Silent(nNumFramesToRead: %d).\n", nNumFramesToRead);
+				fprintf(stderr, "Silent(nNumFramesToRead: %d).\n", nNumFramesToRead);
 				if (silentNull)
 				{
-					audioCaptureClient->ReleaseBuffer (nNumFramesToRead);
+					audioCaptureClient->ReleaseBuffer(nNumFramesToRead);
 					*dataSize = -1;
 					return dseed::error_good;
 				}
 			}
 			else if (AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY == dwFlags)
 			{
-				fprintf (stderr, "Discontinuity(nNumFramesToRead: %d).\n", nNumFramesToRead);
+				fprintf(stderr, "Discontinuity(nNumFramesToRead: %d).\n", nNumFramesToRead);
 			}
 			else if (AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR == dwFlags)
 			{
-				fprintf (stderr, "Timestamp Error(nNumFramesToRead: %d).\n", nNumFramesToRead);
+				fprintf(stderr, "Timestamp Error(nNumFramesToRead: %d).\n", nNumFramesToRead);
 			}
 			else
 			{
-				fprintf (stderr, "Maybe Discontinuity(nNumFramesToRead: %d).\n", nNumFramesToRead);
+				fprintf(stderr, "Maybe Discontinuity(nNumFramesToRead: %d).\n", nNumFramesToRead);
 			}
 
 			if (0 == nNumFramesToRead)
@@ -135,18 +135,18 @@ public:
 			}
 
 			LONG lBytesToWrite = nNumFramesToRead * wf->nBlockAlign;
-			memcpy (byteArray.data () + totalLength, pData, lBytesToWrite);
+			memcpy(byteArray.data() + totalLength, pData, lBytesToWrite);
 			totalLength += lBytesToWrite;
 
-			if (FAILED (hr = audioCaptureClient->ReleaseBuffer (nNumFramesToRead)))
+			if (FAILED(hr = audioCaptureClient->ReleaseBuffer(nNumFramesToRead)))
 				return dseed::error_fail;
 
-			hr = audioCaptureClient->GetNextPacketSize (&packetLength);
+			hr = audioCaptureClient->GetNextPacketSize(&packetLength);
 		}
 
-		DWORD dwWaitResult = WaitForMultipleObjects (1, &hWakeUp, FALSE, INFINITE);
+		DWORD dwWaitResult = WaitForMultipleObjects(1, &hWakeUp, FALSE, INFINITE);
 
-		memcpy (buffer, byteArray.data (), dseed::minimum (byteArray.size (), bufferMaxSize));
+		memcpy(buffer, byteArray.data(), dseed::minimum(byteArray.size(), bufferMaxSize));
 		*dataSize = totalLength;
 
 		return dseed::error_good;
@@ -168,7 +168,7 @@ private:
 
 #endif
 
-dseed::error_t dseed::audio::create_wasapi_audiorequester (dseed::audio::audioadapter* adapter, dseed::audio::audiorequester** requester) noexcept
+dseed::error_t dseed::audio::create_wasapi_audiorequester(dseed::audio::audioadapter* adapter, dseed::audio::audiorequester** requester) noexcept
 {
 	if (requester == nullptr)
 		return dseed::error_invalid_args;
@@ -179,93 +179,93 @@ dseed::error_t dseed::audio::create_wasapi_audiorequester (dseed::audio::audioad
 	if (adapter != nullptr)
 	{
 		dseed::audio::wasapi_audioadapter_nativeobject adapterNativeObject;
-		adapter->native_object ((void**)&adapterNativeObject);
+		adapter->native_object((void**)&adapterNativeObject);
 		mmDevice = adapterNativeObject.mmDevice;
 	}
 	else
 	{
 		Microsoft::WRL::ComPtr<IMMDeviceEnumerator> deviceEnumerator;
-		if (FAILED (CoCreateInstance (__uuidof (MMDeviceEnumerator), nullptr, CLSCTX_ALL,
+		if (FAILED(CoCreateInstance(__uuidof (MMDeviceEnumerator), nullptr, CLSCTX_ALL,
 			__uuidof(IMMDeviceEnumerator), (void**)&deviceEnumerator)))
 			return dseed::error_fail;
 
-		if(FAILED(deviceEnumerator->GetDefaultAudioEndpoint (eCapture, eConsole, &mmDevice)))
+		if (FAILED(deviceEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &mmDevice)))
 			return dseed::error_fail;
 	}
 
 	Microsoft::WRL::ComPtr<IAudioClient> audioClient;
-	if (FAILED (mmDevice->Activate (__uuidof (IAudioClient), CLSCTX_ALL, nullptr, (void**)&audioClient)))
+	if (FAILED(mmDevice->Activate(__uuidof (IAudioClient), CLSCTX_ALL, nullptr, (void**)&audioClient)))
 		return dseed::error_fail;
 
 	WAVEFORMATEX* wf;
-	audioClient->GetMixFormat (&wf);
+	audioClient->GetMixFormat(&wf);
 	switch (wf->wFormatTag)
 	{
-		case WAVE_FORMAT_IEEE_FLOAT:
-			wf->wFormatTag = WAVE_FORMAT_PCM;
+	case WAVE_FORMAT_IEEE_FLOAT:
+		wf->wFormatTag = WAVE_FORMAT_PCM;
+		wf->wBitsPerSample = 16;
+		wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
+		wf->nAvgBytesPerSec = wf->nBlockAlign * wf->nSamplesPerSec;
+		break;
+
+	case WAVE_FORMAT_EXTENSIBLE:
+	{
+		PWAVEFORMATEXTENSIBLE pEx = reinterpret_cast<PWAVEFORMATEXTENSIBLE>(wf);
+		if (IsEqualGUID(KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, pEx->SubFormat))
+		{
+			pEx->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+			pEx->Samples.wValidBitsPerSample = 16;
 			wf->wBitsPerSample = 16;
 			wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
 			wf->nAvgBytesPerSec = wf->nBlockAlign * wf->nSamplesPerSec;
-			break;
-
-		case WAVE_FORMAT_EXTENSIBLE:
-			{
-				PWAVEFORMATEXTENSIBLE pEx = reinterpret_cast<PWAVEFORMATEXTENSIBLE>(wf);
-				if (IsEqualGUID (KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, pEx->SubFormat))
-				{
-					pEx->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-					pEx->Samples.wValidBitsPerSample = 16;
-					wf->wBitsPerSample = 16;
-					wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
-					wf->nAvgBytesPerSec = wf->nBlockAlign * wf->nSamplesPerSec;
-				}
-			}
-			break;
+		}
+	}
+	break;
 	}
 
 	REFERENCE_TIME hnsRequestedDuration = REFTIMES_PER_SEC;
-	if (FAILED (audioClient->Initialize (AUDCLNT_SHAREMODE_SHARED, 0, hnsRequestedDuration, 0, wf, NULL)))
+	if (FAILED(audioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, 0, hnsRequestedDuration, 0, wf, NULL)))
 	{
-		CoTaskMemFree (wf);
+		CoTaskMemFree(wf);
 		return dseed::error_fail;
 	}
 
 	REFERENCE_TIME hnsDefaultDevicePeriod;
-	if (FAILED (audioClient->GetDevicePeriod (&hnsDefaultDevicePeriod, NULL)))
+	if (FAILED(audioClient->GetDevicePeriod(&hnsDefaultDevicePeriod, NULL)))
 	{
-		CoTaskMemFree (wf);
+		CoTaskMemFree(wf);
 		return dseed::error_fail;
 	}
 
 	Microsoft::WRL::ComPtr<IAudioCaptureClient> audioCaptureClient;
-	if (FAILED (audioClient->GetService (__uuidof(IAudioCaptureClient), (void**)&audioCaptureClient)))
+	if (FAILED(audioClient->GetService(__uuidof(IAudioCaptureClient), (void**)&audioCaptureClient)))
 	{
-		CoTaskMemFree (wf);
+		CoTaskMemFree(wf);
 		return dseed::error_fail;
 	}
 
-	HANDLE hWakeUp = CreateWaitableTimer (nullptr, FALSE, nullptr);
+	HANDLE hWakeUp = CreateWaitableTimer(nullptr, FALSE, nullptr);
 	if (hWakeUp == INVALID_HANDLE_VALUE || hWakeUp == 0)
 	{
-		CoTaskMemFree (wf);
+		CoTaskMemFree(wf);
 		return dseed::error_fail;
 	}
 
 	LARGE_INTEGER liFirstFire;
 	liFirstFire.QuadPart = -hnsDefaultDevicePeriod / 2;
 	LONG lTimeBetweenFires = (LONG)hnsDefaultDevicePeriod / 2 / (10 * 1000);
-	BOOL bOK = SetWaitableTimer (
+	BOOL bOK = SetWaitableTimer(
 		hWakeUp,
 		&liFirstFire,
 		lTimeBetweenFires,
 		NULL, NULL, FALSE
 	);
 
-	*requester = new __wasapi_audiorequester (audioClient.Get (), audioCaptureClient.Get (), hWakeUp, wf);
+	*requester = new __wasapi_audiorequester(audioClient.Get(), audioCaptureClient.Get(), hWakeUp, wf);
 	if (*requester == nullptr)
 	{
-		CoTaskMemFree (wf);
-		CloseHandle (hWakeUp);
+		CoTaskMemFree(wf);
+		CloseHandle(hWakeUp);
 		return dseed::error_out_of_memory;
 	}
 

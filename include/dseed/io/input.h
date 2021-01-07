@@ -77,8 +77,8 @@ namespace dseed::io
 		bool key_states[256];
 
 	public:
-		inline bool key_down (keys key) noexcept { return key_states[(int)key]; }
-		inline bool key_up (keys key) noexcept { return !key_states[(int)key]; }
+		inline bool key_down(keys key) noexcept { return key_states[(int)key]; }
+		inline bool key_up(keys key) noexcept { return !key_states[(int)key]; }
 	};
 
 	struct mouse_state
@@ -90,10 +90,10 @@ namespace dseed::io
 		bool is_relative;
 
 	public:
-		inline mouse_state ()
-			: position (int32_min, int32_min), wheel (0, 0)
-			, buttons (mousebuttons::no_button)
-			, is_relative (false)
+		inline mouse_state()
+			: position(int32_min, int32_min), wheel(0, 0)
+			, buttons(mousebuttons::no_button)
+			, is_relative(false)
 		{ }
 	};
 
@@ -173,11 +173,11 @@ namespace dseed::io
 	class DSEEDEXP inputdevice : public object
 	{
 	public:
-		virtual inputdevicetype type () = 0;
+		virtual inputdevicetype type() = 0;
 
 	public:
-		virtual error_t state (void* state, size_t state_size, playerindex playerindex = playerindex_player1) = 0;
-		virtual error_t send_feedback (const void* feedback, size_t feedback_size, playerindex playerindex = playerindex_player1) = 0;
+		virtual error_t state(void* state, size_t state_size, playerindex playerindex = playerindex_player1) = 0;
+		virtual error_t send_feedback(const void* feedback, size_t feedback_size, playerindex playerindex = playerindex_player1) = 0;
 	};
 }
 

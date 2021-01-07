@@ -1,71 +1,71 @@
 #include <dseed.h>
 
-inline uint16_t swrand16 () noexcept
+inline uint16_t swrand16() noexcept
 {
 	static std::random_device rd;
-	static std::mt19937 rnd (rd ());
+	static std::mt19937 rnd(rd());
 	static std::uniform_int_distribution<uint16_t> range;
-	return range (rnd);
+	return range(rnd);
 }
-inline uint32_t swrand32 () noexcept
+inline uint32_t swrand32() noexcept
 {
 	static std::random_device rd;
-	static std::mt19937 rnd (rd ());
+	static std::mt19937 rnd(rd());
 	static std::uniform_int_distribution<uint32_t> range;
-	return range (rnd);
+	return range(rnd);
 }
-inline uint64_t swrand64 () noexcept
+inline uint64_t swrand64() noexcept
 {
 	static std::random_device rd;
-	static std::mt19937_64 rnd (rd ());
+	static std::mt19937_64 rnd(rd());
 	static std::uniform_int_distribution<uint64_t> range;
-	return range (rnd);
+	return range(rnd);
 }
 
 #if ARCH_AMD64
-inline uint16_t hwrand16_x86 () noexcept
+inline uint16_t hwrand16_x86() noexcept
 {
 	uint16_t ret;
-	_rdrand16_step (&ret);
+	_rdrand16_step(&ret);
 	return ret;
 }
-inline uint32_t hwrand32_x86 () noexcept
+inline uint32_t hwrand32_x86() noexcept
 {
 	uint32_t ret;
-	_rdrand32_step (&ret);
+	_rdrand32_step(&ret);
 	return ret;
 }
-inline uint64_t hwrand64_x86 () noexcept
+inline uint64_t hwrand64_x86() noexcept
 {
 	uint64_t ret;
-	_rdrand64_step (&ret);
+	_rdrand64_step(&ret);
 	return ret;
 }
 #endif
 
-uint16_t (*hwrand16)() = []() -> uint16_t
+uint16_t(*hwrand16)() = []() -> uint16_t
 {
-	if (dseed::instructions::x86_instruction_info::instance ().rdrand)
+	if (dseed::instructions::x86_instruction_info::instance().rdrand)
 		hwrand16 = hwrand16_x86;
 	else
 		hwrand16 = swrand16;
-	return hwrand16 ();
+	return hwrand16();
 };
-uint32_t (*hwrand32)() = []() -> uint32_t
+uint32_t(*hwrand32)() = []() -> uint32_t
 {
-	if (dseed::instructions::x86_instruction_info::instance ().rdrand)
+	if (dseed::instructions::x86_instruction_info::instance().rdrand)
 		hwrand32 = hwrand32_x86;
 	else
 		hwrand32 = swrand32;
-	return hwrand32 ();
+	return hwrand32();
 };
-uint64_t (*hwrand64)() = []() -> uint64_t
+uint64_t(*hwrand64)() = []() -> uint64_t
 {
-	if (dseed::instructions::x86_instruction_info::instance ().rdrand)
+	if (dseed::instructions::x86_instruction_info::instance().rdrand)
 		hwrand64 = hwrand64_x86;
 	else
 		hwrand64 = swrand64;
-	return hwrand64 ();
+	return hwrand64();
 };
 
 #if ARCH_ARM64 && !(COMPILER_MSVC)
@@ -107,48 +107,48 @@ uint32_t crc32_table[256] = {
 		0x79B737BA, 0x8BDCB4B9, 0x988C474D, 0x6AE7C44E, 0xBE2DA0A5, 0x4C4623A6, 0x5F16D052, 0xAD7D5351,
 };
 
-uint32_t dseed::instructions::crc32 (uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept
+uint32_t dseed::instructions::crc32(uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept
 {
 	uint32_t crc = ~crc32;
 #if ARCH_X86SET
-	if (x86_instruction_info::instance ().sse4_2)
+	if (x86_instruction_info::instance().sse4_2)
 	{
 #	if ARCH_AMD64
 		size_t s64BytesCount = bytesCount / 8;
 		for (size_t i = 0; i < s64BytesCount; ++i)
-			crc = (uint32_t)(_mm_crc32_u64 ((uint64_t)crc, reinterpret_cast<const uint64_t*>(bytes)[i]) & 0xffffffff);
+			crc = (uint32_t)(_mm_crc32_u64((uint64_t)crc, reinterpret_cast<const uint64_t*>(bytes)[i]) & 0xffffffff);
 #	else
 		size_t s64BytesCount = 0;
 #	endif
 
 		size_t s32BytesCount = bytesCount / 4;
 		for (size_t i = s64BytesCount * 8; i < s32BytesCount; ++i)
-			crc = _mm_crc32_u32 (crc, reinterpret_cast<const uint32_t*>(bytes)[i]);
+			crc = _mm_crc32_u32(crc, reinterpret_cast<const uint32_t*>(bytes)[i]);
 
 		size_t s16BytesCount = bytesCount / 2;
 		for (size_t i = s32BytesCount * 4; i < s16BytesCount; ++i)
-			crc = _mm_crc32_u16 (crc, reinterpret_cast<const uint16_t*>(bytes)[i]);
+			crc = _mm_crc32_u16(crc, reinterpret_cast<const uint16_t*>(bytes)[i]);
 
 		for (size_t i = s16BytesCount * 2; i < bytesCount; ++i)
-			crc = _mm_crc32_u8 (crc, bytes[i]);
+			crc = _mm_crc32_u8(crc, bytes[i]);
 	}
 #elif ARCH_ARM64 && !(COMPILER_MSVC)
-	if (arm_instruction_info::instance ().neon)
+	if (arm_instruction_info::instance().neon)
 	{
 		size_t s64BytesCount = bytesCount / 8;
 		for (size_t i = 0; i < s64BytesCount; ++i)
-			crc = __crc32cd (crc, reinterpret_cast<const uint64_t*>(bytes)[i]);
+			crc = __crc32cd(crc, reinterpret_cast<const uint64_t*>(bytes)[i]);
 
 		size_t s32BytesCount = bytesCount / 4;
 		for (size_t i = s64BytesCount * 8; i < s32BytesCount; ++i)
-			crc = __crc32cw (crc, reinterpret_cast<const uint32_t*>(bytes)[i]);
+			crc = __crc32cw(crc, reinterpret_cast<const uint32_t*>(bytes)[i]);
 
 		size_t s16BytesCount = bytesCount / 2;
 		for (size_t i = s32BytesCount * 4; i < s16BytesCount; ++i)
-			crc = __crc32ch (crc, reinterpret_cast<const uint16_t*>(bytes)[i]);
+			crc = __crc32ch(crc, reinterpret_cast<const uint16_t*>(bytes)[i]);
 
 		for (size_t i = s16BytesCount * 2; i < bytesCount; ++i)
-			crc = __crc32cb (crc, bytes[i]);
+			crc = __crc32cb(crc, bytes[i]);
 	}
 #else
 	if (false)

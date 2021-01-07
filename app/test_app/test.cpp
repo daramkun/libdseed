@@ -135,7 +135,7 @@ public:
 public:
 	virtual void next_frame (dseed::timespan delta) override
 	{
-		static dseed::f32x4 color (1, 1, 1, 1), clearColor (0, 0, 0, 1);
+		static dseed::f32x4_t color (1, 1, 1, 1), clearColor (0, 0, 0, 1);
 
 		if (vgaDevice == nullptr)
 			return;
@@ -162,8 +162,8 @@ public:
 		{
 			for (int x = -5; x <= 5; ++x)
 			{
-				transform = dseed::multiply ((dseed::f32x4x4)dseed::float4x4::scale (0.25f, 0.25f, 1), 
-					(dseed::f32x4x4)dseed::float4x4::translate (1280 / 2 + (x * 150), 720 / 2 + (y * 150), 0));
+				transform = dseed::multiply ((dseed::f32x4x4_t)dseed::float4x4::scale (0.25f, 0.25f, 1), 
+					(dseed::f32x4x4_t)dseed::float4x4::translate (1280 / 2 + (x * 150), 720 / 2 + (y * 150), 0));
 				spriteRender->draw (0, transform, color);
 			}
 		}
@@ -185,8 +185,6 @@ private:
 	dseed::autoref<dseed::audio::audioplayer> audioPlayer;
 	dseed::autoref<dseed::audio::backgroundaudio> bgm;
 };
-
-#include <d3d11.h>
 
 ENTRYPOINT_ATTRIBUTE
 ENTRYPOINT_RETURNTYPE ENTRYPOINT_CALLTYPE ENTRYPOINT_NAME (ENTRYPOINT_ARGUMENTS)

@@ -1,6 +1,6 @@
 #pragma once
 
-static dseed::media::audioformat waveFormatFromWaveFormatEX (const WAVEFORMATEX* pwfx)
+static dseed::media::audioformat waveFormatFromWaveFormatEX(const WAVEFORMATEX* pwfx)
 {
 	dseed::media::audioformat wf = {};
 	wf.channels = (uint8_t)pwfx->nChannels;
@@ -22,24 +22,24 @@ static dseed::media::audioformat waveFormatFromWaveFormatEX (const WAVEFORMATEX*
 	{
 		switch (pwfx->wFormatTag)
 		{
-			case WAVE_FORMAT_PCM:
-				wf.pulse_format = dseed::media::pulseformat::pcm;
-				break;
-			case WAVE_FORMAT_IEEE_FLOAT:
-				wf.pulse_format = dseed::media::pulseformat::ieee_float;
-				break;
-			default:
-				wf.pulse_format = dseed::media::pulseformat::unknown;
-				break;
+		case WAVE_FORMAT_PCM:
+			wf.pulse_format = dseed::media::pulseformat::pcm;
+			break;
+		case WAVE_FORMAT_IEEE_FLOAT:
+			wf.pulse_format = dseed::media::pulseformat::ieee_float;
+			break;
+		default:
+			wf.pulse_format = dseed::media::pulseformat::unknown;
+			break;
 		}
 	}
 	return wf;
 }
 
-static WAVEFORMATEX* waveFormatExFromWaveFormat (const dseed::media::audioformat* waveFormat)
+static WAVEFORMATEX* waveFormatExFromWaveFormat(const dseed::media::audioformat* waveFormat)
 {
-	WAVEFORMATEX* pwfx = (WAVEFORMATEX*)CoTaskMemAlloc (sizeof (WAVEFORMATEX));
-	pwfx->cbSize = sizeof (WAVEFORMATEX);
+	WAVEFORMATEX* pwfx = (WAVEFORMATEX*)CoTaskMemAlloc(sizeof(WAVEFORMATEX));
+	pwfx->cbSize = sizeof(WAVEFORMATEX);
 	pwfx->nChannels = waveFormat->channels;
 	pwfx->wBitsPerSample = waveFormat->bits_per_sample;
 	pwfx->nSamplesPerSec = waveFormat->samples_per_sec;
@@ -47,9 +47,9 @@ static WAVEFORMATEX* waveFormatExFromWaveFormat (const dseed::media::audioformat
 	pwfx->nAvgBytesPerSec = waveFormat->bytes_per_sec;
 	switch (waveFormat->pulse_format)
 	{
-		case dseed::media::pulseformat::unknown: pwfx->wFormatTag = 0; break;
-		case dseed::media::pulseformat::pcm: pwfx->wFormatTag = WAVE_FORMAT_PCM; break;
-		case dseed::media::pulseformat::ieee_float: pwfx->wFormatTag = WAVE_FORMAT_IEEE_FLOAT; break;
+	case dseed::media::pulseformat::unknown: pwfx->wFormatTag = 0; break;
+	case dseed::media::pulseformat::pcm: pwfx->wFormatTag = WAVE_FORMAT_PCM; break;
+	case dseed::media::pulseformat::ieee_float: pwfx->wFormatTag = WAVE_FORMAT_IEEE_FLOAT; break;
 	}
 	return pwfx;
 }

@@ -7,12 +7,12 @@ namespace dseed
 	{
 		int32_t numerator, denominator;
 
-		fraction () = default;
-		fraction (int32_t numerator) noexcept;
-		fraction (int32_t numerator, int32_t denominator) noexcept;
-		fraction (double fp) noexcept;
+		fraction() = default;
+		fraction(int32_t numerator) noexcept;
+		fraction(int32_t numerator, int32_t denominator) noexcept;
+		fraction(double fp) noexcept;
 
-		operator double () noexcept;
+		operator double() noexcept;
 	};
 }
 
