@@ -2,14 +2,14 @@
 
 #include "common.hxx"
 
-#if defined ( USE_WEBP )
+#if defined(USE_WEBP)
 #	include <webp/decode.h>
 #	include <webp/demux.h>
 #endif
 
 dseed::error_t dseed::bitmaps::create_webp_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
 {
-#if defined ( USE_WEBP )
+#if defined(USE_WEBP)
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 

@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#if defined ( USE_FLAC )
+#if defined(USE_FLAC)
 #	define FLAC__NO_DLL
 #	include "FLAC/all.h"
 
@@ -265,7 +265,7 @@ private:
 
 dseed::error_t dseed::media::create_flac_media_decoder (dseed::io::stream* stream, dseed::media::media_decoder** decoder)
 {
-#if defined ( USE_FLAC )
+#if defined(USE_FLAC)
 	dseed::autoref<__flac_decoder> temp = new __flac_decoder (false);
 	if (temp == nullptr)
 		return dseed::error_out_of_memory;

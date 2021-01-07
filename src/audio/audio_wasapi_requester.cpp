@@ -130,7 +130,7 @@ public:
 			if (0 == nNumFramesToRead)
 			{
 				//*bufferLength = 0;
-				//pCaptureClient->ReleaseBuffer ( nNumFramesToRead );
+				//pCaptureClient->ReleaseBuffer(nNumFramesToRead);
 				//return nullptr;
 			}
 

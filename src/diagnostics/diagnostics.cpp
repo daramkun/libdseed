@@ -116,7 +116,7 @@ public:
 public:
 	virtual void write(dseed::diagnostics::loglevel level, const char* tag, const char* message) override
 	{
-#if _DEBUG || defined ( DEBUG )
+#if _DEBUG || defined(DEBUG)
 #	if PLATFORM_MICROSOFT || PLATFORM_UNIX
 		auto log = ____assembleLogMessage(level, tag, message, true);
 #		if PLATFORM_MICROSOFT

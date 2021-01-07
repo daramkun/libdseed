@@ -82,10 +82,10 @@ using namespace std::string_literals;
 #	include <immintrin.h>
 #endif
 
-#if COMPILER_MSVC && defined ( DSEED_WINDOWS_DLL_EXPORT )
-#   define DSEEDEXP											__declspec ( dllexport )
-#elif COMPILER_MSVC && !defined ( DSEED_WINDOWS_DLL_EXPORT )
-#   define DSEEDEXP											__declspec ( dllimport )
+#if COMPILER_MSVC && defined(DSEED_WINDOWS_DLL_EXPORT)
+#   define DSEEDEXP											__declspec(dllexport)
+#elif COMPILER_MSVC && !defined(DSEED_WINDOWS_DLL_EXPORT)
+#   define DSEEDEXP											__declspec(dllimport)
 #else
 #   define DSEEDEXP
 #endif

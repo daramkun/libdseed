@@ -70,7 +70,7 @@ void jpeg_stream_src (j_decompress_ptr cinfo, dseed::io::stream* stream)
 
 dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::io::stream* stream, bool yuv, dseed::bitmaps::bitmap_array** decoder)
 {
-#if defined ( USE_JPEG )
+#if defined(USE_JPEG)
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 

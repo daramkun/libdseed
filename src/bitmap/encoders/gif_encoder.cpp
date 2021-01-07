@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#if defined ( USE_GIF ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_GIF) && defined(USE_BITMAP_ENCODERS)
 #	include <gif_lib.h>
 #	include <vector>
 
@@ -196,7 +196,7 @@ private:
 
 dseed::error_t dseed::bitmaps::create_gif_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder)
 {
-#if defined ( USE_GIF ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_GIF) && defined(USE_BITMAP_ENCODERS)
 	auto enc = new __gif_encoder(stream);
 	if (enc == nullptr)
 		return dseed::error_out_of_memory;

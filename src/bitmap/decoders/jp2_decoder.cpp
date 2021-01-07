@@ -2,7 +2,7 @@
 
 #include "common.hxx"
 
-#if defined ( USE_JPEG2000 )
+#if defined(USE_JPEG2000)
 #	define OPJ_STATIC
 #	include <openjpeg.h>
 #endif
@@ -14,7 +14,7 @@
 
 dseed::error_t dseed::bitmaps::create_jpeg2000_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
 {
-#if defined ( USE_JPEG2000 )
+#if defined(USE_JPEG2000)
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 

@@ -137,11 +137,11 @@ namespace dseed::audio
 	};
 }
 
-#if defined ( USE_XAUDIO2_NATIVE_OBJECT )
+#if defined(USE_XAUDIO2_NATIVE_OBJECT)
 #	include <wrl.h>
 #	include <xaudio2.h>
 #endif
-#if defined ( USE_WASAPI_NATIVE_OBJECT )
+#if defined(USE_WASAPI_NATIVE_OBJECT)
 #	include <wrl.h>
 #	include <mmdeviceapi.h>
 #	include <Audioclient.h>
@@ -149,7 +149,7 @@ namespace dseed::audio
 
 namespace dseed::audio
 {
-#if defined ( USE_XAUDIO2_NATIVE_OBJECT )
+#if defined(USE_XAUDIO2_NATIVE_OBJECT)
 	struct xaudio2_audioplayer_nativeobject
 	{
 		Microsoft::WRL::ComPtr<IXAudio2> xaudio2;
@@ -161,7 +161,7 @@ namespace dseed::audio
 		IXAudio2SourceVoice* sourceVoice;
 	};
 #endif
-#if defined ( USE_WASAPI_NATIVE_OBJECT )
+#if defined(USE_WASAPI_NATIVE_OBJECT)
 	struct wasapi_audioadapter_nativeobject
 	{
 		Microsoft::WRL::ComPtr<IMMDevice> mmDevice;
@@ -173,7 +173,7 @@ namespace dseed::audio
 		Microsoft::WRL::ComPtr<IAudioCaptureClient> audioCaptureClient;
 	};
 #endif
-#if defined ( USE_OPENAL_NATIVE_OBJECT )
+#if defined(USE_OPENAL_NATIVE_OBJECT)
 
 #endif
 }

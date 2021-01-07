@@ -91,7 +91,7 @@ public:
 		uint8_t* pixelsPtr;
 		bitmap->lock ((void**)&pixelsPtr);
 		for (auto i = 0; i < size.height; ++i)
-			_stream->write (pixelsPtr + ( ( size.height - i - 1 ) * stride ), stride);
+			_stream->write (pixelsPtr +(( size.height - i - 1) * stride), stride);
 		bitmap->unlock ();
 
 		return dseed::error_good;

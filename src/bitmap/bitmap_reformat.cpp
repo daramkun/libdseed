@@ -6,7 +6,7 @@
 #include "../libs/exoquant/exoquant.h"
 #include "../libs/exoquant/exoquant.c"
 
-//#if defined ( USE_SQUISH )
+//#if defined(USE_SQUISH)
 //#	include <squish.h>
 //#endif
 
@@ -324,7 +324,7 @@ constexpr pixelformat BC_TO_PF (BCENUM compression) noexcept {
 template<BCENUM compression>
 inline int pixelconv_to_dxt (PIXELCONV_ARGS) noexcept
 {
-#if defined ( USE_SQUISH )
+#if defined(USE_SQUISH)
 	size_t destDepth = calc_bitmap_plane_size (pixelformat::rgba8, size2i (size.width, size.height)),
 		srcDepth = calc_bitmap_plane_size (BC_TO_PF (compression), size2i (size.width, size.height));
 	for (int z = 0; z < size.depth; ++z)
@@ -337,7 +337,7 @@ inline int pixelconv_to_dxt (PIXELCONV_ARGS) noexcept
 template<BCENUM compression>
 inline int pixelconv_from_dxt (PIXELCONV_ARGS) noexcept
 {
-#if defined ( USE_SQUISH )
+#if defined(USE_SQUISH)
 	size_t destDepth = calc_bitmap_plane_size (BC_TO_PF (compression), size2i (size.width, size.height)),
 		srcDepth = calc_bitmap_plane_size (pixelformat::rgba8, size2i (size.width, size.height));
 	for (int z = 0; z < size.depth; ++z)

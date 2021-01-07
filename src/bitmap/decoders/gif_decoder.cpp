@@ -2,13 +2,13 @@
 
 #include "common.hxx"
 
-#if defined ( USE_GIF )
+#if defined(USE_GIF)
 #	include <gif_lib.h>
 #endif
 
 dseed::error_t dseed::bitmaps::create_gif_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
 {
-#if defined ( USE_GIF )
+#if defined(USE_GIF)
 	int err;
 	auto pgif = DGifOpen (stream, [](GifFileType* file, GifByteType* buf, int len) -> int
 		{

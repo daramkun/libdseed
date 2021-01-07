@@ -339,7 +339,7 @@ namespace dseed::graphics
 }
 
 #if PLATFORM_MICROSOFT
-#	if defined ( USE_D3D11_NATIVE_OBJECT )
+#	if defined(USE_D3D11_NATIVE_OBJECT)
 #		include <d3d11.h>
 #		include <dxgi.h>
 #		include <wrl.h>
@@ -347,7 +347,7 @@ namespace dseed::graphics
 #endif
 namespace dseed::graphics
 {
-#if PLATFORM_MICROSOFT && defined ( USE_D3D11_NATIVE_OBJECT )
+#if PLATFORM_MICROSOFT && defined(USE_D3D11_NATIVE_OBJECT)
 	struct d3d11_vgadevice_nativeobject
 	{
 		Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
@@ -377,16 +377,16 @@ namespace dseed::graphics
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	};
 #endif
-#if PLATFORM_MICROSOFT && defined ( USE_D3D12_NATIVE_OBJECT )
+#if PLATFORM_MICROSOFT && defined(USE_D3D12_NATIVE_OBJECT)
 
 #endif
-#if defined ( USE_OPENGL_NATIVE_OBJECT )
+#if defined(USE_OPENGL_NATIVE_OBJECT)
 
 #endif
-#if defined ( USE_VULKAN_NATIVE_OBJECT )
+#if defined(USE_VULKAN_NATIVE_OBJECT)
 
 #endif
-#if defined ( USE_METAL_NATIVE_OBJECT )
+#if defined(USE_METAL_NATIVE_OBJECT)
 
 #endif
 }

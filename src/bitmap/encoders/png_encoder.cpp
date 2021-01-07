@@ -1,13 +1,13 @@
 #include <dseed.h>
 
-#if defined ( USE_PNG ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_PNG) && defined(USE_BITMAP_ENCODERS)
 #	include <png.h>
 #	include <zlib.h>
 #endif
 
 #include <vector>
 
-#if defined ( USE_PNG ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_PNG) && defined(USE_BITMAP_ENCODERS)
 class __png_encoder : public dseed::bitmaps::bitmap_encoder
 {
 public:
@@ -190,7 +190,7 @@ private:
 
 dseed::error_t dseed::bitmaps::create_png_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder)
 {
-#if defined ( USE_PNG ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_PNG) && defined(USE_BITMAP_ENCODERS)
 	png_encoder_options pngOptions;
 	if (options != nullptr)
 	{

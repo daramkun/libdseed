@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#if defined ( USE_WEBP ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_WEBP) && defined(USE_BITMAP_ENCODERS)
 #	include <webp/encode.h>
 #	include <webp/mux.h>
 #	include <functional>
@@ -135,7 +135,7 @@ private:
 
 dseed::error_t dseed::bitmaps::create_webp_bitmap_encoder(dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder)
 {
-#if defined ( USE_WEBP ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_WEBP) && defined(USE_BITMAP_ENCODERS)
 	webp_encoder_options webpOptions;
 	if (options != nullptr)
 	{

@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#if defined ( USE_JPEG ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_JPEG) && defined(USE_BITMAP_ENCODERS)
 #	include <jpeglib.h>
 #	include <assert.h>
 
@@ -193,7 +193,7 @@ private:
 
 dseed::error_t dseed::bitmaps::create_jpeg_bitmap_encoder (dseed::io::stream* stream, const dseed::bitmaps::bitmap_encoder_options* options, dseed::bitmaps::bitmap_encoder** encoder)
 {
-#if defined ( USE_JPEG ) && defined ( USE_BITMAP_ENCODERS )
+#if defined(USE_JPEG) && defined(USE_BITMAP_ENCODERS)
 	dseed::bitmaps::jpeg_encoder_options jpegOptions;
 	if (options != nullptr)
 	{

@@ -41,7 +41,7 @@ public:
 		config.outputChannels = 2;
 		config.outputSampleRate = 48000;
 
-		if ( !drmp3_init (&_file, [](void* pUserData, void* pBufferOut, size_t bytesToRead) -> size_t
+		if(!drmp3_init (&_file, [](void* pUserData, void* pBufferOut, size_t bytesToRead) -> size_t
 			{
 				dseed::io::stream* stream = (dseed::io::stream*)pUserData;
 				int64_t readed = stream->read ((uint8_t*)pBufferOut, bytesToRead);

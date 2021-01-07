@@ -1964,7 +1964,7 @@ static int op_http_conn_start_tls(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
 # if (OPENSSL_VERSION_NUMBER<0x10002000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
    ||!skip_certificate_check
 # endif
-   ){
+  ){
     ret=op_do_ssl_step(_ssl_conn,_fd,SSL_do_handshake);
     if(OP_UNLIKELY(ret<=0))return OP_FALSE;
 # if (OPENSSL_VERSION_NUMBER<0x10002000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)

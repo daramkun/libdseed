@@ -345,7 +345,7 @@ private:
 {
 public:
 	__native_filestream_uwp (Windows::Storage::Streams::IRandomAccessStream^ stream)
-		: _refCount ( 1 )
+		: _refCount(1)
 	{
 	}
 public:

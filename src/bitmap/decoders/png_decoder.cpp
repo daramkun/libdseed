@@ -10,7 +10,7 @@ constexpr int PNG_BYTES_TO_CHECK = 8;
 
 dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
 {
-#if defined ( USE_PNG )
+#if defined(USE_PNG)
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 

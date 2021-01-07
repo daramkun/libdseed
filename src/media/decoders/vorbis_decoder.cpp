@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-#if defined ( USE_VORBIS )
+#if defined(USE_VORBIS)
 #	include <vorbis/vorbisfile.h>
 #	include <vector>
 
@@ -153,7 +153,7 @@ private:
 
 dseed::error_t dseed::media::create_vorbis_media_decoder (dseed::io::stream* stream, dseed::media::media_decoder** decoder)
 {
-#if defined ( USE_VORBIS )
+#if defined(USE_VORBIS)
 	dseed::autoref<__vorbis_decoder> temp = new __vorbis_decoder ();
 	if (temp == nullptr)
 		return dseed::error_out_of_memory;

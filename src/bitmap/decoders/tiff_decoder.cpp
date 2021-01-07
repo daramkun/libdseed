@@ -2,14 +2,14 @@
 
 #include "common.hxx"
 
-#if defined ( USE_TIFF )
+#if defined(USE_TIFF)
 #	include <tiff.h>
 #	include <tiffio.h>
 #endif
 
 dseed::error_t dseed::bitmaps::create_tiff_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
 {
-#if defined ( USE_TIFF )
+#if defined(USE_TIFF)
 	if (stream == nullptr || decoder == nullptr)
 		return dseed::error_invalid_args;
 

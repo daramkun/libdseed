@@ -3,7 +3,7 @@
 
 #include <dseed.h>
 
-#pragma warning ( disable: 4068 )
+#pragma warning(disable: 4068)
 
 /***************************************************************************************************
 *
@@ -18,7 +18,7 @@
 #include <cmath>
 #include <type_traits>
 
-#if ( ARCH_X86SET )
+#if(ARCH_X86SET)
 //  MMX, SSE, SSE 2
 #	include <mmintrin.h>
 #	include <xmmintrin.h>
@@ -30,7 +30,7 @@
 #	include <nmmintrin.h>
 //  AVX
 #	include <immintrin.h>
-#elif ( ARCH_ARMSET )
+#elif(ARCH_ARMSET)
 //  NEON
 #	include <arm_neon.h>
 #	if PLATFORM_ANDROID
@@ -38,7 +38,7 @@
 #	endif
 #endif
 
-#pragma pack ( push, 1 )
+#pragma pack(push, 1)
 struct int24_t
 {
 	uint8_t value[3];
@@ -47,12 +47,12 @@ struct int24_t
 	inline int24_t(int32_t v) { memcpy(value, &v, 3); }
 	inline operator int32_t () const
 	{
-		//return ( ( value [ 2 ] & 0x80 ) ? ( 0xff000000 ) : 0 )
+		//return(( value [ 2 ] & 0x80) ?(0xff000000) : 0)
 		return ((value[2] & 0x80) << 24) >> 7
 			| (value[2] << 16) | (value[1] << 8) | value[0];
 	}
 };
-#pragma pack ( pop )
+#pragma pack(pop)
 
 #define __TC_CHAR											127.0f
 #define __TC_SHORT											32767.0f
@@ -200,7 +200,7 @@ static inline bool __TC_plain_support() {
 
 #pragma region	SSE Type Converter
 #pragma mark	SSE Type Converter
-#if ( ARCH_X86SET )
+#if(ARCH_X86SET)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                //
 //  //////////  //////////  //////////    //////////  //////////  //      //  //      //          //

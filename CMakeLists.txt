@@ -50,14 +50,14 @@ ELSE()
     SET(TARGET_ARCH ${CMAKE_HOST_SYSTEM_PROCESSOR})
 ENDIF()
 
-MESSAGE ( STATUS "==============================================================" )
-MESSAGE ( STATUS "   _ _ _         _                   _ " )
-MESSAGE ( STATUS "  | (_) |__   __| |___  ___  ___  __| |" )
-MESSAGE ( STATUS "  | | | '_ \\ / _` / __|/ _ \\/ _ \\/ _` |" )
-MESSAGE ( STATUS "  | | | |_) | (_| \\__ \\  __/  __/ (_| |" )
-MESSAGE ( STATUS "  |_|_|_.__/ \\__,_|___/\\___|\\___|\\__,_|" )
-MESSAGE ( STATUS "" )
-MESSAGE ( STATUS "==============================================================" )
+MESSAGE(STATUS "==============================================================")
+MESSAGE(STATUS "   _ _ _         _                   _ ")
+MESSAGE(STATUS "  | (_) |__   __| |___  ___  ___  __| |")
+MESSAGE(STATUS "  | | | '_ \\ / _` / __|/ _ \\/ _ \\/ _` |")
+MESSAGE(STATUS "  | | | |_) | (_| \\__ \\  __/  __/ (_| |")
+MESSAGE(STATUS "  |_|_|_.__/ \\__,_|___/\\___|\\___|\\__,_|")
+MESSAGE(STATUS "")
+MESSAGE(STATUS "==============================================================")
 
 MESSAGE(STATUS "libdseed Version:  ${DSEED_VERSION}")
 MESSAGE(STATUS "CMake version:    ${CMAKE_VERSION}")
@@ -182,7 +182,7 @@ SET(DSEED_LIB_SOURCES
 	src/audio/audio_wasapi_adapter.cpp
 	src/audio/audio_xaudio2_player.cpp
 	src/audio/audio_wasapi_requester.cpp
- )
+)
 SET(DSEED_DEFINITIONS)
 SET(DSEED_INCLUDE_DIRS)
 SET(DSEED_LINK_LIBS)
