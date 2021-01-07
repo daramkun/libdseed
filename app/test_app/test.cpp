@@ -122,6 +122,12 @@ public:
 			app->exit ();
 			return;
 		}
+
+		if (dseed::failed(bgm->play()))
+		{
+			app->exit();
+			return;
+		}
 	}
 
 	virtual void closing (bool& cancel) override

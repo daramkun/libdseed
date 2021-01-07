@@ -15,8 +15,8 @@ DEFINE_PROPERTYKEY(PKEY_AudioEndpoint_Path, 0x9c119480, 0xddc2, 0x4954, 0xa1, 0x
 class __xaudio2_backgroundaudio : public dseed::audio::backgroundaudio, public IXAudio2VoiceCallback
 {
 public:
-	__xaudio2_backgroundaudio(IXAudio2SourceVoice* voice, dseed::media::audio_stream* stream)
-		: _refCount(1), sourceVoice(voice), sourceStream(stream), isPlaying(false), isPaused(false), currentBuffer(0)
+	__xaudio2_backgroundaudio(dseed::media::audio_stream* stream)
+		: _refCount(1), sourceVoice(nullptr), sourceStream(stream), isPlaying(false), isPaused(false), currentBuffer(0)
 	{
 		dseed::media::audioformat af;
 		sourceStream->format(&af);
@@ -28,7 +28,8 @@ public:
 	}
 	~__xaudio2_backgroundaudio()
 	{
-		sourceVoice->DestroyVoice();
+		if (sourceVoice)
+			sourceVoice->DestroyVoice();
 	}
 
 public:
@@ -39,6 +40,12 @@ public:
 		if (ret == 0)
 			delete this;
 		return ret;
+	}
+
+public:
+	void SetVoice(IXAudio2SourceVoice* voice)
+	{
+		sourceVoice = voice;
 	}
 
 public:
@@ -531,13 +538,19 @@ public:
 		WAVEFORMATEX wf;
 		convert_to_waveformatex(&af, &wf);
 
+		dseed::autoref<__xaudio2_backgroundaudio> bgmAudio;
+		*&bgmAudio = new __xaudio2_backgroundaudio(stream);
+		if (bgmAudio == nullptr)
+			return dseed::error_out_of_memory;
+
 		IXAudio2SourceVoice* voice;
-		if (FAILED(xaudio2->CreateSourceVoice(&voice, &wf)))
+		if (FAILED(xaudio2->CreateSourceVoice(&voice, &wf, 0, XAUDIO2_DEFAULT_FREQ_RATIO, bgmAudio)))
 			return dseed::error_fail;
 
-		*audio = new __xaudio2_backgroundaudio(voice, stream);
-		if (*audio == nullptr)
-			return dseed::error_out_of_memory;
+		bgmAudio->SetVoice(voice);
+
+		*audio = bgmAudio;
+		(*audio)->retain();
 
 		return dseed::error_good;
 	}
