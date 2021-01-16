@@ -180,6 +180,20 @@ namespace dseed
 	constexpr attrkey_t attrkey_duration = 0x0001000100010002;
 }
 
+namespace dseed
+{
+	struct DSEEDEXP version
+	{
+	public:
+		version();
+		version(const char* versionString);
+		version(int major, int minor, int build, int revision);
+
+	public:
+		int major, minor, build, revision;
+	};
+}
+
 namespace dseed::instructions
 {
 #	if COMPILER_MSVC

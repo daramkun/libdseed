@@ -115,13 +115,13 @@ dseed::error_t __d3d11_sprite_vgabuffer::native_object(void** nativeObject)
 	return dseed::error_good;
 }
 
-dseed::error_t __d3d11_sprite_vgabuffer::stride() noexcept
+size_t __d3d11_sprite_vgabuffer::stride() noexcept
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	buffer.Get()->GetDesc(&bufferDesc);
 	return bufferDesc.ByteWidth;
 }
-dseed::error_t __d3d11_sprite_vgabuffer::length() noexcept { return 1; }
+size_t __d3d11_sprite_vgabuffer::length() noexcept { return 1; }
 dseed::graphics::vgabuffertype __d3d11_sprite_vgabuffer::type() noexcept { return dseed::graphics::vgabuffertype::constant; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ dseed::error_t __d3d11_sprite_pipeline::native_object(void** nativeObject)
 	if (nativeObject == nullptr)
 		return dseed::error_invalid_args;
 
-	auto no = reinterpret_cast<dseed::graphics::d3d11_sprite_pipeline_nativeobject*>(nativeObject);
+	auto* no = reinterpret_cast<dseed::graphics::d3d11_sprite_pipeline_nativeobject*>(nativeObject);
 	pixelShader.As(&no->pixelShader);
 	blendState.As(&no->blendState);
 	samplerState.As(&no->samplerState);
@@ -167,7 +167,7 @@ __d3d11_sprite_atlas::__d3d11_sprite_atlas(ID3D11Resource* texture, ID3D11Shader
 {
 	for (size_t i = 0; i < atlas_count; ++i)
 	{
-		auto& atlas = atlases[i];
+		const auto& atlas = atlases[i];
 		this->atlases.emplace_back(atlas);
 	}
 }
@@ -175,7 +175,7 @@ __d3d11_sprite_atlas::__d3d11_sprite_atlas(ID3D11Resource* texture, ID3D11Shader
 int32_t __d3d11_sprite_atlas::retain() { return ++_refCount; }
 int32_t __d3d11_sprite_atlas::release()
 {
-	auto ret = --_refCount;
+	const auto ret = --_refCount;
 	if (ret == 0)
 		delete this;
 	return ret;
@@ -186,7 +186,7 @@ dseed::error_t __d3d11_sprite_atlas::native_object(void** nativeObject)
 	if (nativeObject == nullptr)
 		return dseed::error_invalid_args;
 
-	auto no = reinterpret_cast<dseed::graphics::d3d11_sprite_atlas_nativeobject*>(nativeObject);
+	auto* no = reinterpret_cast<dseed::graphics::d3d11_sprite_atlas_nativeobject*>(nativeObject);
 	texture.As(&no->texture);
 	srv.As(&no->shaderResourceView);
 
@@ -267,7 +267,7 @@ __d3d11_sprite_rendertarget::__d3d11_sprite_rendertarget(dseed::graphics::sprite
 int32_t __d3d11_sprite_rendertarget::retain() { return ++_refCount; }
 int32_t __d3d11_sprite_rendertarget::release()
 {
-	auto ret = --_refCount;
+	const auto ret = --_refCount;
 	if (ret == 0)
 		delete this;
 	return ret;
@@ -278,7 +278,7 @@ dseed::error_t __d3d11_sprite_rendertarget::native_object(void** nativeObject)
 	if (nativeObject == nullptr)
 		return dseed::error_invalid_args;
 
-	auto no = reinterpret_cast<dseed::graphics::d3d11_sprite_rendertarget_nativeobject*>(nativeObject);
+	auto* no = reinterpret_cast<dseed::graphics::d3d11_sprite_rendertarget_nativeobject*>(nativeObject);
 	rtv.As(&no->renderTargetView);
 
 	return dseed::error_good;
@@ -300,15 +300,16 @@ dseed::error_t __d3d11_sprite_rendertarget::atlas(dseed::graphics::sprite_atlas*
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 __d3d11_sprite_render::__d3d11_sprite_render(dseed::graphics::vgadevice* device)
-	: _refCount(1), vgadevice(device), session(false)
-	, renderMethod(dseed::graphics::rendermethod::deferred), renderTargetSize(0, 0), transformBuffer({ dseed::float4x4::identity(), dseed::float4x4::identity() })
+	: _refCount(1), vgadevice(device), renderTargetSize(0, 0)
+	, transformBuffer({ dseed::float4x4::identity(), dseed::float4x4::identity() })
+	, session(false), renderMethod(dseed::graphics::rendermethod::deferred)
 {
 
 }
 dseed::error_t __d3d11_sprite_render::initialize()
 {
 	dseed::graphics::d3d11_vgadevice_nativeobject nativeObject;
-	vgadevice->native_object((void**)&nativeObject);
+	vgadevice->native_object(reinterpret_cast<void**>(&nativeObject));
 	d3dDevice = nativeObject.d3dDevice.Get();
 	d3dDevice->GetImmediateContext(&immediateContext);
 
@@ -375,7 +376,7 @@ dseed::error_t __d3d11_sprite_render::initialize()
 int32_t __d3d11_sprite_render::retain() { return ++_refCount; }
 int32_t __d3d11_sprite_render::release()
 {
-	auto ret = --_refCount;
+	const auto ret = --_refCount;
 	if (ret == 0)
 		delete this;
 	return ret;
@@ -389,7 +390,7 @@ dseed::error_t __d3d11_sprite_render::create_pipeline(dseed::graphics::shaderpac
 	if (pipeline == nullptr) return dseed::error_invalid_args;
 
 	dseed::graphics::d3d11_vgadevice_nativeobject nativeObject;
-	vgadevice->native_object((void**)&nativeObject);
+	vgadevice->native_object(reinterpret_cast<void**>(&nativeObject));
 
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
@@ -403,7 +404,7 @@ dseed::error_t __d3d11_sprite_render::create_pipeline(dseed::graphics::shaderpac
 				return dseed::error_invalid_args;
 
 			Microsoft::WRL::ComPtr<ID3DBlob> pixelShaderBlob;
-			if (FAILED(CompileHLSL("ps_5_0", (const char*)pixelShaderCodeBlob->ptr(), &pixelShaderBlob)))
+			if (FAILED(CompileHLSL("ps_5_0", static_cast<const char*>(pixelShaderCodeBlob->ptr()), &pixelShaderBlob)))
 				return dseed::error_fail;
 
 			if (FAILED(nativeObject.d3dDevice->CreatePixelShader(
@@ -429,7 +430,7 @@ dseed::error_t __d3d11_sprite_render::create_pipeline(dseed::graphics::shaderpac
 	}
 	else
 	{
-		dseed::graphics::blendparams alphablend = dseed::graphics::blendparams::alphablend();
+		const auto alphablend = dseed::graphics::blendparams::alphablend();
 		if (FAILED(CreateBlendStateFromBlendParams(nativeObject.d3dDevice.Get(), alphablend, &blendState)))
 			return dseed::error_invalid_args;
 	}
@@ -447,7 +448,7 @@ dseed::error_t __d3d11_sprite_render::create_atlas(dseed::bitmaps::bitmap* bitma
 		return dseed::error_invalid_args;
 
 	dseed::graphics::d3d11_vgadevice_nativeobject nativeObject;
-	vgadevice->native_object((void**)&nativeObject);
+	vgadevice->native_object(reinterpret_cast<void**>(&nativeObject));
 
 	dseed::autoref<dseed::bitmaps::bitmap> convBitmap;
 	if (vgadevice->is_support_format(bitmap->format()))
@@ -460,7 +461,7 @@ dseed::error_t __d3d11_sprite_render::create_atlas(dseed::bitmaps::bitmap* bitma
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-	if (FAILED(CreateTextureFromBitmap(nativeObject.d3dDevice.Get(), convBitmap, (ID3D11Resource**)texture.GetAddressOf(), &srv, nullptr)))
+	if (FAILED(CreateTextureFromBitmap(nativeObject.d3dDevice.Get(), convBitmap, reinterpret_cast<ID3D11Resource**>(texture.GetAddressOf()), &srv, nullptr)))
 		return dseed::error_fail;
 
 	dseed::rect2i defaultAtlas(0, 0, bitmap->size().width, bitmap->size().height);
@@ -483,7 +484,7 @@ dseed::error_t __d3d11_sprite_render::create_rendertarget(const dseed::size2i& s
 		return dseed::error_invalid_args;
 
 	dseed::graphics::d3d11_vgadevice_nativeobject nativeObject;
-	vgadevice->native_object((void**)&nativeObject);
+	vgadevice->native_object(reinterpret_cast<void**>(&nativeObject));
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> backBufferSRV;
@@ -510,7 +511,7 @@ dseed::error_t __d3d11_sprite_render::create_constant(size_t size, dseed::graphi
 		return dseed::error_invalid_args;
 
 	dseed::graphics::d3d11_vgadevice_nativeobject nativeObject;
-	vgadevice->native_object((void**)&nativeObject);
+	vgadevice->native_object(reinterpret_cast<void**>(&nativeObject));
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 	if (FAILED(CreateConstantBuffer(nativeObject.d3dDevice.Get(), size, &constantBuffer, dat)))
@@ -531,13 +532,13 @@ inline SPRITE_RENDER_COMMAND* add_command(std::queue<SPRITE_RENDER_COMMAND*>& co
 		command = commandPool.get_memory();
 		commands.push(command);
 	}
-	else if (commands.back()->instances.size() == 0)
+	else if (commands.back()->instances.empty())
 	{
 		command = commands.back();
 	}
 	else
 	{
-		SPRITE_RENDER_COMMAND* baseCommand = commands.back();
+		auto* baseCommand = commands.back();
 		command = commandPool.get_memory();
 		for (auto& rt : baseCommand->renderTargets)
 			command->renderTargets.emplace_back(rt);
@@ -561,7 +562,7 @@ dseed::error_t __d3d11_sprite_render::set_pipeline(dseed::graphics::pipeline* pi
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		SPRITE_RENDER_COMMAND* command = add_command(commands, commandPool);
+		auto* command = add_command(commands, commandPool);
 		command->pipeline = pipeline;
 	}
 	else if (renderMethod == dseed::graphics::rendermethod::forward)
@@ -569,11 +570,11 @@ dseed::error_t __d3d11_sprite_render::set_pipeline(dseed::graphics::pipeline* pi
 		commands.front()->pipeline = pipeline;
 
 		dseed::graphics::d3d11_sprite_pipeline_nativeobject no;
-		pipeline->native_object((void**)&no);
+		pipeline->native_object(reinterpret_cast<void**>(&no));
 
 		immediateContext->PSSetShader(no.pixelShader.Get(), nullptr, 0);
 		immediateContext->OMSetBlendState(no.blendState.Get(), nullptr, 0xffffffff);
-		ID3D11SamplerState* samplerState = no.samplerState.Get();
+		auto* samplerState = no.samplerState.Get();
 		immediateContext->PSSetSamplers(0, 1, &samplerState);
 	}
 
@@ -588,7 +589,7 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget(dseed::graphics::sprite_r
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
 	{
-		SPRITE_RENDER_COMMAND* command = add_command(commands, commandPool);
+		auto* command = add_command(commands, commandPool);
 		command->renderTargets.clear();
 		for (size_t i = 0; i < size; ++i)
 			command->renderTargets.emplace_back(rendertargets[i]);
@@ -632,7 +633,8 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget(dseed::graphics::sprite_r
 		immediateContext->OMSetRenderTargets(rtv.size(), rtv.data(), nullptr);
 		immediateContext->RSSetViewports(viewports.size(), viewports.data());
 
-		transformBuffer.projectionTransform = dseed::float4x4::orthographic_offcenter(0, (float)viewports[0].Width, (float)viewports[0].Height, 0, 0.00001f, 32767.0f);
+		transformBuffer.projectionTransform =
+			dseed::float4x4::orthographic_offcenter(0, static_cast<float>(viewports[0].Width), static_cast<float>(viewports[0].Height), 0, 0.00001f, 32767.0f);
 		immediateContext->UpdateSubresource(transformConstantBuffer.Get(), 0, nullptr, &transformBuffer, sizeof(SPRITE_TRANSFORM), 0);
 	}
 
@@ -693,7 +695,7 @@ dseed::error_t __d3d11_sprite_render::set_constant(dseed::graphics::vgabuffer** 
 		{
 			commands.front()->constbufs.emplace_back(constbuf[i]);
 			dseed::graphics::d3d11_sprite_vgabuffer_nativeobject nativeObject;
-			constbuf[i]->native_object((void**)&nativeObject);
+			constbuf[i]->native_object(reinterpret_cast<void**>(&nativeObject));
 			buf.emplace_back(nativeObject.buffer.Get());
 		}
 		immediateContext->PSSetConstantBuffers(0, buf.size(), buf.data());
@@ -710,11 +712,11 @@ dseed::error_t __d3d11_sprite_render::clear_rendertarget(dseed::graphics::sprite
 	if (rendertarget != nullptr)
 	{
 		dseed::graphics::d3d11_sprite_rendertarget_nativeobject nativeObject;
-		rendertarget->native_object((void**)&nativeObject);
-		immediateContext->ClearRenderTargetView(nativeObject.renderTargetView.Get(), (const float*)&color);
+		rendertarget->native_object(reinterpret_cast<void**>(&nativeObject));
+		immediateContext->ClearRenderTargetView(nativeObject.renderTargetView.Get(), reinterpret_cast<const float*>(&color));
 	}
 	else
-		immediateContext->ClearRenderTargetView(renderTargetView.Get(), (const float*)&color);
+		immediateContext->ClearRenderTargetView(renderTargetView.Get(), reinterpret_cast<const float*>(&color));
 
 	return dseed::error_good;
 }
@@ -729,9 +731,9 @@ dseed::error_t __d3d11_sprite_render::update_constant(dseed::graphics::vgabuffer
 	constbuf->native_object(&buffer);
 
 	D3D11_BOX destBox = {};
-	destBox.left = (UINT)offset;
-	destBox.right = (UINT)(offset + length);
-	immediateContext->UpdateSubresource(buffer.Get(), 0, &destBox, buf, (UINT)length, 0);
+	destBox.left = static_cast<UINT>(offset);
+	destBox.right = static_cast<UINT>(offset + length);
+	immediateContext->UpdateSubresource(buffer.Get(), 0, &destBox, buf, static_cast<UINT>(length), 0);
 
 	return dseed::error_good;
 }
@@ -743,7 +745,7 @@ dseed::error_t __d3d11_sprite_render::update_atlas(dseed::graphics::sprite_atlas
 		return dseed::error_invalid_args;
 
 	dseed::graphics::d3d11_sprite_atlas_nativeobject no;
-	atlas->native_object((void**)&no);
+	atlas->native_object(reinterpret_cast<void**>(&no));
 
 	if (data->type() == dseed::bitmaps::bitmaptype::bitmap2d || data->type() == dseed::bitmaps::bitmaptype::bitmap2dcube)
 	{
@@ -757,7 +759,7 @@ dseed::error_t __d3d11_sprite_render::update_atlas(dseed::graphics::sprite_atlas
 		texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
 
 		D3D11_SUBRESOURCE_DATA initialData;
-		data->lock((void**)&initialData.pSysMem);
+		data->lock(const_cast<void**>(&initialData.pSysMem));
 		initialData.SysMemPitch = dseed::color::calc_bitmap_stride(data->format(), data->size().width);
 		initialData.SysMemSlicePitch = dseed::color::calc_bitmap_total_size(data->format(), data->size());
 
@@ -781,7 +783,7 @@ dseed::error_t __d3d11_sprite_render::update_atlas(dseed::graphics::sprite_atlas
 		texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
 
 		D3D11_SUBRESOURCE_DATA initialData;
-		data->lock((void**)&initialData.pSysMem);
+		data->lock(const_cast<void**>(&initialData.pSysMem));
 		initialData.SysMemPitch = dseed::color::calc_bitmap_stride(data->format(), data->size().width);
 		initialData.SysMemSlicePitch = dseed::color::calc_bitmap_total_size(data->format(), data->size());
 
@@ -833,14 +835,14 @@ dseed::error_t __d3d11_sprite_render::end() noexcept
 
 			render_ready_command(immediateContext.Get(), command);
 
-			auto instanceCount = command->instances.size();
-			auto loopCount = (size_t)ceil(instanceCount / (double)SPRITE_INSTANCE_COUNT);
+			const auto instanceCount = command->instances.size();
+			const auto loopCount = static_cast<size_t>(ceil(instanceCount / static_cast<double>(SPRITE_INSTANCE_COUNT)));
 			command->instances.resize(loopCount * SPRITE_INSTANCE_COUNT);
 
-			const auto currentInstances = command->instances.data();
+			const auto* currentInstances = command->instances.data();
 			for (size_t i = 0; i < loopCount; ++i)
 			{
-				size_t drawCount = dseed::minimum<size_t>(SPRITE_INSTANCE_COUNT, instanceCount - (i * SPRITE_INSTANCE_COUNT));
+				const auto drawCount = dseed::minimum<size_t>(SPRITE_INSTANCE_COUNT, instanceCount - (i * SPRITE_INSTANCE_COUNT));
 				immediateContext->UpdateSubresource(instanceConstantBuffer.Get(), 0, nullptr,
 					currentInstances + (i * SPRITE_INSTANCE_COUNT), SPRITE_INSTANCE_TOTAL_SIZE, 0);
 				immediateContext->DrawInstanced(4, drawCount, 0, 0);
@@ -879,16 +881,16 @@ dseed::error_t __d3d11_sprite_render::draw(size_t atlas_index, const dseed::f32x
 	if (!session)
 		return dseed::error_invalid_args;
 
-	if (commands.size() == 0)
+	if (commands.empty())
 		return dseed::error_good;
 
-	SPRITE_RENDER_COMMAND* command = commands.back();
-	if (command->renderTargets.size() == 0 || command->atlases.size() == 0 || command->pipeline == nullptr)
+	auto* command = commands.back();
+	if (command->renderTargets.empty() || command->atlases.empty() || command->pipeline == nullptr)
 		return dseed::error_good;
 
-	const dseed::rect2i atlas = command->atlases[0]->atlas_element(atlas_index);
-	auto size = command->atlases[0]->size();
-	auto rcp = dseed::rcp(dseed::f32x4_t(size.width, size.height, 0, 0));
+	const auto atlas = command->atlases[0]->atlas_element(atlas_index);
+	const auto size = command->atlases[0]->size();
+	const auto rcp = dseed::rcp(dseed::f32x4_t(size.width, size.height, 0, 0));
 
 	SPRITE_INSTANCE_DATA record = {};
 	record.area = dseed::f32x4_t(
@@ -917,7 +919,7 @@ dseed::error_t __d3d11_sprite_render::draw(size_t atlas_index, const dseed::f32x
 }
 
 
-void __d3d11_sprite_render::render_ready_common(ID3D11DeviceContext* deviceContext)
+void __d3d11_sprite_render::render_ready_common(ID3D11DeviceContext* deviceContext) const
 {
 	// Set Vertex Shader, Rasterizer State, Sampler State, ... to Device Context
 	{
@@ -974,7 +976,7 @@ void __d3d11_sprite_render::render_ready_command(ID3D11DeviceContext* deviceCont
 	// Set Pipeline to Device Context
 	{
 		dseed::graphics::d3d11_sprite_pipeline_nativeobject no;
-		command->pipeline->native_object((void**)&no);
+		command->pipeline->native_object(reinterpret_cast<void**>(&no));
 
 		deviceContext->PSSetShader(no.pixelShader.Get(), nullptr, 0);
 		deviceContext->OMSetBlendState(no.blendState.Get(), nullptr, 0xffffffff);
@@ -983,17 +985,17 @@ void __d3d11_sprite_render::render_ready_command(ID3D11DeviceContext* deviceCont
 	}
 
 	// Set Constant Buffers to Pixel Shader for Device Context
-	if (command->constbufs.size() > 0)
+	if (!command->constbufs.empty())
 	{
 		std::vector<ID3D11Buffer*> constantBuffers;
 		constantBuffers.reserve(command->constbufs.size());
-		for (auto& cb : command->constbufs)
+		for (const auto& cb : command->constbufs)
 		{
 			Microsoft::WRL::ComPtr<ID3D11Buffer> d3d11Buffer;
 			cb->native_object(&d3d11Buffer);
 			constantBuffers.emplace_back(d3d11Buffer.Get());
 		}
-		deviceContext->PSSetConstantBuffers(0, (UINT)constantBuffers.size(), constantBuffers.data());
+		deviceContext->PSSetConstantBuffers(0, static_cast<UINT>(constantBuffers.size()), constantBuffers.data());
 	}
 
 	// Set Atlases
@@ -1002,7 +1004,7 @@ void __d3d11_sprite_render::render_ready_command(ID3D11DeviceContext* deviceCont
 		for (size_t i = 0; i < command->atlases.size(); ++i)
 		{
 			dseed::graphics::d3d11_sprite_atlas_nativeobject nativeObject;
-			command->atlases[i]->native_object((void**)&nativeObject);
+			command->atlases[i]->native_object(reinterpret_cast<void**>(&nativeObject));
 			srv.emplace_back(nativeObject.shaderResourceView.Get());
 		}
 		immediateContext->PSSetShaderResources(0, srv.size(), srv.data());

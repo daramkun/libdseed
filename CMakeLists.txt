@@ -91,6 +91,7 @@ SET(DSEED_LIB_SOURCES
 	src/instructions/utility_instructions.cpp
 
 	# Static Components
+	src/common.cpp
 	src/time.cpp
 	src/strings.cpp
 	src/math/half.cpp
@@ -426,6 +427,26 @@ ENDIF()
 IF(${DSEED_USE_BITMAP_ENCODERS})
 	MESSAGE(STATUS "# Use Bitmap Encoders")
 	LIST(APPEND DSEED_DEFINITIONS -DUSE_BITMAP_ENCODERS)
+ENDIF()
+
+FIND_PACKAGE(glew QUIET)
+IF(NOT GLEW_FOUND)
+	MESSAGE(STATUS "# Not found GLEW")
+ELSE()
+	MESSAGE(STATUS "# Use GLEW")
+	LIST(APPEND DSEED_INCLUDE_DIRS ${GLEW_INCLUDE_DIRS})
+	LIST(APPEND DSEED_LINK_LIBS ${GLEW_LIBRARY})
+	LIST(APPEND DSEED_DEFINITIONS -DUSE_GLEW)
+ENDIF()
+
+FIND_PACKAGE(Vulkan QUIET)
+IF(NOT VULKAN_FOUND)
+	MESSAGE(STATUS "# Not found Vulkan SDK")
+ELSE()
+	MESSAGE(STATUS "# Use Vulkan")
+	LIST(APPEND DSEED_INCLUDE_DIRS ${VULKAN_INCLUDE_DIRS})
+	LIST(APPEND DSEED_LINK_LIBS ${VULKAN_LIBRARY})
+	LIST(APPEND DSEED_DEFINITIONS -DUSE_VULKAN)
 ENDIF()
 
 ############################################################################################

@@ -100,8 +100,8 @@ namespace dseed::graphics
 	class DSEEDEXP vgabuffer : public object, public wrapped
 	{
 	public:
-		virtual error_t stride() noexcept = 0;
-		virtual error_t length() noexcept = 0;
+		virtual size_t stride() noexcept = 0;
+		virtual size_t length() noexcept = 0;
 
 	public:
 		virtual vgabuffertype type() noexcept = 0;

@@ -21,8 +21,8 @@ public:
 	virtual dseed::error_t native_object(void** nativeObject) override;
 
 public:
-	virtual dseed::error_t stride() noexcept override;
-	virtual dseed::error_t length() noexcept override;
+	virtual size_t stride() noexcept override;
+	virtual size_t length() noexcept override;
 
 public:
 	virtual dseed::graphics::vgabuffertype type() noexcept override;
@@ -223,7 +223,7 @@ public:
 	}
 
 private:
-	void render_ready_common(ID3D11DeviceContext* deviceContext);
+	void render_ready_common(ID3D11DeviceContext* deviceContext) const;
 	void render_ready_command(ID3D11DeviceContext* deviceContext, const SPRITE_RENDER_COMMAND* command);
 
 private:
