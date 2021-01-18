@@ -35,6 +35,16 @@ public:
 
 	virtual void resized () override
 	{
+		if (vgaDevice != nullptr)
+		{
+			dseed::autoref<dseed::platform::application> app;
+			dseed::platform::application::shared_app(&app);
+
+			dseed::graphics::displaymode dm = {};
+			app->client_size(&dm.resolution);
+			dm.format = dseed::color::pixelformat::bgra8;
+			vgaDevice->set_displaymode(&dm, false);
+		}
 	}
 
 public:
@@ -153,6 +163,8 @@ public:
 		char title[256];
 		sprintf (title, "FPS: %lf", _frameMeasurer.fps ());
 		app->set_title (title);
+		dseed::size2i clientSize;
+		app->client_size(&clientSize);
 
 		spriteRender->clear_rendertarget (nullptr, clearColor);
 
@@ -169,7 +181,7 @@ public:
 			for (int x = -5; x <= 5; ++x)
 			{
 				transform = dseed::multiply ((dseed::f32x4x4_t)dseed::float4x4::scale (0.25f, 0.25f, 1), 
-					(dseed::f32x4x4_t)dseed::float4x4::translate (1280 / 2 + (x * 150), 720 / 2 + (y * 150), 0));
+					(dseed::f32x4x4_t)dseed::float4x4::translate (clientSize.width / 2 + (x * 150), clientSize.height / 2 + (y * 150), 0));
 				spriteRender->draw (0, transform, color);
 			}
 		}

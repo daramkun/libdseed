@@ -400,13 +400,24 @@ public:
 	}
 
 public:
-	virtual dseed::error_t event_handler (dseed::platform::event_handler** handler)
+	virtual dseed::error_t dpi(dseed::size2i* dpi) override
+	{
+		if (_hWnd == nullptr) return dseed::error_invalid_op;
+
+		const auto idpi = GetDpiForWindow(_hWnd);
+		*dpi = dseed::size2i(idpi, idpi);
+
+		return dseed::error_good;
+	}
+
+public:
+	virtual dseed::error_t event_handler (dseed::platform::event_handler** handler) override
 	{
 		if (handler == nullptr) return dseed::error_invalid_args;
 		*handler = _handler;
 		return dseed::error_good;
 	}
-	virtual dseed::error_t set_event_handler (dseed::platform::event_handler* handler)
+	virtual dseed::error_t set_event_handler (dseed::platform::event_handler* handler) override
 	{
 		_handler = handler;
 		if (_handler == nullptr)
@@ -535,6 +546,7 @@ private:
 
 			case WM_SIZE:
 				app->_handler->resized ();
+				InvalidateRect(hWnd, nullptr, TRUE);
 				break;
 
 			case WM_INPUT:

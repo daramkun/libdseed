@@ -198,9 +198,17 @@ public:
 	virtual dseed::error_t end() noexcept override;
 
 public:
-	virtual dseed::error_t draw(size_t atlas_index, const dseed::f32x4x4_t& transform, const dseed::f32x4_t& color) noexcept;
+	virtual dseed::error_t draw(size_t atlas_index, const dseed::f32x4x4_t& transform, const dseed::f32x4_t& color) noexcept override;
 
 public:
+	dseed::error_t preresize()
+	{
+		renderTargetView.ReleaseAndGetAddressOf();
+		renderTargetView = nullptr;
+
+		return dseed::error_good;
+	}
+	
 	dseed::error_t update_backbuffer()
 	{
 		dseed::graphics::d3d11_vgadevice_nativeobject nativeObject;

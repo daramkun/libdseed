@@ -50,6 +50,9 @@ namespace dseed::platform
 		virtual error_t set_window_mode(windowmode mode) = 0;
 
 	public:
+		virtual error_t dpi(size2i* dpi) = 0;
+
+	public:
 		virtual error_t event_handler(dseed::platform::event_handler** handler) = 0;
 		virtual error_t set_event_handler(dseed::platform::event_handler* handler) = 0;
 

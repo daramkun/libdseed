@@ -6,6 +6,24 @@
 #	include "common_d3d11.hxx"
 #	include "d3d11_sprite.hxx"
 
+UINT GetSwapChainFlags(IDXGIFactory* dxgiFactory)
+{
+	UINT ret = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+#	if NTDDI_VERSION >= NTDDI_WIN8
+	ret |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+#		if NTDDI_VERSION >= NTDDI_WIN10
+	Microsoft::WRL::ComPtr<IDXGIFactory5> dxgiFactory5;
+	dxgiFactory->QueryInterface<IDXGIFactory5>(&dxgiFactory5);
+
+	BOOL checkAllowTearing = FALSE;
+	if (SUCCEEDED(dxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &checkAllowTearing, sizeof(checkAllowTearing))) && checkAllowTearing)
+		ret |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+#		endif
+#	endif
+
+	return ret;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 // VGA Logical Device
@@ -14,8 +32,11 @@
 class __d3d11_vgadevice : public dseed::graphics::vgadevice
 {
 public:
-	__d3d11_vgadevice(dseed::graphics::vgaadapter* adapter, ID3D11Device* d3dDevice, ID3D11DeviceContext* immediateContext, IDXGISwapChain* dxgiSwapChain)
-		: _refCount(1), vgaadapter(adapter), d3dDevice(d3dDevice), immediateContext(immediateContext), dxgiSwapChain(dxgiSwapChain), vsync_enable(false)
+	__d3d11_vgadevice(dseed::graphics::vgaadapter* adapter, IDXGIFactory* dxgiFactory,
+		ID3D11Device* d3dDevice, ID3D11DeviceContext* immediateContext, IDXGISwapChain* dxgiSwapChain)
+		: _refCount(1), vgaadapter(adapter), dxgiFactory(dxgiFactory)
+		, d3dDevice(d3dDevice), immediateContext(immediateContext), dxgiSwapChain(dxgiSwapChain)
+		, vsync_enable(false)
 	{
 
 	}
@@ -135,22 +156,46 @@ public:
 #endif
 		}
 
-		DXGI_MODE_DESC dxgiModeDesc = {};
-		dxgiModeDesc.Width = dm->resolution.width;
-		dxgiModeDesc.Height = dm->resolution.height;
-		dxgiModeDesc.Format = DSEEDPF_TO_DXGIPF(dm->format);
-		dxgiModeDesc.RefreshRate.Denominator = dm->refresh_rate.denominator;
-		dxgiModeDesc.RefreshRate.Numerator = dm->refresh_rate.numerator;
+		BOOL lastFullscreenState;
+		Microsoft::WRL::ComPtr<IDXGIOutput> dxgiOutput;
+		if (FAILED(dxgiSwapChain->GetFullscreenState(&lastFullscreenState, &dxgiOutput)))
+			return false;
 
 		if (fullscreen)
 		{
-			dxgiModeDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
-			dxgiModeDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+			DXGI_MODE_DESC dxgiModeDesc = {};
+			dxgiModeDesc.Width = dm->resolution.width;
+			dxgiModeDesc.Height = dm->resolution.height;
+			dxgiModeDesc.Format = DSEEDPF_TO_DXGIPF(dm->format);
+			dxgiModeDesc.RefreshRate.Denominator = dm->refresh_rate.denominator;
+			dxgiModeDesc.RefreshRate.Numerator = dm->refresh_rate.numerator;
+
+			if (fullscreen)
+			{
+				dxgiModeDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
+				dxgiModeDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+			}
+
+			if (FAILED(dxgiSwapChain->ResizeTarget(&dxgiModeDesc)))
+				return false;
 		}
 
-		if (FAILED(dxgiSwapChain->ResizeTarget(&dxgiModeDesc)) ||
-			FAILED(dxgiSwapChain->SetFullscreenState(fullscreen, nullptr)))
+		spriterender->preresize();
+		
+		if (FAILED(dxgiSwapChain->ResizeBuffers(0, dm->resolution.width, dm->resolution.height,
+			DXGI_FORMAT_UNKNOWN, GetSwapChainFlags(dxgiFactory.Get()))))
 			return false;
+		
+		if (lastFullscreenState != fullscreen)
+		{
+			if (fullscreen)
+				dxgiSwapChain->GetContainingOutput(&dxgiOutput);
+			else
+				dxgiOutput = nullptr;
+
+			if (FAILED(dxgiSwapChain->SetFullscreenState(fullscreen, dxgiOutput.Get())))
+				return false;
+		}
 
 		spriterender->update_backbuffer();
 
@@ -171,6 +216,7 @@ public:
 
 private:
 	std::atomic<int32_t> _refCount;
+	Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory;
 	Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> dxgiSwapChain;
@@ -250,12 +296,14 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice(platform::application* ap
 	dseed::size2i clientSize;
 	app->client_size(&clientSize);
 
+	Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactoryBackup;
 #if NTDDI_VERSION >= NTDDI_WIN8
 	if (IsWindows8OrGreater())
 	{
 		Microsoft::WRL::ComPtr<IDXGIFactory2> dxgiFactory;
 		if (FAILED(CreateDXGIFactory2(0, __uuidof(IDXGIFactory2), (void**)&dxgiFactory)))
 			return dseed::error_fail;
+		dxgiFactoryBackup = dxgiFactory;
 
 		DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainDesc = {};
 #	if NTDDI_VERSION >= NTDDI_WIN10
@@ -282,18 +330,7 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice(platform::application* ap
 		dxgiSwapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		dxgiSwapChainDesc.SampleDesc.Count = 1;
 		dxgiSwapChainDesc.Stereo = FALSE;
-		dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-#	if NTDDI_VERSION >= NTDDI_WIN8
-		dxgiSwapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-#		if NTDDI_VERSION >= NTDDI_WIN10
-		Microsoft::WRL::ComPtr<IDXGIFactory5> dxgiFactory5;
-		dxgiFactory.As<IDXGIFactory5>(&dxgiFactory5);
-
-		BOOL checkAllowTearing = FALSE;
-		if (SUCCEEDED(dxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &checkAllowTearing, sizeof(checkAllowTearing))) && checkAllowTearing)
-			dxgiSwapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-#		endif
-#	endif
+		dxgiSwapChainDesc.Flags = GetSwapChainFlags(dxgiFactory.Get());
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> dxgiSwapChain1;
 #	if PLATFORM_WINDOWS
@@ -318,6 +355,7 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice(platform::application* ap
 		Microsoft::WRL::ComPtr<IDXGIFactory> dxgiFactory;
 		if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgiFactory)))
 			return dseed::error_fail;
+		dxgiFactoryBackup = dxgiFactory;
 
 		DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc = {};
 		dxgiSwapChainDesc.BufferDesc.Width = clientSize.width;
@@ -336,7 +374,8 @@ dseed::error_t dseed::graphics::create_d3d11_vgadevice(platform::application* ap
 	}
 #endif
 
-	* device = new __d3d11_vgadevice(adapter, d3dDevice.Get(), immediateContext.Get(), dxgiSwapChain.Get());
+	* device = new __d3d11_vgadevice(adapter, dxgiFactoryBackup.Get(),
+		d3dDevice.Get(), immediateContext.Get(), dxgiSwapChain.Get());
 	if (*device == nullptr)
 		return  dseed::error_out_of_memory;
 
