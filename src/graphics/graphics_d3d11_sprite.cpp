@@ -514,7 +514,7 @@ dseed::error_t __d3d11_sprite_render::create_constant(size_t size, dseed::graphi
 	vgadevice->native_object(reinterpret_cast<void**>(&nativeObject));
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
-	if (FAILED(CreateConstantBuffer(nativeObject.d3dDevice.Get(), size, &constantBuffer, dat)))
+	if (FAILED(CreateConstantBuffer(nativeObject.d3dDevice.Get(), (UINT)size, &constantBuffer, dat)))
 		return dseed::error_fail;
 
 	*constbuf = new __d3d11_sprite_vgabuffer(constantBuffer.Get());
@@ -609,8 +609,8 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget(dseed::graphics::sprite_r
 				rtv.emplace_back(renderTargetView.Get());
 
 				D3D11_VIEWPORT viewport = {};
-				viewport.Width = renderTargetSize.width;
-				viewport.Height = renderTargetSize.height;
+				viewport.Width = (float)renderTargetSize.width;
+				viewport.Height = (float)renderTargetSize.height;
 				viewport.MaxDepth = 1.0f;
 				viewports.emplace_back(viewport);
 			}
@@ -624,14 +624,14 @@ dseed::error_t __d3d11_sprite_render::set_rendertarget(dseed::graphics::sprite_r
 				rendertargets[i]->atlas(&atlas);
 
 				D3D11_VIEWPORT viewport = {};
-				viewport.Width = atlas->size().width;
-				viewport.Height = atlas->size().height;
+				viewport.Width = (float)atlas->size().width;
+				viewport.Height = (float)atlas->size().height;
 				viewport.MaxDepth = 1.0f;
 				viewports.emplace_back(viewport);
 			}
 		}
-		immediateContext->OMSetRenderTargets(rtv.size(), rtv.data(), nullptr);
-		immediateContext->RSSetViewports(viewports.size(), viewports.data());
+		immediateContext->OMSetRenderTargets((UINT)rtv.size(), rtv.data(), nullptr);
+		immediateContext->RSSetViewports((UINT)viewports.size(), viewports.data());
 
 		transformBuffer.projectionTransform =
 			dseed::float4x4::orthographic_offcenter(0, static_cast<float>(viewports[0].Width), static_cast<float>(viewports[0].Height), 0, 0.00001f, 32767.0f);
@@ -667,7 +667,7 @@ dseed::error_t __d3d11_sprite_render::set_atlas(dseed::graphics::sprite_atlas** 
 			atlas[i]->native_object((void**)&nativeObject);
 			srv.emplace_back(nativeObject.shaderResourceView.Get());
 		}
-		immediateContext->PSSetShaderResources(0, srv.size(), srv.data());
+		immediateContext->PSSetShaderResources(0, (UINT)srv.size(), srv.data());
 	}
 
 	return dseed::error_good;
@@ -698,7 +698,7 @@ dseed::error_t __d3d11_sprite_render::set_constant(dseed::graphics::vgabuffer** 
 			constbuf[i]->native_object(reinterpret_cast<void**>(&nativeObject));
 			buf.emplace_back(nativeObject.buffer.Get());
 		}
-		immediateContext->PSSetConstantBuffers(0, buf.size(), buf.data());
+		immediateContext->PSSetConstantBuffers(0, (UINT)buf.size(), buf.data());
 	}
 
 	return dseed::error_good;
@@ -760,8 +760,8 @@ dseed::error_t __d3d11_sprite_render::update_atlas(dseed::graphics::sprite_atlas
 
 		D3D11_SUBRESOURCE_DATA initialData;
 		data->lock(const_cast<void**>(&initialData.pSysMem));
-		initialData.SysMemPitch = dseed::color::calc_bitmap_stride(data->format(), data->size().width);
-		initialData.SysMemSlicePitch = dseed::color::calc_bitmap_total_size(data->format(), data->size());
+		initialData.SysMemPitch = (UINT)dseed::color::calc_bitmap_stride(data->format(), data->size().width);
+		initialData.SysMemSlicePitch = (UINT)dseed::color::calc_bitmap_total_size(data->format(), data->size());
 
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> cpuTex;
 		if (FAILED(d3dDevice->CreateTexture2D(&texDesc, &initialData, &cpuTex)))
@@ -784,8 +784,8 @@ dseed::error_t __d3d11_sprite_render::update_atlas(dseed::graphics::sprite_atlas
 
 		D3D11_SUBRESOURCE_DATA initialData;
 		data->lock(const_cast<void**>(&initialData.pSysMem));
-		initialData.SysMemPitch = dseed::color::calc_bitmap_stride(data->format(), data->size().width);
-		initialData.SysMemSlicePitch = dseed::color::calc_bitmap_total_size(data->format(), data->size());
+		initialData.SysMemPitch = (UINT)dseed::color::calc_bitmap_stride(data->format(), data->size().width);
+		initialData.SysMemSlicePitch = (UINT)dseed::color::calc_bitmap_total_size(data->format(), data->size());
 
 		Microsoft::WRL::ComPtr<ID3D11Texture3D> cpuTex;
 		if (FAILED(d3dDevice->CreateTexture3D(&texDesc, &initialData, &cpuTex)))
@@ -845,7 +845,7 @@ dseed::error_t __d3d11_sprite_render::end() noexcept
 				const auto drawCount = dseed::minimum<size_t>(SPRITE_INSTANCE_COUNT, instanceCount - (i * SPRITE_INSTANCE_COUNT));
 				immediateContext->UpdateSubresource(instanceConstantBuffer.Get(), 0, nullptr,
 					currentInstances + (i * SPRITE_INSTANCE_COUNT), SPRITE_INSTANCE_TOTAL_SIZE, 0);
-				immediateContext->DrawInstanced(4, drawCount, 0, 0);
+				immediateContext->DrawInstanced(4, (UINT)drawCount, 0, 0);
 			}
 
 			command->pipeline = nullptr;
@@ -890,7 +890,7 @@ dseed::error_t __d3d11_sprite_render::draw(size_t atlas_index, const dseed::f32x
 
 	const auto atlas = command->atlases[0]->atlas_element(atlas_index);
 	const auto size = command->atlases[0]->size();
-	const auto rcp = dseed::rcp(dseed::f32x4_t(size.width, size.height, 0, 0));
+	const auto rcp = dseed::rcp(dseed::f32x4_t((float)size.width, (float)size.height, 0, 0));
 
 	SPRITE_INSTANCE_DATA record = {};
 	record.area = dseed::f32x4_t(
@@ -898,7 +898,7 @@ dseed::error_t __d3d11_sprite_render::draw(size_t atlas_index, const dseed::f32x
 		atlas.y * rcp.y(),
 		atlas.width * rcp.x(),
 		atlas.height * rcp.y());
-	record.transform = dseed::float4x4::scale(size.width, size.height, 1) * transform;
+	record.transform = dseed::float4x4::scale((float)size.width, (float)size.height, 1) * transform;
 	record.color = color;
 
 	if (renderMethod == dseed::graphics::rendermethod::deferred)
@@ -945,8 +945,8 @@ void __d3d11_sprite_render::render_ready_command(ID3D11DeviceContext* deviceCont
 				rtv.emplace_back(renderTargetView.Get());
 
 				D3D11_VIEWPORT viewport = {};
-				viewport.Width = renderTargetSize.width;
-				viewport.Height = renderTargetSize.height;
+				viewport.Width = (float)renderTargetSize.width;
+				viewport.Height = (float)renderTargetSize.height;
 				viewport.MaxDepth = 1.0f;
 				viewports.emplace_back(viewport);
 			}
@@ -960,14 +960,14 @@ void __d3d11_sprite_render::render_ready_command(ID3D11DeviceContext* deviceCont
 				command->renderTargets[i]->atlas(&atlas);
 
 				D3D11_VIEWPORT viewport = {};
-				viewport.Width = atlas->size().width;
-				viewport.Height = atlas->size().height;
+				viewport.Width = (float)atlas->size().width;
+				viewport.Height = (float)atlas->size().height;
 				viewport.MaxDepth = 1.0f;
 				viewports.emplace_back(viewport);
 			}
 		}
-		immediateContext->OMSetRenderTargets(rtv.size(), rtv.data(), nullptr);
-		immediateContext->RSSetViewports(viewports.size(), viewports.data());
+		immediateContext->OMSetRenderTargets((UINT)rtv.size(), rtv.data(), nullptr);
+		immediateContext->RSSetViewports((UINT)viewports.size(), viewports.data());
 
 		transformBuffer.projectionTransform = dseed::float4x4::orthographic_offcenter(0, (float)viewports[0].Width, (float)viewports[0].Height, 0, 0.00001f, 32767.0f);
 		immediateContext->UpdateSubresource(transformConstantBuffer.Get(), 0, nullptr, &transformBuffer, sizeof(SPRITE_TRANSFORM), 0);
@@ -1007,7 +1007,7 @@ void __d3d11_sprite_render::render_ready_command(ID3D11DeviceContext* deviceCont
 			command->atlases[i]->native_object(reinterpret_cast<void**>(&nativeObject));
 			srv.emplace_back(nativeObject.shaderResourceView.Get());
 		}
-		immediateContext->PSSetShaderResources(0, srv.size(), srv.data());
+		immediateContext->PSSetShaderResources(0, (UINT)srv.size(), srv.data());
 	}
 }
 

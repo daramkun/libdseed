@@ -393,24 +393,17 @@ namespace dseed::graphics
 
 namespace dseed::graphics
 {
-#if PLATFORM_MICROSOFT
 	DSEEDEXP error_t create_dxgi_vgaadapter_enumerator(vgaadapter_enumerator** enumerator) noexcept;
 	DSEEDEXP error_t create_d3d11_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 
-#	if NTDDI_WIN10
 	DSEEDEXP error_t create_d3d12_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
-#	endif
-#endif
-#if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID || PLATFORM_MACOS || PLATFORM_IOS || PLATFORM_WEBASSEMBLY
+	
 	DSEEDEXP error_t create_opengl_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
-#endif
-#if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID
+	
 	DSEEDEXP error_t create_vulkan_vgaadapter_enumerator(vgaadapter_enumerator** enumerator) noexcept;
 	DSEEDEXP error_t create_vulkan_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
-#endif
-#if PLATFORM_MACOS || PLATFORM_IOS
-	DSEEDEXP error_t create_metal_vgadevice(platform::application* app, adapter* adapter, vgadevice** device) noexcept;
-#endif
+	
+	DSEEDEXP error_t create_metal_vgadevice(platform::application* app, vgaadapter* adapter, vgadevice** device) noexcept;
 }
 
 #endif

@@ -1,6 +1,7 @@
 #include <dseed.h>
 
 #include <map>
+#include <cstring>
 
 using namespace dseed::color;
 
@@ -141,7 +142,7 @@ inline bool filter_bitmap(uint8_t* dest, const uint8_t* src, const dseed::size3i
 	return true;
 }
 
-std::map<pixelformat, ftfn> g_resizes = {
+std::map<pixelformat, ftfn> g_filters = {
 	{ pixelformat::rgba8, filter_bitmap<rgba8> },
 	{ pixelformat::rgb8, filter_bitmap<rgb8> },
 	{ pixelformat::rgbaf, filter_bitmap<rgbaf> },
@@ -172,8 +173,8 @@ dseed::error_t dseed::bitmaps::filter_bitmap(dseed::bitmaps::bitmap* original, c
 	original->lock((void**)&srcPtr);
 	temp->lock((void**)&destPtr);
 
-	auto found = g_resizes.find(original->format());
-	if (found == g_resizes.end())
+	auto found = g_filters.find(original->format());
+	if (found == g_filters.end())
 		return dseed::error_not_support;
 
 	if (!found->second(destPtr, srcPtr, original->size(), mask))

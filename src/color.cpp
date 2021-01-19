@@ -1,6 +1,6 @@
 #include <dseed.h>
 
-size_t dseed::color::calc_bitmap_stride (pixelformat pf, size_t width) noexcept
+size_t dseed::color::calc_bitmap_stride(pixelformat pf, size_t width) noexcept
 {
 	switch (pf)
 	{
@@ -43,7 +43,7 @@ size_t dseed::color::calc_bitmap_stride (pixelformat pf, size_t width) noexcept
 	}
 }
 
-size_t dseed::color::calc_bitmap_plane_size (pixelformat pf, const size2i& size) noexcept
+size_t dseed::color::calc_bitmap_plane_size(pixelformat pf, const size2i& size) noexcept
 {
 	switch (pf)
 	{
@@ -65,12 +65,12 @@ size_t dseed::color::calc_bitmap_plane_size (pixelformat pf, const size2i& size)
 	case pixelformat::depth16:
 	case pixelformat::depth24stencil8:
 	case pixelformat::depth32:
-		return calc_bitmap_stride (pf, size.width) * size.height;
+		return calc_bitmap_stride(pf, size.width) * size.height;
 
 	case pixelformat::yuyv8:
-		return (size_t)(ceilf (size.width / 2.0) * size.height) * 4;
+		return ((size_t)ceilf(size.width / 2.0f) * size.height) * 4;
 	case pixelformat::nv12:
-		return (size_t)(size.width * size.height + ((ceilf (size.width / 2.0) * 2) * ceilf (size.height / 2.0)));
+		return ((size_t)size.width * size.height + (((size_t)ceilf(size.width / 2.0f) * 2) * (size_t)ceilf(size.height / 2.0f)));
 
 	case pixelformat::bc1:
 	case pixelformat::bc4:
@@ -80,7 +80,7 @@ size_t dseed::color::calc_bitmap_plane_size (pixelformat pf, const size2i& size)
 	case pixelformat::pvrtc_2abpp:
 	case pixelformat::pvrtc_4bpp:
 	case pixelformat::pvrtc_4abpp:
-		return (size_t)(ceilf (size.width / 4.0) * ceilf (size.height / 4.0) * 8);
+		return ((size_t)ceilf(size.width / 4.0f) * (size_t)ceilf(size.height / 4.0f) * 8);
 
 	case pixelformat::bc2:
 	case pixelformat::bc3:
@@ -89,37 +89,37 @@ size_t dseed::color::calc_bitmap_plane_size (pixelformat pf, const size2i& size)
 	case pixelformat::bc7:
 	case pixelformat::etc2a:
 	case pixelformat::astc4x4:
-		return (size_t)(ceilf (size.width / 4.0) * ceilf (size.height / 4.0) * 16);
+		return ((size_t)ceilf(size.width / 4.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
 
-	case pixelformat::astc5x4: return (size_t)(ceilf (size.width / 5.0) * ceilf (size.height / 4.0) * 16);
-	case pixelformat::astc5x5: return (size_t)(ceilf (size.width / 5.0) * ceilf (size.height / 5.0) * 16);
-	case pixelformat::astc6x5: return (size_t)(ceilf (size.width / 6.0) * ceilf (size.height / 4.0) * 16);
-	case pixelformat::astc6x6: return (size_t)(ceilf (size.width / 6.0) * ceilf (size.height / 6.0) * 16);
-	case pixelformat::astc8x5: return (size_t)(ceilf (size.width / 8.0) * ceilf (size.height / 5.0) * 16);
-	case pixelformat::astc8x6: return (size_t)(ceilf (size.width / 8.0) * ceilf (size.height / 6.0) * 16);
-	case pixelformat::astc8x8: return (size_t)(ceilf (size.width / 8.0) * ceilf (size.height / 8.0) * 16);
-	case pixelformat::astc10x5: return (size_t)(ceilf (size.width / 10.0) * ceilf (size.height / 5.0) * 16);
-	case pixelformat::astc10x6: return (size_t)(ceilf (size.width / 10.0) * ceilf (size.height / 6.0) * 16);
-	case pixelformat::astc10x8: return (size_t)(ceilf (size.width / 10.0) * ceilf (size.height / 8.0) * 16);
-	case pixelformat::astc12x10: return (size_t)(ceilf (size.width / 12.0) * ceilf (size.height / 10.0) * 16);
-	case pixelformat::astc12x12: return (size_t)(ceilf (size.width / 12.0) * ceilf (size.height / 12.0) * 16);
+	case pixelformat::astc5x4: return ((size_t)ceilf(size.width / 5.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
+	case pixelformat::astc5x5: return ((size_t)ceilf(size.width / 5.0f) * (size_t)ceilf(size.height / 5.0f) * 16);
+	case pixelformat::astc6x5: return ((size_t)ceilf(size.width / 6.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
+	case pixelformat::astc6x6: return ((size_t)ceilf(size.width / 6.0f) * (size_t)ceilf(size.height / 6.0f) * 16);
+	case pixelformat::astc8x5: return ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 5.0f) * 16);
+	case pixelformat::astc8x6: return ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 6.0f) * 16);
+	case pixelformat::astc8x8: return ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 8.0f) * 16);
+	case pixelformat::astc10x5: return ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 5.0f) * 16);
+	case pixelformat::astc10x6: return ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 6.0f) * 16);
+	case pixelformat::astc10x8: return ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 8.0f) * 16);
+	case pixelformat::astc12x10: return ((size_t)ceilf(size.width / 12.0f) * (size_t)ceilf(size.height / 10.0f) * 16);
+	case pixelformat::astc12x12: return ((size_t)ceilf(size.width / 12.0f) * (size_t)ceilf(size.height / 12.0f) * 16);
 
 	default: return 0;
 	}
 }
 
-size_t dseed::color::calc_bitmap_total_size (pixelformat pf, const size3i& size) noexcept
+size_t dseed::color::calc_bitmap_total_size(pixelformat pf, const size3i& size) noexcept
 {
-	return calc_bitmap_plane_size (pf, size2i (size.width, size.height)) * size.depth;
+	return calc_bitmap_plane_size(pf, size2i(size.width, size.height)) * size.depth;
 }
 
-dseed::size3i dseed::color::calc_mipmap_size (int mipLevel, const size3i& size, bool cubemap) noexcept
+dseed::size3i dseed::color::calc_mipmap_size(int mipLevel, const size3i& size, bool cubemap) noexcept
 {
-	int halfmaker = (int)powf (2, mipLevel);
-	dseed::size3i mipSize (
-		(int32_t)ceilf (size.width / halfmaker),
-		(int32_t)ceilf (size.height / halfmaker),
-		cubemap ? size.depth : (int32_t)ceilf (size.depth / halfmaker)
+	int halfmaker = (int)powf(2, (float)mipLevel);
+	dseed::size3i mipSize(
+		(int32_t)ceilf((float)size.width / halfmaker),
+		(int32_t)ceilf((float)size.height / halfmaker),
+		cubemap ? size.depth : (int32_t)ceilf((float)size.depth / halfmaker)
 	);
 	if (mipSize.width == 0) mipSize.width = 1;
 	if (mipSize.height == 0) mipSize.height = 1;
@@ -127,7 +127,10 @@ dseed::size3i dseed::color::calc_mipmap_size (int mipLevel, const size3i& size, 
 	return mipSize;
 }
 
-size_t dseed::color::calc_maximum_mipmap_levels (const dseed::size3i& size, bool cubemap) noexcept
+size_t dseed::color::calc_maximum_mipmap_levels(const dseed::size3i& size, bool cubemap) noexcept
 {
-	return (size_t)(1 + floorf (log2 (dseed::maximum (size.width, dseed::maximum (size.height, cubemap ? size.height : size.depth)))));
+	auto z = cubemap ? size.height : size.depth;
+	auto y = dseed::maximum(size.height, z);
+	auto x = dseed::maximum(size.width, y);
+	return (size_t)(1 + (size_t)floorf((float)log2(x)));
 }

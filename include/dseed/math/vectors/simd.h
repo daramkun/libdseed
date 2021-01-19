@@ -295,17 +295,17 @@ namespace dseed
 	// 4D Vector Arithmetic Operations
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////
-	static inline f32x4_t add(const f32x4_t& v1, const f32x4_t& v2) noexcept;
-	static inline f32x4_t subtract(const f32x4_t& v1, const f32x4_t& v2) noexcept;
-	static inline f32x4_t negate(const f32x4_t& v) noexcept;
-	static inline f32x4_t multiply(const f32x4_t& v1, const f32x4_t& v2) noexcept;
-	static inline f32x4_t multiply(const f32x4_t& v, float s) noexcept;
-	static inline f32x4_t multiply(float s, const f32x4_t& v) noexcept { return multiply(v, s); }
-	static inline f32x4_t fma(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept;
-	static inline f32x4_t fms(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept;
-	static inline f32x4_t fnms(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept;
-	static inline f32x4_t divide(const f32x4_t& v1, const f32x4_t& v2) noexcept;
-	static inline f32x4_t divide(const f32x4_t& v, float s) noexcept;
+	static inline f32x4_t addfv(const f32x4_t& v1, const f32x4_t& v2) noexcept;
+	static inline f32x4_t subtractfv(const f32x4_t& v1, const f32x4_t& v2) noexcept;
+	static inline f32x4_t negatefv(const f32x4_t& v) noexcept;
+	static inline f32x4_t multiplyfv(const f32x4_t& v1, const f32x4_t& v2) noexcept;
+	static inline f32x4_t multiplyfv(const f32x4_t& v, float s) noexcept;
+	static inline f32x4_t multiplyfv(float s, const f32x4_t& v) noexcept { return multiplyfv(v, s); }
+	static inline f32x4_t fmaf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept;
+	static inline f32x4_t fmsf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept;
+	static inline f32x4_t fnmsf(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept;
+	static inline f32x4_t dividefv(const f32x4_t& v1, const f32x4_t& v2) noexcept;
+	static inline f32x4_t dividefv(const f32x4_t& v, float s) noexcept;
 
 	static inline i32x4_t add32(const i32x4_t& v1, const i32x4_t& v2) noexcept;
 	static inline i32x4_t subtract32(const i32x4_t& v1, const i32x4_t& v2) noexcept;
@@ -333,10 +333,10 @@ namespace dseed
 	// 4D Vector Bit Operations
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////
-	static inline f32x4_t and (const f32x4_t& v1, const f32x4_t& v2) noexcept;
-	static inline f32x4_t or (const f32x4_t & v1, const f32x4_t & v2) noexcept;
-	static inline f32x4_t xor (const f32x4_t& v1, const f32x4_t& v2) noexcept;
-	static inline f32x4_t not(const f32x4_t& v) noexcept;
+	static inline f32x4_t andfv(const f32x4_t& v1, const f32x4_t& v2) noexcept;
+	static inline f32x4_t orfv(const f32x4_t & v1, const f32x4_t & v2) noexcept;
+	static inline f32x4_t xorfv(const f32x4_t& v1, const f32x4_t& v2) noexcept;
+	static inline f32x4_t notfv(const f32x4_t& v) noexcept;
 
 	static inline i32x4_t and32(const i32x4_t& v1, const i32x4_t& v2) noexcept;
 	static inline i32x4_t or32(const i32x4_t& v1, const i32x4_t& v2) noexcept;
@@ -513,24 +513,24 @@ namespace dseed
 	// 4x4 Matrix Arithmetic Operations
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////
-	static inline f32x4x4_t add(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
-	static inline f32x4x4_t subtract(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
-	static inline f32x4x4_t negate(const f32x4x4_t& m) noexcept;
-	static inline f32x4x4_t multiply(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
-	static inline f32x4x4_t multiply(const f32x4x4_t& m, float s) noexcept;
-	static inline f32x4x4_t multiply(float s, const f32x4x4_t& m) noexcept { return multiply(m, s); }
-	static inline f32x4x4_t divide(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
-	static inline f32x4x4_t divide(const f32x4x4_t& m, float s) noexcept;
+	static inline f32x4x4_t addfv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
+	static inline f32x4x4_t subtractfv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
+	static inline f32x4x4_t negatefv(const f32x4x4_t& m) noexcept;
+	static inline f32x4x4_t multiplyfv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
+	static inline f32x4x4_t multiplyfv(const f32x4x4_t& m, float s) noexcept;
+	static inline f32x4x4_t multiplyfv(float s, const f32x4x4_t& m) noexcept { return multiplyfv(m, s); }
+	static inline f32x4x4_t dividefv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept;
+	static inline f32x4x4_t dividefv(const f32x4x4_t& m, float s) noexcept;
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// 4x4 Matrix Bit Operations
 	//
 	///////////////////////////////////////////////////////////////////////////////////////////
-	static inline f32x4x4_t and (const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept;
-	static inline f32x4x4_t or (const f32x4x4_t & v1, const f32x4x4_t & v2) noexcept;
-	static inline f32x4x4_t xor (const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept;
-	static inline f32x4x4_t not(const f32x4x4_t& v) noexcept;
+	static inline f32x4x4_t andfv(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept;
+	static inline f32x4x4_t orfv(const f32x4x4_t & v1, const f32x4x4_t & v2) noexcept;
+	static inline f32x4x4_t xorfv(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept;
+	static inline f32x4x4_t notfv(const f32x4x4_t& v) noexcept;
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -586,18 +586,18 @@ namespace dseed
 ///////////////////////////////////////////////////////////////////////////////////////////////
 namespace dseed
 {
-	static inline f32x4_t operator+(const f32x4_t& v1, const f32x4_t& v2) noexcept { return add(v1, v2); }
-	static inline f32x4_t operator-(const f32x4_t& v1, const f32x4_t& v2) noexcept { return subtract(v1, v2); }
-	static inline f32x4_t operator-(const f32x4_t& v) noexcept { return negate(v); }
-	static inline f32x4_t operator*(const f32x4_t& v1, const f32x4_t& v2) noexcept { return multiply(v1, v2); }
-	static inline f32x4_t operator*(const f32x4_t& v, float s) noexcept { return multiply(v, s); }
-	static inline f32x4_t operator*(float s, const f32x4_t& v) noexcept { return multiply(s, v); }
-	static inline f32x4_t operator/(const f32x4_t& v1, const f32x4_t& v2) noexcept { return divide(v1, v2); }
-	static inline f32x4_t operator/(const f32x4_t& v, float s) noexcept { return divide(v, s); }
-	static inline f32x4_t operator&(const f32x4_t& v1, const f32x4_t& v2) noexcept { return and (v1, v2); }
-	static inline f32x4_t operator|(const f32x4_t& v1, const f32x4_t& v2) noexcept { return or (v1, v2); }
-	static inline f32x4_t operator^(const f32x4_t& v1, const f32x4_t& v2) noexcept { return xor (v1, v2); }
-	static inline f32x4_t operator~(const f32x4_t& v) noexcept { return not(v); }
+	static inline f32x4_t operator+(const f32x4_t& v1, const f32x4_t& v2) noexcept { return addfv(v1, v2); }
+	static inline f32x4_t operator-(const f32x4_t& v1, const f32x4_t& v2) noexcept { return subtractfv(v1, v2); }
+	static inline f32x4_t operator-(const f32x4_t& v) noexcept { return negatefv(v); }
+	static inline f32x4_t operator*(const f32x4_t& v1, const f32x4_t& v2) noexcept { return multiplyfv(v1, v2); }
+	static inline f32x4_t operator*(const f32x4_t& v, float s) noexcept { return multiplyfv(v, s); }
+	static inline f32x4_t operator*(float s, const f32x4_t& v) noexcept { return multiplyfv(s, v); }
+	static inline f32x4_t operator/(const f32x4_t& v1, const f32x4_t& v2) noexcept { return dividefv(v1, v2); }
+	static inline f32x4_t operator/(const f32x4_t& v, float s) noexcept { return dividefv(v, s); }
+	static inline f32x4_t operator&(const f32x4_t& v1, const f32x4_t& v2) noexcept { return andfv (v1, v2); }
+	static inline f32x4_t operator|(const f32x4_t& v1, const f32x4_t& v2) noexcept { return orfv (v1, v2); }
+	static inline f32x4_t operator^(const f32x4_t& v1, const f32x4_t& v2) noexcept { return xorfv (v1, v2); }
+	static inline f32x4_t operator~(const f32x4_t& v) noexcept { return notfv(v); }
 	static inline f32x4_t operator<<(const f32x4_t& v, int move) noexcept { return reinterpretitof(shiftl32(reinterpretftoi(v), move)); }
 	static inline f32x4_t operator>>(const f32x4_t& v, int move) noexcept { return reinterpretitof(shiftr32(reinterpretftoi(v), move)); }
 	static inline f32x4_t operator==(const f32x4_t& v1, const f32x4_t& v2) noexcept { return equalsb(v1, v2); }
@@ -615,8 +615,8 @@ namespace dseed
 	static inline i32x4_t operator*(const i32x4_t& v1, const i32x4_t& v2) noexcept { return multiply32(v1, v2); }
 	static inline i32x4_t operator*(const i32x4_t& v, int s) noexcept { return multiply32(v, s); }
 	static inline i32x4_t operator*(int s, const i32x4_t& v) noexcept { return multiply32(s, v); }
-	static inline i32x4_t operator/(const i32x4_t& v1, const i32x4_t& v2) noexcept { return castf32toi32(divide(casti32tof32(v1), casti32tof32(v2))); }
-	static inline i32x4_t operator/(const i32x4_t& v, int s) noexcept { return castf32toi32(divide(casti32tof32(v), (float)s)); }
+	static inline i32x4_t operator/(const i32x4_t& v1, const i32x4_t& v2) noexcept { return castf32toi32(dividefv(casti32tof32(v1), casti32tof32(v2))); }
+	static inline i32x4_t operator/(const i32x4_t& v, int s) noexcept { return castf32toi32(dividefv(casti32tof32(v), (float)s)); }
 	static inline i32x4_t operator&(const i32x4_t& v1, const i32x4_t& v2) noexcept { return and32(v1, v2); }
 	static inline i32x4_t operator|(const i32x4_t& v1, const i32x4_t& v2) noexcept { return or32(v1, v2); }
 	static inline i32x4_t operator^(const i32x4_t& v1, const i32x4_t& v2) noexcept { return xor32(v1, v2); }
@@ -638,18 +638,18 @@ namespace dseed
 ///////////////////////////////////////////////////////////////////////////////////////////////
 namespace dseed
 {
-	static inline f32x4x4_t operator+(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return add(v1, v2); }
-	static inline f32x4x4_t operator-(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return subtract(v1, v2); }
-	static inline f32x4x4_t operator-(const f32x4x4_t& v) noexcept { return negate(v); }
-	static inline f32x4x4_t operator*(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return multiply(v1, v2); }
-	static inline f32x4x4_t operator*(const f32x4x4_t& v, float s) noexcept { return multiply(v, s); }
-	static inline f32x4x4_t operator*(float s, const f32x4x4_t& v) noexcept { return multiply(s, v); }
-	static inline f32x4x4_t operator/(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return divide(v1, v2); }
-	static inline f32x4x4_t operator/(const f32x4x4_t& v, float s) noexcept { return divide(v, s); }
-	static inline f32x4x4_t operator&(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return and (v1, v2); }
-	static inline f32x4x4_t operator|(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return or (v1, v2); }
-	static inline f32x4x4_t operator^(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return xor (v1, v2); }
-	static inline f32x4x4_t operator~(const f32x4x4_t& v) noexcept { return not(v); }
+	static inline f32x4x4_t operator+(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return addfv(v1, v2); }
+	static inline f32x4x4_t operator-(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return subtractfv(v1, v2); }
+	static inline f32x4x4_t operator-(const f32x4x4_t& v) noexcept { return negatefv(v); }
+	static inline f32x4x4_t operator*(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return multiplyfv(v1, v2); }
+	static inline f32x4x4_t operator*(const f32x4x4_t& v, float s) noexcept { return multiplyfv(v, s); }
+	static inline f32x4x4_t operator*(float s, const f32x4x4_t& v) noexcept { return multiplyfv(s, v); }
+	static inline f32x4x4_t operator/(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return dividefv(v1, v2); }
+	static inline f32x4x4_t operator/(const f32x4x4_t& v, float s) noexcept { return dividefv(v, s); }
+	static inline f32x4x4_t operator&(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return andfv (v1, v2); }
+	static inline f32x4x4_t operator|(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return orfv (v1, v2); }
+	static inline f32x4x4_t operator^(const f32x4x4_t& v1, const f32x4x4_t& v2) noexcept { return xorfv (v1, v2); }
+	static inline f32x4x4_t operator~(const f32x4x4_t& v) noexcept { return notfv(v); }
 	static inline f32x4x4_t operator<<(const f32x4x4_t& v, int move) noexcept
 	{
 		return f32x4x4_t(
@@ -678,7 +678,7 @@ namespace dseed
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //
-// 4D Vector and 4x4 Matrix Implementations
+// 4D Vector andfv 4x4 Matrix Implementations
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #	include "simd.constructors.inl"

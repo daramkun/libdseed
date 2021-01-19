@@ -41,16 +41,11 @@
 #pragma pack(push, 1)
 struct int24_t
 {
-	uint8_t value[3];
+	int32_t value : 24;
 
 	int24_t() = default;
-	inline int24_t(int32_t v) { memcpy(value, &v, 3); }
-	inline operator int32_t () const
-	{
-		//return(( value [ 2 ] & 0x80) ?(0xff000000) : 0)
-		return ((value[2] & 0x80) << 24) >> 7
-			| (value[2] << 16) | (value[1] << 8) | value[0];
-	}
+	inline int24_t(int32_t v) { value = v; }
+	inline operator int32_t () const { return value; }
 };
 #pragma pack(pop)
 
@@ -68,30 +63,35 @@ struct int24_t
 #define AVX_CONVERT_COUNT_UNIT								0xfffffff8								//< ~8 + 1  = -8
 #define AVX512_CONVERT_COUNT_UNIT							0xfffffff0								//< ~16 + 1 = -16
 
+#if !COMPILER_MSVC
+#	define min(x, y)		(x < y ? x : y)
+#	define max(x, y)		(x > y ? x : y)
+#endif
+
 #pragma region	Plain Type Convert Inline functions
 #pragma mark	Plain Type Convert Inline functions
 template<typename S, typename D>
 static inline D __TC_convert(S value) { static_assert (true, "Not supported format."); }
-template<> static inline float __TC_convert(int8_t value) { return (float)(min(1, max(-1, value * __TC_INV_CHAR))); }
-template<> static inline float __TC_convert(int16_t value) { return (float)(min(1, max(-1, value * __TC_INV_SHORT))); }
-template<> static inline float __TC_convert(int24_t value) { return (float)(min(1, max(-1, ((int32_t)value) * __TC_INV_24BIT))); }
-template<> static inline float __TC_convert(int32_t value) { return (float)(min(1, max(-1, value * __TC_INV_INT))); }
-template<> static inline int8_t __TC_convert(float value) { return (int8_t)(min(1, max(-1, value)) * __TC_CHAR); }
-template<> static inline int16_t __TC_convert(float value) { return (int16_t)(min(1, max(-1, value)) * __TC_SHORT); }
-template<> static inline int24_t __TC_convert(float value) { return (int24_t)(int32_t)(min(1, max(-1, value)) * __TC_24BIT); }
-template<> static inline int32_t __TC_convert(float value) { return (int32_t)(min(1, max(-1, value)) * __TC_INT); }
-template<> static inline int16_t __TC_convert(int8_t value) { return value << 8; }
-template<> static inline int24_t __TC_convert(int8_t value) { return (int24_t)(((int32_t)value) << 16); }
-template<> static inline int32_t __TC_convert(int8_t value) { return value << 24; }
-template<> static inline int8_t __TC_convert(int16_t value) { return value >> 8; }
-template<> static inline int24_t __TC_convert(int16_t value) { return (int24_t)(value << 8); }
-template<> static inline int32_t __TC_convert(int16_t value) { return value << 16; }
-template<> static inline int8_t __TC_convert(int24_t value) { return ((int32_t)value) >> 16; }
-template<> static inline int16_t __TC_convert(int24_t value) { return ((int32_t)value) >> 8; }
-template<> static inline int32_t __TC_convert(int24_t value) { return ((int32_t)value) << 8; }
-template<> static inline int8_t __TC_convert(int32_t value) { return value >> 24; }
-template<> static inline int16_t __TC_convert(int32_t value) { return value >> 16; }
-template<> static inline int24_t __TC_convert(int32_t value) { return (int24_t)(value >> 8); }
+template<> inline float __TC_convert(int8_t value) { return (float)(min(1, max(-1, value * __TC_INV_CHAR))); }
+template<> inline float __TC_convert(int16_t value) { return (float)(min(1, max(-1, value * __TC_INV_SHORT))); }
+template<> inline float __TC_convert(int24_t value) { return (float)(min(1, max(-1, ((int32_t)value) * __TC_INV_24BIT))); }
+template<> inline float __TC_convert(int32_t value) { return (float)(min(1, max(-1, value * __TC_INV_INT))); }
+template<> inline int8_t __TC_convert(float value) { return (int8_t)(min(1, max(-1, value)) * __TC_CHAR); }
+template<> inline int16_t __TC_convert(float value) { return (int16_t)(min(1, max(-1, value)) * __TC_SHORT); }
+template<> inline int24_t __TC_convert(float value) { return (int24_t)(int32_t)(min(1, max(-1, value)) * __TC_24BIT); }
+template<> inline int32_t __TC_convert(float value) { return (int32_t)(min(1, max(-1, value)) * __TC_INT); }
+template<> inline int16_t __TC_convert(int8_t value) { return value << 8; }
+template<> inline int24_t __TC_convert(int8_t value) { return (int24_t)(((int32_t)value) << 16); }
+template<> inline int32_t __TC_convert(int8_t value) { return value << 24; }
+template<> inline int8_t __TC_convert(int16_t value) { return value >> 8; }
+template<> inline int24_t __TC_convert(int16_t value) { return (int24_t)(value << 8); }
+template<> inline int32_t __TC_convert(int16_t value) { return value << 16; }
+template<> inline int8_t __TC_convert(int24_t value) { return ((int32_t)value) >> 16; }
+template<> inline int16_t __TC_convert(int24_t value) { return ((int32_t)value) >> 8; }
+template<> inline int32_t __TC_convert(int24_t value) { return ((int32_t)value) << 8; }
+template<> inline int8_t __TC_convert(int32_t value) { return value >> 24; }
+template<> inline int16_t __TC_convert(int32_t value) { return value >> 16; }
+template<> inline int24_t __TC_convert(int32_t value) { return (int24_t)(value >> 8); }
 #pragma endregion
 
 #pragma region	Type Converters Selector
@@ -236,7 +236,7 @@ static inline bool __TC_sample_convert_sse(const void* src, void* dest, int64_t 
 ////////////////////////////////////////////////////////////
 // float to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_sse<float, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<float, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128 f32_to_i8_converter = _mm_set1_ps((float)__TC_CHAR);
 	static const __m128i i32_to_i8_shuffle = _mm_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 8, 4, 0);
@@ -263,7 +263,7 @@ template<> static inline bool __TC_sample_convert_sse<float, int8_t>(const void*
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<float, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<float, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128  f32_to_i16_converter = _mm_set1_ps((float)__TC_SHORT);
 	static const __m128i zero_int = _mm_setzero_si128();
@@ -288,7 +288,7 @@ template<> static inline bool __TC_sample_convert_sse<float, int16_t>(const void
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<float, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<float, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128 f32_to_i24_converter = _mm_set1_ps((float)__TC_24BIT);
 	static const __m128i i32_to_i24_shuffle = _mm_set_epi8(-1, -1, -1, -1, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0);
@@ -314,7 +314,7 @@ template<> static inline bool __TC_sample_convert_sse<float, int24_t>(const void
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<float, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<float, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128 f32_to_i32_converter = _mm_set1_ps((float)__TC_INT);
 
@@ -339,7 +339,7 @@ template<> static inline bool __TC_sample_convert_sse<float, int32_t>(const void
 ////////////////////////////////////////////////////////////
 // 8-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_sse<int8_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int8_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i zero_int = _mm_setzero_si128();
 
@@ -359,7 +359,7 @@ template<> static inline bool __TC_sample_convert_sse<int8_t, int16_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int8_t, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int8_t, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i32_to_i24_shuffle = _mm_set_epi8(-1, -1, -1, -1, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0);
 
@@ -382,7 +382,7 @@ template<> static inline bool __TC_sample_convert_sse<int8_t, int24_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int8_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int8_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	if (srcByteCount * 4 > destByteSize)
 		return false;
@@ -400,7 +400,7 @@ template<> static inline bool __TC_sample_convert_sse<int8_t, int32_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int8_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int8_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128  i8_to_f32_converter = _mm_set1_ps((float)__TC_INV_CHAR);
 
@@ -427,7 +427,7 @@ template<> static inline bool __TC_sample_convert_sse<int8_t, float>(const void*
 ////////////////////////////////////////////////////////////
 // 16-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_sse<int16_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int16_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i16_to_i8_shuffle = _mm_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, 28, 24, 20, 16, 12, 8, 4, 0);
 
@@ -451,7 +451,7 @@ template<> static inline bool __TC_sample_convert_sse<int16_t, int8_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int16_t, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int16_t, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i32_to_i24_shuffle = _mm_set_epi8(-1, -1, -1, -1, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0);
 
@@ -475,7 +475,7 @@ template<> static inline bool __TC_sample_convert_sse<int16_t, int24_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int16_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int16_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	if (srcByteCount * 2 > destByteSize)
 		return false;
@@ -494,7 +494,7 @@ template<> static inline bool __TC_sample_convert_sse<int16_t, int32_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int16_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int16_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128  i16_to_f32_converter = _mm_set1_ps((float)__TC_INV_SHORT);
 
@@ -520,7 +520,7 @@ template<> static inline bool __TC_sample_convert_sse<int16_t, float>(const void
 ////////////////////////////////////////////////////////////
 // 24-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_sse<int24_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int24_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i32_to_i8_shuffle = _mm_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 8, 4, 0);
 	static const __m128i i24_to_i32_shuffle = _mm_set_epi8(-1, 11, 10, 9, -1, 8, 7, 6, -1, 5, 4, 3, -1, 2, 1, 0);
@@ -549,7 +549,7 @@ template<> static inline bool __TC_sample_convert_sse<int24_t, int8_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int24_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int24_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i zero_int = _mm_setzero_si128();
 	static const __m128i i24_to_i32_shuffle = _mm_set_epi8(-1, 11, 10, 9, -1, 8, 7, 6, -1, 5, 4, 3, -1, 2, 1, 0);
@@ -578,7 +578,7 @@ template<> static inline bool __TC_sample_convert_sse<int24_t, int16_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int24_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int24_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i24_to_i32_shuffle = _mm_set_epi8(-1, 11, 10, 9, -1, 8, 7, 6, -1, 5, 4, 3, -1, 2, 1, 0);
 	static const __m128i i24_to_i32_negate_shuffle = _mm_set_epi8(14, -1, -1, -1, 10, -1, -1, -1, 6, -1, -1, -1, 2, -1, -1, -1);
@@ -603,7 +603,7 @@ template<> static inline bool __TC_sample_convert_sse<int24_t, int32_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int24_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int24_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128  i24_to_f32_converter = _mm_set1_ps((float)__TC_INV_24BIT);
 	static const __m128i i24_to_i32_shuffle = _mm_set_epi8(-1, 11, 10, 9, -1, 8, 7, 6, -1, 5, 4, 3, -1, 2, 1, 0);
@@ -637,7 +637,7 @@ template<> static inline bool __TC_sample_convert_sse<int24_t, float>(const void
 ////////////////////////////////////////////////////////////
 // 32-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_sse<int32_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int32_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i32_to_i8_shuffle = _mm_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 12, 8, 4, 0);
 
@@ -661,7 +661,7 @@ template<> static inline bool __TC_sample_convert_sse<int32_t, int8_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int32_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int32_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i zero_int = _mm_setzero_si128();
 
@@ -686,7 +686,7 @@ template<> static inline bool __TC_sample_convert_sse<int32_t, int16_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int32_t, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int32_t, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128i i32_to_i24_shuffle = _mm_set_epi8(-1, -1, -1, -1, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0);
 
@@ -710,7 +710,7 @@ template<> static inline bool __TC_sample_convert_sse<int32_t, int24_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_sse<int32_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_sse<int32_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m128  i32_to_f32_converter = _mm_set1_ps((float)__TC_INV_INT);
 
@@ -762,7 +762,7 @@ static const __TC_SAMPLE_CONVERTERS __g_TC_sse_converters = {};
 
 static inline bool __TC_sse_support()
 {
-#if ARCH_X86SET
+#if COMPILER_MSVC && ARCH_X86SET
 	int cpuid[4];
 	__cpuidex(cpuid, 1, 0);
 
@@ -811,7 +811,7 @@ static inline bool __TC_sample_convert_avx(const void* src, void* dest, int64_t 
 ////////////////////////////////////////////////////////////
 // float to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_avx<float, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<float, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256 f32_to_i8_converter = _mm256_set1_ps((float)__TC_CHAR);
 	static const __m256i i32_to_i8_shuffle = _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 28, 24, 20, 16, 12, 8, 4, 0);
@@ -838,7 +838,7 @@ template<> static inline bool __TC_sample_convert_avx<float, int8_t>(const void*
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<float, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<float, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256  f32_to_i16_converter = _mm256_set1_ps((float)__TC_SHORT);
 	static const __m256i i32_to_i16_shuffle = _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 29, 28, 25, 24, 21, 20, 17, 16, 13, 12, 9, 8, 5, 4, 1, 0);
@@ -863,7 +863,7 @@ template<> static inline bool __TC_sample_convert_avx<float, int16_t>(const void
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<float, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<float, int24_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256 f32_to_i24_converter = _mm256_set1_ps((float)__TC_24BIT);
 	static const __m256i i32_to_i24_shuffle = _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, 30, 29, 28, 26, 25, 24, 22, 21, 20, 18, 17, 16, 14, 13, 12, 10, 9, 8, 6, 5, 4, 2, 1, 0);
@@ -889,7 +889,7 @@ template<> static inline bool __TC_sample_convert_avx<float, int24_t>(const void
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<float, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<float, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256 f32_to_i32_converter = _mm256_set1_ps((float)__TC_INT);
 
@@ -914,7 +914,7 @@ template<> static inline bool __TC_sample_convert_avx<float, int32_t>(const void
 ////////////////////////////////////////////////////////////
 // 8-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_avx<int8_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int8_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256i zero_int = _mm256_setzero_si256();
 
@@ -934,7 +934,7 @@ template<> static inline bool __TC_sample_convert_avx<int8_t, int16_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<int8_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int8_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	if (srcByteCount * 4 > destByteSize)
 		return false;
@@ -952,7 +952,7 @@ template<> static inline bool __TC_sample_convert_avx<int8_t, int32_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<int8_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int8_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256  i8_to_f32_converter = _mm256_set1_ps((float)__TC_INV_CHAR);
 
@@ -980,7 +980,7 @@ template<> static inline bool __TC_sample_convert_avx<int8_t, float>(const void*
 ////////////////////////////////////////////////////////////
 // 16-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_avx<int16_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int16_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256i i16_to_i8_shuffle = _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 64, 60, 56, 52, 48, 44, 40, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0);
 
@@ -1004,7 +1004,7 @@ template<> static inline bool __TC_sample_convert_avx<int16_t, int8_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<int16_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int16_t, int32_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	if (srcByteCount * 2 > destByteSize)
 		return false;
@@ -1023,7 +1023,7 @@ template<> static inline bool __TC_sample_convert_avx<int16_t, int32_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<int16_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int16_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256  i16_to_f32_converter = _mm256_set1_ps((float)__TC_INV_SHORT);
 
@@ -1057,7 +1057,7 @@ template<> static inline bool __TC_sample_convert_avx<int16_t, float>(const void
 ////////////////////////////////////////////////////////////
 // 32-bit to
 ////////////////////////////////////////////////////////////
-template<> static inline bool __TC_sample_convert_avx<int32_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int32_t, int8_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static __m256i i32_to_i16_shuffle = _mm256_setr_epi8(
 		0, 4, 8, 12, 16, 20, 24, 28,
@@ -1085,7 +1085,7 @@ template<> static inline bool __TC_sample_convert_avx<int32_t, int8_t>(const voi
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<int32_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int32_t, int16_t>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static __m256i i32_to_i16_shuffle = _mm256_setr_epi8(
 		0, 1, 4, 5, 8, 9, 12, 13,
@@ -1113,7 +1113,7 @@ template<> static inline bool __TC_sample_convert_avx<int32_t, int16_t>(const vo
 
 	return true;
 }
-template<> static inline bool __TC_sample_convert_avx<int32_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
+template<> inline bool __TC_sample_convert_avx<int32_t, float>(const void* src, void* dest, int64_t srcByteCount, int64_t destByteSize) noexcept
 {
 	static const __m256  i32_to_f32_converter = _mm256_set1_ps((float)__TC_INV_INT);
 
@@ -1165,7 +1165,7 @@ static const __TC_SAMPLE_CONVERTERS __g_TC_avx_converters = {};
 
 static inline bool __TC_avx_support()
 {
-#if ARCH_AMD64
+#if COMPILER_MSVC && ARCH_AMD64
 	int cpuid[4];
 	__cpuidex(cpuid, 1, 0);
 

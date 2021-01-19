@@ -137,11 +137,11 @@ namespace dseed::audio
 	};
 }
 
-#if defined(USE_XAUDIO2_NATIVE_OBJECT)
+#if PLATFORM_MICROSOFT && defined(USE_XAUDIO2_NATIVE_OBJECT)
 #	include <wrl.h>
 #	include <xaudio2.h>
 #endif
-#if defined(USE_WASAPI_NATIVE_OBJECT)
+#if PLATFORM_MICROSOFT && defined(USE_WASAPI_NATIVE_OBJECT)
 #	include <wrl.h>
 #	include <mmdeviceapi.h>
 #	include <Audioclient.h>
@@ -149,7 +149,7 @@ namespace dseed::audio
 
 namespace dseed::audio
 {
-#if defined(USE_XAUDIO2_NATIVE_OBJECT)
+#if PLATFORM_MICROSOFT && defined(USE_XAUDIO2_NATIVE_OBJECT)
 	struct xaudio2_audioplayer_nativeobject
 	{
 		Microsoft::WRL::ComPtr<IXAudio2> xaudio2;
@@ -161,7 +161,7 @@ namespace dseed::audio
 		IXAudio2SourceVoice* sourceVoice;
 	};
 #endif
-#if defined(USE_WASAPI_NATIVE_OBJECT)
+#if PLATFORM_MICROSOFT && defined(USE_WASAPI_NATIVE_OBJECT)
 	struct wasapi_audioadapter_nativeobject
 	{
 		Microsoft::WRL::ComPtr<IMMDevice> mmDevice;
@@ -180,16 +180,13 @@ namespace dseed::audio
 
 namespace dseed::audio
 {
-#if PLATFORM_MICROSOFT
 	DSEEDEXP error_t create_wasapi_audiooadapter_enumerator(audioadapter_type type, audioadapter_enumerator** enumerator) noexcept;
 	DSEEDEXP error_t create_xaudio2_audioplayer(audioadapter* adapter, audioplayer** player) noexcept;
 	DSEEDEXP error_t create_wasapi_audiorequester(audioadapter* adapter, audiorequester** requester) noexcept;
-#endif
-#if PLATFORM_WINDOWS || PLATFORM_UNIX || PLATFORM_ANDROID || PLATFORM_MACOS || PLATFORM_IOS || PLATFORM_WEBASSEMBLY
+
 	DSEEDEXP error_t create_openal_audioadapter_enumerator(audioadapter_type type, audioadapter_enumerator** enumerator) noexcept;
 	DSEEDEXP error_t create_openal_audioplayer(audioadapter* adapter, audioplayer** player) noexcept;
 	DSEEDEXP error_t create_openal_audiorequester(audioadapter* adapter, audiorequester** requester) noexcept;
-#endif
 }
 
 #endif

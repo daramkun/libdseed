@@ -2,7 +2,7 @@
 
 #include "common.hxx"
 
-#if PLATFORM_LINUX
+#if PLATFORM_LINUX && USE_X11
 
 
 

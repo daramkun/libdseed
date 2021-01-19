@@ -9,6 +9,9 @@ namespace dseed
 	DSEEDEXP void utf8_to_utf16(const char* u8, char16_t* u16, size_t u16size) noexcept;
 	DSEEDEXP void utf16_to_utf8(const char16_t* u16, char* u8, size_t u8size) noexcept;
 
+	DSEEDEXP void utf16_to_wchar(const char16_t* u16, wchar_t* wc, size_t wcsize) noexcept;
+	DSEEDEXP void wchar_to_utf16(const wchar_t* wc, char16_t* u16, size_t u16size) noexcept;
+
 	inline std::u16string utf8_to_utf16(const std::string& u8) noexcept
 	{
 		std::vector<char16_t> temp(u8.length() * 4);
@@ -24,6 +27,7 @@ namespace dseed
 
 	DSEEDEXP void path_combine(const char* path1, const char* path2, char* ret, size_t retsize) noexcept;
 	DSEEDEXP void path_combine(const char16_t* path1, const char16_t* path2, char16_t* ret, size_t retsize) noexcept;
+	DSEEDEXP void path_combine(const wchar_t* path1, const wchar_t* path2, wchar_t* ret, size_t retsize) noexcept;
 
 	inline std::string path_combine(const std::string& path1, const std::string& path2) noexcept
 	{

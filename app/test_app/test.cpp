@@ -3,12 +3,12 @@
 class own_handler : public dseed::platform::event_handler
 {
 public:
-	own_handler () : _refCount (1) { }
+	own_handler() : _refCount(1) { }
 
 public:
-	virtual int32_t retain () override { return ++_refCount; }
+	virtual int32_t retain() override { return ++_refCount; }
 
-	virtual int32_t release () override
+	virtual int32_t release() override
 	{
 		auto ret = --_refCount;
 		if (ret == 0)
@@ -17,23 +17,23 @@ public:
 	}
 
 public:
-	virtual void activated () override
+	virtual void activated() override
 	{
 	}
 
-	virtual void deactivated () override
+	virtual void deactivated() override
 	{
 	}
 
-	virtual void paused () override
+	virtual void paused() override
 	{
 	}
 
-	virtual void resumed () override
+	virtual void resumed() override
 	{
 	}
 
-	virtual void resized () override
+	virtual void resized() override
 	{
 		if (vgaDevice != nullptr)
 		{
@@ -48,88 +48,88 @@ public:
 	}
 
 public:
-	virtual void shown () override
+	virtual void shown() override
 	{
 		dseed::autoref<dseed::platform::application> app;
-		dseed::platform::application::shared_app (&app);
-		app->set_client_size (dseed::size2i (1280, 720));
+		dseed::platform::application::shared_app(&app);
+		app->set_client_size(dseed::size2i(1280, 720));
 
-		if (dseed::failed (dseed::graphics::create_d3d11_vgadevice (app, nullptr, &vgaDevice)))
+		if (dseed::failed(dseed::graphics::create_d3d11_vgadevice(app, nullptr, &vgaDevice)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 		//vgaDevice->set_vsync (true);
-		
-		if (dseed::failed (vgaDevice->sprite_render ((dseed::graphics::vgarender**) & spriteRender)))
+
+		if (dseed::failed(vgaDevice->sprite_render((dseed::graphics::vgarender**)&spriteRender)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
 		dseed::autoref<dseed::io::stream> stream;
-		if (dseed::failed (dseed::io::create_native_filestream (u8"../../../sample/bitmaps/sample3.png", false, &stream)))
+		if (dseed::failed(dseed::io::create_native_filestream(u8"../../../sample/bitmaps/sample3.png", false, &stream)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
 		dseed::autoref<dseed::bitmaps::bitmap_array> decoder;
-		if (dseed::failed (dseed::bitmaps::detect_bitmap_decoder (stream, &decoder)))
+		if (dseed::failed(dseed::bitmaps::detect_bitmap_decoder(stream, &decoder)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
 		dseed::autoref<dseed::bitmaps::bitmap> bitmap;
-		if (dseed::failed (decoder->at (0, &bitmap)))
+		if (dseed::failed(decoder->at(0, &bitmap)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
-		if (dseed::failed (spriteRender->create_atlas (bitmap, nullptr, 0, &spriteAtlas)))
+		if (dseed::failed(spriteRender->create_atlas(bitmap, nullptr, 0, &spriteAtlas)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
-		if (dseed::failed (spriteRender->create_pipeline (nullptr, nullptr, dseed::graphics::sprite_texfilter::linear, &spritePipeline)))
+		if (dseed::failed(spriteRender->create_pipeline(nullptr, nullptr, dseed::graphics::sprite_texfilter::linear, &spritePipeline)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
 		dseed::autoref<dseed::io::stream> fileStream;
-		if (dseed::failed (dseed::io::create_native_filestream (u8"../../../sample/audios/sample1.mp3", false, &fileStream)))
+		if (dseed::failed(dseed::io::create_native_filestream(u8"../../../sample/audios/sample1.mp3", false, &fileStream)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
 		dseed::autoref<dseed::media::media_decoder> audioDecoder;
-		if (dseed::failed (dseed::media::detect_media_decoder (fileStream, &audioDecoder)))
+		if (dseed::failed(dseed::media::detect_media_decoder(fileStream, &audioDecoder)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
 		dseed::autoref<dseed::media::audio_stream> audioStream;
-		if (dseed::failed (dseed::media::create_audio_buffered_stream (audioDecoder, &audioStream)))
+		if (dseed::failed(dseed::media::create_audio_buffered_stream(audioDecoder, &audioStream)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
-		if (dseed::failed (dseed::audio::create_xaudio2_audioplayer (nullptr, &audioPlayer)))
+		if (dseed::failed(dseed::audio::create_xaudio2_audioplayer(nullptr, &audioPlayer)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
-		if (dseed::failed (audioPlayer->create_backgroundaudio (audioStream, &bgm)))
+		if (dseed::failed(audioPlayer->create_backgroundaudio(audioStream, &bgm)))
 		{
-			app->exit ();
+			app->exit();
 			return;
 		}
 
@@ -140,55 +140,60 @@ public:
 		}
 	}
 
-	virtual void closing (bool& cancel) override
+	virtual void closing(bool& cancel) override
 	{
 	}
 
-	virtual void closed () override
+	virtual void closed() override
 	{
 	}
 
 public:
-	virtual void next_frame (dseed::timespan delta) override
+	virtual void next_frame(dseed::timespan delta) override
 	{
-		static dseed::f32x4_t color (1, 1, 1, 1), clearColor (0, 0, 0, 1);
+		static dseed::f32x4_t color(1, 1, 1, 1), clearColor(0, 0, 0, 1);
 
 		if (vgaDevice == nullptr)
 			return;
 
-		_frameMeasurer.update (delta);
+		_frameMeasurer.update(delta);
 
 		dseed::autoref<dseed::platform::application> app;
-		dseed::platform::application::shared_app (&app);
+		dseed::platform::application::shared_app(&app);
 		char title[256];
-		sprintf (title, "FPS: %lf", _frameMeasurer.fps ());
-		app->set_title (title);
+		sprintf(title, "FPS: %lf", _frameMeasurer.fps());
+		app->set_title(title);
 		dseed::size2i clientSize;
 		app->client_size(&clientSize);
 
-		spriteRender->clear_rendertarget (nullptr, clearColor);
+		spriteRender->clear_rendertarget(nullptr, clearColor);
 
-		dseed::float4x4 transform = dseed::float4x4::identity ();
-		spriteRender->begin (dseed::graphics::rendermethod::deferred, transform);
+		dseed::float4x4 transform = dseed::float4x4::identity();
+		spriteRender->begin(dseed::graphics::rendermethod::deferred, transform);
 
 		dseed::graphics::sprite_rendertarget* renderTarget = nullptr;
-		spriteRender->set_rendertarget (&renderTarget, 1);
-		spriteRender->set_atlas (&spriteAtlas, 1);
-		spriteRender->set_pipeline (spritePipeline);
-		
+		spriteRender->set_rendertarget(&renderTarget, 1);
+		spriteRender->set_atlas(&spriteAtlas, 1);
+		spriteRender->set_pipeline(spritePipeline);
+
 		for (int y = -2; y <= 2; ++y)
 		{
 			for (int x = -5; x <= 5; ++x)
 			{
-				transform = dseed::multiply ((dseed::f32x4x4_t)dseed::float4x4::scale (0.25f, 0.25f, 1), 
-					(dseed::f32x4x4_t)dseed::float4x4::translate (clientSize.width / 2 + (x * 150), clientSize.height / 2 + (y * 150), 0));
-				spriteRender->draw (0, transform, color);
+				transform = dseed::multiplyfv((dseed::f32x4x4_t)dseed::float4x4::scale(0.25f, 0.25f, 1),
+					(dseed::f32x4x4_t)dseed::float4x4::translate(
+						(float)clientSize.width / 2 + (x * 150),
+						(float)clientSize.height / 2 + (y * 150),
+						0
+					)
+				);
+				spriteRender->draw(0, transform, color);
 			}
 		}
 
-		spriteRender->end ();
+		spriteRender->end();
 
-		vgaDevice->present ();
+		vgaDevice->present();
 	}
 
 private:
@@ -205,16 +210,16 @@ private:
 };
 
 ENTRYPOINT_ATTRIBUTE
-ENTRYPOINT_RETURNTYPE ENTRYPOINT_CALLTYPE ENTRYPOINT_NAME (ENTRYPOINT_ARGUMENTS)
+ENTRYPOINT_RETURNTYPE ENTRYPOINT_CALLTYPE ENTRYPOINT_NAME(ENTRYPOINT_ARGUMENTS)
 {
 	dseed::autoref<dseed::platform::application> app;
-	if (dseed::failed (dseed::platform::create_application (&app)))
+	if (dseed::failed(dseed::platform::create_application(&app)))
 		return -1;
 
 	dseed::autoref<dseed::platform::event_handler> handler;
-	*&handler = new own_handler ();
+	*&handler = new own_handler();
 
-	app->run (handler);
+	app->run(handler);
 
-	ENTRYPOINT_RETURN (0);
+	ENTRYPOINT_RETURN(0);
 }

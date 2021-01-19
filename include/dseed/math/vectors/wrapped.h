@@ -417,7 +417,7 @@ namespace dseed
 		}
 
 	public:
-		inline f32x4_t conjugate() const noexcept { return multiply(f32x4_t(*this), f32x4_t(-1, -1, -1, 1)); }
+		inline f32x4_t conjugate() const noexcept { return multiplyfv(f32x4_t(*this), f32x4_t(-1, -1, -1, 1)); }
 		inline f32x4_t invert() const noexcept
 		{
 			const auto length = length4(*this);
@@ -426,7 +426,7 @@ namespace dseed
 			if (length.x() <= single_epsilon)
 				return f32x4_t(0, 0, 0, 0);
 
-			return divide(conjugated, length);
+			return dividefv(conjugated, length);
 		}
 
 	public:

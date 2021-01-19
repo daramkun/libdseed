@@ -11,6 +11,10 @@
 #include <random>
 using namespace std::string_literals;
 
+#if __clang__
+#	pragma clang diagnostic ignored "-Wexpansion-to-defined"
+#endif
+
 #define COMPILER_MSVC										(defined(_MSC_VER) || _MSC_VER)
 #define COMPILER_GCC										(defined(__GNUC__) && !defined(__clang__) || __GNUC__ || __clang__)
 #define COMPILER_CLANG										(defined(__clang__) || __clang__)
@@ -19,6 +23,7 @@ using namespace std::string_literals;
 #define PLATFORM_FUCHSIA									(defined(__Fuchsia__) || __Fuchsia__)
 #define PLATFORM_GOOGLE										(PLATFORM_ANDROID || PLATFORM_FUCHSIA)
 #define PLATFORM_UNIX										((defined(__unix__) || defined(__linux__) || __unix__ || __linux__) && !(defined(__ANDROID__) || __ANDROID__))
+#define PLATFORM_LINUX										PLATFORM_UNIX
 #define PLATFORM_WEBASSEMBLY								(defined(__EMSCRIPTEN__) || defined(__asmjs__) || __EMSCRIPTEN__ || __asmjs__)
 #if defined (__APPLE__)
 #	include <TargetConditionals.h>
@@ -255,6 +260,15 @@ namespace dseed::instructions
 	extern uint64_t(*hwrand64)();
 
 	DSEEDEXP uint32_t crc32(uint32_t crc32, const uint8_t* bytes, size_t bytesCount) noexcept;
+}
+
+namespace dseed
+{
+	template<typename T>
+	static constexpr auto to_underlying_type(T e)
+	{
+		return static_cast<typename std::underlying_type<T>::type>(e);
+	}
 }
 
 #endif

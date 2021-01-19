@@ -276,7 +276,7 @@ dseed::error_t dseed::media::reformat_audio (audio_stream* original, pulseformat
 	if (original == nullptr || stream == nullptr)
 		return dseed::error_invalid_args;
 	if (!(fmt == pulseformat::pcm && (bits_per_sample == 8 || bits_per_sample == 16 || bits_per_sample == 24 || bits_per_sample == 32))
-		|| !(fmt == pulseformat::ieee_float && bits_per_sample == 32))
+		&& !(fmt == pulseformat::ieee_float && bits_per_sample == 32))
 		return dseed::error_invalid_args;
 
 	audioformat original_format;

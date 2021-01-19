@@ -3,6 +3,7 @@
 #include <string.h>
 #include <queue>
 #include <shared_mutex>
+#include <unordered_map>
 
 dseed::object::object () { memcpy (_signature, "DSEEDOBJ", 8); }
 dseed::object::~object () { }

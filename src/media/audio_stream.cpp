@@ -1,5 +1,6 @@
 #include <dseed.h>
 
+#include <cstring>
 #include <vector>
 
 class __buffered_stream : public dseed::media::audio_stream

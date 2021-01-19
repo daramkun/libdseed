@@ -68,7 +68,7 @@ public:
 	}
 
 public:
-	virtual size_t read (void* buffer, size_t length) noexcept
+	virtual size_t read (void* buffer, size_t length) noexcept override
 	{
 		size_t readLength = length * _format.channels;
 		std::vector<int8_t> buf (readLength);
@@ -81,16 +81,16 @@ public:
 		return ret / _format.channels;
 	}
 	virtual size_t write (const void* data, size_t length) noexcept override { return 0; }
-	virtual bool seek (dseed::io::seekorigin origin, size_t offset) noexcept
+	virtual bool seek (dseed::io::seekorigin origin, size_t offset) noexcept override
 	{
 		return _original->seek (origin, offset / _format.channels);
 	}
-	virtual void flush () noexcept { }
-	virtual dseed::error_t set_length (size_t length) noexcept { return dseed::error_not_impl; }
+	virtual void flush () noexcept override { }
+	virtual dseed::error_t set_length (size_t length) noexcept override { return dseed::error_not_impl; }
 
 public:
-	virtual size_t position () noexcept { return _original->position () / _format.channels; }
-	virtual size_t length () noexcept { return _original->length () / _format.channels; }
+	virtual size_t position () noexcept override { return _original->position () / _format.channels; }
+	virtual size_t length () noexcept override { return _original->length () / _format.channels; }
 
 public:
 	virtual bool readable () noexcept override { return _original->readable (); }

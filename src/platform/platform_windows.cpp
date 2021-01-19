@@ -557,10 +557,10 @@ private:
 					app->input_device (dseed::io::inputdevicetype_mouse, reinterpret_cast<dseed::io::inputdevice**>(&mouse));
 
 					UINT dwSize = 0;
-					GetRawInputData ((HRAWINPUT)lParam, RID_INPUT, nullptr, &dwSize, sizeof (RAWINPUTHEADER));
+					GetRawInputData (reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &dwSize, sizeof (RAWINPUTHEADER));
 
 					std::shared_ptr<BYTE[]> lpb (new BYTE[dwSize]);
-					RAWINPUT* raw = (RAWINPUT*)&lpb[0];
+					auto* raw = reinterpret_cast<RAWINPUT*>(&lpb[0]);
 					ZeroMemory (raw, dwSize);
 
 					if (raw->header.dwType == RIM_TYPEMOUSE)
@@ -608,21 +608,25 @@ private:
 						|| touchpanel == nullptr)
 						return DefWindowProcW (hWnd, uMsg, wParam, lParam);
 
-					UINT touchInputsCount = LOWORD (wParam);
-					std::shared_ptr<TOUCHINPUT[]> touchInputs (new TOUCHINPUT[touchInputsCount]);
-					if (GetTouchInputInfo ((HTOUCHINPUT)lParam, touchInputsCount, &touchInputs[0], sizeof (TOUCHINPUT)))
+					const UINT touchInputsCount = LOWORD (wParam);
+					const std::shared_ptr<TOUCHINPUT[]> touchInputs (new TOUCHINPUT[touchInputsCount]);
+					if (GetTouchInputInfo (reinterpret_cast<HTOUCHINPUT>(lParam), touchInputsCount, &touchInputs[0], sizeof (TOUCHINPUT)))
 					{
 						for (UINT i = 0; i < touchInputsCount; ++i)
 						{
 							TOUCHINPUT& ti = touchInputs[i];
 							if (ti.dwFlags & TOUCHEVENTF_DOWN)
 							{
-								dseed::io::touchpointer p = { (int32_t)ti.dwID, dseed::point2i (ti.x, ti.y), dseed::io::touchstate::pressed };
+								const dseed::io::touchpointer p = {
+									static_cast<int32_t>(ti.dwID),
+									dseed::point2i (ti.x, ti.y),
+									dseed::io::touchstate::pressed
+								};
 								touchpanel->_state[0].pointers[touchpanel->_state[0].pointerCount++] = p;
 							}
 							else
 							{
-								auto p = touchpanel->pointer (ti.dwID);
+								auto* p = touchpanel->pointer (ti.dwID);
 								if (p)
 								{
 									p->state = (ti.dwFlags & TOUCHEVENTF_UP) ? dseed::io::touchstate::released : dseed::io::touchstate::moved;
@@ -630,7 +634,7 @@ private:
 								}
 							}
 						}
-						CloseTouchInputHandle ((HTOUCHINPUT)lParam);
+						CloseTouchInputHandle (reinterpret_cast<HTOUCHINPUT>(lParam));
 					}
 					else return DefWindowProcW (hWnd, uMsg, wParam, lParam);
 				}

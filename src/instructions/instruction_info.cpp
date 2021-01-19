@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bitset>
+#include <cstring>
 
 const dseed::instructions::x86_instruction_info& dseed::instructions::x86_instruction_info::instance()
 {
@@ -10,24 +11,39 @@ const dseed::instructions::x86_instruction_info& dseed::instructions::x86_instru
 }
 
 #if ARCH_X86SET
-#	include <intrin.h>
+#	if COMPILER_MSVC
+#		include <intrin.h>
+#	else
+#		if ARCH_IA32
+#			define __cpuid(__leaf, __eax, __ebx, __ecx, __edx) \
+    __asm("cpuid" : "=a"(__eax), "=b" (__ebx), "=c"(__ecx), "=d"(__edx) \
+                  : "0"(__leaf))
+#			define __cpuidex(__leaf, __count, __eax, __ebx, __ecx, __edx) \
+    __asm("cpuid" : "=a"(__eax), "=b" (__ebx), "=c"(__ecx), "=d"(__edx) \
+                  : "0"(__leaf), "2"(__count))
+ #		elif ARCH_AMD64
+ /* x86-64 uses %rbx as the base register, so preserve it. */
+ #			define __cpuid(__leaf, __eax, __ebx, __ecx, __edx) \
+    __asm("  xchgq  %%rbx,%q1\n" \
+          "  cpuid\n" \
+          "  xchgq  %%rbx,%q1" \
+        : "=a"(__eax), "=r" (__ebx), "=c"(__ecx), "=d"(__edx) \
+        : "0"(__leaf))
+#			define __cpuidex(__leaf, __count, __eax, __ebx, __ecx, __edx) \
+	__asm("  xchgq  %%rbx,%q1\n" \
+          "  cpuid\n" \
+          "  xchgq  %%rbx,%q1" \
+        : "=a"(__eax), "=r" (__ebx), "=c"(__ecx), "=d"(__edx) \
+        : "0"(__leaf), "2"(__count))
+#		endif
+#	endif
 
 inline void cpuid(int cpuinfo[4], int funcId)
 {
 #	if COMPILER_MSVC
 	__cpuid(cpuinfo, funcId);
 #	else
-	__asm
-	{
-		mov    esi, cpuinfo
-		mov    eax, funcId
-		xor ecx, ecx
-		cpuid
-		mov    dword ptr[esi + 0], eax
-		mov    dword ptr[esi + 4], ebx
-		mov    dword ptr[esi + 8], ecx
-		mov    dword ptr[esi + 12], edx
-	};
+	__cpuid(funcId, cpuinfo[0], cpuinfo[1], cpuinfo[2], cpuinfo[3]);
 #	endif
 }
 inline void cpuidex(int cpuinfo[4], int funcId, int subFuncId)
@@ -35,17 +51,7 @@ inline void cpuidex(int cpuinfo[4], int funcId, int subFuncId)
 #	if COMPILER_MSVC
 	__cpuidex(cpuinfo, funcId, subFuncId);
 #	else
-	__asm
-	{
-		mov    esi, cpuinfo
-		mov    eax, funcId
-		mov    ecx, subFuncId
-		cpuid
-		mov    dword ptr[esi + 0], eax
-		mov    dword ptr[esi + 4], ebx
-		mov    dword ptr[esi + 8], ecx
-		mov    dword ptr[esi + 12], edx
-	};
+	__cpuidex(funcId, subFuncId, cpuinfo[0], cpuinfo[1], cpuinfo[2], cpuinfo[3]);
 #	endif
 }
 #endif

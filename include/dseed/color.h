@@ -344,7 +344,7 @@ namespace dseed::color
 			struct { float r, g, b, a; };
 			f32x4_t color;
 		};
-		rgbaf() noexcept = default;
+		rgbaf() noexcept { };
 		inline rgbaf(float r, float g, float b, float a = 1.00000000f) noexcept
 			: r(r), g(g), b(b), a(a)
 		{ }
@@ -1066,10 +1066,10 @@ namespace dseed::color
 		inline operator hsva8 () const noexcept;
 		inline operator hsv8 () const noexcept;
 
-		inline colorv& operator+= (const colorv& cp) noexcept { vector = add(vector, cp.vector); return *this; }
-		inline colorv& operator-= (const colorv& cp) noexcept { vector = subtract(vector, cp.vector); return *this; }
-		inline colorv& operator*= (const colorv& cp) noexcept { vector = multiply(vector, cp.vector); return *this; }
-		inline colorv& operator/= (const colorv& cp) noexcept { vector = divide(vector, cp.vector); return *this; }
+		inline colorv& operator+= (const colorv& cp) noexcept { vector = addfv(vector, cp.vector); return *this; }
+		inline colorv& operator-= (const colorv& cp) noexcept { vector = subtractfv(vector, cp.vector); return *this; }
+		inline colorv& operator*= (const colorv& cp) noexcept { vector = multiplyfv(vector, cp.vector); return *this; }
+		inline colorv& operator/= (const colorv& cp) noexcept { vector = dividefv(vector, cp.vector); return *this; }
 
 		inline void restore_alpha(const rgba8& oc) noexcept { this->operator[](3) = (float)oc.a; }
 		inline void restore_alpha(const rgb8& oc) noexcept { }
@@ -1086,13 +1086,13 @@ namespace dseed::color
 		inline void restore_alpha(const hsv8& oc) noexcept { }
 	};
 
-	inline colorv operator+ (const colorv& c1, const colorv& c2) noexcept { return colorv(add(c1.vector, c2.vector)); }
-	inline colorv operator- (const colorv& c1, const colorv& c2) noexcept { return colorv(subtract(c1.vector, c2.vector)); }
-	inline colorv operator- (const colorv& c) noexcept { return colorv(negate(c.vector)); }
-	inline colorv operator* (const colorv& c1, const colorv& c2) noexcept { return colorv(multiply(c1.vector, c2.vector)); }
-	inline colorv operator/ (const colorv& c1, const colorv& c2) noexcept { return colorv(divide(c1.vector, c2.vector)); }
-	inline colorv operator* (const colorv& c1, double factor) noexcept { return colorv(multiply(c1.vector, (float)factor)); }
-	inline colorv operator/ (const colorv& c1, double factor) noexcept { return colorv(divide(c1.vector, (float)factor)); }
+	inline colorv operator+ (const colorv& c1, const colorv& c2) noexcept { return colorv(addfv(c1.vector, c2.vector)); }
+	inline colorv operator- (const colorv& c1, const colorv& c2) noexcept { return colorv(subtractfv(c1.vector, c2.vector)); }
+	inline colorv operator- (const colorv& c) noexcept { return colorv(negatefv(c.vector)); }
+	inline colorv operator* (const colorv& c1, const colorv& c2) noexcept { return colorv(multiplyfv(c1.vector, c2.vector)); }
+	inline colorv operator/ (const colorv& c1, const colorv& c2) noexcept { return colorv(dividefv(c1.vector, c2.vector)); }
+	inline colorv operator* (const colorv& c1, double factor) noexcept { return colorv(multiplyfv(c1.vector, (float)factor)); }
+	inline colorv operator/ (const colorv& c1, double factor) noexcept { return colorv(dividefv(c1.vector, (float)factor)); }
 	inline bool operator== (const colorv& c1, const colorv& c2) noexcept { return equalsb(c1.vector, c2.vector); }
 	inline bool operator!= (const colorv& c1, const colorv& c2) noexcept { return not_equalsb(c1.vector, c2.vector); }
 

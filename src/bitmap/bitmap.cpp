@@ -1,5 +1,7 @@
 #include <dseed.h>
 
+#include <cstring>
+
 #include <mutex>
 #include <shared_mutex>
 
@@ -25,25 +27,25 @@ public:
 	}
 
 public:
-	virtual size_t size() noexcept { return _palette.size() / (_bpp / 8); }
-	virtual size_t bits_per_pixel() noexcept { return _bpp; }
+	virtual size_t size() noexcept override { return _palette.size() / (_bpp / 8); }
+	virtual size_t bits_per_pixel() noexcept override { return _bpp; }
 
 public:
-	virtual dseed::error_t lock(void** ptr) noexcept
+	virtual dseed::error_t lock(void** ptr) noexcept override
 	{
 		if (!_mutex.try_lock())
 			return dseed::error_resource_locked;
 		*ptr = _palette.data();
 		return dseed::error_good;
 	}
-	virtual dseed::error_t unlock() noexcept
+	virtual dseed::error_t unlock() noexcept override
 	{
 		_mutex.unlock();
 		return dseed::error_good;
 	}
 
 public:
-	virtual dseed::error_t copy_palette(void* buf) noexcept
+	virtual dseed::error_t copy_palette(void* buf) noexcept override
 	{
 		if (buf == nullptr) return dseed::error_invalid_args;
 		memcpy(buf, _palette.data(), _palette.size());

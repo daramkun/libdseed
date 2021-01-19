@@ -2,6 +2,7 @@
 
 #include <map>
 #include <tuple>
+#include <cstring>
 
 using namespace dseed::color;
 using size2i = dseed::size2i;

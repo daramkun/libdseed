@@ -207,6 +207,9 @@ inline HRESULT CreateTextureFromBitmap(ID3D11Device* d3dDevice, dseed::bitmaps::
 	default: return E_INVALIDARG;
 	}
 
+	if (texture == nullptr || *texture == nullptr)
+		return E_FAIL;
+
 	if (srv)
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = { };

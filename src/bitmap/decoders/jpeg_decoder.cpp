@@ -140,7 +140,7 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::io::stream* stream,
 
 	return dseed::error_good;
 #else
-	return dseed::error_feature_not_support;
+	return dseed::error_not_support_file_format;
 #endif
 }
 

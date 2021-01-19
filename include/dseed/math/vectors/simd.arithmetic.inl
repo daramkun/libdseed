@@ -8,16 +8,16 @@
 namespace dseed
 {
 #if !DONT_USE_SSE
-	static inline f32x4_t add(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_add_ps(v1, v2); }
-	static inline f32x4_t subtract(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_sub_ps(v1, v2); }
-	static inline f32x4_t negate(const f32x4_t& v) noexcept { static auto zero = _mm_set1_ps(0); return subtract(zero, v); }
-	static inline f32x4_t multiply(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_mul_ps(v1, v2); }
-	static inline f32x4_t multiply(const f32x4_t& v, float s) noexcept { return _mm_mul_ps(v, _mm_set1_ps(s)); }
-	static inline f32x4_t fma(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept { return _mm_fmadd_ps(mv1, mv2, av); }
-	static inline f32x4_t fms(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept { return _mm_fmsub_ps(mv1, mv2, sv); }
-	static inline f32x4_t fnms(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept { return _mm_fnmsub_ps(mv1, mv2, sv); }
-	static inline f32x4_t divide(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_div_ps(v1, v2); }
-	static inline f32x4_t divide(const f32x4_t& v, float s) noexcept { return divide(v, _mm_set1_ps(s)); }
+	static inline f32x4_t addfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_add_ps(v1, v2); }
+	static inline f32x4_t subtractfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_sub_ps(v1, v2); }
+	static inline f32x4_t negatefv(const f32x4_t& v) noexcept { static auto zero = _mm_set1_ps(0); return subtractfv(zero, v); }
+	static inline f32x4_t multiplyfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_mul_ps(v1, v2); }
+	static inline f32x4_t multiplyfv(const f32x4_t& v, float s) noexcept { return _mm_mul_ps(v, _mm_set1_ps(s)); }
+	static inline f32x4_t fmaf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept { return _mm_fmadd_ps(mv1, mv2, av); }
+	static inline f32x4_t fmsf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept { return _mm_fmsub_ps(mv1, mv2, sv); }
+	static inline f32x4_t fnmsf(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept { return _mm_fnmsub_ps(mv1, mv2, sv); }
+	static inline f32x4_t dividefv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return _mm_div_ps(v1, v2); }
+	static inline f32x4_t dividefv(const f32x4_t& v, float s) noexcept { return dividefv(v, _mm_set1_ps(s)); }
 
 	static inline i32x4_t add32(const i32x4_t& v1, const i32x4_t& v2) noexcept { return _mm_add_epi32(v1, v2); }
 	static inline i32x4_t subtract32(const i32x4_t& v1, const i32x4_t& v2) noexcept { return _mm_sub_epi32(v1, v2); }
@@ -51,12 +51,12 @@ namespace dseed
 	}
 	static inline i32x4_t multiply8(const i32x4_t& v, int s) noexcept { return multiply8(v, _mm_set1_epi8(s)); }
 #elif !DONT_USE_NEON
-	static inline f32x4_t add(const f32x4_t& v1, const f32x4_t& v2) noexcept { return vaddq_f32(v1, v2); }
-	static inline f32x4_t subtract(const f32x4_t& v1, const f32x4_t& v2) noexcept { return vsubq_f32(v1, v2); }
-	static inline f32x4_t negate(const f32x4_t& v) noexcept { return vnegq_f32(v); }
-	static inline f32x4_t multiply(const f32x4_t& v1, const f32x4_t& v2) noexcept { return vmulq_f32(v1, v2); }
-	static inline f32x4_t multiply(const f32x4_t& v, float s) noexcept { return vmulq_f32(v, vmovq_n_f32(s)); }
-	static inline f32x4_t fma(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept
+	static inline f32x4_t addfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return vaddq_f32(v1, v2); }
+	static inline f32x4_t subtractfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return vsubq_f32(v1, v2); }
+	static inline f32x4_t negatefv(const f32x4_t& v) noexcept { return vnegq_f32(v); }
+	static inline f32x4_t multiplyfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return vmulq_f32(v1, v2); }
+	static inline f32x4_t multiplyfv(const f32x4_t& v, float s) noexcept { return vmulq_f32(v, vmovq_n_f32(s)); }
+	static inline f32x4_t fmaf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept
 	{
 #if ARCH_ARM
 		return vmlaq_f32(av, mv1, mv2);
@@ -64,11 +64,11 @@ namespace dseed
 		return vfmaq_f32(av, mv1, mv2);
 #endif
 	}
-	static inline f32x4_t fms(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept
+	static inline f32x4_t fmsf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept
 	{
-		return subtract(multiply(mv1, mv2), sv);
+		return subtractfv(multiplyfv(mv1, mv2), sv);
 	}
-	static inline f32x4_t fnms(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept
+	static inline f32x4_t fnmsf(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept
 	{
 #if ARCH_ARM
 		return vmlsq_f32(sv, mv1, mv2);
@@ -76,14 +76,14 @@ namespace dseed
 		return vfmsq_f32(sv, mv1, mv2);
 #endif
 	}
-	static inline f32x4_t divide(const f32x4_t& v1, const f32x4_t& v2) noexcept
+	static inline f32x4_t dividefv(const f32x4_t& v1, const f32x4_t& v2) noexcept
 	{
 		float32x4_t reciprocal = vrecpeq_f32(v2);
 		reciprocal = vmulq_f32(vrecpsq_f32(v2, reciprocal), reciprocal);
 		reciprocal = vmulq_f32(vrecpsq_f32(v2, reciprocal), reciprocal);
 		return vmulq_f32(v1, reciprocal);
 	}
-	static inline f32x4_t divide(const f32x4_t& v, float s) noexcept { return divide(v, vmovq_n_f32(s)); }
+	static inline f32x4_t dividefv(const f32x4_t& v, float s) noexcept { return dividefv(v, vmovq_n_f32(s)); }
 
 	static inline i32x4_t add32(const i32x4_t& v1, const i32x4_t& v2) noexcept { return vaddq_s32(v1, v2); }
 	static inline i32x4_t subtract32(const i32x4_t& v1, const i32x4_t& v2) noexcept { return vsubq_s32(v1, v2); }
@@ -103,16 +103,16 @@ namespace dseed
 	static inline i32x4_t multiply8(const i32x4_t& v1, const i32x4_t& v2) noexcept { return vmulq_s8(v1, v2); }
 	static inline i32x4_t multiply8(const i32x4_t& v, int s) noexcept { return vmulq_s8(v, vmovq_n_s8(s)); }
 #elif DONT_USE_SIMD
-	static inline f32x4_t add(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z(), v1.w() + v2.w()); }
-	static inline f32x4_t subtract(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z(), v1.w() - v2.w()); }
-	static inline f32x4_t negate(const f32x4_t& v) noexcept { return f32x4_t(-v.x(), -v.y(), -v.z(), -v.w()); }
-	static inline f32x4_t multiply(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() * v2.x(), v1.y() * v2.y(), v1.z() * v2.z(), v1.w() * v2.w()); }
-	static inline f32x4_t multiply(const f32x4_t& v, float s) noexcept { return f32x4_t(v.x() * s, v.y() * s, v.z() * s, v.w() * s); }
-	static inline f32x4_t fma(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept { return add(multiply(mv1, mv2), av); }
-	static inline f32x4_t fms(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept { return subtract(multiply(mv1, mv2), sv); }
-	static inline f32x4_t fnms(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept { return subtract(sv, multiply(mv1, mv2)); }
-	static inline f32x4_t divide(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() / v2.x(), v1.y() / v2.y(), v1.z() / v2.z(), v1.w() / v2.w()); }
-	static inline f32x4_t divide(const f32x4_t& v, float s) noexcept { return f32x4_t(v.x() / s, v.y() / s, v.z() / s, v.w() / s); }
+	static inline f32x4_t addfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z(), v1.w() + v2.w()); }
+	static inline f32x4_t subtractfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z(), v1.w() - v2.w()); }
+	static inline f32x4_t negatefv(const f32x4_t& v) noexcept { return f32x4_t(-v.x(), -v.y(), -v.z(), -v.w()); }
+	static inline f32x4_t multiplyfv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() * v2.x(), v1.y() * v2.y(), v1.z() * v2.z(), v1.w() * v2.w()); }
+	static inline f32x4_t multiplyfv(const f32x4_t& v, float s) noexcept { return f32x4_t(v.x() * s, v.y() * s, v.z() * s, v.w() * s); }
+	static inline f32x4_t fmaf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& av) noexcept { return addfv(multiplyfv(mv1, mv2), av); }
+	static inline f32x4_t fmsf(const f32x4_t& mv1, const f32x4_t& mv2, const f32x4_t& sv) noexcept { return subtractfv(multiplyfv(mv1, mv2), sv); }
+	static inline f32x4_t fnmsf(const f32x4_t& sv, const f32x4_t& mv1, const f32x4_t& mv2) noexcept { return subtractfv(sv, multiplyfv(mv1, mv2)); }
+	static inline f32x4_t dividefv(const f32x4_t& v1, const f32x4_t& v2) noexcept { return f32x4_t(v1.x() / v2.x(), v1.y() / v2.y(), v1.z() / v2.z(), v1.w() / v2.w()); }
+	static inline f32x4_t dividefv(const f32x4_t& v, float s) noexcept { return f32x4_t(v.x() / s, v.y() / s, v.z() / s, v.w() / s); }
 
 	static inline i32x4_t add32(const i32x4_t& v1, const i32x4_t& v2) noexcept { return i32x4_t(v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z(), v1.w() + v2.w()); }
 	static inline i32x4_t subtract32(const i32x4_t& v1, const i32x4_t& v2) noexcept { return i32x4_t(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z(), v1.w() - v2.w()); }
@@ -327,79 +327,79 @@ namespace dseed
 ///////////////////////////////////////////////////////////////////////////////////////////
 namespace dseed
 {
-	static inline f32x4x4_t add(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
+	static inline f32x4x4_t addfv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
 	{
 		return f32x4x4_t(
-			add(m1.column1(), m2.column1()),
-			add(m1.column2(), m2.column2()),
-			add(m1.column3(), m2.column3()),
-			add(m1.column4(), m2.column4())
+			addfv(m1.column1(), m2.column1()),
+			addfv(m1.column2(), m2.column2()),
+			addfv(m1.column3(), m2.column3()),
+			addfv(m1.column4(), m2.column4())
 		);
 	}
-	static inline f32x4x4_t subtract(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
+	static inline f32x4x4_t subtractfv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
 	{
 		return f32x4x4_t(
-			subtract(m1.column1(), m2.column1()),
-			subtract(m1.column2(), m2.column2()),
-			subtract(m1.column3(), m2.column3()),
-			subtract(m1.column4(), m2.column4())
+			subtractfv(m1.column1(), m2.column1()),
+			subtractfv(m1.column2(), m2.column2()),
+			subtractfv(m1.column3(), m2.column3()),
+			subtractfv(m1.column4(), m2.column4())
 		);
 	}
-	static inline f32x4x4_t negate(const f32x4x4_t& m) noexcept
+	static inline f32x4x4_t negatefv(const f32x4x4_t& m) noexcept
 	{
 		return f32x4x4_t(
-			negate(m.column1()),
-			negate(m.column2()),
-			negate(m.column3()),
-			negate(m.column4())
+			negatefv(m.column1()),
+			negatefv(m.column2()),
+			negatefv(m.column3()),
+			negatefv(m.column4())
 		);
 	}
-	static inline f32x4x4_t multiply(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
+	static inline f32x4x4_t multiplyfv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
 	{
 		return f32x4x4_t(
-			fma(m1.column1().vx(), m2.column1(),
-				fma(m1.column1().vy(), m2.column2(),
-					fma(m1.column1().vz(), m2.column3(),
-						multiply(m1.column1().vw(), m2.column4())))),
-			fma(m1.column2().vx(), m2.column1(),
-				fma(m1.column2().vy(), m2.column2(),
-					fma(m1.column2().vz(), m2.column3(),
-						multiply(m1.column2().vw(), m2.column4())))),
-			fma(m1.column3().vx(), m2.column1(),
-				fma(m1.column3().vy(), m2.column2(),
-					fma(m1.column3().vz(), m2.column3(),
-						multiply(m1.column3().vw(), m2.column4())))),
-			fma(m1.column4().vx(), m2.column1(),
-				fma(m1.column4().vy(), m2.column2(),
-					fma(m1.column4().vz(), m2.column3(),
-						multiply(m1.column4().vw(), m2.column4()))))
+			fmaf(m1.column1().vx(), m2.column1(),
+				fmaf(m1.column1().vy(), m2.column2(),
+					fmaf(m1.column1().vz(), m2.column3(),
+						multiplyfv(m1.column1().vw(), m2.column4())))),
+			fmaf(m1.column2().vx(), m2.column1(),
+				fmaf(m1.column2().vy(), m2.column2(),
+					fmaf(m1.column2().vz(), m2.column3(),
+						multiplyfv(m1.column2().vw(), m2.column4())))),
+			fmaf(m1.column3().vx(), m2.column1(),
+				fmaf(m1.column3().vy(), m2.column2(),
+					fmaf(m1.column3().vz(), m2.column3(),
+						multiplyfv(m1.column3().vw(), m2.column4())))),
+			fmaf(m1.column4().vx(), m2.column1(),
+				fmaf(m1.column4().vy(), m2.column2(),
+					fmaf(m1.column4().vz(), m2.column3(),
+						multiplyfv(m1.column4().vw(), m2.column4()))))
 		);
 	}
-	static inline f32x4x4_t multiply(const f32x4x4_t& m, float s) noexcept
+	static inline f32x4x4_t multiplyfv(const f32x4x4_t& m, float s) noexcept
 	{
 		return f32x4x4_t(
-			multiply(m.column1(), s),
-			multiply(m.column2(), s),
-			multiply(m.column3(), s),
-			multiply(m.column4(), s)
+			multiplyfv(m.column1(), s),
+			multiplyfv(m.column2(), s),
+			multiplyfv(m.column3(), s),
+			multiplyfv(m.column4(), s)
 		);
 	}
-	static inline f32x4x4_t divide(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
+	static inline f32x4x4_t dividefv(const f32x4x4_t& m1, const f32x4x4_t& m2) noexcept
 	{
 		return f32x4x4_t(
-			divide(m1.column1(), m2.column1()),
-			divide(m1.column2(), m2.column2()),
-			divide(m1.column3(), m2.column3()),
-			divide(m1.column4(), m2.column4())
+			dividefv(m1.column1(), m2.column1()),
+			dividefv(m1.column2(), m2.column2()),
+			dividefv(m1.column3(), m2.column3()),
+			dividefv(m1.column4(), m2.column4())
 		);
 	}
-	static inline f32x4x4_t divide(const f32x4x4_t& m, float s) noexcept
+	static inline f32x4x4_t dividefv(const f32x4x4_t& m, float s) noexcept
 	{
 		return f32x4x4_t(
-			divide(m.column1(), s),
-			divide(m.column2(), s),
-			divide(m.column3(), s),
-			divide(m.column4(), s)
+			dividefv(m.column1(), s),
+			dividefv(m.column2(), s),
+			dividefv(m.column3(), s),
+			dividefv(m.column4(), s)
 		);
 	}
 }

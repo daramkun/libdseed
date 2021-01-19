@@ -37,7 +37,11 @@ inline uint32_t hwrand32_x86() noexcept
 }
 inline uint64_t hwrand64_x86() noexcept
 {
+#if COMPILER_GCC || COMPILER_CLANG
+	unsigned long long ret;
+#else
 	uint64_t ret;
+#endif
 	_rdrand64_step(&ret);
 	return ret;
 }

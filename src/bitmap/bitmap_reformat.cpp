@@ -190,7 +190,7 @@ inline int pixelconv_to_chromasubsample_yuv422(PIXELCONV_ARGS) noexcept
 				yuv8 srcColor1 = *srcPtrX;
 				r8 srcColor2 = { 0 };
 				if (x + 1 < size.width)
-					srcColor2 = *(srcPtrX + 1);
+					srcColor2 = (dseed::color::r8)*(srcPtrX + 1);
 				*destPtrX = yuyv(srcColor1.y, srcColor2.color, srcColor1.u, srcColor1.v);
 			}
 		}
@@ -258,7 +258,7 @@ inline int pixelconv_to_chromasubsample_nv12(PIXELCONV_ARGS) noexcept
 			{
 				r8* destYPtrX = destYPtr + x;
 				const TSrc* srcPtrX = srcPtr + x;
-				*destYPtrX = *srcPtrX;
+				*destYPtrX = (dseed::color::r8)*srcPtrX;
 
 				if ((x + 1) % 2 == 1 && (y + 1) % 2 == 1)
 				{
@@ -355,7 +355,7 @@ inline int pixelconv_from_dxt (PIXELCONV_ARGS) noexcept
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-template<> inline int pixelconv<pixelformat::rgb8, pixelformat::etc1>(PIXELCONV_ARGS)
+template<> inline int pixelconv<pixelformat::rgb8, pixelformat::etc1>(PIXELCONV_ARGS) noexcept
 {
 	size_t destArr = calc_bitmap_plane_size(pixelformat::rgb8, size2i(size.width, size.height)),
 		srcArr = calc_bitmap_plane_size(pixelformat::etc1, size2i(size.width, size.height));
@@ -364,7 +364,7 @@ template<> inline int pixelconv<pixelformat::rgb8, pixelformat::etc1>(PIXELCONV_
 		etc1_decode_image(src + (srcArr * z), dest + (destArr * z), size.width, size.height, 3, (uint32_t)destStride);
 	return 0;
 }
-template<> inline int pixelconv<pixelformat::rgba8, pixelformat::etc1>(PIXELCONV_ARGS)
+template<> inline int pixelconv<pixelformat::rgba8, pixelformat::etc1>(PIXELCONV_ARGS) noexcept
 {
 	size_t destArr = calc_bitmap_plane_size(pixelformat::rgba8, size2i(size.width, size.height)),
 		tempArr = calc_bitmap_plane_size(pixelformat::rgb8, size2i(size.width, size.height));
@@ -390,7 +390,7 @@ template<> inline int pixelconv<pixelformat::rgba8, pixelformat::etc1>(PIXELCONV
 	}
 	return 0;
 }
-template<> inline int pixelconv<pixelformat::etc1, pixelformat::rgb8>(PIXELCONV_ARGS)
+template<> inline int pixelconv<pixelformat::etc1, pixelformat::rgb8>(PIXELCONV_ARGS) noexcept
 {
 	size_t destArr = calc_bitmap_plane_size(pixelformat::etc1, size2i(size.width, size.height)),
 		srcArr = calc_bitmap_plane_size(pixelformat::rgb8, size2i(size.width, size.height));
@@ -399,7 +399,7 @@ template<> inline int pixelconv<pixelformat::etc1, pixelformat::rgb8>(PIXELCONV_
 		etc1_encode_image(src + (z * srcArr), size.width, size.height, 3, (etc1_uint32)srcStride, dest + (z * destArr));
 	return 0;
 }
-template<> inline int pixelconv<pixelformat::etc1, pixelformat::rgba8>(PIXELCONV_ARGS)
+template<> inline int pixelconv<pixelformat::etc1, pixelformat::rgba8>(PIXELCONV_ARGS) noexcept
 {
 	size_t destArr = calc_bitmap_plane_size(pixelformat::etc1, size2i(size.width, size.height)),
 		tempArr = calc_bitmap_plane_size(pixelformat::rgb8, size2i(size.width, size.height));

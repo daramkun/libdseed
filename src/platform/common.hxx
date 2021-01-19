@@ -1,6 +1,8 @@
 #ifndef __DSEED_PLATFORM_COMMON_HXX__
 #define __DSEED_PLATFORM_COMMON_HXX__
 
+#include <cstring>
+
 extern dseed::platform::application* g_sharedApp;
 
 class dummy_handler : public dseed::platform::event_handler

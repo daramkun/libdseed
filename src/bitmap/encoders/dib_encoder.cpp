@@ -1,6 +1,17 @@
 #include <dseed.h>
 
+#include <cstring>
+
 #include "../../libs/DIBHelper.hxx"
+
+#ifndef _WINGDI_
+#	define BI_RGB        0L
+#	define BI_RLE8       1L
+#	define BI_RLE4       2L
+#	define BI_BITFIELDS  3L
+#	define BI_JPEG       4L
+#	define BI_PNG        5L
+#endif
 
 class __dib_encoder : public dseed::bitmaps::bitmap_encoder
 {
@@ -56,6 +67,8 @@ public:
 			case dseed::color::pixelformat::bgra8_indexed8:
 				infoHeader.biBitCount = 8;
 				break;
+			default:
+				return dseed::error_not_support;
 		}
 		infoHeader.biCompression = BI_RGB;
 		infoHeader.biClrImportant = 0;

@@ -72,74 +72,92 @@ namespace dseed
 	}
 #endif
 
-	template<permute x, permute y, permute z, permute w>
+	template<permute x1, permute y1, permute z1, permute w1>
 	inline f32x4_t f32x4_t::shuffle(const f32x4_t& v) noexcept
 	{
 #if !DONT_USE_SSE
-		return _mm_permute_ps(v._intrinsic, static_cast<uint8_t>(_MM_SHUFFLE(static_cast<int>(w), static_cast<int>(z), static_cast<int>(y),
-			static_cast<int>(x))));
+		return _mm_permute_ps(v._intrinsic, static_cast<uint8_t>(_MM_SHUFFLE(
+			dseed::to_underlying_type(w1),
+			dseed::to_underlying_type(z1),
+			dseed::to_underlying_type(y1),
+			dseed::to_underlying_type(x1)
+		)));
 #elif !DONT_USE_NEON
-		return shuffle<x, y, z, w>(this, this);
+		return shuffle<x1, y1, z1, w1>(this, this);
 #elif DONT_USE_SIMD
 		return f32x4_t(
-			v._arr((int)x),
-			v._arr((int)y),
-			v._arr((int)z),
-			v._arr((int)w)
+			v._arr((int)x1),
+			v._arr((int)y1),
+			v._arr((int)z1),
+			v._arr((int)w1)
 		);
 #endif
 	}
-	template<shuffle1 x, shuffle1 y, shuffle2 z, shuffle2 w>
+	template<shuffle1 x1, shuffle1 y1, shuffle2 z1, shuffle2 w1>
 	inline f32x4_t f32x4_t::shuffle(const f32x4_t& v1, const f32x4_t& v2) noexcept
 	{
 #if !DONT_USE_SSE
-		return _mm_shuffle_ps(v1._intrinsic, v2._intrinsic, static_cast<uint8_t>(_MM_SHUFFLE(static_cast<int>(w), static_cast<int>(z), static_cast<int>(y),
-			static_cast<int>(x))));
+		return _mm_shuffle_ps(v1._intrinsic, v2._intrinsic, static_cast<uint8_t>(_MM_SHUFFLE(
+			dseed::to_underlying_type(w1),
+			dseed::to_underlying_type(z1),
+			dseed::to_underlying_type(y1),
+			dseed::to_underlying_type(x1)
+		)));
 #elif !DONT_USE_NEON
-		float32x2_t a = __getpart<x, y>(v1._intrinsic, v2._intrinsic);
-		float32x2_t b = __getpart<z, w>(v2._intrinsic, v1._intrinsic);
+		float32x2_t a = __getpart<x1, y1>(v1._intrinsic, v2._intrinsic);
+		float32x2_t b = __getpart<z1, w1>(v2._intrinsic, v1._intrinsic);
 		return vcombine_f32(a, b);
 #elif DONT_USE_SIMD
 		return f32x4_t(
-			(x >= 0 && x <= 3) ? v1._arr[(int)x] : v2._arr[4 - (int)x],
-			(y >= 0 && y <= 3) ? v1._arr[(int)y] : v2._arr[4 - (int)y],
-			(z >= 0 && z <= 3) ? v2._arr[(int)z] : v1._arr[4 - (int)z],
-			(w >= 0 && w <= 3) ? v2._arr[(int)w] : v1._arr[4 - (int)w]
+			(x1 >= 0 && x1 <= 3) ? v1._arr[(int)x1] : v2._arr[4 - (int)x1],
+			(y1 >= 0 && y1 <= 3) ? v1._arr[(int)y1] : v2._arr[4 - (int)y1],
+			(z1 >= 0 && z1 <= 3) ? v2._arr[(int)z1] : v1._arr[4 - (int)z1],
+			(w1 >= 0 && w1 <= 3) ? v2._arr[(int)w1] : v1._arr[4 - (int)w1]
 		);
 #endif
 	}
 
-	template<permute x, permute y, permute z, permute w>
+	template<permute x1, permute y1, permute z1, permute w1>
 	inline i32x4_t i32x4_t::shuffle(const i32x4_t& v) noexcept
 	{
 #if !DONT_USE_SSE
-		return _mm_shuffle_epi32(v._intrinsic, _MM_SHUFFLE(static_cast<int>(w), static_cast<int>(z), static_cast<int>(y), static_cast<int>(x)));
+		return _mm_shuffle_epi32(v._intrinsic, _MM_SHUFFLE(
+			dseed::to_underlying_type(w1),
+			dseed::to_underlying_type(z1),
+			dseed::to_underlying_type(y1),
+			dseed::to_underlying_type(x1)
+		));
 #elif !DONT_USE_NEON
-		return shuffle<x, y, z, w>(this, this);
+		return shuffle<x1, y1, z1, w1>(this, this);
 #elif DONT_USE_SIMD
 		return i32x4_t(
-			v._arr[(int)x],
-			v._arr[(int)y],
-			v._arr[(int)z],
-			v._arr[(int)w]
+			v._arr[(int)x1],
+			v._arr[(int)y1],
+			v._arr[(int)z1],
+			v._arr[(int)w1]
 		);
 #endif
 	}
-	template<shuffle1 x, shuffle1 y, shuffle2 z, shuffle2 w>
+	template<shuffle1 x1, shuffle1 y1, shuffle2 z1, shuffle2 w1>
 	inline i32x4_t i32x4_t::shuffle(const i32x4_t& v1, const i32x4_t& v2) noexcept
 	{
 #if !DONT_USE_SSE
-		return _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(v1._intrinsic), _mm_castsi128_ps(v2._intrinsic), _MM_SHUFFLE(static_cast<int>(w), static_cast<int>(z), static_cast<int>(y), static_cast<int>(x))));
+		return _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(v1._intrinsic), _mm_castsi128_ps(v2._intrinsic), _MM_SHUFFLE(
+			dseed::to_underlying_type(w1),
+			dseed::to_underlying_type(z1),
+			dseed::to_underlying_type(y1),
+			dseed::to_underlying_type(x1)
+		)));
 #elif !DONT_USE_NEON
-		int32x2_t a = __getpart<x, y>(v1._intrinsic, v2._intrinsic);
-		int32x2_t b = __getpart<z, w>(v2._intrinsic, v1._intrinsic);
+		int32x2_t a = __getpart<x1, y1>(v1._intrinsic, v2._intrinsic);
+		int32x2_t b = __getpart<z1, w1>(v2._intrinsic, v1._intrinsic);
 		return vcombine_i32(a, b);
 #elif DONT_USE_SIMD
 		return i32x4_t(
-			(x >= 0 && x <= 3) ? v1._arr[(int)x] : v2._arr[4 - (int)x],
-			(y >= 0 && y <= 3) ? v1._arr[(int)y] : v2._arr[4 - (int)y],
-			(z >= 0 && z <= 3) ? v2._arr[(int)z] : v1._arr[4 - (int)z],
-			(w >= 0 && w <= 3) ? v2._arr[(int)w] : v1._arr[4 - (int)w]
+			(x1 >= 0 && x1 <= 3) ? v1._arr[(int)x1] : v2._arr[4 - (int)x1],
+			(y1 >= 0 && y1 <= 3) ? v1._arr[(int)y1] : v2._arr[4 - (int)y1],
+			(z1 >= 0 && z1 <= 3) ? v2._arr[(int)z1] : v1._arr[4 - (int)z1],
+			(w1 >= 0 && w1 <= 3) ? v2._arr[(int)w1] : v1._arr[4 - (int)w1]
 		);
 #endif
 	}

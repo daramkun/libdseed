@@ -1,6 +1,8 @@
 #ifndef __DSEED_BITMAP_DECODERS_COMMON_HXX__
 #define __DSEED_BITMAP_DECODERS_COMMON_HXX__
 
+#include <cstring>
+
 namespace dseed
 {
 	class __common_bitmap_array : public dseed::bitmaps::bitmap_array

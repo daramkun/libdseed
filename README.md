@@ -1,6 +1,8 @@
 # libdseed
 This is base library for personal project.
 
+![libdseed logo](./docs/logo.svg)
+
 ## Features
 * SIMD Vector/Matrix Math Interface
 * Reference Counting Object
@@ -13,6 +15,7 @@ This is base library for personal project.
 * Audio PCM Data-type Conversion
 
 ## Goals
-* Lightweight Game Engine Framework
+* Light-weight Cross-platform Game Engine Framework
 * SIMD Bitmap/Audio Processing
 * AVX2 Math Interface
+* Implement Content Pipeline

@@ -313,7 +313,7 @@ namespace dseed
 	{
 		f32x4_t sin, cos;
 		sincos(v, &sin, &cos);
-		return divide(sin, cos);
+		return dividefv(sin, cos);
 	}
 #elif !DONT_USE_NEON
 	static inline f32x4_t sin(const f32x4_t& v) noexcept
@@ -400,7 +400,7 @@ namespace dseed
 	{
 		f32x4_t sin, cos;
 		sincos(v, &sin, &cos);
-		return divide(sin, cos);
+		return dividefv(sin, cos);
 	}
 #elif DONT_USE_SIMD
 	static inline f32x4_t sin(const f32x4_t& v) noexcept { return f32x4_t(sinf(v.x()), sinf(v.y()), sinf(v.z()), sinf(v.w())); }

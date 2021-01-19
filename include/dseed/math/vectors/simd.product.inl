@@ -146,7 +146,7 @@ namespace dseed
 	{
 #if !DONT_USE_SIMD
 		const auto v2_ = f32x4_t::shuffle<permute::y, permute::x, permute::w, permute::w>(v2);
-		return multiply(v1, v2_);
+		return multiplyfv(v1, v2_);
 #elif DONT_USE_SIMD
 		return f32x4_t(v1.x() * v2.y(), v1.y() * v2.x(), 0, 0);
 #endif
@@ -158,7 +158,7 @@ namespace dseed
 		const auto v2_1 = f32x4_t::shuffle<permute::z, permute::x, permute::y, permute::w>(v2);
 		const auto v1_2 = f32x4_t::shuffle<permute::z, permute::x, permute::y, permute::w>(v1);
 		const auto v2_2 = f32x4_t::shuffle<permute::y, permute::z, permute::x, permute::w>(v2);
-		return subtract(multiply(v1_1, v2_1), multiply(v1_2, v2_2));
+		return subtractfv(multiplyfv(v1_1, v2_1), multiplyfv(v1_2, v2_2));
 #elif DONT_USE_SIMD
 		return f32x4_t(
 			(v1.y() * v2.z()) - (v1.z() * v2.y()),

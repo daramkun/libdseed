@@ -47,7 +47,11 @@ namespace dseed
 	constexpr double double_positive_infinity = HUGE_VAL;
 	constexpr double double_negative_infinity = -HUGE_VAL;
 	constexpr double double_epsilon = DBL_EPSILON;
+#if COMPILER_MSVC
 	constexpr double double_nan = HUGE_VAL * 0.0;
+#else
+	constexpr double double_nam = NAN;
+#endif
 }
 
 namespace dseed
@@ -101,15 +105,15 @@ namespace dseed
 		subtract,
 		multiply,
 		divide,
-		and,
-		or ,
-		xor,
+		andop,
+		orop,
+		xorop,
 	};
 
 	enum class unary_operator
 	{
 		negate,
-		not,
+		notop,
 		invert,
 	};
 

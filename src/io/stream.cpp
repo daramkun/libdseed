@@ -1,6 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <dseed.h>
 
+#include <cstring>
+
 class __memorystream : public dseed::io::stream
 {
 public:
@@ -395,7 +397,7 @@ public:
 	}
 	virtual bool seek(dseed::io::seekorigin origin, size_t offset) noexcept override
 	{
-		return !lseek(_fd, offset, origin);
+		return !lseek(_fd, offset, (int)origin);
 	}
 	virtual void flush() noexcept override
 	{
