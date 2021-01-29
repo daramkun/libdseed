@@ -43,6 +43,12 @@ public:
 		dseed::autoref<dseed::platform::application> app;
 		dseed::platform::application::shared_app(&app);
 		app->set_client_size(dseed::size2i(1280, 720));
+
+		if (dseed::failed(dseed::graphics::create_d3d11_vgadevice(app, nullptr, &vgaDevice)))
+		{
+			app->exit();
+			return;
+		}
 	}
 
 	virtual void closing(bool& cancel) override
@@ -57,11 +63,15 @@ public:
 	virtual void next_frame(dseed::timespan delta) override
 	{
 
+
+		vgaDevice->present();
 	}
 
 private:
 	std::atomic<int32_t> _refCount;
 	dseed::framemeasurer _frameMeasurer;
+
+	dseed::autoref<dseed::graphics::vgadevice> vgaDevice;
 };
 
 ENTRYPOINT_ATTRIBUTE

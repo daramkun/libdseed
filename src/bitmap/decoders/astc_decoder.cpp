@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 #if COMPILER_MSVC
 #	pragma pack (push, 1)
 #else
@@ -75,10 +73,6 @@ dseed::error_t dseed::bitmaps::create_astc_bitmap_decoder (dseed::io::stream* st
 		return dseed::error_io;
 
 	bitmap->unlock ();
-
-	*decoder = new dseed::__common_bitmap_array (bitmap, dseed::bitmaps::arraytype::mipmap);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	
+	return create_bitmap_array(arraytype::mipmap, bitmap, decoder);
 }

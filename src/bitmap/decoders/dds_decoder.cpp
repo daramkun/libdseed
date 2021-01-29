@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 #include "../../libs/DDSHelper.hxx"
 
 dseed::error_t dseed::bitmaps::create_dds_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
@@ -225,9 +223,5 @@ dseed::error_t dseed::bitmaps::create_dds_bitmap_decoder (dseed::io::stream* str
 		bitmaps[mip]->unlock ();
 	}
 
-	*decoder = new dseed::__common_bitmap_array (bitmaps, dseed::bitmaps::arraytype::mipmap);
-	if (decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(arraytype::plain, bitmaps, decoder);
 }

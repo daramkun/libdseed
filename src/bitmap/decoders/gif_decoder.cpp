@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 #if defined(USE_GIF)
 #	include <gif_lib.h>
 #endif
@@ -53,7 +51,6 @@ dseed::error_t dseed::bitmaps::create_gif_bitmap_decoder (dseed::io::stream* str
 		return dseed::error_fail;
 
 	std::vector<dseed::bitmaps::bitmap*> _bitmaps (imageCount);
-	std::vector<dseed::timespan> _timespans (imageCount);
 	std::vector<uint8_t> raster (size.width * size.height);
 	for (int z = 0; z < imageCount; ++z)
 	{
@@ -87,7 +84,9 @@ dseed::error_t dseed::bitmaps::create_gif_bitmap_decoder (dseed::io::stream* str
 			if (savedImage.ExtensionBlocks[i].Function == GRAPHICS_EXT_FUNC_CODE)
 			{
 				int delayTime = (savedImage.ExtensionBlocks[i].Bytes[1] | (savedImage.ExtensionBlocks[i].Bytes[2] << 8)) * 10;
-				_timespans[z] = dseed::timespan::from_milliseconds (delayTime);
+				dseed::autoref<dseed::attributes> attr;
+				_bitmaps[z]->extra_info(&attr);
+				attr->set_int64(dseed::attrkey_duration, dseed::timespan::from_milliseconds(delayTime).ticks());
 				if (savedImage.ExtensionBlocks[i].Bytes[3] != NO_TRANSPARENT_COLOR)
 				{
 					usingPalette[transparent = savedImage.ExtensionBlocks[i].Bytes[3]].a = 0;
@@ -140,9 +139,7 @@ dseed::error_t dseed::bitmaps::create_gif_bitmap_decoder (dseed::io::stream* str
 
 	DGifCloseFile (pgif, &err);
 
-	*decoder = new dseed::__common_bitmap_array (_bitmaps, _timespans);
-
-	return dseed::error_good;
+	return create_bitmap_array(arraytype::plain, _bitmaps, decoder);
 #else
 	return dseed::error_not_support;
 #endif

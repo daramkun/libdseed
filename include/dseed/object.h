@@ -42,6 +42,7 @@ namespace dseed
 				_ptr->retain();
 		}
 		inline autoref(const autoref<T>& obj)
+			: _ptr(nullptr)
 		{
 			store(obj.get());
 		}
@@ -61,7 +62,7 @@ namespace dseed
 #	if ARCH_IA32 || ARCH_ARM
 				&& (_ptr != (void*)0xcccccccc && _ptr != (void*)0xcdcdcdcd)
 #	else
-				&& (_ptr != (void*)0xcccccccccccccccc && _ptr != (void*)0xcdcdcdcdcdcdcdcd)
+				&& (_ptr != reinterpret_cast<void*>(0xcccccccccccccccc) && _ptr != reinterpret_cast<void*>(0xcdcdcdcdcdcdcdcd))
 #	endif
 #endif
 				)

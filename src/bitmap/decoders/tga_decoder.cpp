@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 #if COMPILER_MSVC
 #	pragma pack (push, 1)
 #else
@@ -182,9 +180,5 @@ dseed::error_t dseed::bitmaps::create_tga_bitmap_decoder (dseed::io::stream* str
 
 	bitmap->unlock ();
 
-	*decoder = new dseed::__common_bitmap_array (bitmap);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(arraytype::plain, bitmap, decoder);
 }

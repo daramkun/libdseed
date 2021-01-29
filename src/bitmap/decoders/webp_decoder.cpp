@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 #if defined(USE_WEBP)
 #	include <webp/decode.h>
 #	include <webp/demux.h>
@@ -57,7 +55,7 @@ dseed::error_t dseed::bitmaps::create_webp_bitmap_decoder (dseed::io::stream* st
 	size_t stride = dseed::color::calc_bitmap_stride (format, width);
 
 	int index = 0;
-	std::vector<std::tuple<dseed::bitmaps::bitmap*, dseed::timespan>> bitmaps;
+	std::vector<dseed::bitmaps::bitmap*> bitmaps;
 	bitmaps.resize (frameCount);
 
 	do
@@ -89,7 +87,11 @@ dseed::error_t dseed::bitmaps::create_webp_bitmap_decoder (dseed::io::stream* st
 
 			bitmap->unlock ();
 
-			bitmaps[index] = std::tuple<dseed::bitmaps::bitmap*, dseed::timespan> (bitmap.detach (), duration);
+			dseed::autoref<dseed::attributes> attr;
+			bitmap->extra_info(&attr);
+			attr->set_int64(dseed::attrkey_duration, duration.ticks());
+
+			bitmaps[index] = bitmap.detach();
 		}
 		++index;
 	} while (WebPDemuxNextFrame (&iter));
@@ -97,11 +99,7 @@ dseed::error_t dseed::bitmaps::create_webp_bitmap_decoder (dseed::io::stream* st
 	WebPDemuxReleaseIterator (&iter);
 	WebPDemuxDelete (demuxer);
 
-	*decoder = new dseed::__common_bitmap_array (bitmaps);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(arraytype::plain, bitmaps, decoder);
 #else
 	return dseed::error_not_support;
 #endif

@@ -27,7 +27,7 @@ inline bool gen_histogram(dseed::bitmaps::histogram* histogram, const uint8_t* s
 		for (size_t x = 0; x < size.width; ++x)
 		{
 			const TPixel& pixel = *(srcPtr + x);
-			++histogram->histogram[pixel[(int)c]];
+			++histogram->histogram_data[pixel[(int)c]];
 		}
 	}
 
@@ -83,7 +83,7 @@ dseed::error_t dseed::bitmaps::histogram_equalization(histogram* histogram)
 	int total = 0;
 	for (int i = 0; i < 256; ++i)
 	{
-		int current = histogram->histogram[i];
+		int current = histogram->histogram_data[i];
 		total += current;
 		histogram->histogram_table[i] = (int)roundf(total / (double)histogram->total_pixels * 255);
 	}
@@ -98,13 +98,13 @@ using ahtp = pixelformat;
 template<class TPixel>
 inline bool apply_histogram(const dseed::bitmaps::histogram* histogram, uint8_t* dest, const uint8_t* src, const dseed::size3i& size, uint32_t targetDepth, dseed::bitmaps::histogram_color c) noexcept
 {
-	size_t stride = calc_bitmap_stride(type2format<TPixel>(), size.width);
-	size_t depth = calc_bitmap_plane_size(type2format<TPixel>(), size2i(size.width, size.height));
+	const size_t stride = calc_bitmap_stride(type2format<TPixel>(), size.width);
+	const size_t depth = calc_bitmap_plane_size(type2format<TPixel>(), size2i(size.width, size.height));
 
-	size_t depthZ = targetDepth * depth;
+	const size_t depthZ = targetDepth * depth;
 	for (size_t y = 0; y < size.height; ++y)
 	{
-		size_t strideY = y * stride;
+		const size_t strideY = y * stride;
 
 		TPixel* destPtr = (TPixel*)(dest + depthZ + strideY);
 		const TPixel* srcPtr = (const TPixel*)(src + depthZ + strideY);

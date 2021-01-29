@@ -125,6 +125,7 @@ SET(DSEED_LIB_SOURCES
 	src/bitmap/bitmap_filter.cpp
 	src/bitmap/bitmap_histogram.cpp
 	src/bitmap/bitmap_flip.cpp
+	src/bitmap/bitmap_element.cpp
 	
 	# Bitmap Decoders
 	src/bitmap/decoders/wic_decoder.cpp
@@ -150,6 +151,7 @@ SET(DSEED_LIB_SOURCES
 	src/bitmap/encoders/dds_encoder.cpp
 	src/bitmap/encoders/ico_encoder.cpp
 	src/bitmap/encoders/jpeg_encoder.cpp
+	src/bitmap/encoders/tiff_encoder.cpp
 	src/bitmap/encoders/wic_encoder.cpp
 
 	# Media (Audio)
@@ -301,6 +303,12 @@ IF(NOT ${DSEED_SKIP_BUILD_APPS})
 	TARGET_INCLUDE_DIRECTORIES(${TEST_BASIC_WINDOW_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 	TARGET_LINK_LIBRARIES(${TEST_BASIC_WINDOW_NAME} dseed)
 	SET_TARGET_PROPERTIES(${TEST_BASIC_WINDOW_NAME} PROPERTIES CXX_STANDARD 17)
+	
+	SET(TEST_BITMAP_NAME dseed_bitmap)
+	ADD_EXECUTABLE(${TEST_BITMAP_NAME} app/test_bitmap/test.cpp)
+	TARGET_INCLUDE_DIRECTORIES(${TEST_BITMAP_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+	TARGET_LINK_LIBRARIES(${TEST_BITMAP_NAME} dseed)
+	SET_TARGET_PROPERTIES(${TEST_BITMAP_NAME} PROPERTIES CXX_STANDARD 17)
 ENDIF()
 
 ############################################################################################
@@ -322,7 +330,7 @@ IF(NOT ${DSEED_SKIP_INSTALL})
 			FRAMEWORK TRUE
 			FRAMEWORK_VERSION A
 			MACOSX_FRAMEWORK_IDENTIFIER in.daram.dseed
-			MACOSX_FRAMEWORK_INFO_PLIST Info.plist
+			MACOSX_FRAMEWORK_INFO_PLIST ${CMAKE_SOURCE_DIR}/Info.plist
 			VERSION ${DSEED_VERSION_CMAKE}
 			SOVERSION 1.0.0
 		)

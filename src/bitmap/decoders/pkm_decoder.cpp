@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 #define PKM_HEADER_SIZE 16
 
 #if COMPILER_MSVC
@@ -54,9 +52,5 @@ dseed::error_t dseed::bitmaps::create_pkm_bitmap_decoder (dseed::io::stream* str
 	memcpy (ptr, pixels.data (), pixels.size ());
 	bitmap->unlock ();
 
-	*decoder = new dseed::__common_bitmap_array (bitmap, dseed::bitmaps::arraytype::mipmap);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(arraytype::mipmap, bitmap, decoder);
 }

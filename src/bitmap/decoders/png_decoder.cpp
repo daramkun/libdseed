@@ -4,8 +4,6 @@
 #	include <png.h>
 #endif
 
-#include "common.hxx"
-
 constexpr int PNG_BYTES_TO_CHECK = 8;
 
 dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept
@@ -188,11 +186,7 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 
 	bitmap->unlock ();
 
-	*decoder = new __common_bitmap_array (bitmap);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return error_good;
+	return create_bitmap_array(arraytype::plain, bitmap, decoder);
 #else
 	return dseed::error_not_support;
 #endif

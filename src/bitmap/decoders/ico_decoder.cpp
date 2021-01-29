@@ -1,6 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
 #include "../../libs/ICOHelper.hxx"
 
 dseed::error_t __create_ico_cur_bitmap_decoder (dseed::io::stream* stream, bool ico, dseed::bitmaps::bitmap_array** decoder) noexcept
@@ -60,11 +59,7 @@ dseed::error_t __create_ico_cur_bitmap_decoder (dseed::io::stream* stream, bool 
 		bitmaps.push_back (bitmap.detach ());
 	}
 
-	*decoder = new dseed::__common_bitmap_array (bitmaps);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(dseed::bitmaps::arraytype::plain, bitmaps, decoder);
 }
 
 dseed::error_t dseed::bitmaps::create_ico_bitmap_decoder (dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept

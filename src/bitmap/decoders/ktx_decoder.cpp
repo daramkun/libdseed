@@ -1,7 +1,5 @@
 #include <dseed.h>
 
-#include "common.hxx"
-
 struct KTXHeader
 {
 	uint8_t identifier[12];
@@ -202,9 +200,5 @@ dseed::error_t dseed::bitmaps::create_ktx_bitmap_decoder (dseed::io::stream* str
 		bitmaps[mipLevel]->unlock ();
 	}
 
-	*decoder = new dseed::__common_bitmap_array (bitmaps, dseed::bitmaps::arraytype::mipmap);
-	if (decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(arraytype::mipmap, bitmaps, decoder);
 }

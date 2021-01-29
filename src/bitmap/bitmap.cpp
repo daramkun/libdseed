@@ -271,14 +271,52 @@ dseed::error_t dseed::bitmaps::create_bitmap(bitmaptype type, const size3i& size
 	return create_bitmap(nullptr, type, size, format, palette, bitmap);
 }
 
-#include "decoders/common.hxx"
+class __common_bitmap_array : public dseed::bitmaps::bitmap_array
+{
+public:
+	__common_bitmap_array(const std::vector<dseed::bitmaps::bitmap*>& bitmaps, dseed::bitmaps::arraytype frametype)
+		: _refCount(1), _frametype(frametype)
+	{
+		for (auto i : bitmaps)
+			_bitmaps.emplace_back(dseed::autoref(i));
+	}
+
+public:
+	virtual int32_t retain() override { return ++_refCount; }
+	virtual int32_t release() override
+	{
+		const auto ret = --_refCount;
+		if (ret == 0)
+			delete this;
+		return ret;
+	}
+
+public:
+	virtual dseed::error_t at(size_t i, dseed::bitmaps::bitmap** bitmap) noexcept override
+	{
+		if (!(i >= 0 && i < _bitmaps.size())) return dseed::error_invalid_args;
+		if (bitmap == nullptr) return dseed::error_invalid_args;
+
+		*bitmap = _bitmaps[i];
+		(*bitmap)->retain();
+
+		return dseed::error_good;
+	}
+	virtual size_t size() noexcept override { return _bitmaps.size(); }
+	virtual dseed::bitmaps::arraytype type() noexcept override { return _frametype; }
+
+private:
+	std::atomic<int32_t> _refCount;
+	std::vector<dseed::autoref<dseed::bitmaps::bitmap>> _bitmaps;
+	dseed::bitmaps::arraytype _frametype;
+};
 
 dseed::error_t dseed::bitmaps::create_bitmap_array(arraytype type, size_t size, dseed::bitmaps::bitmap** bitmaps, dseed::bitmaps::bitmap_array** arr) noexcept
 {
 	if (size <= 0 || bitmaps == nullptr || arr == nullptr)
 		return dseed::error_invalid_args;
 
-	dseed::size3i bmpsize = bitmaps[0]->size();
+	const dseed::size3i bmpsize = bitmaps[0]->size();
 
 	std::vector<dseed::bitmaps::bitmap*> bmpvec;
 	for (int i = 0; i < size; ++i)
@@ -289,7 +327,7 @@ dseed::error_t dseed::bitmaps::create_bitmap_array(arraytype type, size_t size, 
 		bmpvec.push_back(bitmaps[i]);
 	}
 
-	*arr = new dseed::__common_bitmap_array(bmpvec, type);
+	*arr = new __common_bitmap_array(bmpvec, type);
 	if (*arr == nullptr)
 		return dseed::error_out_of_memory;
 

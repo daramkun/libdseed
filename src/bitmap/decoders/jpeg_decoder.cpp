@@ -66,8 +66,6 @@ void jpeg_stream_src (j_decompress_ptr cinfo, dseed::io::stream* stream)
 }
 #endif
 
-#include "common.hxx"
-
 dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::io::stream* stream, bool yuv, dseed::bitmaps::bitmap_array** decoder)
 {
 #if defined(USE_JPEG)
@@ -134,11 +132,7 @@ dseed::error_t __create_jpeg_bitmap_decoder_internal (dseed::io::stream* stream,
 	jpeg_finish_decompress (&cinfo);
 	jpeg_destroy_decompress (&cinfo);
 
-	*decoder = new dseed::__common_bitmap_array (bitmap);
-	if (*decoder == nullptr)
-		return dseed::error_out_of_memory;
-
-	return dseed::error_good;
+	return create_bitmap_array(dseed::bitmaps::arraytype::plain, bitmap, decoder);
 #else
 	return dseed::error_not_support_file_format;
 #endif

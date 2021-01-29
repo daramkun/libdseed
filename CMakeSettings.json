@@ -13,11 +13,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -34,11 +36,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -55,11 +59,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -76,11 +82,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -97,11 +105,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -118,11 +128,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -139,11 +151,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		},
@@ -160,11 +174,13 @@
 			"variables": [
 				{
 					"name": "CMAKE_TOOLCHAIN_FILE",
-					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake"
+					"value": "D:/Projects/vcpkg/scripts/buildsystems/vcpkg.cmake",
+					"type": "STRING"
 				},
 				{
 					"name": "VCPKG_TARGET_TRIPLET",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static",
+					"type": "STRING"
 				}
 			]
 		}
