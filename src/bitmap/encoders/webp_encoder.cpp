@@ -17,6 +17,7 @@ public:
 
 		_config.quality = (float)quality;
 		_config.lossless = lossless;
+		_config.method = 6;
 
 		_config.thread_level = 1;
 	}

@@ -790,11 +790,11 @@ dseed::error_t dseed::bitmaps::reformat_bitmap(dseed::bitmaps::bitmap* original,
 	if (dseed::succeeded(temp->palette(&destPalette)) && destPalette != nullptr)
 		destPalette->lock((void**)&destPalettePtr);
 
-	auto found = g_pixelconvs.find(pctp(reformat, originalFormat));
+	const auto found = g_pixelconvs.find(pctp(reformat, originalFormat));
 	if (found == g_pixelconvs.end())
 		return dseed::error_not_support;
 
-	int paletteCount = found->second(destPtr, srcPtr, size, destPalettePtr, srcPalettePtr);
+	const int paletteCount = found->second(destPtr, srcPtr, size, destPalettePtr, srcPalettePtr);
 	if (paletteCount == -1)
 		return dseed::error_not_support;
 

@@ -1,7 +1,6 @@
 #include <dseed.h>
 
 #include <map>
-#include <tuple>
 
 using namespace dseed::color;
 using size2i = dseed::size2i;
@@ -12,22 +11,22 @@ using ghtp = pixelformat;
 template<class TPixel>
 inline bool gen_histogram(dseed::bitmaps::histogram* histogram, const uint8_t* src, const dseed::size3i& size, uint32_t targetDepth, dseed::bitmaps::histogram_color c) noexcept
 {
-	size_t stride = calc_bitmap_stride(type2format<TPixel>(), size.width);
-	size_t depth = calc_bitmap_plane_size(type2format<TPixel>(), size2i(size.width, size.height));
+	const size_t stride = calc_bitmap_stride(type2format<TPixel>(), size.width);
+	const size_t depth = calc_bitmap_plane_size(type2format<TPixel>(), size2i(size.width, size.height));
 
 	histogram->total_pixels = size.width * size.height;
 
-	size_t depthZ = targetDepth * depth;
+	const size_t depthZ = targetDepth * depth;
 	for (size_t y = 0; y < size.height; ++y)
 	{
-		size_t strideY = y * stride;
+		const size_t strideY = y * stride;
 
-		const TPixel* srcPtr = (const TPixel*)(src + depthZ + strideY);
+		const auto* srcPtr = reinterpret_cast<const TPixel*>(src + depthZ + strideY);
 
 		for (size_t x = 0; x < size.width; ++x)
 		{
 			const TPixel& pixel = *(srcPtr + x);
-			++histogram->histogram_data[pixel[(int)c]];
+			++histogram->histogram_data[pixel[static_cast<int>(c)]];
 		}
 	}
 
@@ -51,7 +50,7 @@ dseed::error_t dseed::bitmaps::bitmap_generate_histogram(dseed::bitmaps::bitmap*
 	if (original == nullptr || histogram == nullptr)
 		return dseed::error_invalid_args;
 
-	auto format = original->format();
+	const auto format = original->format();
 	if (color > histogram_color::fourth || color < histogram_color::first)
 		return dseed::error_invalid_args;
 	if (color >= histogram_color::second && (format == pixelformat::r8))
@@ -61,12 +60,12 @@ dseed::error_t dseed::bitmaps::bitmap_generate_histogram(dseed::bitmaps::bitmap*
 		|| format == pixelformat::hsv8))
 		return dseed::error_invalid_args;
 
-	const uint8_t* srcPtr;
-	original->lock((void**)&srcPtr);
+	uint8_t* srcPtr;
+	original->lock(reinterpret_cast<void**>(&srcPtr));
 
-	auto size = original->size();
+	const auto size = original->size();
 
-	auto found = g_ghs.find(format);
+	const auto found = g_ghs.find(format);
 	if (found == g_ghs.end())
 		return dseed::error_not_support;
 
@@ -83,9 +82,9 @@ dseed::error_t dseed::bitmaps::histogram_equalization(histogram* histogram)
 	int total = 0;
 	for (int i = 0; i < 256; ++i)
 	{
-		int current = histogram->histogram_data[i];
+		const int current = histogram->histogram_data[i];
 		total += current;
-		histogram->histogram_table[i] = (int)roundf(total / (double)histogram->total_pixels * 255);
+		histogram->histogram_table[i] = static_cast<int>(roundf(total * (255 / static_cast<double>(histogram->total_pixels))));
 	}
 	histogram->calced_table = true;
 
@@ -106,15 +105,17 @@ inline bool apply_histogram(const dseed::bitmaps::histogram* histogram, uint8_t*
 	{
 		const size_t strideY = y * stride;
 
-		TPixel* destPtr = (TPixel*)(dest + depthZ + strideY);
-		const TPixel* srcPtr = (const TPixel*)(src + depthZ + strideY);
+		auto* destPtr = reinterpret_cast<TPixel*>(dest + depthZ + strideY);
+		const auto* srcPtr = reinterpret_cast<const TPixel*>(src + depthZ + strideY);
 
 		for (size_t x = 0; x < size.width; ++x)
 		{
-			const TPixel& pixel = *(srcPtr + x);
-			TPixel& dest = *(destPtr + x);
-			dest = pixel;
-			dest[(int)c] = histogram->histogram_table[pixel[(int)c]];
+			const TPixel& srcPixel = *(srcPtr + x);
+			TPixel& destPixel = *(destPtr + x);
+			destPixel = srcPixel;
+			auto element = srcPixel[static_cast<int>(c)];
+			auto equalized = static_cast<uint8_t>(histogram->histogram_table[element]);
+			destPixel[static_cast<int>(c)] = equalized;
 		}
 	}
 
@@ -140,7 +141,7 @@ dseed::error_t dseed::bitmaps::bitmap_apply_histogram(dseed::bitmaps::bitmap* or
 	if (!histogram->calced_table)
 		return dseed::error_invalid_args;
 
-	auto format = original->format();
+	const auto format = original->format();
 	if (color > histogram_color::fourth || color < histogram_color::first)
 		return dseed::error_invalid_args;
 	if (color >= histogram_color::second && (format == pixelformat::r8))
@@ -150,18 +151,18 @@ dseed::error_t dseed::bitmaps::bitmap_apply_histogram(dseed::bitmaps::bitmap* or
 		|| format == pixelformat::hsv8))
 		return dseed::error_invalid_args;
 
-	auto size = original->size();
+	const auto size = original->size();
 
 	dseed::autoref<dseed::bitmaps::bitmap> temp;
 	if (dseed::failed(dseed::bitmaps::create_bitmap(original->type(), size, format, nullptr, &temp)))
 		return dseed::error_fail;
 
 	uint8_t* destPtr;
-	const uint8_t* srcPtr;
-	original->lock((void**)&srcPtr);
-	temp->lock((void**)&destPtr);
+	uint8_t* srcPtr;
+	original->lock(reinterpret_cast<void**>(&srcPtr));
+	temp->lock(reinterpret_cast<void**>(&destPtr));
 
-	auto found = g_ahs.find(format);
+	const auto found = g_ahs.find(format);
 	if (found == g_ahs.end())
 		return dseed::error_not_support;
 
