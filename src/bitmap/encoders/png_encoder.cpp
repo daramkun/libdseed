@@ -205,7 +205,7 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_encoder(dseed::io::stream* stre
 	png_infop info = png_create_info_struct(png);
 	if (info == nullptr)
 	{
-		png_destroy_read_struct(&png, nullptr, nullptr);
+		png_destroy_write_struct(&png, nullptr);
 		return dseed::error_out_of_memory;
 	}
 
@@ -214,7 +214,12 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_encoder(dseed::io::stream* stre
 
 	*encoder = new __png_encoder(png, info, stream);
 	if (*encoder == nullptr)
+	{
+		png_destroy_write_struct(&png, &info);
 		return dseed::error_out_of_memory;
+	}
+
+	png_destroy_write_struct(&png, &info);
 
 	return dseed::error_good;
 #else
