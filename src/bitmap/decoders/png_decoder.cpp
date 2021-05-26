@@ -184,6 +184,8 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 	}
 	png_read_image (png, rows.data ());
 
+	png_destroy_read_struct(&png, &info, nullptr);
+
 	bitmap->unlock ();
 
 	return create_bitmap_array(arraytype::plain, bitmap, decoder);

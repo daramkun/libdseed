@@ -55,7 +55,7 @@ inline void determine_props(const uint8_t* src, const dseed::size3i& size, int t
 				if (prop->grayscale && (type2format<TPixel>() != pixelformat::r8 && type2format<TPixel>() != pixelformat::rf))
 				{
 					rgb8 rgb = (rgb8)pixel;
-					if (abs(rgb.r - rgb.g) > threshold || abs(rgb.r - rgb.b) > threshold)
+					if (abs(rgb.r - rgb.g) > threshold || abs(rgb.r - rgb.b) > threshold || abs(rgb.g - rgb.b) > threshold)
 						prop->grayscale = false;
 				}
 

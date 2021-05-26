@@ -26,6 +26,10 @@ public:
 			}
 			);
 	}
+	~__png_encoder()
+	{
+		png_destroy_write_struct(&_png, &_info);
+	}
 
 public:
 	virtual int32_t retain() override { return ++_refCount; }
@@ -57,7 +61,8 @@ public:
 
 		std::vector<uint8_t> pixels;
 		pixels.resize(stride * size.height);
-		bitmap->copy_pixels(pixels.data(), 0);
+		if (dseed::failed(bitmap->copy_pixels(pixels.data(), 0)))
+			return dseed::error_fail;
 
 		std::vector<png_bytep> pixelsRows;
 		pixelsRows.resize(size.height);
@@ -160,6 +165,9 @@ public:
 
 			png_set_IHDR(_png, _info, size.width, size.height, 8, colorType,
 				PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+			png_write_info(_png, _info);
+			png_set_swap(_png);
+			
 			png_set_rows(_png, _info, pixelsRows.data());
 
 			png_write_png(_png, _info, PNG_TRANSFORM_IDENTITY, nullptr);
@@ -218,8 +226,6 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_encoder(dseed::io::stream* stre
 		png_destroy_write_struct(&png, &info);
 		return dseed::error_out_of_memory;
 	}
-
-	png_destroy_write_struct(&png, &info);
 
 	return dseed::error_good;
 #else

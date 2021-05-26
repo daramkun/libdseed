@@ -108,12 +108,65 @@ int test_histogram_euqualization()
 	return 0;
 }
 
+int test_conv_to_grayscale()
+{
+	dseed::autoref<dseed::io::stream> inputStream;
+	//if (dseed::failed(dseed::io::create_native_filestream(u8"../../../sample/bitmaps/sample9.green.jpg", false, &inputStream)))
+	if (dseed::failed(dseed::io::create_native_filestream(u8"E:\\0100.png", false, &inputStream)))
+	{
+		return -1;
+	}
+
+	dseed::autoref<dseed::bitmaps::bitmap_array> decoder;
+	if (dseed::failed(dseed::bitmaps::detect_bitmap_decoder(inputStream, &decoder)))
+	{
+		return -2;
+	}
+
+	dseed::autoref<dseed::bitmaps::bitmap> bitmap;
+	if (dseed::failed(decoder->at(0, &bitmap)))
+	{
+		return -3;
+	}
+
+	dseed::bitmaps::bitmap_properties prop;
+	dseed::bitmaps::determine_bitmap_properties(bitmap, &prop, 20);
+
+	if (prop.transparent)
+		return -4;
+
+	dseed::autoref<dseed::bitmaps::bitmap> grayscale;
+	if (dseed::failed(dseed::bitmaps::reformat_bitmap(bitmap, dseed::color::pixelformat::r8, &grayscale)))
+	{
+		return -4;
+	}
+
+	dseed::autoref<dseed::io::stream> outputStream;
+	if (dseed::failed(dseed::io::create_native_filestream(u8"output.jpg", true, &outputStream)))
+	{
+		return -5;
+	}
+
+	dseed::autoref<dseed::bitmaps::bitmap_encoder> encoder;
+	if (dseed::failed(dseed::bitmaps::create_jpeg_bitmap_encoder(outputStream, nullptr, &encoder)))
+	{
+		return -6;
+	}
+
+	encoder->encode_frame(grayscale);
+
+	encoder->commit();
+	
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {
 #if COMPILER_MSVC
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 #endif
 	
 	//return test_split_and_join_bitmap_pixel_element();
-	return test_histogram_euqualization();
+	//return test_histogram_euqualization();
+	return test_conv_to_grayscale();
 }

@@ -13,7 +13,6 @@ void jpeg_stream_src (j_decompress_ptr cinfo, dseed::io::stream* stream)
 		dseed::io::stream* stream;
 		JOCTET buffer[INPUT_BUF_SIZE];
 	};
-	const static JOCTET EOI_BUFFER[1] = { JPEG_EOI };
 
 	morisot_source_mgr* src;
 

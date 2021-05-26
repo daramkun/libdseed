@@ -15,7 +15,6 @@ namespace dseed
 		uint8_t value[3];
 		int24_t() = default;
 		int24_t(int32_t v) noexcept { memcpy(value, &v, 3); }
-		int24_t(uint24_t v) noexcept;
 		operator int32_t () const noexcept
 		{
 			return ((value[2] & 0x80) << 24) >> 7
@@ -27,15 +26,11 @@ namespace dseed
 		uint8_t value[3];
 		uint24_t() = default;
 		uint24_t(uint32_t v) noexcept { memcpy(value, &v, 3); }
-		uint24_t(int24_t v) noexcept;
 		operator uint32_t () const noexcept
 		{
 			return (value[2] << 16) | (value[1] << 8) | value[0];
 		}
 	};
-
-	inline int24_t::int24_t(uint24_t v) noexcept : int24_t(static_cast<uint32_t>(v)) { }
-	inline uint24_t::uint24_t(int24_t v) noexcept : uint24_t(static_cast<int32_t>(v)) { }
 #if COMPILER_MSVC
 #	pragma pack (pop)
 #else

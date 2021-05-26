@@ -328,6 +328,9 @@ namespace dseed::color
 		inline rgb8(uint8_t r, uint8_t g, uint8_t b) noexcept
 			: r(r), g(g), b(b)
 		{ }
+		inline rgb8(const rgb8& rgb) noexcept
+			: r(rgb.r), g(rgb.g), b(rgb.b)
+		{ }
 		inline rgb8(uint24_t rgb) noexcept
 			: color(rgb)
 		{ }
@@ -500,6 +503,9 @@ namespace dseed::color
 		bgr8() noexcept = default;
 		inline bgr8(uint8_t r, uint8_t g, uint8_t b) noexcept
 			: r(r), g(g), b(b)
+		{ }
+		inline bgr8(const bgr8 & rgb) noexcept
+			: b(rgb.b), g(rgb.g), r(rgb.r)
 		{ }
 		inline bgr8(uint24_t bgr) noexcept
 			: color(bgr)
@@ -875,6 +881,9 @@ namespace dseed::color
 		inline yuv8(uint8_t y, uint8_t u, uint8_t v) noexcept
 			: y(y), u(u), v(v)
 		{ }
+		inline yuv8(const yuv8 & yuv) noexcept
+			: y(yuv.y), u(yuv.u), v(yuv.v)
+		{ }
 		inline yuv8(uint24_t yuv) noexcept
 			: color(yuv)
 		{ }
@@ -883,7 +892,7 @@ namespace dseed::color
 		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
 
 		static inline yuv8 max_color() noexcept { return yuv8(255, 255, 255); }
-		static inline yuv8 min_color() noexcept { return yuv8(0); }
+		static inline yuv8 min_color() noexcept { return yuv8(0, 0, 0); }
 
 		inline operator rgba8 () const noexcept;
 		inline operator rgb8 () const noexcept;
@@ -1004,6 +1013,9 @@ namespace dseed::color
 		hsv8() noexcept = default;
 		inline hsv8(uint8_t h, uint8_t s, uint8_t v) noexcept
 			: h(h), s(s), v(v)
+		{ }
+		inline hsv8(const hsv8& hsv) noexcept
+			: h(hsv.h), s(hsv.s), v(hsv.v)
 		{ }
 		inline hsv8(uint24_t hsv) noexcept
 			: color(hsv)
