@@ -64,6 +64,14 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 	case PNG_COLOR_TYPE_GRAY:
 		png_set_expand_gray_1_2_4_to_8 (png);
 		break;
+
+	case PNG_COLOR_TYPE_RGB:
+	case PNG_COLOR_TYPE_RGBA:
+		break;
+
+	case PNG_COLOR_TYPE_GRAY_ALPHA:
+	default:
+		return dseed::error_not_support_file_format;
 	}
 
 	auto bitDepth = png_get_bit_depth (png, info);

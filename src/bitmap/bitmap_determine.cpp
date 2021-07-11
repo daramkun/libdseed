@@ -129,31 +129,43 @@ dseed::error_t dseed::bitmaps::determine_bitmap_properties(dseed::bitmaps::bitma
 		bitmap->palette(&palette);
 
 		uint8_t pixels[256 * 4];
-		if (dseed::failed(palette->lock((void**)&pixels)))
+		if (dseed::failed(palette->copy_palette(pixels)))
 			return dseed::error_fail;
 
 		if (format == dseed::color::pixelformat::bgra8_indexed8)
 			determine_props_indexed<dseed::color::bgra8>(pixels, 4, (int)palette->size(), threshold, prop);
 		else
 			determine_props_indexed<dseed::color::bgr8>(pixels, 3, (int)palette->size(), threshold, prop);
-
-		palette->unlock();
 	}
 	else
 	{
 		auto size = bitmap->size();
 
-		uint8_t* srcPtr;
-		if (dseed::failed(bitmap->lock((void**)&srcPtr)))
-			return dseed::error_fail;
-
 		auto found = g_dbps.find(format);
 		if (found == g_dbps.end())
 			return dseed::error_not_support;
 
+		uint8_t* srcPtr;
+		auto result = bitmap->lock((void**)&srcPtr);
+		if (dseed::failed(result))
+		{
+			if (result == dseed::error_not_impl)
+			{
+				const dseed::size2i size2d(size.width, size.height);
+				const auto plane_size = dseed::color::calc_bitmap_plane_size(format, size2d);
+				srcPtr = new uint8_t[plane_size * size.depth];
+
+				for (auto i = 0; i < size.depth; ++i)
+					bitmap->copy_pixels(srcPtr + (i * plane_size), i);
+			}
+			else
+				return dseed::error_fail;
+		}
+
 		found->second(srcPtr, size, threshold, prop);
 
-		bitmap->unlock();
+		if (bitmap->unlock() == dseed::error_not_impl)
+			delete[] srcPtr;
 	}
 	return dseed::error_good;
 }

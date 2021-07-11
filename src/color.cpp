@@ -45,6 +45,7 @@ size_t dseed::color::calc_bitmap_stride(pixelformat pf, size_t width) noexcept
 
 size_t dseed::color::calc_bitmap_plane_size(pixelformat pf, const size2i& size) noexcept
 {
+	size_t returnValue = 0;
 	switch (pf)
 	{
 	case pixelformat::rgbaf:
@@ -65,12 +66,16 @@ size_t dseed::color::calc_bitmap_plane_size(pixelformat pf, const size2i& size) 
 	case pixelformat::depth16:
 	case pixelformat::depth24stencil8:
 	case pixelformat::depth32:
-		return calc_bitmap_stride(pf, size.width) * size.height;
+		returnValue = calc_bitmap_stride(pf, size.width) * size.height;
+		break;
 
 	case pixelformat::yuyv8:
-		return ((size_t)ceilf(size.width / 2.0f) * size.height) * 4;
+		returnValue = ((size_t)ceilf(size.width / 2.0f) * size.height) * 4;
+		break;
+		
 	case pixelformat::nv12:
-		return ((size_t)size.width * size.height + (((size_t)ceilf(size.width / 2.0f) * 2) * (size_t)ceilf(size.height / 2.0f)));
+		returnValue = ((size_t)size.width * size.height + (((size_t)ceilf(size.width / 2.0f) * 2) * (size_t)ceilf(size.height / 2.0f)));
+		break;
 
 	case pixelformat::bc1:
 	case pixelformat::bc4:
@@ -80,7 +85,8 @@ size_t dseed::color::calc_bitmap_plane_size(pixelformat pf, const size2i& size) 
 	case pixelformat::pvrtc_2abpp:
 	case pixelformat::pvrtc_4bpp:
 	case pixelformat::pvrtc_4abpp:
-		return ((size_t)ceilf(size.width / 4.0f) * (size_t)ceilf(size.height / 4.0f) * 8);
+		returnValue = ((size_t)ceilf(size.width / 4.0f) * (size_t)ceilf(size.height / 4.0f) * 8);
+		break;
 
 	case pixelformat::bc2:
 	case pixelformat::bc3:
@@ -89,23 +95,28 @@ size_t dseed::color::calc_bitmap_plane_size(pixelformat pf, const size2i& size) 
 	case pixelformat::bc7:
 	case pixelformat::etc2a:
 	case pixelformat::astc4x4:
-		return ((size_t)ceilf(size.width / 4.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
+		returnValue = ((size_t)ceilf(size.width / 4.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
+		break;
 
-	case pixelformat::astc5x4: return ((size_t)ceilf(size.width / 5.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
-	case pixelformat::astc5x5: return ((size_t)ceilf(size.width / 5.0f) * (size_t)ceilf(size.height / 5.0f) * 16);
-	case pixelformat::astc6x5: return ((size_t)ceilf(size.width / 6.0f) * (size_t)ceilf(size.height / 4.0f) * 16);
-	case pixelformat::astc6x6: return ((size_t)ceilf(size.width / 6.0f) * (size_t)ceilf(size.height / 6.0f) * 16);
-	case pixelformat::astc8x5: return ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 5.0f) * 16);
-	case pixelformat::astc8x6: return ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 6.0f) * 16);
-	case pixelformat::astc8x8: return ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 8.0f) * 16);
-	case pixelformat::astc10x5: return ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 5.0f) * 16);
-	case pixelformat::astc10x6: return ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 6.0f) * 16);
-	case pixelformat::astc10x8: return ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 8.0f) * 16);
-	case pixelformat::astc12x10: return ((size_t)ceilf(size.width / 12.0f) * (size_t)ceilf(size.height / 10.0f) * 16);
-	case pixelformat::astc12x12: return ((size_t)ceilf(size.width / 12.0f) * (size_t)ceilf(size.height / 12.0f) * 16);
+	case pixelformat::astc5x4: returnValue = ((size_t)ceilf(size.width / 5.0f) * (size_t)ceilf(size.height / 4.0f) * 16); break;
+	case pixelformat::astc5x5: returnValue = ((size_t)ceilf(size.width / 5.0f) * (size_t)ceilf(size.height / 5.0f) * 16); break;
+	case pixelformat::astc6x5: returnValue = ((size_t)ceilf(size.width / 6.0f) * (size_t)ceilf(size.height / 4.0f) * 16); break;
+	case pixelformat::astc6x6: returnValue = ((size_t)ceilf(size.width / 6.0f) * (size_t)ceilf(size.height / 6.0f) * 16); break;
+	case pixelformat::astc8x5: returnValue = ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 5.0f) * 16); break;
+	case pixelformat::astc8x6: returnValue = ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 6.0f) * 16); break;
+	case pixelformat::astc8x8: returnValue = ((size_t)ceilf(size.width / 8.0f) * (size_t)ceilf(size.height / 8.0f) * 16); break;
+	case pixelformat::astc10x5: returnValue = ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 5.0f) * 16); break;
+	case pixelformat::astc10x6: returnValue = ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 6.0f) * 16); break;
+	case pixelformat::astc10x8: returnValue = ((size_t)ceilf(size.width / 10.0f) * (size_t)ceilf(size.height / 8.0f) * 16); break;
+	case pixelformat::astc12x10: returnValue = ((size_t)ceilf(size.width / 12.0f) * (size_t)ceilf(size.height / 10.0f) * 16); break;
+	case pixelformat::astc12x12: returnValue = ((size_t)ceilf(size.width / 12.0f) * (size_t)ceilf(size.height / 12.0f) * 16); break;
 
-	default: return 0;
+	default:
+		returnValue = 0;
+		break;
 	}
+
+	return returnValue;
 }
 
 size_t dseed::color::calc_bitmap_total_size(pixelformat pf, const size3i& size) noexcept

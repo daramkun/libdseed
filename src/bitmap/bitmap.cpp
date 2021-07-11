@@ -34,7 +34,7 @@ public:
 	virtual dseed::error_t lock(void** ptr) noexcept override
 	{
 		if (!_mutex.try_lock())
-			return dseed::error_resource_locked;
+			_mutex.lock();
 		*ptr = _palette.data();
 		return dseed::error_good;
 	}
@@ -65,7 +65,7 @@ dseed::error_t dseed::bitmaps::create_palette(const void* pixels, size_t bits_pe
 	if (!(size > 0 && size <= 256) || palette == nullptr)
 		return dseed::error_invalid_args;
 
-	*palette = new __internal_palette(pixels, size, bits_per_pixel);
+	*palette = new __internal_palette(pixels, size, (int)bits_per_pixel);
 	if (*palette == nullptr)
 		return dseed::error_out_of_memory;
 
@@ -87,6 +87,7 @@ public:
 		_planeSize = dseed::color::calc_bitmap_plane_size(format, dseed::size2i(size.width, size.height));
 
 		size_t bufferSize = dseed::color::calc_bitmap_total_size(format, size);
+		bufferSize = 4 * ((bufferSize * ((24 + 7) / 8) + 3) / 4);
 		_pixels.resize(bufferSize);
 
 		dseed::create_attributes(&_extraInfo);
@@ -121,7 +122,8 @@ public:
 public:
 	virtual dseed::error_t lock(void** ptr) noexcept override
 	{
-		if (!_mutex.try_lock()) return dseed::error_resource_locked;
+		if (!_mutex.try_lock())
+			_mutex.lock();
 		*ptr = _pixels.data();
 		return dseed::error_good;
 	}
@@ -134,12 +136,12 @@ public:
 public:
 	virtual dseed::error_t copy_pixels(void* dest, size_t depth) override
 	{
-		if (_pixels.size() == 0)
+		if (_pixels.empty())
 			return dseed::error_not_support;
 		if ((depth >= _size.depth || depth < 0) || dest == nullptr)
 			return dseed::error_invalid_args;
 
-		memcpy(dest, _pixels.data() + (depth * _planeSize), _pixels.size());
+		memcpy(dest, _pixels.data() + (depth * _planeSize), _planeSize);
 
 		return dseed::error_good;
 	}

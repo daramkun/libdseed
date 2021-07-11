@@ -183,6 +183,7 @@ namespace dseed
 
 	constexpr attrkey_t attrkey_cursor_hotspot = 0x0001000100010001;
 	constexpr attrkey_t attrkey_duration = 0x0001000100010002;
+	constexpr attrkey_t attrkey_wic_load_format = 0x0001000100010002;
 }
 
 namespace dseed

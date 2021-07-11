@@ -781,7 +781,15 @@ dseed::error_t dseed::bitmaps::reformat_bitmap(dseed::bitmaps::bitmap* original,
 		return dseed::error_fail;
 
 	uint8_t* destPtr, * srcPtr, * destPalettePtr = nullptr, * srcPalettePtr = nullptr;
-	original->lock((void**)&srcPtr);
+	if (dseed::failed(original->lock((void**)&srcPtr)))
+	{
+		srcPtr = new uint8_t[dseed::color::calc_bitmap_total_size(originalFormat, size)];
+		dseed::size2i size2d(size.width, size.height);
+		auto plane = dseed::color::calc_bitmap_plane_size(originalFormat, size2d);
+
+		for (auto z = 0; z < size.depth; ++z)
+			original->copy_pixels(srcPtr + (plane * z), z);
+	}
 	temp->lock((void**)&destPtr);
 
 	dseed::autoref<dseed::bitmaps::palette> destPalette, srcPalette;
@@ -792,11 +800,31 @@ dseed::error_t dseed::bitmaps::reformat_bitmap(dseed::bitmaps::bitmap* original,
 
 	const auto found = g_pixelconvs.find(pctp(reformat, originalFormat));
 	if (found == g_pixelconvs.end())
+	{
+		if (destPalette != nullptr)
+			destPalette->unlock();
+		if (srcPalette != nullptr)
+			srcPalette->unlock();
+		
+		temp->unlock();
+		if (dseed::failed(original->unlock()))
+			delete[] srcPtr;
 		return dseed::error_not_support;
+	}
 
 	const int paletteCount = found->second(destPtr, srcPtr, size, destPalettePtr, srcPalettePtr);
 	if (paletteCount == -1)
+	{
+		if (destPalette != nullptr)
+			destPalette->unlock();
+		if (srcPalette != nullptr)
+			srcPalette->unlock();
+
+		temp->unlock();
+		if (dseed::failed(original->unlock()))
+			delete[] srcPtr;
 		return dseed::error_not_support;
+	}
 
 	if (destPalette != nullptr)
 		destPalette->unlock();
@@ -804,7 +832,8 @@ dseed::error_t dseed::bitmaps::reformat_bitmap(dseed::bitmaps::bitmap* original,
 		srcPalette->unlock();
 
 	temp->unlock();
-	original->unlock();
+	if (dseed::failed(original->unlock()))
+		delete[] srcPtr;
 
 	*bitmap = temp.detach();
 

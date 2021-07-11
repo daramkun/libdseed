@@ -5,6 +5,12 @@ namespace dseed::bitmaps
 {
 	using decoder_creator_func = error_t(*)(dseed::io::stream*, dseed::bitmaps::bitmap_array**);
 
+	enum class windows_imaging_codec_load_format
+	{
+		unknown,
+		png, gif, jpeg, tiff, tga, dib, ico, dds, heif, webp
+	};
+	
 	DSEEDEXP error_t create_windows_imaging_codec_bitmap_decoder(dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept;
 
 	DSEEDEXP error_t create_dib_bitmap_decoder(dseed::io::stream* stream, dseed::bitmaps::bitmap_array** decoder) noexcept;

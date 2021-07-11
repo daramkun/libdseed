@@ -188,7 +188,34 @@ public:
 	__windowsimagingcodec_decoder(IWICImagingFactoryP* factory, IWICBitmapDecoder* decoder)
 		: _refCount(1), _factory(factory), _decoder(decoder)
 	{
-
+		_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::unknown;
+		
+		Microsoft::WRL::ComPtr<IWICBitmapDecoderInfo> decoderInfo;
+		if (SUCCEEDED(decoder->GetDecoderInfo(&decoderInfo)))
+		{
+			GUID containerFormat;
+			if(SUCCEEDED(decoderInfo->GetContainerFormat(&containerFormat)))
+			{
+				if (containerFormat == GUID_ContainerFormatPng)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::png;
+				else if (containerFormat == GUID_ContainerFormatGif)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::gif;
+				else if (containerFormat == GUID_ContainerFormatJpeg)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::jpeg;
+				else if (containerFormat == GUID_ContainerFormatTiff)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::tiff;
+				else if (containerFormat == GUID_ContainerFormatBmp)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::dib;
+				else if (containerFormat == GUID_ContainerFormatDds)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::dds;
+				else if (containerFormat == GUID_ContainerFormatWebp)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::webp;
+				else if (containerFormat == GUID_ContainerFormatHeif)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::heif;
+				else if (containerFormat == GUID_ContainerFormatIco)
+					_loadFormat = dseed::bitmaps::windows_imaging_codec_load_format::ico;
+			}
+		}
 	}
 
 public:
@@ -242,6 +269,12 @@ public:
 		}
 
 		*bitmap = new __windowsimagingcodec_bitmap(source, palette);
+		dseed::autoref<dseed::attributes> attrs;
+		if (dseed::failed((*bitmap)->extra_info(&attrs)))
+			attrs = nullptr;
+
+		if (attrs)
+			attrs->set_int32(dseed::attrkey_wic_load_format, static_cast<int>(_loadFormat));
 
 		CComPtr<IWICMetadataQueryReader> reader;
 		if (SUCCEEDED(decodeFrame->GetMetadataQueryReader(&reader)))
@@ -252,7 +285,7 @@ public:
 				dseed::timespan duration = dseed::timespan::from_milliseconds(var.uiVal);
 
 				dseed::autoref<dseed::attributes> attrs;
-				if (dseed::succeeded((*bitmap)->extra_info(&attrs)))
+				if (attrs)
 					attrs->set_int64(dseed::attrkey_duration, duration);
 			}
 		}
@@ -271,6 +304,7 @@ private:
 	std::atomic<int32_t> _refCount;
 	Microsoft::WRL::ComPtr<IWICImagingFactoryP> _factory;
 	Microsoft::WRL::ComPtr<IWICBitmapDecoder> _decoder;
+	dseed::bitmaps::windows_imaging_codec_load_format _loadFormat;
 };
 
 #endif
