@@ -62,6 +62,7 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 		break;
 
 	case PNG_COLOR_TYPE_GRAY:
+	case PNG_COLOR_TYPE_GRAY_ALPHA:
 		png_set_expand_gray_1_2_4_to_8 (png);
 		break;
 
@@ -69,7 +70,6 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 	case PNG_COLOR_TYPE_RGBA:
 		break;
 
-	case PNG_COLOR_TYPE_GRAY_ALPHA:
 	default:
 		return dseed::error_not_support_file_format;
 	}
@@ -107,6 +107,16 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 		}
 		break;
 
+	case 2:
+		if (colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+			format = dseed::color::pixelformat::ra8;
+		else
+		{
+			png_destroy_read_struct(&png, nullptr, nullptr);
+			return dseed::error_not_support;
+		}
+		break;
+
 	case 3:
 		format = dseed::color::pixelformat::rgb8;
 		break;
@@ -131,7 +141,7 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 
 	dseed::autoref<dseed::bitmaps::bitmap> bitmap;
 	if (format == dseed::color::pixelformat::rgba8 || format == dseed::color::pixelformat::rgb8 ||
-		format == dseed::color::pixelformat::r8)
+		format == dseed::color::pixelformat::r8 || format == dseed::color::pixelformat::ra8)
 	{
 		create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, format, nullptr, &bitmap);
 	}
@@ -141,7 +151,7 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 		int numPalette;
 		png_get_PLTE (png, info, &palette, &numPalette);
 
-		if (format == dseed::color::pixelformat::bgr8)
+		if (format == dseed::color::pixelformat::bgr8_indexed8)
 		{
 			for (int i = 0; i < numPalette; ++i)
 			{
@@ -155,7 +165,7 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 
 			create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, format, paletteObj, &bitmap);
 		}
-		else if (format == dseed::color::pixelformat::bgra8)
+		else if (format == dseed::color::pixelformat::bgra8_indexed8)
 		{
 			png_bytep alpha;
 			int numAlpha;
