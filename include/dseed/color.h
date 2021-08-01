@@ -25,6 +25,8 @@ namespace dseed::color
 		// Grayscale Pixel Formats
 		r8 = 0x01030001,
 		rf = 0x01030004,
+		ra8 = 0x01030102,
+		raf = 0x01030108,
 
 		// YUV-type Pixel Formats
 		yuva8 = 0x02010104,
@@ -104,6 +106,8 @@ namespace dseed::color
 
 	struct r8;
 	struct rf;
+	struct ra8;
+	struct raf;
 
 	struct yuva8;
 	struct yuv8;
@@ -197,6 +201,8 @@ namespace dseed::color
 	template<> constexpr pixelformat type2format<bgr565>() noexcept { return pixelformat::bgr565; }
 	template<> constexpr pixelformat type2format<r8>() noexcept { return pixelformat::r8; }
 	template<> constexpr pixelformat type2format<rf>() noexcept { return pixelformat::rf; }
+	template<> constexpr pixelformat type2format<ra8>() noexcept { return pixelformat::ra8; }
+	template<> constexpr pixelformat type2format<raf>() noexcept { return pixelformat::raf; }
 	template<> constexpr pixelformat type2format<yuva8>() noexcept { return pixelformat::yuva8; }
 	template<> constexpr pixelformat type2format<yuv8>() noexcept { return pixelformat::yuv8; }
 	template<> constexpr pixelformat type2format<hsva8>() noexcept { return pixelformat::hsva8; }
@@ -211,6 +217,8 @@ namespace dseed::color
 	template<> constexpr bool hasalpha<rgbaf>() noexcept { return true; }
 	template<> constexpr bool hasalpha<bgra8>() noexcept { return true; }
 	template<> constexpr bool hasalpha<bgra4>() noexcept { return true; }
+	template<> constexpr bool hasalpha<ra8>() noexcept { return true; }
+	template<> constexpr bool hasalpha<raf>() noexcept { return true; }
 	template<> constexpr bool hasalpha<yuva8>() noexcept { return true; }
 	template<> constexpr bool hasalpha<hsva8>() noexcept { return true; }
 	constexpr bool hasalpha(pixelformat format) noexcept
@@ -222,6 +230,8 @@ namespace dseed::color
 		case pixelformat::bgra8:
 		case pixelformat::bgra4:
 		case pixelformat::bgra8_indexed8:
+		case pixelformat::ra8:
+		case pixelformat::raf:
 		case pixelformat::etc2a:
 		case pixelformat::bc1:
 		case pixelformat::bc2:
@@ -291,6 +301,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -350,6 +362,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -410,6 +424,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -467,6 +483,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -526,6 +544,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -591,6 +611,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -655,6 +677,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -723,6 +747,8 @@ namespace dseed::color
 		inline operator bgr565 () const noexcept;
 
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -773,6 +799,8 @@ namespace dseed::color
 		inline operator bgr565 () const noexcept;
 
 		inline operator r8 () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 		inline operator yuva8 () const noexcept;
@@ -795,6 +823,117 @@ namespace dseed::color
 	inline rf operator* (const rf& c1, double factor) noexcept { return rf((float)(c1.color * factor)); }
 	inline rf operator/ (const rf& c1, double factor) noexcept { return rf((float)(c1.color / factor)); }
 	inline bool operator== (const rf& c1, const rf& c2) noexcept { return c1.color == c2.color; }
+
+	struct ra8
+	{
+		union
+		{
+			struct { uint8_t r, a; };
+			uint16_t color;
+		};
+		ra8() noexcept = default;
+		inline ra8(uint8_t grayscale, uint8_t alpha) noexcept : r(grayscale), a(alpha) { }
+		inline ra8(const rgba8& rgba) noexcept
+			: r((uint8_t)maximum(0.0, minimum(255.0, +0.2627 * rgba.r + +0.678 * rgba.g + +0.0593 * rgba.b)))
+			, a(rgba.a)
+		{ }
+
+		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
+		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
+
+		static inline r8 max_color() noexcept { return r8(255); }
+		static inline r8 min_color() noexcept { return r8(0); }
+
+		inline operator rgba8 () const noexcept;
+		inline operator rgb8 () const noexcept;
+		inline operator rgbaf () const noexcept;
+		inline operator bgra8 () const noexcept;
+		inline operator bgr8 () const noexcept;
+		inline operator bgra4 () const noexcept;
+		inline operator bgr565 () const noexcept;
+
+		inline operator r8 () const noexcept;
+		inline operator rf () const noexcept;
+		inline operator raf () const noexcept;
+
+		inline operator yuv8 () const noexcept;
+		inline operator yuva8 () const noexcept;
+
+		inline operator hsv8 () const noexcept;
+		inline operator hsva8 () const noexcept;
+
+		inline operator colorv () const noexcept;
+
+		inline ra8& operator+= (const ra8& c) noexcept { r += c.r; a += c.a; return *this; }
+		inline ra8& operator-= (const ra8& c) noexcept { r -= c.r; a -= c.a; return *this; }
+		inline ra8& operator*= (const ra8& c) noexcept { r *= c.r; a *= c.a; return *this; }
+		inline ra8& operator/= (const ra8& c) noexcept { r /= c.r; a /= c.a; return *this; }
+	};
+	inline ra8 operator+ (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r + c2.r, c1.a + c2.a); }
+	inline ra8 operator- (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r - c2.r, c1.a - c2.a); }
+	inline ra8 operator* (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r * c2.r, c1.a * c2.a); }
+	inline ra8 operator/ (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r / c2.r, c1.a / c2.a); }
+	inline ra8 operator* (const ra8& c1, double factor) noexcept { return ra8((uint8_t)(c1.r * factor), (uint8_t)(c1.a * factor)); }
+	inline ra8 operator/ (const ra8& c1, double factor) noexcept { return ra8((uint8_t)(c1.r / factor), (uint8_t)(c1.a / factor)); }
+	inline ra8 operator& (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r & c2.r, c1.a & c2.a); }
+	inline ra8 operator| (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r | c2.r, c1.a | c2.a); }
+	inline ra8 operator^ (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r ^ c2.r, c1.a ^ c2.a); }
+	inline ra8 operator~ (const ra8& c) noexcept { return ra8(~c.r, ~c.a); }
+	inline bool operator== (const ra8& c1, const ra8& c2) noexcept { return c1.r == c2.r && c1.a == c2.a; }
+
+	struct raf
+	{
+		union
+		{
+			struct { float r, a; };
+			float2 color;
+		};
+		raf() noexcept = default;
+		inline raf(float grayscale, float alpha) : r(grayscale), a(alpha) { }
+		inline raf(const rgbaf& rgbaf)
+			: r((float)maximum(0.0, minimum(1.0, (+0.2627 * rgbaf.r + +0.678 * rgbaf.g + +0.0593 * rgbaf.b))))
+			, a(rgbaf.a)
+		{ }
+
+		inline float& operator [] (int index) noexcept { return reinterpret_cast<float*>(this)[index]; }
+		inline const float& operator [] (int index) const noexcept { return reinterpret_cast<const float*>(this)[index]; }
+
+		static inline rf max_color() noexcept { return rf(1); }
+		static inline rf min_color() noexcept { return rf(0); }
+
+		inline operator rgba8 () const noexcept;
+		inline operator rgb8 () const noexcept;
+		inline operator rgbaf () const noexcept;
+		inline operator bgra8 () const noexcept;
+		inline operator bgr8 () const noexcept;
+		inline operator bgra4 () const noexcept;
+		inline operator bgr565 () const noexcept;
+
+		inline operator r8 () const noexcept;
+		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+
+		inline operator yuv8 () const noexcept;
+		inline operator yuva8 () const noexcept;
+
+		inline operator hsv8 () const noexcept;
+		inline operator hsva8 () const noexcept;
+
+		inline operator colorv () const noexcept;
+
+		inline raf& operator+= (const raf& c) noexcept { r += c.r; a += c.a; return *this; }
+		inline raf& operator-= (const raf& c) noexcept { r -= c.r; a -= c.a; return *this; }
+		inline raf& operator*= (const raf& c) noexcept { r *= c.r; a *= c.a; return *this; }
+		inline raf& operator/= (const raf& c) noexcept { r /= c.r; a /= c.a; return *this; }
+	};
+	inline raf operator+ (const raf& c1, const raf& c2) noexcept { return raf(c1.r + c2.r, c1.a + c2.a); }
+	inline raf operator- (const raf& c1, const raf& c2) noexcept { return raf(c1.r - c2.r, c1.a - c2.a); }
+	inline raf operator- (const raf& c) noexcept { return raf(-c.r, -c.a); }
+	inline raf operator* (const raf& c1, const raf& c2) noexcept { return raf(c1.r * c2.r, c1.a * c2.a); }
+	inline raf operator/ (const raf& c1, const raf& c2) noexcept { return raf(c1.r / c2.r, c1.a / c2.a); }
+	inline raf operator* (const raf& c1, double factor) noexcept { return raf((float)(c1.r * factor), (float)(c1.a * factor)); }
+	inline raf operator/ (const raf& c1, double factor) noexcept { return raf((float)(c1.r / factor), (float)(c1.a / factor)); }
+	inline bool operator== (const raf& c1, const raf& c2) noexcept { return c1.r == c2.r && c1.a == c2.a; }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -845,6 +984,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuv8 () const noexcept;
 
@@ -904,6 +1045,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuva8 () const noexcept;
 
@@ -978,6 +1121,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuva8 () const noexcept;
 		inline operator yuv8 () const noexcept;
@@ -1037,6 +1182,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuva8 () const noexcept;
 		inline operator yuv8 () const noexcept;
@@ -1107,6 +1254,8 @@ namespace dseed::color
 
 		inline operator r8 () const noexcept;
 		inline operator rf () const noexcept;
+		inline operator ra8 () const noexcept;
+		inline operator raf () const noexcept;
 
 		inline operator yuva8 () const noexcept;
 		inline operator yuv8 () const noexcept;
@@ -1158,6 +1307,8 @@ namespace dseed::color
 	inline rgba8::operator bgr565() const noexcept { return bgr565(r / 8, g / 4, b / 8); }
 	inline rgba8::operator r8() const noexcept { return r8(rgb2y(r, g, b)); }
 	inline rgba8::operator rf() const noexcept { return rf(rgb2y(r, g, b) / 255.0f); }
+	inline rgba8::operator ra8() const noexcept { return ra8(rgb2y(r, g, b), a); }
+	inline rgba8::operator raf() const noexcept { return raf(rgb2y(r, g, b) / 255.0f, a / 255.0f); }
 	inline rgba8::operator yuv8() const noexcept { return yuv8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b)); }
 	inline rgba8::operator yuva8() const noexcept { return yuva8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b), a); }
 	inline rgba8::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv(r, g, b, h, s, v); return hsv8(h, s, v); }
@@ -1175,6 +1326,8 @@ namespace dseed::color
 	inline rgb8::operator bgr565() const noexcept { return bgr565(r / 8, g / 4, b / 8); }
 	inline rgb8::operator r8() const noexcept { return r8(rgb2y(r, g, b)); }
 	inline rgb8::operator rf() const noexcept { return rf(rgb2y(r, g, b) / 255.0f); }
+	inline rgb8::operator ra8() const noexcept { return ra8(rgb2y(r, g, b), 255); }
+	inline rgb8::operator raf() const noexcept { return raf(rgb2y(r, g, b) / 255.0f, 1); }
 	inline rgb8::operator yuv8() const noexcept { return yuv8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b)); }
 	inline rgb8::operator yuva8() const noexcept { return yuva8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b), 255); }
 	inline rgb8::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv(r, g, b, h, s, v); return hsv8(h, s, v); }
@@ -1192,6 +1345,8 @@ namespace dseed::color
 	inline rgbaf::operator bgr565() const noexcept { return bgr565((uint8_t)(r * 31), (uint8_t)(g * 63), (uint8_t)(b * 31)); }
 	inline rgbaf::operator r8() const noexcept { return r8(rgb2y((uint8_t)(r * 255), (uint8_t)(g * 255), (uint8_t)(b * 255))); }
 	inline rgbaf::operator rf() const noexcept { return rf(0.299f * r + 0.587f * g + 0.114f * b); }
+	inline rgbaf::operator ra8() const noexcept { return ra8(rgb2y((uint8_t)(r * 255), (uint8_t)(g * 255), (uint8_t)(b * 255)), (uint8_t)(a * 255)); }
+	inline rgbaf::operator raf() const noexcept { return raf(0.299f * r + 0.587f * g + 0.114f * b, a); }
 	inline rgbaf::operator yuv8() const noexcept { bgr8 bgr = *this; return (yuv8)bgr; }
 	inline rgbaf::operator yuva8() const noexcept { bgra8 bgra = *this; return (yuva8)bgra; }
 	inline rgbaf::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv((uint8_t)(r * 255), (uint8_t)(g * 255), (uint8_t)(b * 255), h, s, v); return hsv8(h, s, v); }
@@ -1209,6 +1364,8 @@ namespace dseed::color
 	inline bgra8::operator bgr565() const noexcept { return bgr565(r / 8, g / 4, b / 8); }
 	inline bgra8::operator r8() const noexcept { return r8(rgb2y(r, g, b)); }
 	inline bgra8::operator rf() const noexcept { return rf(rgb2y(r, g, b) / 255.0f); }
+	inline bgra8::operator ra8() const noexcept { return ra8(rgb2y(r, g, b), a); }
+	inline bgra8::operator raf() const noexcept { return raf(rgb2y(r, g, b) / 255.0f, a / 255.0f); }
 	inline bgra8::operator yuv8() const noexcept { return yuv8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b)); }
 	inline bgra8::operator yuva8() const noexcept { return yuva8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b), a); }
 	inline bgra8::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv(r, g, b, h, s, v); return hsv8(h, s, v); }
@@ -1226,6 +1383,8 @@ namespace dseed::color
 	inline bgr8::operator bgr565() const noexcept { return bgr565(r / 8, g / 4, b / 8); }
 	inline bgr8::operator r8() const noexcept { return r8(rgb2y(r, g, b)); }
 	inline bgr8::operator rf() const noexcept { return rf(rgb2y(r, g, b) / 255.0f); }
+	inline bgr8::operator ra8() const noexcept { return ra8(rgb2y(r, g, b), 255); }
+	inline bgr8::operator raf() const noexcept { return raf(rgb2y(r, g, b) / 255.0f, 1); }
 	inline bgr8::operator yuv8() const noexcept { return yuv8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b)); }
 	inline bgr8::operator yuva8() const noexcept { return yuva8(rgb2y(r, g, b), rgb2u(r, g, b), rgb2v(r, g, b), 255); }
 	inline bgr8::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv(r, g, b, h, s, v); return hsv8(h, s, v); }
@@ -1243,6 +1402,8 @@ namespace dseed::color
 	inline bgra4::operator bgr565() const noexcept { return bgr565(r * 2, g * 4, b * 2); }
 	inline bgra4::operator r8() const noexcept { return r8(rgb2y(r * 17, g * 17, b * 17)); }
 	inline bgra4::operator rf() const noexcept { return rf(rgb2y(r * 17, g * 17, b * 17) / 255.0f); }
+	inline bgra4::operator ra8() const noexcept { return ra8(rgb2y(r * 17, g * 17, b * 17), a * 17); }
+	inline bgra4::operator raf() const noexcept { return raf(rgb2y(r * 17, g * 17, b * 17) / 255.0f, a * 17 / 255.0f); }
 	inline bgra4::operator yuv8() const noexcept { return yuv8(rgb2y(r * 17, g * 17, b * 17), rgb2u(r * 17, g * 17, b * 17), rgb2v(r * 17, g * 17, b * 17)); }
 	inline bgra4::operator yuva8() const noexcept { return yuva8(rgb2y(r * 17, g * 17, b * 17), rgb2u(r * 17, g * 17, b * 17), rgb2v(r * 17, g * 17, b * 17), a * 17); }
 	inline bgra4::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv(r * 17, g * 17, b * 17, h, s, v); return hsv8(h, s, v); }
@@ -1260,6 +1421,8 @@ namespace dseed::color
 	inline bgr565::operator bgra4() const noexcept { return bgra4(r / 2, g / 4, b / 2, 15); }
 	inline bgr565::operator r8() const noexcept { return r8(rgb2y(r * 8, g * 4, b * 8)); }
 	inline bgr565::operator rf() const noexcept { return rf(rgb2y(r * 8, g * 4, b * 8) / 255.0f); }
+	inline bgr565::operator ra8() const noexcept { return ra8(rgb2y(r * 8, g * 4, b * 8), 255); }
+	inline bgr565::operator raf() const noexcept { return raf(rgb2y(r * 8, g * 4, b * 8) / 255.0f, 1); }
 	inline bgr565::operator yuv8() const noexcept { return yuv8(rgb2y(r * 8, g * 4, b * 8), rgb2u(r * 8, g * 4, b * 8), rgb2v(r * 8, g * 4, b * 8)); }
 	inline bgr565::operator yuva8() const noexcept { return yuva8(rgb2y(r * 8, g * 4, b * 8), rgb2u(r * 8, g * 4, b * 8), rgb2v(r * 8, g * 4, b * 8), 255); }
 	inline bgr565::operator hsv8() const noexcept { uint8_t h, s, v; rgb2hsv(r * 8, g * 4, b * 8, h, s, v); return hsv8(h, s, v); }
@@ -1277,6 +1440,8 @@ namespace dseed::color
 	inline r8::operator bgra4 () const noexcept { uint8_t t = color / 17; return bgra4(t, t, t, 15); }
 	inline r8::operator bgr565 () const noexcept { return bgr565(color / 8, color / 4, color / 8); }
 	inline r8::operator rf () const noexcept { return rf(color / 255.0f); }
+	inline r8::operator ra8 () const noexcept { return ra8(color, 255); }
+	inline r8::operator raf () const noexcept { return raf(color / 255.0f, 1); }
 	inline r8::operator yuv8 () const noexcept { return yuv8(color, 0, 0); }
 	inline r8::operator yuva8 () const noexcept { return yuva8(color, 0, 0, 255); }
 	inline r8::operator hsv8() const noexcept { return hsv8(0, 0, color); }
@@ -1294,6 +1459,8 @@ namespace dseed::color
 	inline rf::operator bgra4 () const noexcept { uint8_t t = (uint8_t)(color * 15); return bgra4(t, t, t, 15); }
 	inline rf::operator bgr565 () const noexcept { return bgr565((uint8_t)(color * 8), (uint8_t)(color * 4), (uint8_t)(color * 8)); }
 	inline rf::operator r8 () const noexcept { return r8((uint8_t)(color * 255)); }
+	inline rf::operator ra8 () const noexcept { return ra8((uint8_t)(color * 255), 255); }
+	inline rf::operator raf () const noexcept { return raf(color, 1); }
 	inline rf::operator yuv8 () const noexcept { return yuv8((uint8_t)(color * 255), 0, 0); }
 	inline rf::operator yuva8 () const noexcept { return yuva8((uint8_t)(color * 255), 0, 0, 255); }
 	inline rf::operator hsv8() const noexcept { return hsv8(0, 0, (uint8_t)(color * 255)); }
@@ -1301,6 +1468,44 @@ namespace dseed::color
 	inline rf::operator colorv() const noexcept
 	{
 		return colorv(color, 0, 0, 0);
+	}
+
+	inline ra8::operator rgba8 () const noexcept { return rgba8(r, r, r, a); }
+	inline ra8::operator rgb8 () const noexcept { return rgb8(r, r, r); }
+	inline ra8::operator rgbaf () const noexcept { float t = r / 255.0f; return rgbaf(t, t, t, a / 255.0f); }
+	inline ra8::operator bgra8 () const noexcept { return bgra8(r, r, r, a); }
+	inline ra8::operator bgr8 () const noexcept { return bgr8(r, r, r); }
+	inline ra8::operator bgra4 () const noexcept { uint8_t t = r / 17; return bgra4(t, t, t, a / 17); }
+	inline ra8::operator bgr565 () const noexcept { return bgr565(r / 8, r / 4, r / 8); }
+	inline ra8::operator r8 () const noexcept { return r8(r); }
+	inline ra8::operator rf () const noexcept { return rf(r / 255.0f); }
+	inline ra8::operator raf () const noexcept { return raf(r / 255.0f, a / 255.0f); }
+	inline ra8::operator yuv8 () const noexcept { return yuv8(r, 0, 0); }
+	inline ra8::operator yuva8 () const noexcept { return yuva8(r, 0, 0, a); }
+	inline ra8::operator hsv8() const noexcept { return hsv8(0, 0, r); }
+	inline ra8::operator hsva8() const noexcept { return hsva8(0, 0, r, a); }
+	inline ra8::operator colorv() const noexcept
+	{
+		return colorv((float)r, (float)a, 0, 0);
+	}
+
+	inline raf::operator rgba8 () const noexcept { uint8_t t = (uint8_t)(r * 255); return rgba8(t, t, t, (uint8_t)(a * 255)); }
+	inline raf::operator rgb8 () const noexcept { uint8_t t = (uint8_t)(r * 255); return rgb8(t, t, t); }
+	inline raf::operator rgbaf () const noexcept { return rgbaf(r, r, r, 1.0f); }
+	inline raf::operator bgra8 () const noexcept { uint8_t t = (uint8_t)(r * 255); return bgra8(t, t, t, (uint8_t)(a * 255)); }
+	inline raf::operator bgr8 () const noexcept { uint8_t t = (uint8_t)(r * 255); return bgr8(t, t, t); }
+	inline raf::operator bgra4 () const noexcept { uint8_t t = (uint8_t)(r * 15); return bgra4(t, t, t, (uint8_t)(a * 15)); }
+	inline raf::operator bgr565 () const noexcept { return bgr565((uint8_t)(r * 8), (uint8_t)(r * 4), (uint8_t)(r * 8)); }
+	inline raf::operator r8 () const noexcept { return r8((uint8_t)(r * 255)); }
+	inline raf::operator rf () const noexcept { return rf(r); }
+	inline raf::operator ra8 () const noexcept { return ra8((uint8_t)(r * 255), (uint8_t)(a * 255)); }
+	inline raf::operator yuv8 () const noexcept { return yuv8((uint8_t)(r * 255), 0, 0); }
+	inline raf::operator yuva8 () const noexcept { return yuva8((uint8_t)(r * 255), 0, 0, (uint8_t)(a * 255)); }
+	inline raf::operator hsv8() const noexcept { return hsv8(0, 0, (uint8_t)(r * 255)); }
+	inline raf::operator hsva8() const noexcept { return hsva8(0, 0, (uint8_t)(r * 255), (uint8_t)(a * 255)); }
+	inline raf::operator colorv() const noexcept
+	{
+		return colorv(r, a, 0, 0);
 	}
 
 	inline yuva8::operator rgba8 () const noexcept { return rgba8(yuv2r(y, u, v), yuv2g(y, u, v), yuv2b(y, u, v), a); }
@@ -1312,6 +1517,8 @@ namespace dseed::color
 	inline yuva8::operator bgr565 () const noexcept { return bgr565(yuv2r(y, u, v) / 8, yuv2g(y, u, v) / 4, yuv2b(y, u, v) / 8); }
 	inline yuva8::operator r8 () const noexcept { return r8(y); }
 	inline yuva8::operator rf () const noexcept { return rf(y / 255.0f); }
+	inline yuva8::operator ra8 () const noexcept { return ra8(y, a); }
+	inline yuva8::operator raf () const noexcept { return raf(y / 255.0f, a / 255.0f); }
 	inline yuva8::operator yuv8 () const noexcept { return yuv8(y, u, v); }
 	inline yuva8::operator hsv8() const noexcept { return (hsv8)(rgb8)*this; }
 	inline yuva8::operator hsva8() const noexcept { return (hsva8)(rgba8)*this; }
@@ -1329,6 +1536,8 @@ namespace dseed::color
 	inline yuv8::operator bgr565 () const noexcept { return bgr565(yuv2r(y, u, v) / 8, yuv2g(y, u, v) / 4, yuv2b(y, u, v) / 8); }
 	inline yuv8::operator r8 () const noexcept { return r8(y); }
 	inline yuv8::operator rf () const noexcept { return rf(y / 255.0f); }
+	inline yuv8::operator ra8 () const noexcept { return ra8(y, 255); }
+	inline yuv8::operator raf () const noexcept { return raf(y / 255.0f, 1); }
 	inline yuv8::operator yuva8 () const noexcept { return yuva8(y, u, v, 255); }
 	inline yuv8::operator hsv8() const noexcept { return (hsv8)(rgb8)*this; }
 	inline yuv8::operator hsva8() const noexcept { return (hsva8)(rgb8)*this; }
@@ -1346,6 +1555,8 @@ namespace dseed::color
 	inline hsva8::operator bgr565 () const noexcept { uint8_t r, g, b; hsv2rgb(h, s, v, r, g, b); return bgr8(r / 8, g / 4, b / 8); }
 	inline hsva8::operator r8 () const noexcept { return r8(v); }
 	inline hsva8::operator rf () const noexcept { return rf(v / 255.0f); }
+	inline hsva8::operator ra8 () const noexcept { return ra8(v, 255); }
+	inline hsva8::operator raf () const noexcept { return raf(v / 255.0f, 1); }
 	inline hsva8::operator yuva8 () const noexcept { return (yuva8)(rgba8)*this; }
 	inline hsva8::operator yuv8() const noexcept { return (yuv8)(rgb8)*this; }
 	inline hsva8::operator hsv8() const noexcept { return hsv8(h, s, v); }
@@ -1363,6 +1574,8 @@ namespace dseed::color
 	inline hsv8::operator bgr565 () const noexcept { uint8_t r, g, b; hsv2rgb(h, s, v, r, g, b); return bgr8(r / 8, g / 4, b / 8); }
 	inline hsv8::operator r8 () const noexcept { return r8(v); }
 	inline hsv8::operator rf () const noexcept { return rf(v / 255.0f); }
+	inline hsv8::operator ra8 () const noexcept { return ra8(v, 255); }
+	inline hsv8::operator raf () const noexcept { return raf(v / 255.0f, 1); }
 	inline hsv8::operator yuva8 () const noexcept { return (yuva8)(rgba8)*this; }
 	inline hsv8::operator yuv8() const noexcept { return (yuv8)(rgb8)*this; }
 	inline hsv8::operator hsva8() const noexcept { return hsva8(h, s, v, 255); }
@@ -1459,6 +1672,24 @@ namespace dseed::color
 		store(arr);
 		return rf(
 			saturatef(arr[0])
+		);
+	}
+	inline colorv::operator ra8 () const noexcept
+	{
+		float arr[4];
+		store(arr);
+		return ra8(
+			saturate8((int32_t)arr[0]),
+			saturate8((int32_t)arr[1])
+		);
+	}
+	inline colorv::operator raf () const noexcept
+	{
+		float arr[4];
+		store(arr);
+		return raf(
+			saturatef(arr[0]),
+			saturatef(arr[1])
 		);
 	}
 	inline colorv::operator yuva8 () const noexcept
