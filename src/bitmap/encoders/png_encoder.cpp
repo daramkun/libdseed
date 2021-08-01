@@ -56,7 +56,7 @@ public:
 		if (!(format == dseed::color::pixelformat::rgba8 || format == dseed::color::pixelformat::rgb8
 			|| format == dseed::color::pixelformat::bgra8 || format == dseed::color::pixelformat::bgr8
 			|| format == dseed::color::pixelformat::bgr8_indexed8 || format == dseed::color::pixelformat::bgra8_indexed8
-			|| format == dseed::color::pixelformat::r8))
+			|| format == dseed::color::pixelformat::r8 || format == dseed::color::pixelformat::ra8))
 			return dseed::error_not_support;
 
 		std::vector<uint8_t> pixels;
@@ -141,7 +141,7 @@ public:
 		}
 		else if (format == dseed::color::pixelformat::rgba8 || format == dseed::color::pixelformat::bgra8
 			|| format == dseed::color::pixelformat::rgb8 || format == dseed::color::pixelformat::bgr8
-			|| format == dseed::color::pixelformat::r8)
+			|| format == dseed::color::pixelformat::r8 || format == dseed::color::pixelformat::ra8)
 		{
 			int colorType = 0;
 			switch (format)
@@ -160,6 +160,10 @@ public:
 
 			case dseed::color::pixelformat::r8:
 				colorType = PNG_COLOR_TYPE_GRAY;
+				break;
+
+			case dseed::color::pixelformat::ra8:
+				colorType = PNG_COLOR_TYPE_GRAY_ALPHA;
 				break;
 			}
 
