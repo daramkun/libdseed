@@ -50,7 +50,8 @@ dseed::error_t dseed::bitmaps::create_dds_bitmap_decoder (dseed::io::stream* str
 			else if (header.ddspf.RBitMask == 0x00ff0000 && header.ddspf.GBitMask == 0x0000ff00
 				&& header.ddspf.BBitMask == 0x000000ff && header.ddspf.ABitMask == 0xff000000)
 				format = dseed::color::pixelformat::bgra8;
-			else if (header.ddspf.RBitMask == 0xffffffff && header.ddspf.GBitMask == header.ddspf.BBitMask == header.ddspf.ABitMask == 0)
+			else if (header.ddspf.RBitMask == 0xffffffff && header.ddspf.GBitMask == header.ddspf.BBitMask && 
+				header.ddspf.BBitMask == header.ddspf.ABitMask && header.ddspf.ABitMask == 0)
 				format = dseed::color::pixelformat::rf;
 			else
 				return dseed::error_not_support;
@@ -79,7 +80,8 @@ dseed::error_t dseed::bitmaps::create_dds_bitmap_decoder (dseed::io::stream* str
 			break;
 
 		case 8:
-			if (header.ddspf.RBitMask == 0x000000ff && header.ddspf.GBitMask == header.ddspf.BBitMask == header.ddspf.ABitMask == 0)
+			if (header.ddspf.RBitMask == 0x000000ff && header.ddspf.GBitMask == header.ddspf.BBitMask &&
+				header.ddspf.BBitMask == header.ddspf.ABitMask && header.ddspf.ABitMask == 0)
 				format = dseed::color::pixelformat::r8;
 			else
 				return dseed::error_not_support;
@@ -94,7 +96,8 @@ dseed::error_t dseed::bitmaps::create_dds_bitmap_decoder (dseed::io::stream* str
 			if (header.ddspf.RBitMask == 0x000000ff && header.ddspf.GBitMask == 0x0000ff00 && header.ddspf.BBitMask == 0x00ff0000
 				&& (header.ddspf.ABitMask == 0xff000000 || header.ddspf.ABitMask == 0))
 				format = dseed::color::pixelformat::yuva8;
-			else if (header.ddspf.RBitMask == 0xffffffff && header.ddspf.GBitMask == header.ddspf.BBitMask == header.ddspf.ABitMask == 0)
+			else if (header.ddspf.RBitMask == 0xffffffff && header.ddspf.GBitMask == header.ddspf.BBitMask &&
+				header.ddspf.BBitMask == header.ddspf.ABitMask && header.ddspf.ABitMask == 0)
 				format = dseed::color::pixelformat::rf;
 			else
 				return dseed::error_not_support;
@@ -108,7 +111,8 @@ dseed::error_t dseed::bitmaps::create_dds_bitmap_decoder (dseed::io::stream* str
 			break;
 
 		case 8:
-			if (header.ddspf.RBitMask == 0x000000ff && header.ddspf.GBitMask == header.ddspf.BBitMask == header.ddspf.ABitMask == 0)
+			if (header.ddspf.RBitMask == 0x000000ff && header.ddspf.GBitMask == header.ddspf.BBitMask &&
+				header.ddspf.BBitMask == header.ddspf.ABitMask && header.ddspf.ABitMask == 0)
 				format = dseed::color::pixelformat::r8;
 			else
 				return dseed::error_not_support;

@@ -81,10 +81,12 @@ class __internal_bitmap : public dseed::bitmaps::bitmap
 {
 public:
 	__internal_bitmap(const void* pixels, dseed::bitmaps::bitmaptype type, dseed::color::pixelformat format, const dseed::size3i& size, dseed::bitmaps::palette* palette)
-		: _refCount(1), _type(type), _format(format), _size(size), _palette(palette)
+		: _refCount(1), _type(type), _format(format), _size(size), _palette(nullptr), _extraInfo(nullptr)
 	{
 		_stride = dseed::color::calc_bitmap_stride(format, size.width);
 		_planeSize = dseed::color::calc_bitmap_plane_size(format, dseed::size2i(size.width, size.height));
+
+		_palette = palette;
 
 		size_t bufferSize = dseed::color::calc_bitmap_total_size(format, size);
 		bufferSize = 4 * ((bufferSize * ((24 + 7) / 8) + 3) / 4);
@@ -114,8 +116,17 @@ public:
 public:
 	virtual dseed::error_t palette(dseed::bitmaps::palette** palette) noexcept override
 	{
-		if (palette == nullptr) return dseed::error_invalid_args;
-		*palette = _palette;
+		if (palette == nullptr)
+			return dseed::error_invalid_args;
+		if (_palette == nullptr)
+		{
+			if (_format == dseed::color::pixelformat::bgra8_indexed8 || _format == dseed::color::pixelformat::bgr8_indexed8)
+				return dseed::error_fail;
+
+			*palette = nullptr;
+			return dseed::error_good;
+		}
+		(*palette = _palette)->retain();
 		return dseed::error_good;
 	}
 
@@ -221,8 +232,14 @@ public:
 public:
 	virtual dseed::error_t extra_info(dseed::attributes** attr) noexcept override
 	{
-		if (attr == nullptr) return dseed::error_invalid_args;
-		*attr = _extraInfo;
+		if (attr == nullptr)
+			return dseed::error_invalid_args;
+		if (_extraInfo == nullptr)
+		{
+			*attr = nullptr;
+			return dseed::error_fail;
+		}
+		(*attr = _extraInfo)->retain();
 		return dseed::error_good;
 	}
 

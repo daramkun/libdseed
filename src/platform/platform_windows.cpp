@@ -561,7 +561,7 @@ private:
 
 					std::shared_ptr<BYTE[]> lpb (new BYTE[dwSize]);
 					auto* raw = reinterpret_cast<RAWINPUT*>(&lpb[0]);
-					ZeroMemory (raw, dwSize);
+					ZeroMemory(raw, dwSize);
 
 					if (raw->header.dwType == RIM_TYPEMOUSE)
 						raw->data.mouse.usFlags = mouse->_state[0].is_relative ? MOUSE_MOVE_RELATIVE : (MOUSE_MOVE_ABSOLUTE | MOUSE_VIRTUAL_DESKTOP);

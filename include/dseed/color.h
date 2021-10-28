@@ -212,16 +212,16 @@ namespace dseed::color
 	template<> constexpr pixelformat type2indexedformat<bgra8>() noexcept { return pixelformat::bgra8_indexed8; }
 	template<> constexpr pixelformat type2indexedformat<bgr8>() noexcept { return pixelformat::bgr8_indexed8; }
 
-	template<class T> constexpr bool hasalpha() noexcept { return false; }
-	template<> constexpr bool hasalpha<rgba8>() noexcept { return true; }
-	template<> constexpr bool hasalpha<rgbaf>() noexcept { return true; }
-	template<> constexpr bool hasalpha<bgra8>() noexcept { return true; }
-	template<> constexpr bool hasalpha<bgra4>() noexcept { return true; }
-	template<> constexpr bool hasalpha<ra8>() noexcept { return true; }
-	template<> constexpr bool hasalpha<raf>() noexcept { return true; }
-	template<> constexpr bool hasalpha<yuva8>() noexcept { return true; }
-	template<> constexpr bool hasalpha<hsva8>() noexcept { return true; }
-	constexpr bool hasalpha(pixelformat format) noexcept
+	template<class T> constexpr bool has_alpha_element() noexcept { return false; }
+	template<> constexpr bool has_alpha_element<rgba8>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<rgbaf>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<bgra8>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<bgra4>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<ra8>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<raf>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<yuva8>() noexcept { return true; }
+	template<> constexpr bool has_alpha_element<hsva8>() noexcept { return true; }
+	constexpr bool has_alpha_element(pixelformat format) noexcept
 	{
 		switch (format)
 		{
@@ -259,6 +259,7 @@ namespace dseed::color
 			return false;
 		}
 	}
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// Red/Green/Blue Color Types
@@ -328,6 +329,7 @@ namespace dseed::color
 	inline rgba8 operator^ (const rgba8& c1, const rgba8& c2) noexcept { return rgba8(c1.r ^ c2.r, c1.g ^ c2.g, c1.b ^ c2.b, c1.a ^ c2.a); }
 	inline rgba8 operator~ (const rgba8& c) noexcept { return rgba8(~c.r, ~c.g, ~c.b, ~c.a); }
 	inline bool operator== (const rgba8& c1, const rgba8& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const rgba8& c1, const rgba8& c2) noexcept { return c1.color < c2.color; }
 
 	struct rgb8
 	{
@@ -389,6 +391,7 @@ namespace dseed::color
 	inline rgb8 operator^ (const rgb8& c1, const rgb8& c2) noexcept { return rgb8(c1.r ^ c2.r, c1.g ^ c2.g, c1.b ^ c2.b); }
 	inline rgb8 operator~ (const rgb8& c) noexcept { return rgb8(~c.r, ~c.g, ~c.b); }
 	inline bool operator== (const rgb8& c1, const rgb8& c2) noexcept { return static_cast<int>(c1.color) == static_cast<int>(c2.color); }
+	inline bool operator<(const rgb8& c1, const rgb8& c2) noexcept { return (uint32_t)c1.color < (uint32_t)c2.color; }
 
 	struct rgbaf
 	{
@@ -452,6 +455,11 @@ namespace dseed::color
 		f32x4_t a = c1.color, b = c2.color;
 		return equalsb(a, b);
 	}
+	inline bool operator<(const rgbaf& c1, const rgbaf& c2) noexcept
+	{
+		f32x4_t a = c1.color, b = c2.color;
+		return lesserb(a, b);
+	}
 
 	struct bgra8
 	{
@@ -510,6 +518,7 @@ namespace dseed::color
 	inline bgra8 operator^ (const bgra8& c1, const bgra8& c2) noexcept { return bgra8(c1.r ^ c2.r, c1.g ^ c2.g, c1.b ^ c2.b, c1.a ^ c2.a); }
 	inline bgra8 operator~ (const bgra8& c) noexcept { return bgra8(~c.r, ~c.g, ~c.b, ~c.a); }
 	inline bool operator== (const bgra8& c1, const bgra8& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const bgra8& c1, const bgra8& c2) noexcept { return c1.color < c2.color; }
 
 	struct bgr8
 	{
@@ -571,6 +580,7 @@ namespace dseed::color
 	inline bgr8 operator^ (const bgr8& c1, const bgr8& c2) noexcept { return bgr8(c1.r ^ c2.r, c1.g ^ c2.g, c1.b ^ c2.b); }
 	inline bgr8 operator~ (const bgr8& c) noexcept { return bgr8(~c.r, ~c.g, ~c.b); }
 	inline bool operator== (const bgr8& c1, const bgr8& c2) noexcept { return static_cast<int>(c1.color) == static_cast<int>(c2.color); }
+	inline bool operator<(const bgr8& c1, const bgr8& c2) noexcept { return (uint32_t)c1.color < (uint32_t)c2.color; }
 
 	struct bgra4
 	{
@@ -638,6 +648,7 @@ namespace dseed::color
 	inline bgra4 operator^ (const bgra4& c1, const bgra4& c2) noexcept { return bgra4((c1.r ^ c2.r) & 0xf, (c1.g ^ c2.g) & 0xf, (c1.b ^ c2.b) & 0xf, (c1.a ^ c2.a) & 0xf); }
 	inline bgra4 operator~ (const bgra4& c) noexcept { return bgra4((~c.r) & 0xf, (~c.g) & 0xf, (~c.b) & 0xf, (~c.a) & 0xf); }
 	inline bool operator== (const bgra4& c1, const bgra4& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const bgra4& c1, const bgra4& c2) noexcept { return c1.color < c2.color; }
 
 	struct bgr565
 	{
@@ -704,6 +715,7 @@ namespace dseed::color
 	inline bgr565 operator^ (const bgr565& c1, const bgr565& c2) noexcept { return bgr565((c1.r ^ c2.r) & 0x1f, (c1.g ^ c2.g) & 0x3f, (c1.b ^ c2.b) & 0x1f); }
 	inline bgr565 operator~ (const bgr565& c) noexcept { return bgr565((~c.r) & 0x1f, (~c.g) & 0x3f, (~c.b) & 0x1f); }
 	inline bool operator== (const bgr565& c1, const bgr565& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const bgr565& c1, const bgr565& c2) noexcept { return c1.color < c2.color; }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -774,6 +786,7 @@ namespace dseed::color
 	inline r8 operator^ (const r8& c1, const r8& c2) noexcept { return r8(c1.color ^ c2.color); }
 	inline r8 operator~ (const r8& c) noexcept { return r8(~c.color); }
 	inline bool operator== (const r8& c1, const r8& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const r8& c1, const r8& c2) noexcept { return c1.color < c2.color; }
 
 	struct rf
 	{
@@ -823,6 +836,7 @@ namespace dseed::color
 	inline rf operator* (const rf& c1, double factor) noexcept { return rf((float)(c1.color * factor)); }
 	inline rf operator/ (const rf& c1, double factor) noexcept { return rf((float)(c1.color / factor)); }
 	inline bool operator== (const rf& c1, const rf& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const rf& c1, const rf& c2) noexcept { return c1.color < c2.color; }
 
 	struct ra8
 	{
@@ -841,8 +855,8 @@ namespace dseed::color
 		inline uint8_t& operator [] (int index) noexcept { return reinterpret_cast<uint8_t*>(this)[index]; }
 		inline const uint8_t& operator [] (int index) const noexcept { return reinterpret_cast<const uint8_t*>(this)[index]; }
 
-		static inline r8 max_color() noexcept { return r8(255); }
-		static inline r8 min_color() noexcept { return r8(0); }
+		static inline ra8 max_color() noexcept { return ra8(255, 255); }
+		static inline ra8 min_color() noexcept { return ra8(0, 0); }
 
 		inline operator rgba8 () const noexcept;
 		inline operator rgb8 () const noexcept;
@@ -880,6 +894,7 @@ namespace dseed::color
 	inline ra8 operator^ (const ra8& c1, const ra8& c2) noexcept { return ra8(c1.r ^ c2.r, c1.a ^ c2.a); }
 	inline ra8 operator~ (const ra8& c) noexcept { return ra8(~c.r, ~c.a); }
 	inline bool operator== (const ra8& c1, const ra8& c2) noexcept { return c1.r == c2.r && c1.a == c2.a; }
+	inline bool operator<(const ra8& c1, const ra8& c2) noexcept { return c1.color < c2.color; }
 
 	struct raf
 	{
@@ -898,8 +913,8 @@ namespace dseed::color
 		inline float& operator [] (int index) noexcept { return reinterpret_cast<float*>(this)[index]; }
 		inline const float& operator [] (int index) const noexcept { return reinterpret_cast<const float*>(this)[index]; }
 
-		static inline rf max_color() noexcept { return rf(1); }
-		static inline rf min_color() noexcept { return rf(0); }
+		static inline raf max_color() noexcept { return raf(1, 1); }
+		static inline raf min_color() noexcept { return raf(0, 0); }
 
 		inline operator rgba8 () const noexcept;
 		inline operator rgb8 () const noexcept;
@@ -934,6 +949,11 @@ namespace dseed::color
 	inline raf operator* (const raf& c1, double factor) noexcept { return raf((float)(c1.r * factor), (float)(c1.a * factor)); }
 	inline raf operator/ (const raf& c1, double factor) noexcept { return raf((float)(c1.r / factor), (float)(c1.a / factor)); }
 	inline bool operator== (const raf& c1, const raf& c2) noexcept { return c1.r == c2.r && c1.a == c2.a; }
+	inline bool operator<(const raf& c1, const raf& c2) noexcept
+	{
+		f32x4_t a = c1.color, b = c2.color;
+		return lesserb(a, b);
+	}
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -1010,6 +1030,7 @@ namespace dseed::color
 	inline yuva8 operator^ (const yuva8& c1, const yuva8& c2) noexcept { return yuva8(c1.y ^ c2.y, c1.u ^ c2.u, c1.v ^ c2.v, c1.a ^ c2.a); }
 	inline yuva8 operator~ (const yuva8& c) noexcept { return yuva8(~c.y, ~c.u, ~c.v, ~c.a); }
 	inline bool operator== (const yuva8& c1, const yuva8& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const yuva8& c1, const yuva8& c2) noexcept { return c1.color < c2.color; }
 
 	struct yuv8
 	{
@@ -1071,6 +1092,7 @@ namespace dseed::color
 	inline yuv8 operator^ (const yuv8& c1, const yuv8& c2) noexcept { return yuv8(c1.y ^ c2.y, c1.u ^ c2.u, c1.v ^ c2.v); }
 	inline yuv8 operator~ (const yuv8& c) noexcept { return yuv8(~c.y, ~c.u, ~c.v); }
 	inline bool operator== (const yuv8& c1, const yuv8& c2) noexcept { return static_cast<int>(c1.color) == static_cast<int>(c2.color); }
+	inline bool operator<(const yuv8& c1, const yuv8& c2) noexcept { return (uint32_t)c1.color < (uint32_t)c2.color; }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -1147,6 +1169,7 @@ namespace dseed::color
 	inline hsva8 operator^ (const hsva8& c1, const hsva8& c2) noexcept { return hsva8(c1.h ^ c2.h, c1.s ^ c2.s, c1.v ^ c2.v, c1.a ^ c2.a); }
 	inline hsva8 operator~ (const hsva8& c) noexcept { return hsva8(~c.h, ~c.s, ~c.v, ~c.a); }
 	inline bool operator== (const hsva8& c1, const hsva8& c2) noexcept { return c1.color == c2.color; }
+	inline bool operator<(const hsva8& c1, const hsva8& c2) noexcept { return c1.color < c2.color; }
 
 	struct hsv8
 	{
@@ -1208,6 +1231,7 @@ namespace dseed::color
 	inline hsv8 operator^ (const hsv8& c1, const hsv8& c2) noexcept { return hsv8(c1.h ^ c2.h, c1.s ^ c2.s, c1.v ^ c2.v); }
 	inline hsv8 operator~ (const hsv8& c) noexcept { return hsv8(~c.h, ~c.s, ~c.v); }
 	inline bool operator== (const hsv8& c1, const hsv8& c2) noexcept { return static_cast<int>(c1.color) == static_cast<int>(c2.color); }
+	inline bool operator<(const hsv8& c1, const hsv8& c2) noexcept { return (uint32_t)c1.color < (uint32_t)c2.color; }
 
 #	if COMPILER_MSVC
 #		pragma pack (pop)
@@ -1734,6 +1758,19 @@ namespace dseed::color
 			saturate8((int32_t)arr[2])
 		);
 	}
+}
+
+namespace dseed::color
+{
+	template<class T> constexpr bool has_alpha(const T& color) noexcept { return false; }
+	template<> constexpr bool has_alpha<rgba8>(const rgba8& color) noexcept { return color.a < 255; }
+	template<> constexpr bool has_alpha<rgbaf>(const rgbaf& color) noexcept { return color.a < 1; }
+	template<> constexpr bool has_alpha<bgra8>(const bgra8& color) noexcept { return color.a < 255; }
+	template<> constexpr bool has_alpha<bgra4>(const bgra4& color) noexcept { return color.a < 15; }
+	template<> constexpr bool has_alpha<ra8>(const ra8& color) noexcept { return color.a < 255; }
+	template<> constexpr bool has_alpha<raf>(const raf& color) noexcept { return color.a < 1; }
+	template<> constexpr bool has_alpha<yuva8>(const yuva8& color) noexcept { return color.a < 255; }
+	template<> constexpr bool has_alpha<hsva8>(const hsva8& color) noexcept { return color.a < 255; }
 }
 
 namespace dseed::color::defs

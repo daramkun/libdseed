@@ -200,16 +200,16 @@ public:
 			if (dseed::succeeded(bitmap->extra_info(&attr)))
 			{
 				dseed::timespan duration;
-				if (dseed::succeeded(attr->get_int64(dseed::attrkey_duration, (int64_t*)&duration)))
+				if (dseed::succeeded(attr->get_int64(dseed::attrkey_duration, reinterpret_cast<int64_t*>(&duration))))
 				{
-					int delay = (int)(duration.total_milliseconds() / 10);
+					int delay = static_cast<int>(duration.total_milliseconds() / 10);
 
 					Microsoft::WRL::ComPtr<IWICMetadataQueryWriter> queryWriter;
 					if(SUCCEEDED(encodeFrame->GetMetadataQueryWriter(&queryWriter)))
 					{
 						PROPVARIANT var = {};
 						var.vt = VT_UI2;
-						var.uiVal = (uint16_t)delay;
+						var.uiVal = static_cast<uint16_t>(delay);
 						queryWriter->SetMetadataByName(L"/grctlext/Delay", &var);
 					}
 				}
@@ -259,7 +259,7 @@ dseed::error_t dseed::bitmaps::create_wic_bitmap_encoder(dseed::io::stream* stre
 	do
 	{
 		if (FAILED(CoCreateInstance(CLSID_WICImagingFactoryP, nullptr, CLSCTX_ALL,
-			__uuidof (IWICImagingFactoryP), (void**)&factory)))
+			__uuidof (IWICImagingFactoryP), static_cast<void**>(&factory))))
 		{
 #if PLATFORM_WINDOWS
 			if (coinit == false)

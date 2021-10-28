@@ -32,7 +32,9 @@ inline void determine_props(const uint8_t* src, const dseed::size3i& size, int t
 	prop->transparent = false;
 	prop->grayscale = true;
 
-	std::vector<TPixel> pixelStore;
+	std::map<TPixel, int> pixelStore;
+
+	const auto is_not_pixelformat_grayscale = type2format<TPixel>() != pixelformat::r8 && type2format<TPixel>() != pixelformat::rf;
 
 	for (size_t z = 0; z < size.depth; ++z)
 	{
@@ -46,13 +48,13 @@ inline void determine_props(const uint8_t* src, const dseed::size3i& size, int t
 			for (size_t x = 0; x < size.width; ++x)
 			{
 				const TPixel& pixel = *(srcPtr + x);
-				if (!prop->transparent && hasalpha<TPixel>())
+				if (!prop->transparent && has_alpha_element<TPixel>())
 				{
-					if (pixel[3] == TPixel::max_color()[3])
+					if (has_alpha<TPixel>(pixel))
 						prop->transparent = true;
 				}
 
-				if (prop->grayscale && (type2format<TPixel>() != pixelformat::r8 && type2format<TPixel>() != pixelformat::rf))
+				if (prop->grayscale && is_not_pixelformat_grayscale)
 				{
 					rgb8 rgb = (rgb8)pixel;
 					if (abs(rgb.r - rgb.g) > threshold || abs(rgb.r - rgb.b) > threshold || abs(rgb.g - rgb.b) > threshold)
@@ -61,11 +63,13 @@ inline void determine_props(const uint8_t* src, const dseed::size3i& size, int t
 
 				if (pixelStore.size() <= 256)
 				{
-					if (std::find(pixelStore.begin(), pixelStore.end(), pixel) == pixelStore.end())
-						pixelStore.emplace_back(pixel);
+					if (pixelStore.find(pixel) == pixelStore.end())
+						pixelStore.insert(std::pair<TPixel, int>(pixel, 1));
+					else
+						++pixelStore[pixel];
 				}
 
-				if ((prop->transparent || !hasalpha<TPixel>()) && !prop->grayscale && pixelStore.size() > 256)
+				if ((prop->transparent || !has_alpha_element<TPixel>()) && !prop->grayscale && pixelStore.size() > 256)
 				{
 					prop->colours = dseed::bitmaps::colorcount::color_cannot_palettable;
 					return;
@@ -89,7 +93,7 @@ inline void determine_props_indexed(const uint8_t* src, int bpp, int elements, i
 		TPixel& pixel = *(TPixel*)(src + i * bpp);
 		rgba8 rgb = (rgba8)pixel;
 
-		if (rgb.a < 255 && hasalpha<TPixel>())
+		if (rgb.a < 255 && has_alpha_element<TPixel>())
 			prop->transparent = true;
 
 		if (abs(rgb.r - rgb.g) > threshold || abs(rgb.r - rgb.b) > threshold)

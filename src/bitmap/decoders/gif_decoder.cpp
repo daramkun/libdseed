@@ -79,14 +79,12 @@ dseed::error_t dseed::bitmaps::create_gif_bitmap_decoder (dseed::io::stream* str
 		}
 
 		int transparent = -1;
+		int delayTime;
 		for (int i = 0; i < savedImage.ExtensionBlockCount; ++i)
 		{
 			if (savedImage.ExtensionBlocks[i].Function == GRAPHICS_EXT_FUNC_CODE)
 			{
-				int delayTime = (savedImage.ExtensionBlocks[i].Bytes[1] | (savedImage.ExtensionBlocks[i].Bytes[2] << 8)) * 10;
-				dseed::autoref<dseed::attributes> attr;
-				_bitmaps[z]->extra_info(&attr);
-				attr->set_int64(dseed::attrkey_duration, dseed::timespan::from_milliseconds(delayTime).ticks());
+				delayTime = (savedImage.ExtensionBlocks[i].Bytes[1] | (savedImage.ExtensionBlocks[i].Bytes[2] << 8)) * 10;
 				if (savedImage.ExtensionBlocks[i].Bytes[3] != NO_TRANSPARENT_COLOR)
 				{
 					usingPalette[transparent = savedImage.ExtensionBlocks[i].Bytes[3]].a = 0;
@@ -127,6 +125,10 @@ dseed::error_t dseed::bitmaps::create_gif_bitmap_decoder (dseed::io::stream* str
 		if (dseed::failed (dseed::bitmaps::create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, dseed::color::pixelformat::bgra8_indexed8,
 			localPaletteObj, &_bitmaps[z])))
 			return dseed::error_fail;
+
+		dseed::autoref<dseed::attributes> attr;
+		_bitmaps[z]->extra_info(&attr);
+		attr->set_int64(dseed::attrkey_duration, dseed::timespan::from_milliseconds(delayTime).ticks());
 
 		void* ptr;
 		if (dseed::failed (_bitmaps[z]->lock (&ptr)))

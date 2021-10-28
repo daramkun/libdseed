@@ -161,9 +161,13 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 			}
 
 			dseed::autoref<dseed::bitmaps::palette> paletteObj;
-			dseed::bitmaps::create_palette (palette, 24, numPalette, &paletteObj);
+			auto result = dseed::bitmaps::create_palette (palette, 24, numPalette, &paletteObj);
+			if (dseed::failed(result))
+				return result;
 
-			create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, format, paletteObj, &bitmap);
+			result = create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, format, paletteObj, &bitmap);
+			if (dseed::failed(result))
+				return result;
 		}
 		else if (format == dseed::color::pixelformat::bgra8_indexed8)
 		{
@@ -183,9 +187,13 @@ dseed::error_t dseed::bitmaps::create_png_bitmap_decoder (dseed::io::stream* str
 			}
 
 			dseed::autoref<dseed::bitmaps::palette> paletteObj;
-			dseed::bitmaps::create_palette (palette, 32, numPalette, &paletteObj);
+			auto result = dseed::bitmaps::create_palette (palette, 32, numPalette, &paletteObj);
+			if (dseed::failed(result))
+				return result;
 
-			create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, format, paletteObj, &bitmap);
+			result = create_bitmap (dseed::bitmaps::bitmaptype::bitmap2d, size, format, paletteObj, &bitmap);
+			if (dseed::failed(result))
+				return result;
 		}
 	}
 
