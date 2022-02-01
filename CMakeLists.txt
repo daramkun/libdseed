@@ -77,7 +77,10 @@ OPTION(DSEED_USE_JPEG						"libdseed use libjpeg decoding and encoding"	ON)
 OPTION(DSEED_USE_JPEG2000					"libdseed use openjpeg decoding and encoding"	ON)
 OPTION(DSEED_USE_WEBP						"libdseed use libwebp decoding and encoding"	ON)
 OPTION(DSEED_USE_TIFF						"libdseed use libtIFf decoding and encoding"	ON)
-OPTION(DSEED_USE_GIF						"libdseed use gIFlib decoding and encoding"		ON)
+OPTION(DSEED_USE_GIF						"libdseed use giflib decoding and encoding"		ON)
+OPTION(DSEED_USE_LIBRAW						"libdseed use LibRaw deciding"					ON)
+OPTION(DSEED_USE_HEIF						"libdseed use libheif decoding and encoding"	ON)
+OPTION(DSEED_USE_AVIF						"libdseed use libavif decoding and encoding"	ON)
 OPTION(DSEED_USE_WINDOWS_IMAGING_CODECS		"libdseed use Microsoft Windows Imaging Codecs"	ON)
 
 OPTION(DSEED_USE_VORBIS						"libdseed use libvorbis decoding and encoding"	ON)
@@ -234,7 +237,23 @@ IF(COMPILER_GCC OR COMPILER_CLANG)
 ENDIF()
 
 IF(MSVC)
+	MESSAGE(STATUS "[dseed] Compiler is Microsoft Visual C++. Target architecture: ${TARGET_ARCH}")
 	LIST(APPEND DSEED_DEFINITIONS -DDSEED_DLL_EXP)
+	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /MP")
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /MP")
+
+	# https://stackoverflow.com/a/14172871
+	SET(CompilerFlags
+		CMAKE_CXX_FLAGS
+		CMAKE_CXX_FLAGS_DEBUG
+		CMAKE_CXX_FLAGS_RELEASE
+		CMAKE_C_FLAGS
+		CMAKE_C_FLAGS_DEBUG
+		CMAKE_C_FLAGS_RELEASE
+	)
+	FOREACH(CompilerFlag ${CompilerFlags})
+		STRING(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+	ENDFOREACH()
 ENDIF()
 
 INCLUDE("cmake/detect_libraries.cmake")
